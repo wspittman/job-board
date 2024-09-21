@@ -1,14 +1,10 @@
 {
   "name": "job-board",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "start:backend": "npm run dev --workspace=backend",
     "start:frontend": "npm run dev --workspace=frontend"
   },
-  "keywords": [],
-  "author": "",
   "license": "MIT",
   "private": true,
   "workspaces": [

@@ -1,7 +1,8 @@
 import cors from "cors";
 import express from "express";
-import { connectDB } from "./config";
+import { config } from "./config";
 import { router } from "./routes";
+import { connectDB } from "./services/db";
 
 const app = express();
 
@@ -10,10 +11,8 @@ app.use(cors());
 
 app.use("/api", router);
 
-const PORT = process.env.PORT || 3000;
-
 connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  app.listen(config.PORT, () => {
+    console.log(`Server running on port ${config.PORT}`);
   });
 });

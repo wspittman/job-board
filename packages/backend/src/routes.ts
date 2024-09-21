@@ -1,5 +1,5 @@
 import express from "express";
-import { exampleRead } from "./config";
+import { exampleRead } from "./services/db";
 
 export const router = express.Router();
 

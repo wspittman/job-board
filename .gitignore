@@ -1,4 +1,5 @@
 cosmosdbcert.cer
+.env
 
 # Logs
 logs
