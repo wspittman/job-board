@@ -6,14 +6,20 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 interface Config {
   PORT: number;
+
+  // Database configs
   DATABASE_URL: string;
   DATABASE_KEY: string;
   DATABASE_LOCAL_CERT_PATH: string;
+
+  // ATS configs
+  GREENHOUSE_URL: string;
 }
 
 export const config: Config = {
   PORT: parseInt(process.env.PORT || "3000", 10),
 
+  // Database configs
   DATABASE_URL: process.env.DATABASE_URL || "https://localhost:8081",
   DATABASE_KEY:
     process.env.DATABASE_KEY ||
@@ -22,4 +28,8 @@ export const config: Config = {
   DATABASE_LOCAL_CERT_PATH:
     process.env.DATABASE_LOCAL_CERT_PATH ||
     path.resolve(__dirname, "../cosmosdbcert.cer"),
+
+  // ATS configs
+  GREENHOUSE_URL:
+    process.env.GREENHOUSE_URL || "https://boards-api.greenhouse.io/v1/boards",
 };
