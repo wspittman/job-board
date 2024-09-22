@@ -14,6 +14,7 @@ interface Config {
 
   // ATS configs
   GREENHOUSE_URL: string;
+  LEVER_URL: string;
 }
 
 export const config: Config = {
@@ -32,4 +33,5 @@ export const config: Config = {
   // ATS configs
   GREENHOUSE_URL:
     process.env.GREENHOUSE_URL || "https://boards-api.greenhouse.io/v1/boards",
+  LEVER_URL: process.env.LEVER_URL || "https://api.lever.co/v0/postings",
 };
