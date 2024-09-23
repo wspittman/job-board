@@ -1,13 +1,14 @@
 import express from "express";
-import { addCompany, addJob, getCompanies, getJobs } from "./db/db";
+import { addCompany, ATS, getCompanies } from "./db/company";
+import { addJob, getJobs } from "./db/job";
 import { getGreenhouseJobs } from "./services/greenhouse";
 
 export const router = express.Router();
 
 router.get("/", async (req, res) => {
-  await addCompany({ id: "example", ats: "greenhouse" });
+  await addCompany({ id: "example", ats: ATS.GREENHOUSE });
 
-  const companies = await getCompanies("greenhouse");
+  const companies = await getCompanies(ATS.GREENHOUSE);
 
   console.log(companies);
 

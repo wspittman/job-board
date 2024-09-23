@@ -1,6 +1,7 @@
 import {
   Container,
   CosmosClient,
+  Database,
   JSONValue,
   SqlQuerySpec,
 } from "@azure/cosmos";
@@ -8,9 +9,9 @@ import fs from "fs";
 import https from "https";
 import { config } from "../config";
 
-const DB_NAME = "jobboard";
+type ContainerName = "company" | "job";
 
-type ATS = "greenhouse" | "lever";
+const DB_NAME = "jobboard";
 
 interface Item {
   id: string;
@@ -21,52 +22,18 @@ interface Item {
   _ts: number;
 }
 
-/**
- * - id: The ATS company name
- * - pKey: ats
- */
-interface Company {
-  id: string;
-  ats: ATS;
+let containerMap: Record<ContainerName, Container>;
+
+export const getContainer = (name: ContainerName) => containerMap[name];
+
+export async function upsert(container: Container, item: Object) {
+  await container.items.upsert(item);
 }
 
-/**
- * - id: DB-generated
- * - pKey: company
- */
-export interface Job {
-  company: string;
-  title: string;
-  description: string;
-  postDate: string;
-  applyUrl: string;
-}
-
-let companyContainer: Container;
-let jobContainer: Container;
-
-export async function addCompany(company: Company) {
-  upsert(companyContainer, company);
-}
-
-export async function getCompanies(ats: ATS) {
-  return queryFilters<Company>(companyContainer, { ats });
-}
-
-export async function addJob(job: Job) {
-  upsert(jobContainer, job);
-}
-
-export async function getJobs(company: string) {
-  return queryFilters<Job>(jobContainer, { company });
-}
-
-async function upsert(container: Container, item: Object) {
-  const f = await container.items.upsert(item);
-  console.log(f);
-}
-
-async function queryFilters<T>(container: Container, filters: Partial<T>) {
+export async function queryFilters<T>(
+  container: Container,
+  filters: Partial<T>
+) {
   const entries: [string, JSONValue][] = Object.entries(filters);
 
   const whereClause = entries
@@ -84,7 +51,10 @@ async function queryFilters<T>(container: Container, filters: Partial<T>) {
   });
 }
 
-async function query<T>(container: Container, query: string | SqlQuerySpec) {
+export async function query<T>(
+  container: Container,
+  query: string | SqlQuerySpec
+) {
   const { resources } = await container.items.query(query).fetchAll();
   return resources.map((entry) => stripItem<T>(entry));
 }
@@ -110,25 +80,29 @@ export async function connectDB() {
       id: DB_NAME,
     });
 
-    let containerResult = await database.containers.createIfNotExists({
-      id: "company",
-      partitionKey: {
-        paths: ["/ats"],
-      },
-    });
-    companyContainer = containerResult.container;
+    containerMap = {} as Record<ContainerName, Container>;
 
-    containerResult = await database.containers.createIfNotExists({
-      id: "job",
-      partitionKey: {
-        paths: ["/company"],
-      },
-    });
-    jobContainer = containerResult.container;
+    createContainer(database, "company", "ats");
+    createContainer(database, "job", "company");
 
     console.log("CosmosDB connected");
   } catch (error) {
     console.error("CosmosDB connection error:", error);
     process.exit(1);
   }
+}
+
+async function createContainer(
+  database: Database,
+  name: ContainerName,
+  partitionKey: string
+) {
+  const { container } = await database.containers.createIfNotExists({
+    id: name,
+    partitionKey: {
+      paths: [`/${partitionKey}`],
+    },
+  });
+
+  containerMap[name] = container;
 }
