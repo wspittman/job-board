@@ -1,5 +1,5 @@
 import express from "express";
-import { addCompany, addJob, getCompanies, getJobs } from "./services/db";
+import { addCompany, addJob, getCompanies, getJobs } from "./db/db";
 import { getGreenhouseJobs } from "./services/greenhouse";
 
 export const router = express.Router();

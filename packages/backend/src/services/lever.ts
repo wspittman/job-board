@@ -1,6 +1,6 @@
 import axios from "axios";
 import { config } from "../config";
-import { Job } from "./db";
+import { Job } from "../db/db";
 
 interface LeverJob {
   id: string;
