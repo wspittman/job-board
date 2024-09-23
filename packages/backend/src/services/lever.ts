@@ -1,5 +1,6 @@
 import axios from "axios";
 import { config } from "../config";
+import { Job } from "./db";
 
 interface LeverJob {
   id: string;
@@ -33,6 +34,16 @@ interface LeverJob {
   createdAt: number;
 }
 
-export function getLeverJobs(company: string) {
-  return axios.get<LeverJob[]>(`${config.LEVER_URL}/${company}?mode=json`);
+export async function getLeverJobs(company: string): Promise<Job[]> {
+  const rawJobs = (
+    await axios.get<LeverJob[]>(`${config.LEVER_URL}/${company}?mode=json`)
+  ).data;
+
+  return rawJobs.map((job) => ({
+    company,
+    title: job.text,
+    description: job.descriptionPlain,
+    postDate: new Date(job.createdAt).toISOString(),
+    applyUrl: job.applyUrl,
+  }));
 }

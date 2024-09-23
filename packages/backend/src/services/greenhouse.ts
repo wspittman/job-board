@@ -1,5 +1,6 @@
 import axios from "axios";
 import { config } from "../config";
+import { Job } from "./db";
 
 interface GreenhouseJobsResult {
   jobs: GreenhouseJob[];
@@ -35,8 +36,18 @@ interface GreenhouseJob {
   }[];
 }
 
-export function getGreenhouseJobs(company: string) {
-  return axios.get<GreenhouseJobsResult>(
-    `${config.GREENHOUSE_URL}/${company}/jobs?content=true`
-  );
+export async function getGreenhouseJobs(company: string): Promise<Job[]> {
+  const rawJobs = (
+    await axios.get<GreenhouseJobsResult>(
+      `${config.GREENHOUSE_URL}/${company}/jobs?content=true`
+    )
+  ).data.jobs;
+
+  return rawJobs.map((job) => ({
+    company,
+    title: job.title,
+    description: job.content,
+    postDate: job.updated_at,
+    applyUrl: job.absolute_url,
+  }));
 }
