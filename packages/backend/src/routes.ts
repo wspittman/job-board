@@ -17,7 +17,7 @@ router.get("/jobs", async (req, res, next) => {
       return res.json([]);
     }
 
-    const jobs = await getJobs("example");
+    const jobs = await getJobs(company);
 
     res.json(jobs);
   } catch (error: any) {
@@ -28,7 +28,6 @@ router.get("/jobs", async (req, res, next) => {
 // TBD Admin Auth
 router.put("/company", async (req, res, next) => {
   try {
-    console.log(req.body);
     const company = validateCompany(req.body);
 
     await addCompany(company);
