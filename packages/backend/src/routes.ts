@@ -1,24 +1,51 @@
 import express from "express";
-import { addCompany, ATS, getCompanies } from "./db/company";
-import { addJob, getJobs } from "./db/job";
-import { getGreenhouseJobs } from "./services/greenhouse";
+import { crawl } from "./crawler";
+import { addCompany, validateCompany } from "./db/company";
+import { getJobs } from "./db/job";
 
 export const router = express.Router();
 
-router.get("/", async (req, res) => {
-  await addCompany({ id: "example", ats: ATS.GREENHOUSE });
+router.get("/", (_, res) => {
+  res.send("API is working");
+});
 
-  const companies = await getCompanies(ATS.GREENHOUSE);
+router.get("/jobs", async (req, res, next) => {
+  try {
+    const company = req.query.company as string;
 
-  console.log(companies);
+    if (!company) {
+      return res.json([]);
+    }
 
-  const [company] = companies;
-  const jobs = await getGreenhouseJobs(company.id);
-  //const lJobs = await getLeverJobs(company.id));
+    const jobs = await getJobs("example");
 
-  await Promise.all(jobs.map((job) => addJob(job)));
+    res.json(jobs);
+  } catch (error: any) {
+    next(error);
+  }
+});
 
-  const dbJobs = await getJobs(company.id);
+// TBD Admin Auth
+router.put("/company", async (req, res, next) => {
+  try {
+    console.log(req.body);
+    const company = validateCompany(req.body);
 
-  res.send("API is working: " + JSON.stringify(dbJobs[0]));
+    await addCompany(company);
+
+    res.send("Success");
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// TBD Admin Auth
+router.post("/jobs", async (_, res, next) => {
+  try {
+    await crawl();
+
+    res.send("Success");
+  } catch (error: any) {
+    next(error);
+  }
 });
