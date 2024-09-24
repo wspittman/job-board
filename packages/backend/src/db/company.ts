@@ -1,10 +1,6 @@
 import { AppError } from "../AppError";
+import { ATS } from "../ats/ats";
 import { getContainer, queryFilters, upsert } from "./db";
-
-export enum ATS {
-  GREENHOUSE = "greenhouse",
-  LEVER = "lever",
-}
 
 /**
  * - id: The ATS company name

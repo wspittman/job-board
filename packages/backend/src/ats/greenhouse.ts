@@ -49,5 +49,6 @@ export async function getGreenhouseJobs(company: string): Promise<Job[]> {
     description: job.content,
     postDate: job.updated_at,
     applyUrl: job.absolute_url,
+    atsId: job.id.toString(),
   }));
 }

@@ -10,6 +10,7 @@ export interface Job {
   description: string;
   postDate: string;
   applyUrl: string;
+  atsId: string;
 }
 
 export async function addJob(job: Job) {

@@ -1,7 +1,6 @@
-import { ATS, getCompanies } from "./db/company";
+import { ATS, getAtsJobs } from "./ats/ats";
+import { getCompanies } from "./db/company";
 import { addJob, Job } from "./db/job";
-import { getGreenhouseJobs } from "./services/greenhouse";
-import { getLeverJobs } from "./services/lever";
 
 // TODO: This might take longer than the request timeout
 export async function crawl() {
@@ -19,7 +18,7 @@ async function crawlAts(ats: ATS) {
 
 async function crawlCompany(ats: ATS, company: string) {
   return logWrap(`CrawlCompany(${ats} ${company})`, async () => {
-    const jobs = await getJobs(ats, company);
+    const jobs = await getAtsJobs(ats, company);
     await batchRun(jobs, (job) => insertJob(ats, company, job));
   });
 }
@@ -38,15 +37,6 @@ async function logWrap(msg: string, func: () => Promise<void>) {
     console.log(`${msg}: End`);
   } catch (error) {
     console.error(`${msg}: Error ${error}`);
-  }
-}
-
-async function getJobs(ats: ATS, company: string) {
-  switch (ats) {
-    case ATS.GREENHOUSE:
-      return getGreenhouseJobs(company);
-    case ATS.LEVER:
-      return getLeverJobs(company);
   }
 }
 
