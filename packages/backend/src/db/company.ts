@@ -1,3 +1,4 @@
+import { AppError } from "../AppError";
 import { getContainer, queryFilters, upsert } from "./db";
 
 export enum ATS {
@@ -16,11 +17,15 @@ interface Company {
 
 export function validateCompany({ id, ats }: Company): Company {
   if (!id) {
-    throw new Error("Company ID is required");
+    throw new AppError("Company: id field is required");
   }
 
-  if (!ats || !Object.values(ATS).includes(ats)) {
-    throw new Error("Invalid ATS");
+  if (!ats) {
+    throw new AppError("Company: ats field is required");
+  }
+
+  if (!Object.values(ATS).includes(ats)) {
+    throw new AppError("Company: ats field is invalid");
   }
 
   return { id, ats };

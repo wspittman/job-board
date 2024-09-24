@@ -47,8 +47,6 @@ async function getJobs(ats: ATS, company: string) {
       return getGreenhouseJobs(company);
     case ATS.LEVER:
       return getLeverJobs(company);
-    default:
-      throw new Error("Invalid ATS");
   }
 }
 
