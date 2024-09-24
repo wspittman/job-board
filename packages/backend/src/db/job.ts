@@ -1,4 +1,4 @@
-import { getContainer, queryFilters, upsert } from "./db";
+import { queryFilters, upsert } from "./db";
 
 /**
  * - id: DB-generated
@@ -14,9 +14,9 @@ export interface Job {
 }
 
 export async function addJob(job: Job) {
-  upsert(getContainer("job"), job);
+  upsert("job", job);
 }
 
 export async function getJobs(company: string) {
-  return queryFilters<Job>(getContainer("job"), { company });
+  return queryFilters<Job>("job", { company });
 }

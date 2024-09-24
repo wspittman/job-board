@@ -1,6 +1,6 @@
 import { AppError } from "../AppError";
 import { ATS } from "../ats/ats";
-import { getContainer, queryFilters, upsert } from "./db";
+import { queryFilters, upsert } from "./db";
 
 /**
  * - id: The ATS company name
@@ -28,9 +28,9 @@ export function validateCompany({ id, ats }: Company): Company {
 }
 
 export async function addCompany(company: Company) {
-  upsert(getContainer("company"), company);
+  upsert("company", company);
 }
 
 export async function getCompanies(ats: ATS) {
-  return queryFilters<Company>(getContainer("company"), { ats });
+  return queryFilters<Company>("company", { ats });
 }

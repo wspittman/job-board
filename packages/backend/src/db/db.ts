@@ -26,12 +26,16 @@ let containerMap: Record<ContainerName, Container>;
 
 export const getContainer = (name: ContainerName) => containerMap[name];
 
-export async function upsert(container: Container, item: Object) {
-  await container.items.upsert(item);
+export async function upsert(container: ContainerName, item: Object) {
+  await getContainer(container).items.upsert(item);
+}
+
+export async function deleteItem(container: ContainerName, id: string) {
+  await getContainer(container).item(id).delete();
 }
 
 export async function queryFilters<T>(
-  container: Container,
+  container: ContainerName,
   filters: Partial<T>
 ) {
   const entries: [string, JSONValue][] = Object.entries(filters);
@@ -52,10 +56,12 @@ export async function queryFilters<T>(
 }
 
 export async function query<T>(
-  container: Container,
+  container: ContainerName,
   query: string | SqlQuerySpec
 ) {
-  const { resources } = await container.items.query(query).fetchAll();
+  const { resources } = await getContainer(container)
+    .items.query(query)
+    .fetchAll();
   return resources.map((entry) => stripItem<T>(entry));
 }
 
