@@ -1,11 +1,13 @@
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
+import helmet from "helmet";
 import { config } from "./config";
 import { connectDB } from "./db/db";
 import { router } from "./routes";
 
 const app = express();
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
