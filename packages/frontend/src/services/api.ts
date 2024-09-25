@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3000/api";
 
-interface Job {
+export interface Job {
   id: string;
   company: string;
   isRemote: boolean;
