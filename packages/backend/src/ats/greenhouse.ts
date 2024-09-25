@@ -44,11 +44,11 @@ export async function getGreenhouseJobs(company: string): Promise<Job[]> {
   ).data.jobs;
 
   return rawJobs.map((job) => ({
+    id: job.id.toString(),
     company,
     title: job.title,
     description: job.content,
     postDate: job.updated_at,
     applyUrl: job.absolute_url,
-    atsId: job.id.toString(),
   }));
 }

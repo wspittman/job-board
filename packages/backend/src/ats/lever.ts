@@ -40,11 +40,11 @@ export async function getLeverJobs(company: string): Promise<Job[]> {
   ).data;
 
   return rawJobs.map((job) => ({
+    id: job.id,
     company,
     title: job.text,
     description: job.descriptionPlain,
     postDate: new Date(job.createdAt).toISOString(),
     applyUrl: job.applyUrl,
-    atsId: job.id,
   }));
 }

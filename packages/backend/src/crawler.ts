@@ -1,6 +1,6 @@
 import { ATS, getAtsJobs } from "./ats/ats";
 import { getCompanies } from "./db/company";
-import { addJob, Job } from "./db/job";
+import { addJob, deleteJob, getJobIds } from "./db/job";
 
 // TODO: This might take longer than the request timeout
 export async function crawl() {
@@ -17,16 +17,25 @@ async function crawlAts(ats: ATS) {
 }
 
 async function crawlCompany(ats: ATS, company: string) {
-  return logWrap(`CrawlCompany(${ats} ${company})`, async () => {
+  const msg = `CrawlCompany(${ats}, ${company})`;
+  return logWrap(msg, async () => {
     const jobs = await getAtsJobs(ats, company);
-    await batchRun(jobs, (job) => insertJob(ats, company, job));
-  });
-}
+    const jobIdSet = new Set(jobs.map((job) => job.id));
+    const dbJobIds = await getJobIds(company);
+    const dbJobIdSet = new Set(dbJobIds);
 
-async function insertJob(ats: ATS, company: string, job: Job) {
-  return logWrap(`InsertJob(${ats} ${company} ${job?.title})`, async () => {
-    // TBD: More processing goes here
-    await addJob(job);
+    // If the ATS job is not in the DB, add it
+    const toAdd = jobs.filter((job) => !dbJobIdSet.has(job.id));
+    console.log(`${msg}: Adding ${toAdd.length} jobs`);
+    await batchRun(toAdd, (job) => addJob(job));
+
+    // If the DB job is not in the ATS, delete it
+    const toDelete = dbJobIds.filter((id) => !jobIdSet.has(id));
+    console.log(`${msg}: Deleting ${toDelete.length} jobs`);
+    await batchRun(toDelete, (id) => deleteJob(id, company));
+
+    // If job is in both ATS and DB, do nothing
+    console.log(`${msg}: Ignoring ${jobIdSet.size - toAdd.length} jobs`);
   });
 }
 

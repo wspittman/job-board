@@ -1,16 +1,21 @@
-import { queryFilters, upsert } from "./db";
+import {
+  deleteItem,
+  getAllIdsByPartitionKey,
+  queryByFilters,
+  upsert,
+} from "./db";
 
 /**
- * - id: DB-generated
+ * - id: The ATS-granted job id
  * - pKey: company
  */
 export interface Job {
+  id: string;
   company: string;
   title: string;
   description: string;
   postDate: string;
   applyUrl: string;
-  atsId: string;
 }
 
 export async function addJob(job: Job) {
@@ -18,5 +23,13 @@ export async function addJob(job: Job) {
 }
 
 export async function getJobs(company: string) {
-  return queryFilters<Job>("job", { company });
+  return queryByFilters<Job>("job", { company });
+}
+
+export async function getJobIds(company: string) {
+  return getAllIdsByPartitionKey("job", company);
+}
+
+export async function deleteJob(id: string, company: string) {
+  return deleteItem("job", id, company);
 }

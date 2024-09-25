@@ -1,6 +1,6 @@
 import { AppError } from "../AppError";
 import { ATS } from "../ats/ats";
-import { queryFilters, upsert } from "./db";
+import { queryByFilters, upsert } from "./db";
 
 /**
  * - id: The ATS company name
@@ -32,5 +32,5 @@ export async function addCompany(company: Company) {
 }
 
 export async function getCompanies(ats: ATS) {
-  return queryFilters<Company>("company", { ats });
+  return queryByFilters<Company>("company", { ats });
 }

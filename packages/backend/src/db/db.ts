@@ -2,6 +2,8 @@ import {
   Container,
   CosmosClient,
   Database,
+  FeedOptions,
+  ItemDefinition,
   JSONValue,
   SqlQuerySpec,
 } from "@azure/cosmos";
@@ -30,11 +32,32 @@ export async function upsert(container: ContainerName, item: Object) {
   await getContainer(container).items.upsert(item);
 }
 
-export async function deleteItem(container: ContainerName, id: string) {
-  await getContainer(container).item(id).delete();
+export async function deleteItem(
+  container: ContainerName,
+  id: string,
+  partitionKey: string
+) {
+  await getContainer(container).item(id, partitionKey).delete();
 }
 
-export async function queryFilters<T>(
+export async function getAllByPartitionKey<T extends ItemDefinition>(
+  container: ContainerName,
+  partitionKey: string
+) {
+  return getContainer(container).items.readAll<T>({ partitionKey }).fetchAll();
+}
+
+export async function getAllIdsByPartitionKey(
+  container: ContainerName,
+  partitionKey: string
+) {
+  const result = await query<{ id: string }>(container, "SELECT c.id FROM c", {
+    partitionKey,
+  });
+  return result.map((entry) => entry.id);
+}
+
+export async function queryByFilters<T>(
   container: ContainerName,
   filters: Partial<T>
 ) {
@@ -57,10 +80,11 @@ export async function queryFilters<T>(
 
 export async function query<T>(
   container: ContainerName,
-  query: string | SqlQuerySpec
+  query: string | SqlQuerySpec,
+  options?: FeedOptions
 ) {
   const { resources } = await getContainer(container)
-    .items.query(query)
+    .items.query(query, options)
     .fetchAll();
   return resources.map((entry) => stripItem<T>(entry));
 }
