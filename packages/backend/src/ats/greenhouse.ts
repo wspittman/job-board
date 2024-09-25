@@ -47,6 +47,9 @@ export async function getGreenhouseJobs(company: string): Promise<Job[]> {
     id: job.id.toString(),
     company,
     title: job.title,
+    // Simple keyword match for now
+    isRemote: job.location.name.toLowerCase().includes("remote"),
+    location: job.location.name,
     description: job.content,
     postDate: job.updated_at,
     applyUrl: job.absolute_url,

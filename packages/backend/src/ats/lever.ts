@@ -43,6 +43,13 @@ export async function getLeverJobs(company: string): Promise<Job[]> {
     id: job.id,
     company,
     title: job.text,
+    // Simple keyword match for now
+    isRemote:
+      job.workplaceType === "remote" ||
+      job.categories.allLocations.some((x) =>
+        x.toLowerCase().includes("remote")
+      ),
+    location: job.categories.allLocations.join(" OR "),
     description: job.descriptionPlain,
     postDate: new Date(job.createdAt).toISOString(),
     applyUrl: job.applyUrl,

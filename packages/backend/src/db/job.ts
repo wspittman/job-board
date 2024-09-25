@@ -13,6 +13,9 @@ export interface Job {
   id: string;
   company: string;
   title: string;
+  isRemote: boolean;
+  // Just freetext for now
+  location: string;
   description: string;
   postDate: string;
   applyUrl: string;
