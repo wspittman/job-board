@@ -5,6 +5,8 @@ const API_URL = "http://localhost:3000/api";
 interface Job {
   id: string;
   company: string;
+  isRemote: boolean;
+  location: string;
   title: string;
   description: string;
   postDate: string;
