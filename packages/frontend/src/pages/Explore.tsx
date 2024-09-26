@@ -1,23 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { JobTable } from "../components/JobTable";
 import { Selector } from "../components/Selector";
-import { fetchJobs } from "../services/api";
-
-const exampleSelections = [
-  { value: "", text: "Pick one" },
-  { value: "example1", text: "example1" },
-  { value: "example2", text: "example2" },
-];
+import { useJobs, useMetadata } from "../services/apiHooks";
 
 export const Explore = () => {
   const [selectorValue, setSelectorValue] = useState("");
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["jobs", selectorValue],
-    queryFn: () => fetchJobs(selectorValue),
-    refetchOnMount: false,
-  });
+  const {
+    data: metadata,
+    isLoading: mLoading,
+    isError: mError,
+  } = useMetadata();
+  const { data = [], isLoading, isError } = useJobs(selectorValue);
+
+  const companySelections = useMemo(
+    () =>
+      metadata?.companyNames.map(([id, name]) => ({ value: id, text: name })) ||
+      [],
+    [metadata]
+  );
+
+  if (mLoading) return <div>Loading...</div>;
+  if (mError) return <div>An error occurred</div>;
 
   return (
     <div>
@@ -26,11 +30,11 @@ export const Explore = () => {
         tooltip="Selector tooltip example"
         value={selectorValue}
         setValue={setSelectorValue}
-        options={exampleSelections}
+        options={companySelections}
       />
       {isLoading && <div>Loading...</div>}
       {isError && <div>An error occurred</div>}
-      {data && <JobTable jobs={data} onSelect={() => {}} />}
+      <JobTable jobs={data} onSelect={() => {}} />
     </div>
   );
 };

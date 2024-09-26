@@ -1,13 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import React from "react";
-import { ping } from "../services/api";
+import { usePing } from "../services/apiHooks";
 
-export const Home: React.FC = () => {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["ping"],
-    queryFn: ping,
-    refetchOnMount: false,
-  });
+export const Home = () => {
+  const { data, isLoading, isError } = usePing();
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>An error occurred</div>;

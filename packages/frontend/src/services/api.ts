@@ -2,6 +2,12 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3000/api";
 
+export interface Metadata {
+  companyCount: number;
+  companyNames: [string, string][];
+  jobCount: number;
+}
+
 export interface Job {
   id: string;
   companyId: string;
@@ -20,6 +26,11 @@ export const api = axios.create({
 
 export const ping = async () => {
   const response = await api.get("/");
+  return response.data;
+};
+
+export const fetchMetadata = async () => {
+  const response = await api.get<Metadata>("/metadata");
   return response.data;
 };
 
