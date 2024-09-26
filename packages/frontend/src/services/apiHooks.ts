@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchJobs, fetchMetadata, ping } from "./api";
+import { fetchJobs, fetchMetadata, Filters, ping } from "./api";
 
 export function usePing() {
   return useQuery({
@@ -17,11 +17,13 @@ export function useMetadata() {
   });
 }
 
-export function useJobs(companyId: string) {
+export function useJobs(filters: Filters) {
+  const isEmpty = Object.values(filters).every((v) => !v);
+
   return useQuery({
-    queryKey: ["jobs", companyId],
-    queryFn: () => fetchJobs(companyId),
+    queryKey: ["jobs", filters],
+    queryFn: () => fetchJobs(filters),
     staleTime: Infinity,
-    enabled: !!companyId,
+    enabled: !isEmpty,
   });
 }

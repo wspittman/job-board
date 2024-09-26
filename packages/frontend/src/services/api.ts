@@ -20,6 +20,10 @@ export interface Job {
   applyUrl: string;
 }
 
+export interface Filters {
+  companyId?: string;
+}
+
 export const api = axios.create({
   baseURL: API_URL,
 });
@@ -34,11 +38,9 @@ export const fetchMetadata = async () => {
   return response.data;
 };
 
-export const fetchJobs = async (companyId: string) => {
+export const fetchJobs = async (filters: Filters) => {
   const response = await api.get<Job[]>("/jobs", {
-    params: {
-      companyId,
-    },
+    params: filters,
   });
   return response.data;
 };

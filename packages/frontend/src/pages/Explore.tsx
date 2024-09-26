@@ -1,36 +1,17 @@
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { FilterArea } from "../components/FilterArea";
 import { JobTable } from "../components/JobTable";
-import { useJobs, useMetadata } from "../services/apiHooks";
+import { Filters } from "../services/api";
+import { useJobs } from "../services/apiHooks";
 
 export const Explore = () => {
-  const [selectorValue, setSelectorValue] = useState("");
+  const [filters, setFilters] = useState<Filters>({});
 
-  const {
-    data: metadata,
-    isLoading: mLoading,
-    isError: mError,
-  } = useMetadata();
-  const { data = [], isLoading, isError } = useJobs(selectorValue);
-
-  const CompanySelections = useMemo(
-    () =>
-      metadata?.companyNames.map(([id, name]) => ({ id, label: name })) || [],
-    [metadata]
-  );
-
-  if (mLoading) return <div>Loading...</div>;
-  if (mError) return <div>An error occurred</div>;
+  const { data = [], isLoading, isError } = useJobs(filters);
 
   return (
     <div>
-      <Autocomplete
-        disablePortal
-        options={CompanySelections}
-        renderInput={(params) => <TextField {...params} label="Company" />}
-        onChange={(_, value) => setSelectorValue(value?.id || "")}
-      />
+      <FilterArea filters={filters} onChange={setFilters} />
       {isLoading && <div>Loading...</div>}
       {isError && <div>An error occurred</div>}
       <JobTable jobs={data} onSelect={() => {}} />
