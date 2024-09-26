@@ -7,10 +7,11 @@ import {
 
 /**
  * - id: The ATS-granted job id
- * - pKey: company
+ * - pKey: companyId
  */
 export interface Job {
   id: string;
+  companyId: string;
   company: string;
   title: string;
   isRemote: boolean;
@@ -25,14 +26,14 @@ export async function addJob(job: Job) {
   upsert("job", job);
 }
 
-export async function getJobs(company: string) {
-  return queryByFilters<Job>("job", { company });
+export async function getJobs(companyId: string) {
+  return queryByFilters<Job>("job", { companyId });
 }
 
-export async function getJobIds(company: string) {
-  return getAllIdsByPartitionKey("job", company);
+export async function getJobIds(companyId: string) {
+  return getAllIdsByPartitionKey("job", companyId);
 }
 
-export async function deleteJob(id: string, company: string) {
-  return deleteItem("job", id, company);
+export async function deleteJob(id: string, companyId: string) {
+  return deleteItem("job", id, companyId);
 }

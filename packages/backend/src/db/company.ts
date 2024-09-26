@@ -6,12 +6,16 @@ import { queryByFilters, upsert } from "./db";
  * - id: The ATS company name
  * - pKey: ats
  */
-interface Company {
+export interface Company {
   id: string;
   ats: ATS;
+  name: string;
+  description: string;
 }
 
-export function validateCompany({ id, ats }: Company): Company {
+export type CompanyInput = Pick<Company, "id" | "ats">;
+
+export function validateCompanyInput({ id, ats }: CompanyInput): CompanyInput {
   if (!id) {
     throw new AppError("Company: id field is required");
   }

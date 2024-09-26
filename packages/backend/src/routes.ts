@@ -1,6 +1,7 @@
 import express from "express";
+import { fillCompanyInput } from "./ats/ats";
 import { crawl } from "./crawler";
-import { addCompany, validateCompany } from "./db/company";
+import { addCompany, validateCompanyInput } from "./db/company";
 import { getJobs } from "./db/job";
 
 export const router = express.Router();
@@ -11,13 +12,13 @@ router.get("/", (_, res) => {
 
 router.get("/jobs", async (req, res, next) => {
   try {
-    const company = req.query.company as string;
+    const companyId = req.query.companyId as string;
 
-    if (!company) {
+    if (!companyId) {
       return res.json([]);
     }
 
-    const jobs = await getJobs(company);
+    const jobs = await getJobs(companyId);
 
     res.json(jobs);
   } catch (error: any) {
@@ -25,10 +26,10 @@ router.get("/jobs", async (req, res, next) => {
   }
 });
 
-// TBD Admin Auth
 router.put("/company", async (req, res, next) => {
   try {
-    const company = validateCompany(req.body);
+    const input = validateCompanyInput(req.body);
+    const company = await fillCompanyInput(input);
 
     await addCompany(company);
 

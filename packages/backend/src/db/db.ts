@@ -89,9 +89,9 @@ export async function query<T>(
   return resources.map((entry) => stripItem<T>(entry));
 }
 
-function stripItem<T>(entry: Item): T & { id: string } {
+function stripItem<T>(entry: Item): T {
   const { _rid, _self, _etag, _attachments, _ts, ...rest } = entry;
-  return rest as T & { id: string };
+  return rest as T;
 }
 
 export async function connectDB() {
@@ -113,7 +113,7 @@ export async function connectDB() {
     containerMap = {} as Record<ContainerName, Container>;
 
     createContainer(database, "company", "ats");
-    createContainer(database, "job", "company");
+    createContainer(database, "job", "companyId");
 
     console.log("CosmosDB connected");
   } catch (error) {

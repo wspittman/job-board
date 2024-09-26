@@ -1,6 +1,9 @@
 import axios from "axios";
+import { AppError } from "../AppError";
 import { config } from "../config";
-import { Job } from "../db/job";
+import type { Company, CompanyInput } from "../db/company";
+import type { Job } from "../db/job";
+import { checkStatus } from "./utils";
 
 interface LeverJob {
   id: string;
@@ -16,6 +19,7 @@ interface LeverJob {
   // Available in dual properties of description (styles HTML) and descriptionPlain (plaintext)
   // Also there are opening\openingPlain, and descriptionBody\descriptionBodyPlain, which are subsets of description
   descriptionPlain: string;
+  openingPlain: string;
   lists: {
     text: string;
     content: string;
@@ -34,14 +38,39 @@ interface LeverJob {
   createdAt: number;
 }
 
-export async function getLeverJobs(company: string): Promise<Job[]> {
-  const rawJobs = (
-    await axios.get<LeverJob[]>(`${config.LEVER_URL}/${company}?mode=json`)
-  ).data;
+export async function getLeverCompany(company: CompanyInput): Promise<Company> {
+  const result = await axios.get<LeverJob[]>(
+    `${config.LEVER_URL}/${company.id}?mode=json&limit=1`
+  );
 
-  return rawJobs.map((job) => ({
+  checkStatus(result, ["Lever", company.id]);
+
+  if (!result.data.length) {
+    // Since we can't gather proper name/description, treat as not found
+    throw new AppError(`Lever / ${company.id}: Not Found`, 404);
+  }
+
+  const { openingPlain } = result.data[0];
+
+  return {
+    ...company,
+    // No name field, just use token until we have a better solution
+    name: company.id,
+    description: openingPlain,
+  };
+}
+
+export async function getLeverJobs(company: Company): Promise<Job[]> {
+  const result = await axios.get<LeverJob[]>(
+    `${config.LEVER_URL}/${company.id}?mode=json`
+  );
+
+  checkStatus(result, ["Lever", company.id]);
+
+  return result.data.map((job) => ({
     id: job.id,
-    company,
+    companyId: company.id,
+    company: company.name,
     title: job.text,
     // Simple keyword match for now
     isRemote:

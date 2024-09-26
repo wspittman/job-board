@@ -1,6 +1,13 @@
 import axios from "axios";
 import { config } from "../config";
-import { Job } from "../db/job";
+import type { Company, CompanyInput } from "../db/company";
+import type { Job } from "../db/job";
+import { checkStatus } from "./utils";
+
+interface GreenhouseCompanyResult {
+  name: string;
+  content: string;
+}
 
 interface GreenhouseJobsResult {
   jobs: GreenhouseJob[];
@@ -36,16 +43,38 @@ interface GreenhouseJob {
   }[];
 }
 
-export async function getGreenhouseJobs(company: string): Promise<Job[]> {
-  const rawJobs = (
-    await axios.get<GreenhouseJobsResult>(
-      `${config.GREENHOUSE_URL}/${company}/jobs?content=true`
-    )
-  ).data.jobs;
+export async function getGreenhouseCompany(
+  company: CompanyInput
+): Promise<Company> {
+  const result = await axios.get<GreenhouseCompanyResult>(
+    `${config.GREENHOUSE_URL}/${company.id}`
+  );
+
+  checkStatus(result, ["Greenhouse", company.id]);
+
+  const { name, content } = result.data;
+
+  return {
+    ...company,
+    name,
+    // Basic HTML tag removal
+    description: content.replace(/<[^>]*>/g, ""),
+  };
+}
+
+export async function getGreenhouseJobs(company: Company): Promise<Job[]> {
+  const result = await axios.get<GreenhouseJobsResult>(
+    `${config.GREENHOUSE_URL}/${company.id}/jobs?content=true`
+  );
+
+  checkStatus(result, ["Greenhouse", company.id]);
+
+  const rawJobs = result.data.jobs;
 
   return rawJobs.map((job) => ({
     id: job.id.toString(),
-    company,
+    companyId: company.id,
+    company: company.name,
     title: job.title,
     // Simple keyword match for now
     isRemote: job.location.name.toLowerCase().includes("remote"),
