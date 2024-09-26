@@ -1,6 +1,7 @@
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import { useMemo, useState } from "react";
 import { JobTable } from "../components/JobTable";
-import { Selector } from "../components/Selector";
 import { useJobs, useMetadata } from "../services/apiHooks";
 
 export const Explore = () => {
@@ -13,10 +14,9 @@ export const Explore = () => {
   } = useMetadata();
   const { data = [], isLoading, isError } = useJobs(selectorValue);
 
-  const companySelections = useMemo(
+  const CompanySelections = useMemo(
     () =>
-      metadata?.companyNames.map(([id, name]) => ({ value: id, text: name })) ||
-      [],
+      metadata?.companyNames.map(([id, name]) => ({ id, label: name })) || [],
     [metadata]
   );
 
@@ -25,12 +25,11 @@ export const Explore = () => {
 
   return (
     <div>
-      <Selector
-        label="Selector Example"
-        tooltip="Selector tooltip example"
-        value={selectorValue}
-        setValue={setSelectorValue}
-        options={companySelections}
+      <Autocomplete
+        disablePortal
+        options={CompanySelections}
+        renderInput={(params) => <TextField {...params} label="Company" />}
+        onChange={(_, value) => setSelectorValue(value?.id || "")}
       />
       {isLoading && <div>Loading...</div>}
       {isError && <div>An error occurred</div>}
