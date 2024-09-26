@@ -32,6 +32,10 @@ export const FilterArea = ({ filters, onChange }: Props) => {
     return filters.title || "";
   }, [filters.title]);
 
+  const locationValue = useMemo(() => {
+    return filters.location || "";
+  }, [filters.location]);
+
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>An error occurred</div>;
 
@@ -73,6 +77,15 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           name="title"
           value={titleValue}
           onChange={(e) => onChange({ ...filters, title: e.target.value })}
+        />
+      </Grid>
+      <Grid size="grow">
+        <TextField
+          fullWidth
+          label="Location"
+          name="location"
+          value={locationValue}
+          onChange={(e) => onChange({ ...filters, location: e.target.value })}
         />
       </Grid>
     </Grid>
