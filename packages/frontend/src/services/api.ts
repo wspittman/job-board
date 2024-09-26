@@ -4,6 +4,7 @@ const API_URL = "http://localhost:3000/api";
 
 export interface Job {
   id: string;
+  companyId: string;
   company: string;
   isRemote: boolean;
   location: string;
@@ -22,10 +23,10 @@ export const ping = async () => {
   return response.data;
 };
 
-export const fetchJobs = async (company: string) => {
+export const fetchJobs = async (companyId: string) => {
   const response = await api.get<Job[]>("/jobs", {
     params: {
-      company,
+      companyId,
     },
   });
   return response.data;
