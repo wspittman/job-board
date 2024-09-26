@@ -21,7 +21,12 @@ export interface Job {
 }
 
 export interface Filters {
+  // Exact Match
   companyId?: string;
+  isRemote?: boolean;
+  // Substring Match
+  title?: string;
+  location?: string;
 }
 
 export const api = axios.create({
