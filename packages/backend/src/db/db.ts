@@ -11,7 +11,7 @@ import fs from "fs";
 import https from "https";
 import { config } from "../config";
 
-type ContainerName = "company" | "job";
+type ContainerName = "company" | "job" | "metadata";
 
 const DB_NAME = "jobboard";
 
@@ -27,6 +27,17 @@ interface Item {
 let containerMap: Record<ContainerName, Container>;
 
 export const getContainer = (name: ContainerName) => containerMap[name];
+
+export async function getItem<T>(
+  container: ContainerName,
+  id: string,
+  partitionKey: string
+) {
+  const { resource } = await getContainer(container)
+    .item(id, partitionKey)
+    .read();
+  return stripItem<T>(resource);
+}
 
 export async function upsert(container: ContainerName, item: Object) {
   await getContainer(container).items.upsert(item);
@@ -114,6 +125,7 @@ export async function connectDB() {
 
     createContainer(database, "company", "ats");
     createContainer(database, "job", "companyId");
+    createContainer(database, "metadata", "id");
 
     console.log("CosmosDB connected");
   } catch (error) {

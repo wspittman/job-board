@@ -3,11 +3,21 @@ import { fillCompanyInput } from "./ats/ats";
 import { crawl } from "./crawler";
 import { addCompany, validateCompanyInput } from "./db/company";
 import { getJobs } from "./db/job";
+import { getMetadata, renewMetadata } from "./db/metadata";
 
 export const router = express.Router();
 
 router.get("/", (_, res) => {
   res.send("API is working");
+});
+
+router.get("/metadata", async (_, res, next) => {
+  try {
+    const metadata = await getMetadata();
+    res.json(metadata);
+  } catch (error: any) {
+    next(error);
+  }
 });
 
 router.get("/jobs", async (req, res, next) => {
@@ -43,6 +53,7 @@ router.put("/company", async (req, res, next) => {
 router.post("/jobs", async (_, res, next) => {
   try {
     await crawl();
+    await renewMetadata();
 
     res.send("Success");
   } catch (error: any) {
