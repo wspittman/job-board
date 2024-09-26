@@ -23,6 +23,15 @@ export const FilterArea = ({ filters, onChange }: Props) => {
     return companyOptions.find((c) => c.id === filters.companyId) ?? null;
   }, [companyOptions, filters.companyId]);
 
+  const isRemoteValue = useMemo(() => {
+    if (filters.isRemote === undefined) return "";
+    return filters.isRemote ? "true" : "false";
+  }, [filters.isRemote]);
+
+  const titleValue = useMemo(() => {
+    return filters.title || "";
+  }, [filters.title]);
+
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>An error occurred</div>;
 
@@ -45,7 +54,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           fullWidth
           label="Remote"
           name="isRemote"
-          value={filters.isRemote ?? ""}
+          value={isRemoteValue}
           onChange={(e) => {
             const isRemote =
               e.target.value === "" ? undefined : e.target.value === "true";
@@ -56,6 +65,15 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           <MenuItem value="true">Remote</MenuItem>
           <MenuItem value="false">In-Person / Hybrid</MenuItem>
         </TextField>
+      </Grid>
+      <Grid size="grow">
+        <TextField
+          fullWidth
+          label="Title"
+          name="title"
+          value={titleValue}
+          onChange={(e) => onChange({ ...filters, title: e.target.value })}
+        />
       </Grid>
     </Grid>
   );
