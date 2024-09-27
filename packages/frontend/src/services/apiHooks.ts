@@ -18,7 +18,9 @@ export function useMetadata() {
 }
 
 export function useJobs(filters: Filters) {
-  const isEmpty = Object.values(filters).every((v) => !v);
+  const isEmpty = Object.values(filters).every(
+    (v) => v === undefined || v === ""
+  );
 
   return useQuery({
     queryKey: ["jobs", filters],

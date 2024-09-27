@@ -1,6 +1,6 @@
 import { AppError } from "../AppError";
 import { ATS } from "../ats/ats";
-import { queryByFilters, upsert } from "./db";
+import { getAllByPartitionKey, upsert } from "./db";
 
 /**
  * - id: The ATS company name
@@ -36,5 +36,5 @@ export async function addCompany(company: Company) {
 }
 
 export async function getCompanies(ats: ATS) {
-  return queryByFilters<Company>("company", { ats });
+  return (await getAllByPartitionKey<Company>("company", ats)).resources;
 }

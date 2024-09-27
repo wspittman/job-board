@@ -2,7 +2,7 @@ import express from "express";
 import { fillCompanyInput } from "./ats/ats";
 import { crawl } from "./crawler";
 import { addCompany, validateCompanyInput } from "./db/company";
-import { getJobs } from "./db/job";
+import { getJobs, validateFilters } from "./db/job";
 import { getMetadata, renewMetadata } from "./db/metadata";
 
 export const router = express.Router();
@@ -22,13 +22,13 @@ router.get("/metadata", async (_, res, next) => {
 
 router.get("/jobs", async (req, res, next) => {
   try {
-    const companyId = req.query.companyId as string;
+    const filters = validateFilters(req.query);
 
-    if (!companyId) {
+    if (!Object.keys(filters).length) {
       return res.json([]);
     }
 
-    const jobs = await getJobs(companyId);
+    const jobs = await getJobs(filters);
 
     res.json(jobs);
   } catch (error: any) {
