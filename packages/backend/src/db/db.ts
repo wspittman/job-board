@@ -71,7 +71,8 @@ export async function getAllIdsByPartitionKey(
 export async function queryByFilters<T>(
   container: ContainerName,
   exactFilters: Partial<T>,
-  substringFilters: Partial<T>
+  substringFilters: Partial<T>,
+  maxItems: number = 50
 ) {
   const [exactWhere, exactParam] = prepFilterClause(
     exactFilters,
@@ -83,12 +84,22 @@ export async function queryByFilters<T>(
   );
 
   const whereClause = [...exactWhere, ...substringWhere].join(" AND ");
-  const parameters = [...exactParam, ...substringParam];
+  const parameters = [
+    ...exactParam,
+    ...substringParam,
+    { name: "@maxItems", value: maxItems },
+  ];
 
-  return query<T>(container, {
-    query: `SELECT * FROM c WHERE ${whereClause}`,
-    parameters,
-  });
+  return query<T>(
+    container,
+    {
+      query: `SELECT * FROM c WHERE ${whereClause} OFFSET 0 LIMIT @maxItems`,
+      parameters,
+    },
+    {
+      maxItemCount: maxItems,
+    }
+  );
 }
 
 function prepFilterClause(
