@@ -60,7 +60,7 @@ npm run start:frontend
 
 A screenshot of the current UI. We have a ways to go.
 
-![An in-progress screenshot from 9/30/24](screenshots\InProgress_9_30_24.png)
+![An in-progress screenshot from 9/30/24](screenshots/InProgress_9_30_24.png)
 
 ## API Reference
 
