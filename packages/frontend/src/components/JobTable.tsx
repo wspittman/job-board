@@ -15,7 +15,7 @@ const columns: [ColKey, string][] = [
   ["company", "Company"],
   ["location", "Location"],
   ["isRemote", "Remote"],
-  ["postDate", "Post Date"],
+  ["postDate", "Date"],
 ];
 
 interface Props {
@@ -82,7 +82,9 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
                 <TableCell>{job.company}</TableCell>
                 <TableCell>{job.location}</TableCell>
                 <TableCell>{job.isRemote ? "Yes" : "No"}</TableCell>
-                <TableCell>{job.postDate}</TableCell>
+                <TableCell>
+                  {new Date(job.postDate).toLocaleDateString()}
+                </TableCell>
               </TableRow>
             );
           })}
