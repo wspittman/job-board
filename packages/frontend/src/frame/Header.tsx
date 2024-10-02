@@ -58,7 +58,7 @@ export const Header = (): JSX.Element => {
   ];
 
   return (
-    <AppBar position="static">
+    <AppBar position="sticky">
       <Toolbar variant="dense">
         <Breadcrumbs aria-label="breadcrumb">{breadcrumbs}</Breadcrumbs>
         <Box sx={{ flexGrow: 1 }} />

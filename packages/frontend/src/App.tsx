@@ -11,15 +11,16 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <Box
-      sx={{
-        width: "100vw",
-        height: "100vh",
-        margin: "-8px",
-      }}
-    >
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            margin: "-8px",
+          }}
+        >
           <Header />
           <Routes>
             <Route path="/" element={<Home />} />
@@ -28,9 +29,9 @@ function App() {
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </Box>
+        </Box>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
