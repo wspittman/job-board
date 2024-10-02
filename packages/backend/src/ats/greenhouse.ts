@@ -88,6 +88,7 @@ export async function getGreenhouseJobs(company: Company): Promise<Job[]> {
 function removeHtml(html: string): string {
   return decode(html)
     .replace(/<[^>]*>/g, "\n")
+    .replace(/\s?\n\s?/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .replace(/&nbsp;/g, " ")
     .trim();
