@@ -54,7 +54,9 @@ export const JobCard = ({ job }: Props) => {
           </Button>
         </Box>
       </Box>
-      <Typography variant="body2">{job.description}</Typography>
+      <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+        {job.description}
+      </Typography>
     </Box>
   );
 };
