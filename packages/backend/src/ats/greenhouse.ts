@@ -1,4 +1,5 @@
 import axios from "axios";
+import { decode } from "html-entities";
 import { config } from "../config";
 import type { Company, CompanyInput } from "../db/company";
 import type { Job } from "../db/job";
@@ -57,8 +58,7 @@ export async function getGreenhouseCompany(
   return {
     ...company,
     name,
-    // Basic HTML tag removal
-    description: content.replace(/<[^>]*>/g, ""),
+    description: removeHtml(content),
   };
 }
 
@@ -79,8 +79,16 @@ export async function getGreenhouseJobs(company: Company): Promise<Job[]> {
     // Simple keyword match for now
     isRemote: job.location.name.toLowerCase().includes("remote"),
     location: job.location.name,
-    description: job.content,
+    description: removeHtml(job.content),
     postDate: job.updated_at,
     applyUrl: job.absolute_url,
   }));
+}
+
+function removeHtml(html: string): string {
+  return decode(html)
+    .replace(/<[^>]*>/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/&nbsp;/g, " ")
+    .trim();
 }
