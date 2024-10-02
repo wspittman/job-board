@@ -1,9 +1,9 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
-import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { FilterArea } from "../components/FilterArea";
+import { JobCard } from "../components/JobCard";
 import { JobTable } from "../components/JobTable";
 import { Filters, Job } from "../services/api";
 import { useJobs } from "../services/apiHooks";
@@ -59,7 +59,7 @@ export const Explore = () => {
               overflow: "auto",
             }}
           >
-            <Typography>{selectedJob?.description}</Typography>
+            <JobCard job={selectedJob} />
           </Box>
         )}
       </Box>
@@ -76,14 +76,14 @@ export const Explore = () => {
       </Drawer>
 
       <Drawer
-        open={selectedJob !== undefined}
+        open={!!selectedJob}
         onClose={clearJob}
         sx={{ display: { sm: "none" } }}
       >
         <Button onClick={clearJob} sx={{ m: 1 }} variant="outlined">
           Close
         </Button>
-        <Typography>{selectedJob?.description}</Typography>
+        {selectedJob && <JobCard job={selectedJob} />}
       </Drawer>
     </>
   );
