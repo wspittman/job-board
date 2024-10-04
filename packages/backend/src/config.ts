@@ -4,20 +4,7 @@ import path from "path";
 // Load environment variables from .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-interface Config {
-  PORT: number;
-
-  // Database configs
-  DATABASE_URL: string;
-  DATABASE_KEY: string;
-  DATABASE_LOCAL_CERT_PATH: string;
-
-  // ATS configs
-  GREENHOUSE_URL: string;
-  LEVER_URL: string;
-}
-
-export const config: Config = {
+export const config = {
   PORT: parseInt(process.env.PORT || "3000", 10),
 
   // Database configs
@@ -34,4 +21,10 @@ export const config: Config = {
   GREENHOUSE_URL:
     process.env.GREENHOUSE_URL || "https://boards-api.greenhouse.io/v1/boards",
   LEVER_URL: process.env.LEVER_URL || "https://api.lever.co/v0/postings",
+
+  // AI configs
+  OPENAI_ENDPOINT: process.env.OPENAI_ENDPOINT || "OpenAI Endpoint Required",
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "OpenAI API Key Required",
+  OPENAI_API_VERSION: process.env.OPENAI_API_VERSION || "2024-08-01-preview",
+  OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4o-mini",
 };
