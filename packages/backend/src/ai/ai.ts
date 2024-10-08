@@ -1,12 +1,6 @@
-import { AzureOpenAI } from "openai";
-import { config } from "../config";
+import OpenAI from "openai";
 
-const client = new AzureOpenAI({
-  endpoint: config.OPENAI_ENDPOINT,
-  apiKey: config.OPENAI_API_KEY,
-  apiVersion: config.OPENAI_API_VERSION,
-  deployment: config.OPENAI_MODEL,
-});
+const client = new OpenAI();
 
 const locationPrompt = `You are an experienced job seeker whose goal is to quickly find relevant information from job descriptions.
 First, read the job location text that is provided. Then decide if the job is intended to be remote or on-site. Then decide where the job is based to the extent possible, regardless of whether it is remote or on-site. Provide the response in the following JSON format, using empty string ("") for any unknown fields.
@@ -24,6 +18,7 @@ When well-known acronyms exist, always use the full name with the acronym in par
 
 export async function extractLocation(locationText: string) {
   const f = await client.chat.completions.create({
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
@@ -34,7 +29,6 @@ export async function extractLocation(locationText: string) {
         content: `<location>${locationText}</location>`,
       },
     ],
-    model: "gpt-4o-mini",
     // TBD: Switch to json_schema once it is supported with Azure gpt-4o-mini
     response_format: { type: "json_object" },
   });

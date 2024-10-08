@@ -23,8 +23,5 @@ export const config = {
   LEVER_URL: process.env.LEVER_URL || "https://api.lever.co/v0/postings",
 
   // AI configs
-  OPENAI_ENDPOINT: process.env.OPENAI_ENDPOINT || "OpenAI Endpoint Required",
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "OpenAI API Key Required",
-  OPENAI_API_VERSION: process.env.OPENAI_API_VERSION || "2024-08-01-preview",
-  OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  // OPENAI_API_KEY present in .env, referenced directly in OpenAI SDK
 };
