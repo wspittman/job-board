@@ -24,4 +24,7 @@ export const config = {
 
   // AI configs
   // OPENAI_API_KEY present in .env, referenced directly in OpenAI SDK
+
+  // Auth configs
+  ADMIN_TOKEN: process.env.ADMIN_TOKEN || "admin",
 };
