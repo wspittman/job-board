@@ -5,7 +5,7 @@ import {
   queryByFilters,
   upsert,
 } from "../db/db";
-import { renewMetadata } from "../db/metadata";
+import { renewMetadata } from "./metadata";
 
 /**
  * - id: The ATS-granted job id

@@ -1,4 +1,4 @@
-import { getContainer, getItem, upsert } from "./db";
+import { getContainer, getItem, upsert } from "../db/db";
 
 /**
  * Metadata for the database. Refreshed after Crawl and cached in the backend service.

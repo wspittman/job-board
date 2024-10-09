@@ -1,7 +1,7 @@
 import express, { Request } from "express";
 import { createCompany } from "../controllers/company";
 import { crawlJobs, getJobs } from "../controllers/job";
-import { metadataRouter } from "./metadata";
+import { getMetadata } from "../controllers/metadata";
 
 export const router = express.Router();
 
@@ -40,7 +40,14 @@ router.post("/jobs", async (_, res, next) => {
   }
 });
 
-router.use("/metadata", metadataRouter);
+router.get("/metadata", async (_, res, next) => {
+  try {
+    const metadata = await getMetadata();
+    res.json(metadata);
+  } catch (error: any) {
+    next(error);
+  }
+});
 
 function queryToDict(query: Request["query"]) {
   const result: Record<string, string> = {};
