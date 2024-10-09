@@ -1,7 +1,7 @@
 import { getAts } from "./ats/ats";
 import { ATS } from "./ats/types";
 import { Company, getCompanies } from "./controllers/company";
-import { addJob, deleteJob, getJobIds } from "./db/job";
+import { addJob, deleteJob, getJobIds } from "./controllers/job";
 
 // TODO: This might take longer than the request timeout
 export async function crawl() {

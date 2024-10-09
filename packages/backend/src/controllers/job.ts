@@ -1,10 +1,11 @@
-import { Request } from "express";
+import { crawl } from "../crawler";
 import {
   deleteItem,
   getAllIdsByPartitionKey,
   queryByFilters,
   upsert,
-} from "./db";
+} from "../db/db";
+import { renewMetadata } from "../db/metadata";
 
 /**
  * - id: The ATS-granted job id
@@ -32,22 +33,13 @@ export interface Filters {
   location?: string;
 }
 
-function queryToDict(query: Request["query"]) {
-  const result: Record<string, string> = {};
-
-  for (const [key, value] of Object.entries(query)) {
-    if (typeof value === "string" && value.length) {
-      result[key] = value;
-    }
-  }
-
-  return result;
-}
-
-export function validateFilters(query: Request["query"]): Filters {
+function validateFilters({
+  companyId,
+  isRemote,
+  title,
+  location,
+}: Record<string, string>): Filters {
   const filters: Filters = {};
-
-  const { companyId, isRemote, title, location } = queryToDict(query);
 
   if (companyId) {
     filters.companyId = companyId;
@@ -68,11 +60,26 @@ export function validateFilters(query: Request["query"]): Filters {
   return filters;
 }
 
+export async function getJobs(filterInput: Record<string, string>) {
+  const filters = validateFilters(filterInput);
+
+  if (!Object.keys(filters).length) {
+    return [];
+  }
+
+  return await getJobsByFilters(filters);
+}
+
+export async function crawlJobs() {
+  await crawl();
+  await renewMetadata();
+}
+
 export async function addJob(job: Job) {
   upsert("job", job);
 }
 
-export async function getJobs({
+async function getJobsByFilters({
   companyId,
   isRemote,
   title,

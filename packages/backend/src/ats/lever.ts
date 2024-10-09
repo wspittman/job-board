@@ -2,7 +2,7 @@ import axios from "axios";
 import { AppError } from "../AppError";
 import { config } from "../config";
 import type { Company } from "../controllers/company";
-import type { Job } from "../db/job";
+import type { Job } from "../controllers/job";
 import { ATS, AtsEndpoint } from "./types";
 import { checkStatus } from "./utils";
 

@@ -1,5 +1,5 @@
 import type { Company } from "../controllers/company";
-import type { Job } from "../db/job";
+import type { Job } from "../controllers/job";
 
 export enum ATS {
   GREENHOUSE = "greenhouse",

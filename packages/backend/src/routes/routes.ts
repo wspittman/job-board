@@ -1,6 +1,6 @@
-import express from "express";
+import express, { Request } from "express";
 import { createCompany } from "../controllers/company";
-import { jobsRouter } from "./jobs";
+import { crawlJobs, getJobs } from "../controllers/job";
 import { metadataRouter } from "./metadata";
 
 export const router = express.Router();
@@ -19,5 +19,37 @@ router.put("/company", async (req, res, next) => {
   }
 });
 
-router.use("/jobs", jobsRouter);
+router.get("/jobs", async (req, res, next) => {
+  try {
+    const jobs = await getJobs(queryToDict(req.query));
+
+    res.json(jobs);
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// TBD Admin Auth
+router.post("/jobs", async (_, res, next) => {
+  try {
+    await crawlJobs();
+
+    res.send("Success");
+  } catch (error: any) {
+    next(error);
+  }
+});
+
 router.use("/metadata", metadataRouter);
+
+function queryToDict(query: Request["query"]) {
+  const result: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(query)) {
+    if (typeof value === "string" && value.length) {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
