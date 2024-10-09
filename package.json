@@ -5,7 +5,6 @@
     "start:backend": "npm run dev --workspace=backend",
     "start:frontend": "npm run dev --workspace=frontend"
   },
-  "license": "MIT",
   "private": true,
   "workspaces": [
     "packages/*"
