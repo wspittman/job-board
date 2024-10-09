@@ -1,62 +1,47 @@
-import express, { Request } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { createCompany } from "../controllers/company";
 import { crawlJobs, getJobs } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
+import { validateAdmin } from "../middleware/auth";
+import { convertQuery, getQuery } from "../middleware/querystring";
 
 export const router = express.Router();
 
-router.get("/", (_, res) => {
-  res.send("API is working");
-});
+router.use(convertQuery);
 
-router.put("/company", async (req, res, next) => {
-  try {
-    createCompany(req.body);
+router.get(
+  "/",
+  jsonWrapper(() => Promise.resolve())
+);
 
-    res.send("Success");
-  } catch (error: any) {
-    next(error);
-  }
-});
+router.put(
+  "/company",
+  jsonWrapper((req) => createCompany(req.body))
+);
 
-router.get("/jobs", async (req, res, next) => {
-  try {
-    const jobs = await getJobs(queryToDict(req.query));
+router.get(
+  "/jobs",
+  jsonWrapper((req, res) => getJobs(getQuery(res)))
+);
 
-    res.json(jobs);
-  } catch (error: any) {
-    next(error);
-  }
-});
+router.post(
+  "/jobs",
+  validateAdmin,
+  jsonWrapper(() => crawlJobs())
+);
 
-// TBD Admin Auth
-router.post("/jobs", async (_, res, next) => {
-  try {
-    await crawlJobs();
+router.get(
+  "/metadata",
+  jsonWrapper(() => getMetadata())
+);
 
-    res.send("Success");
-  } catch (error: any) {
-    next(error);
-  }
-});
-
-router.get("/metadata", async (_, res, next) => {
-  try {
-    const metadata = await getMetadata();
-    res.json(metadata);
-  } catch (error: any) {
-    next(error);
-  }
-});
-
-function queryToDict(query: Request["query"]) {
-  const result: Record<string, string> = {};
-
-  for (const [key, value] of Object.entries(query)) {
-    if (typeof value === "string" && value.length) {
-      result[key] = value;
+function jsonWrapper(fn: (req: Request, res: Response) => Promise<unknown>) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = (await fn(req, res)) ?? { status: "success" };
+      res.json(result);
+    } catch (error: any) {
+      next(error);
     }
-  }
-
-  return result;
+  };
 }

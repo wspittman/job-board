@@ -9,7 +9,7 @@ export const Home = () => {
   return (
     <div>
       <h1>Boilerplate</h1>
-      <p>{data}</p>
+      <p>{JSON.stringify(data)}</p>
     </div>
   );
 };
