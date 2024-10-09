@@ -1,28 +1,12 @@
-import type { Company, CompanyInput } from "../db/company";
-import { getGreenhouseCompany, getGreenhouseJobs } from "./greenhouse";
-import { getLeverCompany, getLeverJobs } from "./lever";
+import { Greenhouse } from "./greenhouse";
+import { Lever } from "./lever";
+import { ATS, AtsEndpoint } from "./types";
 
-export enum ATS {
-  GREENHOUSE = "greenhouse",
-  LEVER = "lever",
-}
+const atsEndpoints: Record<ATS, AtsEndpoint> = {
+  [ATS.GREENHOUSE]: new Greenhouse(),
+  [ATS.LEVER]: new Lever(),
+};
 
-export async function fillCompanyInput(
-  company: CompanyInput
-): Promise<Company> {
-  switch (company.ats) {
-    case ATS.GREENHOUSE:
-      return getGreenhouseCompany(company);
-    case ATS.LEVER:
-      return getLeverCompany(company);
-  }
-}
-
-export async function getAtsJobs(company: Company) {
-  switch (company.ats) {
-    case ATS.GREENHOUSE:
-      return getGreenhouseJobs(company);
-    case ATS.LEVER:
-      return getLeverJobs(company);
-  }
+export function getAts(ats: ATS) {
+  return atsEndpoints[ats];
 }

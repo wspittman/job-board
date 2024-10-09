@@ -1,8 +1,9 @@
 import axios from "axios";
 import { decode } from "html-entities";
 import { config } from "../config";
-import type { Company, CompanyInput } from "../db/company";
+import type { Company } from "../controllers/company";
 import type { Job } from "../db/job";
+import { ATS, AtsEndpoint } from "./types";
 import { checkStatus } from "./utils";
 
 interface GreenhouseCompanyResult {
@@ -44,45 +45,46 @@ interface GreenhouseJob {
   }[];
 }
 
-export async function getGreenhouseCompany(
-  company: CompanyInput
-): Promise<Company> {
-  const result = await axios.get<GreenhouseCompanyResult>(
-    `${config.GREENHOUSE_URL}/${company.id}`
-  );
+export class Greenhouse implements AtsEndpoint {
+  async getCompany(id: string): Promise<Company> {
+    const result = await axios.get<GreenhouseCompanyResult>(
+      `${config.GREENHOUSE_URL}/${id}`
+    );
 
-  checkStatus(result, ["Greenhouse", company.id]);
+    checkStatus(result, ["Greenhouse", id]);
 
-  const { name, content } = result.data;
+    const { name, content } = result.data;
 
-  return {
-    ...company,
-    name,
-    description: removeHtml(content),
-  };
-}
+    return {
+      id,
+      ats: ATS.GREENHOUSE,
+      name,
+      description: removeHtml(content),
+    };
+  }
 
-export async function getGreenhouseJobs(company: Company): Promise<Job[]> {
-  const result = await axios.get<GreenhouseJobsResult>(
-    `${config.GREENHOUSE_URL}/${company.id}/jobs?content=true`
-  );
+  async getJobs(company: Company): Promise<Job[]> {
+    const result = await axios.get<GreenhouseJobsResult>(
+      `${config.GREENHOUSE_URL}/${company.id}/jobs?content=true`
+    );
 
-  checkStatus(result, ["Greenhouse", company.id]);
+    checkStatus(result, ["Greenhouse", company.id]);
 
-  const rawJobs = result.data.jobs;
+    const rawJobs = result.data.jobs;
 
-  return rawJobs.map((job) => ({
-    id: job.id.toString(),
-    companyId: company.id,
-    company: company.name,
-    title: job.title,
-    // Simple keyword match for now
-    isRemote: job.location.name.toLowerCase().includes("remote"),
-    location: job.location.name,
-    description: removeHtml(job.content),
-    postDate: job.updated_at,
-    applyUrl: job.absolute_url,
-  }));
+    return rawJobs.map((job) => ({
+      id: job.id.toString(),
+      companyId: company.id,
+      company: company.name,
+      title: job.title,
+      // Simple keyword match for now
+      isRemote: job.location.name.toLowerCase().includes("remote"),
+      location: job.location.name,
+      description: removeHtml(job.content),
+      postDate: job.updated_at,
+      applyUrl: job.absolute_url,
+    }));
+  }
 }
 
 function removeHtml(html: string): string {

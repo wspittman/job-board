@@ -1,5 +1,6 @@
-import { ATS, getAtsJobs } from "./ats/ats";
-import { Company, getCompanies } from "./db/company";
+import { getAts } from "./ats/ats";
+import { ATS } from "./ats/types";
+import { Company, getCompanies } from "./controllers/company";
 import { addJob, deleteJob, getJobIds } from "./db/job";
 
 // TODO: This might take longer than the request timeout
@@ -19,7 +20,7 @@ async function crawlAts(ats: ATS) {
 async function crawlCompany(company: Company) {
   const msg = `CrawlCompany(${company.ats}, ${company.id})`;
   return logWrap(msg, async () => {
-    const jobs = await getAtsJobs(company);
+    const jobs = await getAts(company.ats).getJobs(company);
     const jobIdSet = new Set(jobs.map((job) => job.id));
     const dbJobIds = await getJobIds(company.id);
     const dbJobIdSet = new Set(dbJobIds);

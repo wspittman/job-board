@@ -1,8 +1,9 @@
 import axios from "axios";
 import { AppError } from "../AppError";
 import { config } from "../config";
-import type { Company, CompanyInput } from "../db/company";
+import type { Company } from "../controllers/company";
 import type { Job } from "../db/job";
+import { ATS, AtsEndpoint } from "./types";
 import { checkStatus } from "./utils";
 
 interface LeverJob {
@@ -38,49 +39,52 @@ interface LeverJob {
   createdAt: number;
 }
 
-export async function getLeverCompany(company: CompanyInput): Promise<Company> {
-  const result = await axios.get<LeverJob[]>(
-    `${config.LEVER_URL}/${company.id}?mode=json&limit=1`
-  );
+export class Lever implements AtsEndpoint {
+  async getCompany(id: string): Promise<Company> {
+    const result = await axios.get<LeverJob[]>(
+      `${config.LEVER_URL}/${id}?mode=json&limit=1`
+    );
 
-  checkStatus(result, ["Lever", company.id]);
+    checkStatus(result, ["Lever", id]);
 
-  if (!result.data.length) {
-    // Since we can't gather proper name/description, treat as not found
-    throw new AppError(`Lever / ${company.id}: Not Found`, 404);
+    if (!result.data.length) {
+      // Since we can't gather proper name/description, treat as not found
+      throw new AppError(`Lever / ${id}: Not Found`, 404);
+    }
+
+    const { openingPlain } = result.data[0];
+
+    return {
+      id,
+      ats: ATS.LEVER,
+      // No name field, just use token until we have a better solution
+      name: id,
+      description: openingPlain,
+    };
   }
 
-  const { openingPlain } = result.data[0];
+  async getJobs(company: Company): Promise<Job[]> {
+    const result = await axios.get<LeverJob[]>(
+      `${config.LEVER_URL}/${company.id}?mode=json`
+    );
 
-  return {
-    ...company,
-    // No name field, just use token until we have a better solution
-    name: company.id,
-    description: openingPlain,
-  };
-}
+    checkStatus(result, ["Lever", company.id]);
 
-export async function getLeverJobs(company: Company): Promise<Job[]> {
-  const result = await axios.get<LeverJob[]>(
-    `${config.LEVER_URL}/${company.id}?mode=json`
-  );
-
-  checkStatus(result, ["Lever", company.id]);
-
-  return result.data.map((job) => ({
-    id: job.id,
-    companyId: company.id,
-    company: company.name,
-    title: job.text,
-    // Simple keyword match for now
-    isRemote:
-      job.workplaceType === "remote" ||
-      job.categories.allLocations.some((x) =>
-        x.toLowerCase().includes("remote")
-      ),
-    location: job.categories.allLocations.join(" OR "),
-    description: job.descriptionPlain,
-    postDate: new Date(job.createdAt).toISOString(),
-    applyUrl: job.applyUrl,
-  }));
+    return result.data.map((job) => ({
+      id: job.id,
+      companyId: company.id,
+      company: company.name,
+      title: job.text,
+      // Simple keyword match for now
+      isRemote:
+        job.workplaceType === "remote" ||
+        job.categories.allLocations.some((x) =>
+          x.toLowerCase().includes("remote")
+        ),
+      location: job.categories.allLocations.join(" OR "),
+      description: job.descriptionPlain,
+      postDate: new Date(job.createdAt).toISOString(),
+      applyUrl: job.applyUrl,
+    }));
+  }
 }

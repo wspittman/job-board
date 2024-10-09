@@ -1,6 +1,7 @@
 import { AppError } from "../AppError";
-import { ATS } from "../ats/ats";
-import { getAllByPartitionKey, upsert } from "./db";
+import { getAts } from "../ats/ats";
+import { ATS } from "../ats/types";
+import { getAllByPartitionKey, upsert } from "../db/db";
 
 /**
  * - id: The ATS company name
@@ -13,9 +14,9 @@ export interface Company {
   description: string;
 }
 
-export type CompanyInput = Pick<Company, "id" | "ats">;
+type CompanyInput = Pick<Company, "id" | "ats">;
 
-export function validateCompanyInput({ id, ats }: CompanyInput): CompanyInput {
+function validateCompanyInput({ id, ats }: CompanyInput): CompanyInput {
   if (!id) {
     throw new AppError("Company: id field is required");
   }
@@ -31,7 +32,15 @@ export function validateCompanyInput({ id, ats }: CompanyInput): CompanyInput {
   return { id, ats };
 }
 
-export async function addCompany(company: Company) {
+export async function createCompany(input: CompanyInput) {
+  const { id, ats } = validateCompanyInput(input);
+
+  const company = await getAts(ats).getCompany(id);
+
+  await addCompany(company);
+}
+
+async function addCompany(company: Company) {
   upsert("company", company);
 }
 
