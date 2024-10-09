@@ -1,9 +1,9 @@
 import express from "express";
-import { fillCompanyInput } from "./ats/ats";
-import { crawl } from "./crawler";
-import { addCompany, validateCompanyInput } from "./db/company";
-import { getJobs, validateFilters } from "./db/job";
-import { getMetadata, renewMetadata } from "./db/metadata";
+import { fillCompanyInput } from "../ats/ats";
+import { crawl } from "../crawler";
+import { addCompany, validateCompanyInput } from "../db/company";
+import { getJobs, validateFilters } from "../db/job";
+import { getMetadata, renewMetadata } from "../db/metadata";
 
 export const router = express.Router();
 

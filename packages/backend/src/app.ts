@@ -3,7 +3,7 @@ import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import { config } from "./config";
 import { connectDB } from "./db/db";
-import { router } from "./routes";
+import { router } from "./routes/routes";
 
 const app = express();
 
