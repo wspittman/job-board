@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import { createCompany } from "../controllers/company";
-import { crawlJobs, getJobs } from "../controllers/job";
+import { createJobs, getJobs } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
 import { prepInput } from "../middleware/prepInput";
@@ -17,7 +17,7 @@ router.get(
 router.put("/company", jsonWrapper(createCompany));
 
 router.get("/jobs", jsonWrapper(getJobs));
-router.post("/jobs", validateAdmin, jsonWrapper(crawlJobs));
+router.post("/jobs", validateAdmin, jsonWrapper(createJobs));
 
 router.get("/metadata", jsonWrapper(getMetadata));
 

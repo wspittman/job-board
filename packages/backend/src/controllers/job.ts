@@ -1,11 +1,13 @@
-import { crawl } from "../crawler";
+import { getAts, getAtsList } from "../ats/ats";
 import {
   deleteItem,
   getAllIdsByPartitionKey,
   queryByFilters,
   upsert,
 } from "../db/db";
-import type { Job } from "../db/models";
+import type { ATS, Company, Job } from "../db/models";
+import { batchRun, logWrap } from "../utils/async";
+import { getCompanies } from "./company";
 import { renewMetadata } from "./metadata";
 
 export interface Filters {
@@ -44,6 +46,13 @@ function validateFilters({
   return filters;
 }
 
+export async function createJobs() {
+  return logWrap("Job.createJobs", async () => {
+    await Promise.all(getAtsList().map(crawlAts));
+    await renewMetadata();
+  });
+}
+
 export async function getJobs(filterInput: Record<string, string>) {
   const filters = validateFilters(filterInput);
 
@@ -54,12 +63,37 @@ export async function getJobs(filterInput: Record<string, string>) {
   return await getJobsByFilters(filters);
 }
 
-export async function crawlJobs() {
-  await crawl();
-  await renewMetadata();
+async function crawlAts(ats: ATS) {
+  return logWrap(`Job.crawlAts(${ats})`, async () => {
+    const companies = await getCompanies(ats);
+    await batchRun(companies, (company) => crawlCompany(company));
+  });
 }
 
-export async function addJob(job: Job) {
+async function crawlCompany(company: Company) {
+  const msg = `CrawlCompany(${company.ats}, ${company.id})`;
+  return logWrap(msg, async () => {
+    const jobs = await getAts(company.ats).getJobs(company);
+    const jobIdSet = new Set(jobs.map((job) => job.id));
+    const dbJobIds = await getJobIds(company.id);
+    const dbJobIdSet = new Set(dbJobIds);
+
+    // If the ATS job is not in the DB, add it
+    const toAdd = jobs.filter((job) => !dbJobIdSet.has(job.id));
+    console.log(`${msg}: Adding ${toAdd.length} jobs`);
+    await batchRun(toAdd, (job) => addJob(job));
+
+    // If the DB job is not in the ATS, delete it
+    const toDelete = dbJobIds.filter((id) => !jobIdSet.has(id));
+    console.log(`${msg}: Deleting ${toDelete.length} jobs`);
+    await batchRun(toDelete, (id) => deleteJob(id, company.id));
+
+    // If job is in both ATS and DB, do nothing
+    console.log(`${msg}: Ignoring ${jobIdSet.size - toAdd.length} jobs`);
+  });
+}
+
+async function addJob(job: Job) {
   upsert("job", job);
 }
 
