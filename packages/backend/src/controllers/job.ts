@@ -5,24 +5,8 @@ import {
   queryByFilters,
   upsert,
 } from "../db/db";
+import type { Job } from "../db/models";
 import { renewMetadata } from "./metadata";
-
-/**
- * - id: The ATS-granted job id
- * - pKey: companyId
- */
-export interface Job {
-  id: string;
-  companyId: string;
-  company: string;
-  title: string;
-  isRemote: boolean;
-  // Just freetext for now
-  location: string;
-  description: string;
-  postDate: string;
-  applyUrl: string;
-}
 
 export interface Filters {
   // Exact Match

@@ -1,10 +1,9 @@
 import axios from "axios";
 import { AppError } from "../AppError";
 import { config } from "../config";
-import type { Company } from "../controllers/company";
-import type { Job } from "../controllers/job";
+import type { Company, Job } from "../db/models";
 import { checkStatus } from "../utils/axios";
-import { ATS, AtsEndpoint } from "./types";
+import type { AtsEndpoint } from "./types";
 
 interface LeverJob {
   id: string;
@@ -56,7 +55,7 @@ export class Lever implements AtsEndpoint {
 
     return {
       id,
-      ats: ATS.LEVER,
+      ats: "lever",
       // No name field, just use token until we have a better solution
       name: id,
       description: openingPlain,

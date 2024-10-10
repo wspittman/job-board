@@ -1,16 +1,5 @@
 import { getContainer, getItem, upsert } from "../db/db";
-
-/**
- * Metadata for the database. Refreshed after Crawl and cached in the backend service.
- * - id: "metadata"
- * - pKey: id
- */
-export interface Metadata {
-  id: "metadata";
-  companyCount: number;
-  companyNames: [string, string][];
-  jobCount: number;
-}
+import type { Metadata } from "../db/models";
 
 let cachedMetadata: Metadata | undefined;
 

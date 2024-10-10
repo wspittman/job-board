@@ -1,18 +1,7 @@
 import { AppError } from "../AppError";
 import { getAts } from "../ats/ats";
-import { ATS } from "../ats/types";
 import { getAllByPartitionKey, upsert } from "../db/db";
-
-/**
- * - id: The ATS company name
- * - pKey: ats
- */
-export interface Company {
-  id: string;
-  ats: ATS;
-  name: string;
-  description: string;
-}
+import type { ATS, Company } from "../db/models";
 
 type CompanyInput = Pick<Company, "id" | "ats">;
 
@@ -25,7 +14,7 @@ function validateCompanyInput({ id, ats }: CompanyInput): CompanyInput {
     throw new AppError("Company: ats field is required");
   }
 
-  if (!Object.values(ATS).includes(ats)) {
+  if (!getAts(ats)) {
     throw new AppError("Company: ats field is invalid");
   }
 

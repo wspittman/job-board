@@ -1,13 +1,13 @@
-import { getAts } from "./ats/ats";
-import { ATS } from "./ats/types";
-import { Company, getCompanies } from "./controllers/company";
+import { getAts, getAtsList } from "./ats/ats";
+import { getCompanies } from "./controllers/company";
 import { addJob, deleteJob, getJobIds } from "./controllers/job";
+import type { ATS, Company } from "./db/models";
 import { batchRun, logWrap } from "./utils/async";
 
 // TODO: This might take longer than the request timeout
 export async function crawl() {
   return logWrap("Crawl", async () => {
-    await Promise.all(Object.values(ATS).map(crawlAts));
+    await Promise.all(getAtsList().map(crawlAts));
   });
 }
 

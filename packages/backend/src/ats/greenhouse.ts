@@ -1,10 +1,9 @@
 import axios from "axios";
 import { config } from "../config";
-import type { Company } from "../controllers/company";
-import type { Job } from "../controllers/job";
+import type { Company, Job } from "../db/models";
 import { checkStatus } from "../utils/axios";
 import { removeHtml } from "../utils/html";
-import { ATS, AtsEndpoint } from "./types";
+import type { AtsEndpoint } from "./types";
 
 interface GreenhouseCompanyResult {
   name: string;
@@ -57,7 +56,7 @@ export class Greenhouse implements AtsEndpoint {
 
     return {
       id,
-      ats: ATS.GREENHOUSE,
+      ats: "greenhouse",
       name,
       description: removeHtml(content),
     };
