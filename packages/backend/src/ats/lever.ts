@@ -3,8 +3,8 @@ import { AppError } from "../AppError";
 import { config } from "../config";
 import type { Company } from "../controllers/company";
 import type { Job } from "../controllers/job";
+import { checkStatus } from "../utils/axios";
 import { ATS, AtsEndpoint } from "./types";
-import { checkStatus } from "./utils";
 
 interface LeverJob {
   id: string;

@@ -2,6 +2,7 @@ import { getAts } from "./ats/ats";
 import { ATS } from "./ats/types";
 import { Company, getCompanies } from "./controllers/company";
 import { addJob, deleteJob, getJobIds } from "./controllers/job";
+import { batchRun, logWrap } from "./utils/async";
 
 // TODO: This might take longer than the request timeout
 export async function crawl() {
@@ -38,35 +39,4 @@ async function crawlCompany(company: Company) {
     // If job is in both ATS and DB, do nothing
     console.log(`${msg}: Ignoring ${jobIdSet.size - toAdd.length} jobs`);
   });
-}
-
-async function logWrap(msg: string, func: () => Promise<void>) {
-  try {
-    console.log(`${msg}: Start`);
-    await func();
-    console.log(`${msg}: End`);
-  } catch (error) {
-    console.error(`${msg}: Error ${error}`);
-  }
-}
-
-async function batchRun<T>(
-  values: T[],
-  func: (value: T) => Promise<void>,
-  size: number = 5
-) {
-  for (let i = 0; i < values.length; i += size) {
-    const batch = values.slice(i, i + size);
-    const result = await Promise.allSettled(batch.map(func));
-
-    result.forEach((r, index) => {
-      if (r.status === "rejected") {
-        console.error(
-          `batchRun: Error at values[${i + index}]="${batch[index]}": ${
-            r.reason
-          }`
-        );
-      }
-    });
-  }
 }

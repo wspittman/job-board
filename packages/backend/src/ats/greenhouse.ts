@@ -1,10 +1,10 @@
 import axios from "axios";
-import { decode } from "html-entities";
 import { config } from "../config";
 import type { Company } from "../controllers/company";
 import type { Job } from "../controllers/job";
+import { checkStatus } from "../utils/axios";
+import { removeHtml } from "../utils/html";
 import { ATS, AtsEndpoint } from "./types";
-import { checkStatus } from "./utils";
 
 interface GreenhouseCompanyResult {
   name: string;
@@ -85,13 +85,4 @@ export class Greenhouse implements AtsEndpoint {
       applyUrl: job.absolute_url,
     }));
   }
-}
-
-function removeHtml(html: string): string {
-  return decode(html)
-    .replace(/<[^>]*>/g, "\n")
-    .replace(/\s?\n\s?/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/&nbsp;/g, " ")
-    .trim();
 }

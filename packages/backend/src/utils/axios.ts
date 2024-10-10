@@ -1,6 +1,10 @@
 import { AxiosResponse } from "axios";
 import { AppError } from "../AppError";
 
+/**
+ * A helper function to convert non-200 status codes into errors.
+ * @param tags User-readable tags to include in error logs/messages.
+ */
 export function checkStatus(
   { status, statusText }: AxiosResponse,
   tags: string[]
