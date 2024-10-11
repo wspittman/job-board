@@ -6,6 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 export const config = {
   PORT: parseInt(process.env.PORT || "3000", 10),
+  NODE_ENV: process.env.NODE_ENV || "dev",
 
   // Database configs
   DATABASE_URL: process.env.DATABASE_URL || "https://localhost:8081",

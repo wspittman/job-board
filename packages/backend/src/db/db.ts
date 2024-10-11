@@ -132,9 +132,12 @@ function stripItem<T>(entry: Item): T {
 
 export async function connectDB() {
   try {
-    const agent = new https.Agent({
-      ca: fs.readFileSync(config.DATABASE_LOCAL_CERT_PATH),
-    });
+    let agent;
+    if (config.NODE_ENV === "dev") {
+      agent = new https.Agent({
+        ca: fs.readFileSync(config.DATABASE_LOCAL_CERT_PATH),
+      });
+    }
 
     const cosmosClient = new CosmosClient({
       endpoint: config.DATABASE_URL,
