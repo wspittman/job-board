@@ -1,5 +1,9 @@
 import express, { NextFunction, Request, Response } from "express";
-import { createCompany } from "../controllers/company";
+import {
+  addCompanies,
+  addCompany,
+  removeCompany,
+} from "../controllers/company";
 import { createJobs, getJobs } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
@@ -14,7 +18,9 @@ router.get(
   jsonWrapper(() => Promise.resolve())
 );
 
-router.put("/company", jsonWrapper(createCompany));
+router.put("/company", jsonWrapper(addCompany));
+router.put("/companies", validateAdmin, jsonWrapper(addCompanies));
+router.delete("/company", validateAdmin, jsonWrapper(removeCompany));
 
 router.get("/jobs", jsonWrapper(getJobs));
 router.post("/jobs", validateAdmin, jsonWrapper(createJobs));
