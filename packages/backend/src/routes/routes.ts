@@ -4,7 +4,7 @@ import {
   addCompany,
   removeCompany,
 } from "../controllers/company";
-import { createJobs, getJobs } from "../controllers/job";
+import { addJobs, getJobs, removeJob } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
 import { prepInput } from "../middleware/prepInput";
@@ -23,7 +23,8 @@ router.put("/companies", validateAdmin, jsonWrapper(addCompanies));
 router.delete("/company", validateAdmin, jsonWrapper(removeCompany));
 
 router.get("/jobs", jsonWrapper(getJobs));
-router.post("/jobs", validateAdmin, jsonWrapper(createJobs));
+router.post("/jobs", validateAdmin, jsonWrapper(addJobs));
+router.delete("/job", validateAdmin, jsonWrapper(removeJob));
 
 router.get("/metadata", jsonWrapper(getMetadata));
 

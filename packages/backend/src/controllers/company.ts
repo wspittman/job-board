@@ -1,76 +1,46 @@
-import { AppError } from "../AppError";
 import { getAts } from "../ats/ats";
-import { deleteItem, getAllByPartitionKey, upsert } from "../db/db";
-import type { ATS, Company } from "../db/models";
-
-// #region Input Types and Validations
-
-type CompanyInput = Pick<Company, "id" | "ats">;
-
-interface CompaniesInput {
-  ids: string[];
-  ats: ATS;
-}
+import { deleteItem, getAllByPartitionKey, getItem, upsert } from "../db/db";
+import type { ATS, Company, CompanyKey, CompanyKeys } from "../db/models";
+import {
+  validateAts,
+  validateCompanyKey,
+  validateCompanyKeys,
+} from "../db/validation";
 
 const container = "company";
 
-function validateCompanyInput({ id, ats }: CompanyInput): CompanyInput {
-  if (!id) {
-    throw new AppError("Company: id field is required");
-  }
-
-  validateAts(ats);
-
-  return { id, ats };
+export async function getCompany(key: CompanyKey) {
+  return readCompany(validateCompanyKey("getCompany", key));
 }
-
-function validateCompaniesInput({ ids, ats }: CompaniesInput): CompaniesInput {
-  ids = (ids ?? []).filter(Boolean);
-
-  if (!ids?.length) {
-    throw new AppError("Company: ids field is required");
-  }
-
-  validateAts(ats);
-
-  return { ids, ats };
-}
-
-function validateAts(ats: ATS) {
-  if (!ats) {
-    throw new AppError("Company: ats field is required");
-  }
-
-  if (!getAts(ats)) {
-    throw new AppError("Company: ats field is invalid");
-  }
-}
-
-// #endregion
 
 export async function getCompanies(ats: ATS) {
+  validateAts("getCompanies", ats);
   return readCompanies(ats);
 }
 
-export async function addCompany(input: CompanyInput) {
-  return addCompanyInternal(validateCompanyInput(input));
+export async function addCompany(key: CompanyKey) {
+  return addCompanyInternal(validateCompanyKey("addCompany", key));
 }
 
-export async function addCompanies(input: CompaniesInput) {
-  const { ids, ats } = validateCompaniesInput(input);
+export async function addCompanies(keys: CompanyKeys) {
+  const { ids, ats } = validateCompanyKeys("addCompanies", keys);
   await Promise.all(ids.map((id) => addCompanyInternal({ id, ats })));
 }
 
-async function addCompanyInternal({ id, ats }: CompanyInput) {
+export async function removeCompany(key: CompanyKey) {
+  return deleteCompany(validateCompanyKey("removeCompany", key));
+}
+
+async function addCompanyInternal({ id, ats }: CompanyKey) {
   const company = await getAts(ats).getCompany(id);
   await updateCompany(company);
 }
 
-export async function removeCompany(input: CompanyInput) {
-  return deleteCompany(validateCompanyInput(input));
-}
+// #region DB Operations
 
-// #region DB
+async function readCompany({ id, ats }: CompanyKey) {
+  return getItem<Company>(container, id, ats);
+}
 
 async function readCompanies(ats: ATS) {
   return (await getAllByPartitionKey<Company>(container, ats)).resources;
@@ -80,7 +50,7 @@ async function updateCompany(company: Company) {
   upsert(container, company);
 }
 
-async function deleteCompany({ id, ats }: CompanyInput) {
+async function deleteCompany({ id, ats }: CompanyKey) {
   deleteItem(container, id, ats);
 }
 

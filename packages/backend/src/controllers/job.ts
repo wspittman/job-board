@@ -5,18 +5,27 @@ import {
   queryByFilters,
   upsert,
 } from "../db/db";
-import type { ATS, Company, Job } from "../db/models";
+import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
+import { validateCompanyKey, validateJobKey } from "../db/validation";
 import { batchRun, logWrap } from "../utils/async";
-import { getCompanies } from "./company";
+import { getCompanies, getCompany } from "./company";
 import { renewMetadata } from "./metadata";
 
-export interface Filters {
+const container = "job";
+
+// #region Input Types and Validations
+
+interface Filters {
   // Exact Match
   companyId?: string;
   isRemote?: boolean;
   // Substring Match
   title?: string;
   location?: string;
+}
+
+interface CrawlOptions {
+  company?: CompanyKey;
 }
 
 function validateFilters({
@@ -46,12 +55,15 @@ function validateFilters({
   return filters;
 }
 
-export async function createJobs() {
-  return logWrap("Job.createJobs", async () => {
-    await Promise.all(getAtsList().map(crawlAts));
-    await renewMetadata();
-  });
+function validateCrawlOptions({ company }: CrawlOptions): CrawlOptions {
+  if (company) {
+    company = validateCompanyKey("getJobs", company);
+  }
+
+  return { company };
 }
+
+// #endregion
 
 export async function getJobs(filterInput: Record<string, string>) {
   const filters = validateFilters(filterInput);
@@ -60,60 +72,85 @@ export async function getJobs(filterInput: Record<string, string>) {
     return [];
   }
 
-  return await getJobsByFilters(filters);
+  return readJobsByFilters(filters);
+}
+
+export async function addJobs(options: CrawlOptions) {
+  const { company: companyKey } = validateCrawlOptions(options);
+
+  if (companyKey) {
+    return logWrap(`addJobs(${companyKey.id})`, async () => {
+      const company = await getCompany(companyKey);
+      await crawlCompany(company);
+      await renewMetadata();
+    });
+  }
+
+  return logWrap("addJobs", async () => {
+    await Promise.all(getAtsList().map(crawlAts));
+    await renewMetadata();
+  });
+}
+
+export async function removeJob(key: JobKey) {
+  return deleteJob(validateJobKey("removeJob", key));
 }
 
 async function crawlAts(ats: ATS) {
-  return logWrap(`Job.crawlAts(${ats})`, async () => {
+  return logWrap(`crawlAts(${ats})`, async () => {
     const companies = await getCompanies(ats);
     await batchRun(companies, (company) => crawlCompany(company));
   });
 }
 
 async function crawlCompany(company: Company) {
-  const msg = `CrawlCompany(${company.ats}, ${company.id})`;
+  const msg = `crawlCompany(${company.ats}, ${company.id})`;
   return logWrap(msg, async () => {
     const jobs = await getAts(company.ats).getJobs(company);
     const jobIdSet = new Set(jobs.map((job) => job.id));
-    const dbJobIds = await getJobIds(company.id);
+    const dbJobIds = await readJobIds(company.id);
     const dbJobIdSet = new Set(dbJobIds);
 
     // If the ATS job is not in the DB, add it
     const toAdd = jobs.filter((job) => !dbJobIdSet.has(job.id));
     console.log(`${msg}: Adding ${toAdd.length} jobs`);
-    await batchRun(toAdd, (job) => addJob(job));
+    await batchRun(toAdd, (job) => updateJob(job));
 
     // If the DB job is not in the ATS, delete it
     const toDelete = dbJobIds.filter((id) => !jobIdSet.has(id));
     console.log(`${msg}: Deleting ${toDelete.length} jobs`);
-    await batchRun(toDelete, (id) => deleteJob(id, company.id));
+    await batchRun(toDelete, (id) => deleteJob({ id, companyId: company.id }));
 
     // If job is in both ATS and DB, do nothing
     console.log(`${msg}: Ignoring ${jobIdSet.size - toAdd.length} jobs`);
   });
 }
 
-async function addJob(job: Job) {
-  upsert("job", job);
-}
+// #region DB Operations
 
-async function getJobsByFilters({
+async function readJobsByFilters({
   companyId,
   isRemote,
   title,
   location,
 }: Filters) {
   return queryByFilters<Job>(
-    "job",
+    container,
     { companyId, isRemote },
     { title, location }
   );
 }
 
-export async function getJobIds(companyId: string) {
-  return getAllIdsByPartitionKey("job", companyId);
+async function readJobIds(companyId: string) {
+  return getAllIdsByPartitionKey(container, companyId);
 }
 
-export async function deleteJob(id: string, companyId: string) {
-  return deleteItem("job", id, companyId);
+async function updateJob(job: Job) {
+  upsert(container, job);
 }
+
+async function deleteJob({ id, companyId }: JobKey) {
+  return deleteItem(container, id, companyId);
+}
+
+// #endregion
