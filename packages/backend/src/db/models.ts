@@ -28,7 +28,6 @@ export interface Job {
   company: string;
   title: string;
   isRemote: boolean;
-  // Just freetext for now
   location: string;
   description: string;
   postDate: string;

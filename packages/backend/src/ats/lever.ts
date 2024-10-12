@@ -1,9 +1,11 @@
 import axios from "axios";
+import { extractLocations } from "../ai/ai";
 import { AppError } from "../AppError";
 import { config } from "../config";
-import type { Company, Job } from "../db/models";
+import type { Company } from "../db/models";
 import { checkStatus } from "../utils/axios";
-import type { AtsEndpoint } from "./types";
+import type { AtsEndpoint, JobUpdates } from "./types";
+import { splitJobs } from "./utils";
 
 interface LeverJob {
   id: string;
@@ -62,28 +64,53 @@ export class Lever implements AtsEndpoint {
     };
   }
 
-  async getJobs(company: Company): Promise<Job[]> {
+  async getJobUpdates(
+    company: Company,
+    currentIds: string[]
+  ): Promise<JobUpdates> {
     const result = await axios.get<LeverJob[]>(
       `${config.LEVER_URL}/${company.id}?mode=json`
     );
 
     checkStatus(result, ["Lever", company.id]);
 
-    return result.data.map((job) => ({
-      id: job.id,
-      companyId: company.id,
-      company: company.name,
-      title: job.text,
-      // Simple keyword match for now
-      isRemote:
-        job.workplaceType === "remote" ||
-        job.categories.allLocations.some((x) =>
-          x.toLowerCase().includes("remote")
-        ),
-      location: job.categories.allLocations.join(" OR "),
-      description: job.descriptionPlain,
-      postDate: new Date(job.createdAt).toISOString(),
-      applyUrl: job.applyUrl,
-    }));
+    const {
+      added: addedRaw,
+      removed,
+      existing,
+    } = splitJobs(result.data, currentIds, (job) => job.id);
+
+    const rawLocations = addedRaw.map(
+      ({ workplaceType, categories }) =>
+        `${workplaceType}: [${categories.allLocations.join("; ")}]`
+    );
+
+    const locations = await extractLocations(rawLocations);
+
+    const added = addedRaw.map((job, index) => {
+      const { isRemote, location } = locations[index] ?? {
+        // Fallback if the location extraction fails
+        isRemote:
+          job.workplaceType === "remote" ||
+          job.categories.allLocations.some((x) =>
+            x.toLowerCase().includes("remote")
+          ),
+        location: job.categories.allLocations.join(" OR "),
+      };
+
+      return {
+        id: job.id,
+        companyId: company.id,
+        company: company.name,
+        title: job.text,
+        isRemote,
+        location,
+        description: job.descriptionPlain,
+        postDate: new Date(job.createdAt).toISOString(),
+        applyUrl: job.applyUrl,
+      };
+    });
+
+    return { added, removed, kept: existing };
   }
 }

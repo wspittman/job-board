@@ -106,23 +106,19 @@ async function crawlAts(ats: ATS) {
 async function crawlCompany(company: Company) {
   const msg = `crawlCompany(${company.ats}, ${company.id})`;
   return logWrap(msg, async () => {
-    const jobs = await getAts(company.ats).getJobs(company);
-    const jobIdSet = new Set(jobs.map((job) => job.id));
     const dbJobIds = await readJobIds(company.id);
-    const dbJobIdSet = new Set(dbJobIds);
+    const { added, removed, kept } = await getAts(company.ats).getJobUpdates(
+      company,
+      dbJobIds
+    );
 
-    // If the ATS job is not in the DB, add it
-    const toAdd = jobs.filter((job) => !dbJobIdSet.has(job.id));
-    console.log(`${msg}: Adding ${toAdd.length} jobs`);
-    await batchRun(toAdd, (job) => updateJob(job));
+    console.log(`${msg}: Adding ${added.length} jobs`);
+    await batchRun(added, (job) => updateJob(job));
 
-    // If the DB job is not in the ATS, delete it
-    const toDelete = dbJobIds.filter((id) => !jobIdSet.has(id));
-    console.log(`${msg}: Deleting ${toDelete.length} jobs`);
-    await batchRun(toDelete, (id) => deleteJob({ id, companyId: company.id }));
+    console.log(`${msg}: Deleting ${removed.length} jobs`);
+    await batchRun(removed, (id) => deleteJob({ id, companyId: company.id }));
 
-    // If job is in both ATS and DB, do nothing
-    console.log(`${msg}: Ignoring ${jobIdSet.size - toAdd.length} jobs`);
+    console.log(`${msg}: Ignoring ${kept} jobs`);
   });
 }
 

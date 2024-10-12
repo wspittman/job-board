@@ -1,9 +1,11 @@
 import axios from "axios";
+import { extractLocations } from "../ai/ai";
 import { config } from "../config";
-import type { Company, Job } from "../db/models";
+import type { Company } from "../db/models";
 import { checkStatus } from "../utils/axios";
 import { removeHtml } from "../utils/html";
-import type { AtsEndpoint } from "./types";
+import type { AtsEndpoint, JobUpdates } from "./types";
+import { splitJobs } from "./utils";
 
 interface GreenhouseCompanyResult {
   name: string;
@@ -62,26 +64,45 @@ export class Greenhouse implements AtsEndpoint {
     };
   }
 
-  async getJobs(company: Company): Promise<Job[]> {
+  async getJobUpdates(
+    company: Company,
+    currentIds: string[]
+  ): Promise<JobUpdates> {
     const result = await axios.get<GreenhouseJobsResult>(
       `${config.GREENHOUSE_URL}/${company.id}/jobs?content=true`
     );
 
     checkStatus(result, ["Greenhouse", company.id]);
 
-    const rawJobs = result.data.jobs;
+    const {
+      added: addedRaw,
+      removed,
+      existing,
+    } = splitJobs(result.data.jobs, currentIds, (job) => job.id.toString());
 
-    return rawJobs.map((job) => ({
-      id: job.id.toString(),
-      companyId: company.id,
-      company: company.name,
-      title: job.title,
-      // Simple keyword match for now
-      isRemote: job.location.name.toLowerCase().includes("remote"),
-      location: job.location.name,
-      description: removeHtml(job.content),
-      postDate: job.updated_at,
-      applyUrl: job.absolute_url,
-    }));
+    const rawLocations = addedRaw.map((job) => job.location.name);
+    const locations = await extractLocations(rawLocations);
+
+    const added = addedRaw.map((job, index) => {
+      const { isRemote, location } = locations[index] ?? {
+        // Fallback if the location extraction fails
+        isRemote: job.location.name.toLowerCase().includes("remote"),
+        location: job.location.name,
+      };
+
+      return {
+        id: job.id.toString(),
+        companyId: company.id,
+        company: company.name,
+        title: job.title,
+        isRemote,
+        location,
+        description: removeHtml(job.content),
+        postDate: job.updated_at,
+        applyUrl: job.absolute_url,
+      };
+    });
+
+    return { added, removed, kept: existing };
   }
 }
