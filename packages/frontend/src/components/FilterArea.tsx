@@ -6,6 +6,8 @@ import { useMemo } from "react";
 import { Filters } from "../services/api";
 import { useMetadata } from "../services/apiHooks";
 
+const gridSize = { xs: 12, sm: 6, md: 4, lg: 3 };
+
 interface Props {
   filters: Filters;
   onChange: (value: Filters) => void;
@@ -41,7 +43,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
 
   return (
     <Grid container spacing={2} sx={{ m: 1 }}>
-      <Grid size="grow">
+      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <Autocomplete
           disablePortal
           options={companyOptions}
@@ -52,7 +54,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           }
         />
       </Grid>
-      <Grid size="grow">
+      <Grid size={gridSize}>
         <TextField
           select
           fullWidth
@@ -70,7 +72,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           <MenuItem value="false">In-Person / Hybrid</MenuItem>
         </TextField>
       </Grid>
-      <Grid size="grow">
+      <Grid size={gridSize}>
         <TextField
           fullWidth
           label="Title"
@@ -79,7 +81,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           onChange={(e) => onChange({ ...filters, title: e.target.value })}
         />
       </Grid>
-      <Grid size="grow">
+      <Grid size={gridSize}>
         <TextField
           fullWidth
           label="Location"
