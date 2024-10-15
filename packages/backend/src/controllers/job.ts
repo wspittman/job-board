@@ -1,10 +1,6 @@
+import { SqlParameter } from "@azure/cosmos";
 import { getAts, getAtsList } from "../ats/ats";
-import {
-  deleteItem,
-  getAllIdsByPartitionKey,
-  queryByFilters,
-  upsert,
-} from "../db/db";
+import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
 import { batchRun, logWrap } from "../utils/async";
@@ -22,6 +18,8 @@ interface Filters {
   // Substring Match
   title?: string;
   location?: string;
+  // Range Match
+  daysSince?: number;
 }
 
 interface CrawlOptions {
@@ -33,6 +31,7 @@ function validateFilters({
   isRemote,
   title,
   location,
+  daysSince,
 }: Record<string, string>): Filters {
   const filters: Filters = {};
 
@@ -50,6 +49,14 @@ function validateFilters({
 
   if (location) {
     filters.location = location;
+  }
+
+  if (daysSince) {
+    const value = parseInt(daysSince);
+
+    if (Number.isFinite(value) && value >= 1 && value <= 365) {
+      filters.daysSince = value;
+    }
   }
 
   return filters;
@@ -129,11 +136,55 @@ async function readJobsByFilters({
   isRemote,
   title,
   location,
+  daysSince,
 }: Filters) {
-  return queryByFilters<Job>(
+  /*
+  Where clauses should ideally be ordered by
+  1. The most selective filter first (ie. likely to filter out the most documents)
+  2. Filter efficiency (equality > range > contains)
+  */
+
+  const whereClauses: string[] = [];
+  const parameters: SqlParameter[] = [];
+
+  if (companyId) {
+    whereClauses.push("c.companyId = @companyId");
+    parameters.push({ name: "@companyId", value: companyId });
+  }
+
+  if (isRemote !== undefined) {
+    whereClauses.push("c.isRemote = @isRemote");
+    parameters.push({ name: "@isRemote", value: isRemote });
+  }
+
+  if (daysSince) {
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const sinceTS = Date.now() - daysSince * millisecondsPerDay;
+    whereClauses.push("c.postTS >= @sinceTS");
+    parameters.push({ name: "@sinceTS", value: sinceTS });
+  }
+
+  if (title) {
+    whereClauses.push("CONTAINS(c.title, @title)");
+    parameters.push({ name: "@title", value: title });
+  }
+
+  if (location) {
+    whereClauses.push("CONTAINS(c.location, @location)");
+    parameters.push({ name: "@location", value: location });
+  }
+
+  const where = whereClauses.join(" AND ");
+
+  return query<Job>(
     container,
-    { companyId, isRemote },
-    { title, location }
+    {
+      query: `SELECT * FROM c WHERE ${where} OFFSET 0 LIMIT 50`,
+      parameters,
+    },
+    {
+      maxItemCount: 50,
+    }
   );
 }
 

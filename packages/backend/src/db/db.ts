@@ -4,7 +4,6 @@ import {
   Database,
   FeedOptions,
   ItemDefinition,
-  SqlParameter,
   SqlQuerySpec,
 } from "@azure/cosmos";
 import fs from "fs";
@@ -66,52 +65,6 @@ export async function getAllIdsByPartitionKey(
     partitionKey,
   });
   return result.map((entry) => entry.id);
-}
-
-export async function queryByFilters<T>(
-  container: ContainerName,
-  exactFilters: Partial<T>,
-  substringFilters: Partial<T>,
-  maxItems: number = 50
-) {
-  const [exactWhere, exactParam] = prepFilterClause(
-    exactFilters,
-    (key) => `c.${key} = @${key}`
-  );
-  const [substringWhere, substringParam] = prepFilterClause(
-    substringFilters,
-    (key) => `CONTAINS(c.${key}, @${key})`
-  );
-
-  const whereClause = [...exactWhere, ...substringWhere].join(" AND ");
-  const parameters = [
-    ...exactParam,
-    ...substringParam,
-    { name: "@maxItems", value: maxItems },
-  ];
-
-  return query<T>(
-    container,
-    {
-      query: `SELECT * FROM c WHERE ${whereClause} OFFSET 0 LIMIT @maxItems`,
-      parameters,
-    },
-    {
-      maxItemCount: maxItems,
-    }
-  );
-}
-
-function prepFilterClause(
-  filters: Object,
-  func: (key: string) => string
-): [string[], SqlParameter[]] {
-  const entries = Object.entries(filters).filter(
-    ([, value]) => value !== undefined
-  );
-  const whereMap = entries.map(([key]) => func(key));
-  const paramMap = entries.map(([key, value]) => ({ name: `@${key}`, value }));
-  return [whereMap, paramMap];
 }
 
 export async function query<T>(
