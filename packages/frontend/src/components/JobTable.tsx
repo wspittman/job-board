@@ -16,7 +16,7 @@ const columns: [ColKey, string][] = [
   ["company", "Company"],
   ["isRemote", "Remote"],
   ["location", "Location"],
-  ["postDate", "Posted"],
+  ["postTS", "Posted"],
 ];
 
 interface Props {
@@ -83,7 +83,7 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
                 <TableCell>{job.company}</TableCell>
                 <TableCell>{job.isRemote ? <Check /> : <X />}</TableCell>
                 <TableCell>{job.location}</TableCell>
-                <TableCell>{timePassedSince(new Date(job.postDate))}</TableCell>
+                <TableCell>{timePassedSince(job.postTS)}</TableCell>
               </TableRow>
             );
           })}
@@ -93,8 +93,8 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
   );
 };
 
-function timePassedSince(before: Date): string {
-  const diff = new Date().getTime() - before.getTime();
+function timePassedSince(before: number): string {
+  const diff = Date.now() - before;
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const months = Math.floor(days / 30);
   const years = Math.floor(months / 12);

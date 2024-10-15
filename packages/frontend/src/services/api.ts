@@ -16,7 +16,7 @@ export interface Job {
   location: string;
   title: string;
   description: string;
-  postDate: string;
+  postTS: number;
   applyUrl: string;
 }
 
@@ -27,6 +27,8 @@ export interface Filters {
   // Substring Match
   title?: string;
   location?: string;
+  // Range Match
+  daysSince?: number;
 }
 
 export const api = axios.create({

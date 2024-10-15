@@ -1,5 +1,6 @@
 import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid2";
+import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import { useMemo } from "react";
@@ -37,6 +38,10 @@ export const FilterArea = ({ filters, onChange }: Props) => {
   const locationValue = useMemo(() => {
     return filters.location || "";
   }, [filters.location]);
+
+  const postSinceValue = useMemo(() => {
+    return filters.daysSince || 0;
+  }, [filters.daysSince]);
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>An error occurred</div>;
@@ -88,6 +93,29 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           name="location"
           value={locationValue}
           onChange={(e) => onChange({ ...filters, location: e.target.value })}
+        />
+      </Grid>
+      <Grid size={gridSize}>
+        <TextField
+          fullWidth
+          type="number"
+          label="Posted Since"
+          name="postSince"
+          value={postSinceValue}
+          onChange={(e) => {
+            const val = parseInt(e.target.value);
+            onChange({
+              ...filters,
+              daysSince: isNaN(val) || val < 1 ? undefined : val,
+            });
+          }}
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">days ago</InputAdornment>
+              ),
+            },
+          }}
         />
       </Grid>
     </Grid>

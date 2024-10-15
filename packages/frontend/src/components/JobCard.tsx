@@ -40,7 +40,7 @@ export const JobCard = ({ job }: Props) => {
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={iconTextStyle}>
             <Calendar />
-            {new Date(job.postDate).toLocaleDateString()}
+            {new Date(job.postTS).toLocaleDateString()}
           </Typography>
         </Box>
         <Box>
