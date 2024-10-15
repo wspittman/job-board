@@ -43,6 +43,15 @@ export const FilterArea = ({ filters, onChange }: Props) => {
 
   return (
     <Grid container spacing={2} sx={{ m: 1 }}>
+      <Grid size={gridSize}>
+        <TextField
+          fullWidth
+          label="Title"
+          name="title"
+          value={titleValue}
+          onChange={(e) => onChange({ ...filters, title: e.target.value })}
+        />
+      </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <Autocomplete
           disablePortal
@@ -71,15 +80,6 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           <MenuItem value="true">Remote</MenuItem>
           <MenuItem value="false">In-Person / Hybrid</MenuItem>
         </TextField>
-      </Grid>
-      <Grid size={gridSize}>
-        <TextField
-          fullWidth
-          label="Title"
-          name="title"
-          value={titleValue}
-          onChange={(e) => onChange({ ...filters, title: e.target.value })}
-        />
       </Grid>
       <Grid size={gridSize}>
         <TextField
