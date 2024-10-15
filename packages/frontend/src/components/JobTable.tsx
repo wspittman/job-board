@@ -16,7 +16,7 @@ const columns: [ColKey, string][] = [
   ["company", "Company"],
   ["isRemote", "Remote"],
   ["location", "Location"],
-  ["postDate", "Date"],
+  ["postDate", "Posted"],
 ];
 
 interface Props {
@@ -83,9 +83,7 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
                 <TableCell>{job.company}</TableCell>
                 <TableCell>{job.isRemote ? <Check /> : <X />}</TableCell>
                 <TableCell>{job.location}</TableCell>
-                <TableCell>
-                  {new Date(job.postDate).toLocaleDateString()}
-                </TableCell>
+                <TableCell>{timePassedSince(new Date(job.postDate))}</TableCell>
               </TableRow>
             );
           })}
@@ -94,3 +92,20 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
     </TableContainer>
   );
 };
+
+function timePassedSince(before: Date): string {
+  const diff = new Date().getTime() - before.getTime();
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const months = Math.floor(days / 30);
+  const years = Math.floor(months / 12);
+
+  if (years > 0) {
+    return years === 1 ? "1 year ago" : `${years} years ago`;
+  } else if (months > 0) {
+    return months === 1 ? "1 month ago" : `${months} months ago`;
+  } else if (days > 0) {
+    return days === 1 ? "1 day ago" : `${days} days ago`;
+  } else {
+    return "< 1 day ago";
+  }
+}
