@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { FilterArea } from "../components/FilterArea";
 import { JobCard } from "../components/JobCard";
 import { JobTable } from "../components/JobTable";
@@ -28,7 +29,33 @@ export const Explore = () => {
 
   const [filters, setFilters] = useState<Filters>({});
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const debouncedFilters = useDebounce(filters, 500);
+
+  // Update filter state from URL params on initial load
+  useEffect(() => {
+    const getVal = (key: string) => searchParams.get(key) || undefined;
+    const isRemote = getVal("isRemote");
+    setFilters({
+      companyId: getVal("companyId"),
+      isRemote: isRemote == undefined ? undefined : isRemote === "true",
+      title: getVal("title"),
+      location: getVal("location"),
+      daysSince: Number(getVal("daysSince")) || undefined,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update URL params when filter state changes
+  useEffect(() => {
+    const newParams = new URLSearchParams();
+    Object.entries(debouncedFilters).forEach(([key, value]) => {
+      if (value !== undefined && value !== "") {
+        newParams.set(key, value);
+      }
+    });
+    setSearchParams(newParams, { replace: true });
+  }, [debouncedFilters, searchParams, setSearchParams]);
 
   const { data = [], isLoading, isError } = useJobs(debouncedFilters);
 
