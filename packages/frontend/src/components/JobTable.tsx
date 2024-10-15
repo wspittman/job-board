@@ -5,6 +5,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import { Check, X } from "lucide-react";
 import React, { useState } from "react";
 import { Job } from "../services/api";
 
@@ -13,8 +14,8 @@ type ColKey = Partial<keyof Job>;
 const columns: [ColKey, string][] = [
   ["title", "Title"],
   ["company", "Company"],
-  ["location", "Location"],
   ["isRemote", "Remote"],
+  ["location", "Location"],
   ["postDate", "Date"],
 ];
 
@@ -80,8 +81,8 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
               >
                 <TableCell>{job.title}</TableCell>
                 <TableCell>{job.company}</TableCell>
+                <TableCell>{job.isRemote ? <Check /> : <X />}</TableCell>
                 <TableCell>{job.location}</TableCell>
-                <TableCell>{job.isRemote ? "Yes" : "No"}</TableCell>
                 <TableCell>
                   {new Date(job.postDate).toLocaleDateString()}
                 </TableCell>
