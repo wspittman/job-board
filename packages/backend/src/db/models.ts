@@ -30,7 +30,7 @@ export interface Job {
   isRemote: boolean;
   location: string;
   description: string;
-  postDate: string;
+  postTS: number;
   applyUrl: string;
 }
 

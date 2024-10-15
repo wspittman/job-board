@@ -106,7 +106,7 @@ export class Lever implements AtsEndpoint {
         isRemote,
         location,
         description: job.descriptionPlain,
-        postDate: new Date(job.createdAt).toISOString(),
+        postTS: new Date(job.createdAt).getTime(),
         applyUrl: job.applyUrl,
       };
     });

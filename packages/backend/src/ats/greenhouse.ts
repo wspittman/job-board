@@ -98,7 +98,7 @@ export class Greenhouse implements AtsEndpoint {
         isRemote,
         location,
         description: removeHtml(job.content),
-        postDate: job.updated_at,
+        postTS: new Date(job.updated_at).getTime(),
         applyUrl: job.absolute_url,
       };
     });
