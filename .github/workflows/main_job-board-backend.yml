@@ -29,6 +29,7 @@ jobs:
           npm run test --if-present
 
       - name: Zip artifact for deployment
+        working-directory: packages/backend
         run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
