@@ -37,7 +37,8 @@ jobs:
           npm install --omit=dev
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./deploy/* -r
+        working-directory: deploy
+        run: zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
