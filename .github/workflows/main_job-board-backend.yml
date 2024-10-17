@@ -76,7 +76,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'job-board-backend'
-          slot-name: 'Production'
-          package: .
-          enable-diff-deploy: false
+          clean: true
           
