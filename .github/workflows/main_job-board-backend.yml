@@ -21,14 +21,24 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: npm install, build, and test
+      - name: npm install, build, and test (full)
+        working-directory: packages/backend
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
 
+      - name: Prepare production deployment
+        run: |
+          mkdir deploy
+          cp -r packages/backend/dist deploy/
+          cp packages/backend/package*.json deploy/
+          cd deploy
+          npm install --omit=dev
+
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        working-directory: deploy
+        run: zip -r ../release.zip ./*
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -57,7 +67,7 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_81B2108ED53B475BA63BB9770A287C8F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_81B2108ED53B475BA63BB9770A287C8F  }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CCB273F3D13F48FAB5C669116A6B0EB2 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_27C1AD0950F6474D8D37E0D56B2F2615 }}
 
@@ -66,6 +76,6 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'job-board-backend'
-          slot-name: 'Production'
+          slot-name: 'production'
           package: .
           
