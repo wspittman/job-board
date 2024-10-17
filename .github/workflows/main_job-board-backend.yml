@@ -21,16 +21,20 @@ jobs:
         with:
           node-version: '20.x'
 
-      - name: npm install, build, and test
-        working-directory: packages/backend
+      - name: Copy backend package for deployment
         run: |
-          npm install
+          mkdir deploy
+          cp -r packages/backend/* deploy/
+          
+      - name: npm install, build, and test
+        working-directory: deploy
+        run: |
+          npm install --omit=dev
           npm run build --if-present
           npm run test --if-present
 
       - name: Zip artifact for deployment
-        working-directory: packages/backend
-        run: zip release.zip ./* -r
+        run: zip release.zip ./deploy/* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
