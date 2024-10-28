@@ -1,5 +1,6 @@
 cosmosdbcert.cer
 .env
+*.tsbuildinfo
 
 # Logs
 logs

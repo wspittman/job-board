@@ -3,9 +3,14 @@ import Grid from "@mui/material/Grid2";
 import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
-import { useMemo } from "react";
 import { Filters } from "../services/api";
-import { useMetadata } from "../services/apiHooks";
+import {
+  useCompanyFilter,
+  useIsRemoteFilter,
+  useLocationFilter,
+  usePostSinceFilter,
+  useTitleFilter,
+} from "./filterHooks";
 
 const gridSize = { xs: 12, sm: 6, md: 4, lg: 3 };
 
@@ -15,36 +20,11 @@ interface Props {
 }
 
 export const FilterArea = ({ filters, onChange }: Props) => {
-  const { data: metadata, isLoading, isError } = useMetadata();
-
-  const companyOptions = useMemo(() => {
-    const companyNames = metadata?.companyNames || [];
-    return companyNames.map(([id, name]) => ({ id, label: name }));
-  }, [metadata]);
-
-  const companyValue = useMemo(() => {
-    return companyOptions.find((c) => c.id === filters.companyId) ?? null;
-  }, [companyOptions, filters.companyId]);
-
-  const isRemoteValue = useMemo(() => {
-    if (filters.isRemote === undefined) return "";
-    return filters.isRemote ? "true" : "false";
-  }, [filters.isRemote]);
-
-  const titleValue = useMemo(() => {
-    return filters.title || "";
-  }, [filters.title]);
-
-  const locationValue = useMemo(() => {
-    return filters.location || "";
-  }, [filters.location]);
-
-  const postSinceValue = useMemo(() => {
-    return filters.daysSince || 0;
-  }, [filters.daysSince]);
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>An error occurred</div>;
+  const { companyOptions, companyValue } = useCompanyFilter(filters);
+  const isRemoteValue = useIsRemoteFilter(filters);
+  const titleValue = useTitleFilter(filters);
+  const locationValue = useLocationFilter(filters);
+  const postSinceValue = usePostSinceFilter(filters);
 
   return (
     <Grid container spacing={2} sx={{ m: 1 }}>
@@ -57,7 +37,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           onChange={(e) => onChange({ ...filters, title: e.target.value })}
         />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+      <Grid size={gridSize}>
         <Autocomplete
           disablePortal
           options={companyOptions}

@@ -9,17 +9,13 @@ export function prepInput(req: Request, res: Response, next: NextFunction) {
 }
 
 /**
- * Turn a Express query object into a simple dictionary.
+ * Turn an Express query object into a simple dictionary of strings.
  */
-function convertQuery(req: Request) {
-  const query = req.query;
-  const result: Record<string, string> = {};
-
-  for (const [key, value] of Object.entries(query)) {
-    if (typeof value === "string" && value.length) {
-      result[key] = value;
-    }
-  }
-
-  return result;
+function convertQuery(req: Request): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(req.query).filter(
+      (entry): entry is [string, string] =>
+        typeof entry[1] === "string" && entry[1].length > 0
+    )
+  ) as Record<string, string>;
 }
