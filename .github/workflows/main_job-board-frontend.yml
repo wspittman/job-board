@@ -70,7 +70,7 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_81B2108ED53B475BA63BB9770A287C8F  }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BETTER_JOB_BOARD_ID_9432  }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CCB273F3D13F48FAB5C669116A6B0EB2 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_27C1AD0950F6474D8D37E0D56B2F2615 }}
 
