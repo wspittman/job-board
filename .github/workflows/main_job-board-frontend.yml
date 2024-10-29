@@ -78,5 +78,5 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "job-board-frontend"
+          app-name: "better-job-board"
           clean: true
