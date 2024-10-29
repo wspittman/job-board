@@ -34,10 +34,10 @@ jobs:
         run: |
           mkdir deploy
           cp -r packages/frontend/dist deploy/
-          cp packages/frontend/package*.json deploy/
+          cp packages/frontend/package.json deploy/
           cp packages/frontend/server.js deploy/
           cd deploy
-          npm ci --omit=dev
+          npm install --omit=dev
 
       - name: Zip artifact for deployment
         working-directory: deploy
