@@ -165,13 +165,13 @@ async function readJobsByFilters({
   }
 
   if (title) {
-    whereClauses.push("CONTAINS(c.title, @title)");
-    parameters.push({ name: "@title", value: title });
+    whereClauses.push("CONTAINS(LOWER(c.title), @title)");
+    parameters.push({ name: "@title", value: title.toLowerCase() });
   }
 
   if (location) {
-    whereClauses.push("CONTAINS(c.location, @location)");
-    parameters.push({ name: "@location", value: location });
+    whereClauses.push("CONTAINS(LOWER(c.location), @location)");
+    parameters.push({ name: "@location", value: location.toLowerCase() });
   }
 
   const where = whereClauses.join(" AND ");
