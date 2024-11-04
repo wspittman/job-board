@@ -1,5 +1,5 @@
 import axios from "axios";
-import { extractLocations } from "../ai/ai";
+import { extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
 import { config } from "../config";
 import type { Company } from "../db/models";
