@@ -30,6 +30,8 @@ export const Explore = () => {
 
   const toggleFilterOpen = () => setIsFilterOpen(!isFilterOpen);
   const clearJob = () => setSelectedJob(undefined);
+  const updateFilters = (newFilters: Filters) =>
+    setFilters({ ...filters, ...newFilters });
 
   const [searchParams, setSearchParams] = useSearchParams();
   const debouncedFilters = useDebounce(filters, 500);
@@ -74,7 +76,7 @@ export const Explore = () => {
           </Box>
 
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
-            <FilterArea filters={filters} onChange={setFilters} />
+            <FilterArea {...filters} onChange={updateFilters} />
           </Box>
 
           <Box sx={{ display: "flex", overflow: "hidden" }}>
@@ -102,7 +104,7 @@ export const Explore = () => {
             <Button onClick={toggleFilterOpen} sx={{ m: 1 }} variant="outlined">
               Close
             </Button>
-            <FilterArea filters={filters} onChange={setFilters} />
+            <FilterArea {...filters} onChange={updateFilters} />
           </Drawer>
 
           <Drawer

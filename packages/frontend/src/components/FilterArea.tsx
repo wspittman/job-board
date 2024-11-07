@@ -3,28 +3,37 @@ import Grid from "@mui/material/Grid2";
 import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
+import { useMemo } from "react";
 import { Filters } from "../services/api";
-import {
-  useCompanyFilter,
-  useIsRemoteFilter,
-  useLocationFilter,
-  usePostSinceFilter,
-  useTitleFilter,
-} from "./filterHooks";
+import { useMetadata } from "../services/apiHooks";
 
 const gridSize = { xs: 12, sm: 6, md: 4, lg: 3 };
 
-interface Props {
-  filters: Filters;
+interface Props extends Filters {
   onChange: (value: Filters) => void;
 }
 
-export const FilterArea = ({ filters, onChange }: Props) => {
-  const { companyOptions, companyValue } = useCompanyFilter(filters);
-  const isRemoteValue = useIsRemoteFilter(filters);
-  const titleValue = useTitleFilter(filters);
-  const locationValue = useLocationFilter(filters);
-  const postSinceValue = usePostSinceFilter(filters);
+export const FilterArea = ({
+  companyId,
+  isRemote,
+  title,
+  location,
+  daysSince,
+  onChange,
+}: Props) => {
+  const { data: metadata } = useMetadata();
+
+  const companyOptions = useMemo(() => {
+    const companyNames = metadata?.companyNames || [];
+    return companyNames.map(([id, name]) => ({ id, label: name }));
+  }, [metadata]);
+
+  const companyValue = companyOptions.find((c) => c.id === companyId) ?? null;
+  const isRemoteValue =
+    isRemote === undefined ? "" : isRemote ? "true" : "false";
+  const titleValue = title || "";
+  const locationValue = location || "";
+  const postSinceValue = daysSince || 0;
 
   return (
     <Grid container spacing={2} sx={{ m: 1 }}>
@@ -34,7 +43,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           label="Title"
           name="title"
           value={titleValue}
-          onChange={(e) => onChange({ ...filters, title: e.target.value })}
+          onChange={(e) => onChange({ title: e.target.value })}
         />
       </Grid>
       <Grid size={gridSize}>
@@ -43,9 +52,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           options={companyOptions}
           renderInput={(params) => <TextField {...params} label="Company" />}
           value={companyValue}
-          onChange={(_, value) =>
-            onChange({ ...filters, companyId: value?.id })
-          }
+          onChange={(_, value) => onChange({ companyId: value?.id })}
         />
       </Grid>
       <Grid size={gridSize}>
@@ -58,7 +65,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           onChange={(e) => {
             const isRemote =
               e.target.value === "" ? undefined : e.target.value === "true";
-            onChange({ ...filters, isRemote });
+            onChange({ isRemote });
           }}
         >
           <MenuItem value="">Any</MenuItem>
@@ -72,7 +79,7 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           label="Location"
           name="location"
           value={locationValue}
-          onChange={(e) => onChange({ ...filters, location: e.target.value })}
+          onChange={(e) => onChange({ location: e.target.value })}
         />
       </Grid>
       <Grid size={gridSize}>
@@ -85,7 +92,6 @@ export const FilterArea = ({ filters, onChange }: Props) => {
           onChange={(e) => {
             const val = parseInt(e.target.value);
             onChange({
-              ...filters,
               daysSince: isNaN(val) || val < 1 ? undefined : val,
             });
           }}
