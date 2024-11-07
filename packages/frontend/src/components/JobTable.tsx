@@ -28,6 +28,10 @@ const columns: ColDef<string | number | boolean>[] = [
     getValue: (job) => job.company,
   },
   {
+    name: "Summary",
+    getValue: (job) => job.facets?.summary ?? "",
+  },
+  {
     name: "Remote",
     getValue: (job) => job.isRemote,
     getDisplay: (value) => (value ? <Check /> : <X />),
@@ -35,6 +39,16 @@ const columns: ColDef<string | number | boolean>[] = [
   {
     name: "Location",
     getValue: (job) => job.location,
+  },
+  {
+    name: "Experience",
+    getValue: (job) => job.facets?.experience ?? 0,
+    getDisplay: (value) => (value ? `${value} years` : ""),
+  },
+  {
+    name: "Salary",
+    getValue: (job) => job.facets?.salary ?? 0,
+    getDisplay: (value) => (value ? `$${value}` : ""),
   },
   {
     name: "Posted",
