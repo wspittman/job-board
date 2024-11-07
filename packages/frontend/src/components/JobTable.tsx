@@ -12,15 +12,38 @@ import { PageLoader } from "../frame/PageLoader";
 import { Filters, Job } from "../services/api";
 import { useJobs } from "../services/apiHooks";
 
-type ColKey = Partial<keyof Job>;
+interface ColDef<T> {
+  name: string;
+  getValue: (job: Job) => T;
+  getDisplay?: (value: T) => string | React.ReactNode;
+}
 
-const columns: [ColKey, string][] = [
-  ["title", "Title"],
-  ["company", "Company"],
-  ["isRemote", "Remote"],
-  ["location", "Location"],
-  ["postTS", "Posted"],
+const columns: ColDef<string | number | boolean>[] = [
+  {
+    name: "Title",
+    getValue: (job) => job.title,
+  },
+  {
+    name: "Company",
+    getValue: (job) => job.company,
+  },
+  {
+    name: "Remote",
+    getValue: (job) => job.isRemote,
+    getDisplay: (value) => (value ? <Check /> : <X />),
+  },
+  {
+    name: "Location",
+    getValue: (job) => job.location,
+  },
+  {
+    name: "Posted",
+    getValue: (job) => job.postTS,
+    getDisplay: (value) => timePassedSince(value as number),
+  },
 ];
+
+type Col = (typeof columns)[number];
 
 interface Props {
   filters: Filters;
@@ -28,15 +51,15 @@ interface Props {
 }
 
 export const JobTable = ({ filters, onSelect }: Props) => {
-  const [orderBy, setOrderBy] = useState<ColKey>("title");
+  const [orderBy, setOrderBy] = useState<Col>(columns[0]);
   const [orderAsc, setOrderAsc] = useState<boolean>(true);
   const [selected, setSelected] = useState<string>();
 
   const { data: jobs = [], isLoading, isError } = useJobs(filters);
 
-  const handleSort = (key: ColKey) => {
-    setOrderAsc(orderBy !== key || !orderAsc);
-    setOrderBy(key);
+  const handleSort = (column: Col) => {
+    setOrderAsc(orderBy !== column || !orderAsc);
+    setOrderBy(column);
   };
 
   const handleSelect = (job: Job) => {
@@ -46,8 +69,10 @@ export const JobTable = ({ filters, onSelect }: Props) => {
 
   const sortedJobs = React.useMemo(() => {
     const comparator = (a: Job, b: Job) => {
-      if (b[orderBy] < a[orderBy]) return orderAsc ? 1 : -1;
-      if (b[orderBy] > a[orderBy]) return orderAsc ? -1 : 1;
+      const aValue = orderBy.getValue(a);
+      const bValue = orderBy.getValue(b);
+      if (aValue < bValue) return orderAsc ? 1 : -1;
+      if (aValue > bValue) return orderAsc ? -1 : 1;
       return 0;
     };
 
@@ -59,14 +84,14 @@ export const JobTable = ({ filters, onSelect }: Props) => {
       <Table>
         <TableHead>
           <TableRow>
-            {columns.map(([key, label]) => (
-              <TableCell key={key}>
+            {columns.map((column) => (
+              <TableCell key={column.name}>
                 <TableSortLabel
-                  active={orderBy === key}
-                  direction={orderBy === key && !orderAsc ? "desc" : "asc"}
-                  onClick={() => handleSort(key)}
+                  active={orderBy === column}
+                  direction={orderBy === column && !orderAsc ? "desc" : "asc"}
+                  onClick={() => handleSort(column)}
                 >
-                  {label}
+                  {column.name}
                 </TableSortLabel>
               </TableCell>
             ))}
@@ -100,11 +125,11 @@ export const JobTable = ({ filters, onSelect }: Props) => {
                   aria-checked={isSelected}
                   selected={isSelected}
                 >
-                  <TableCell>{job.title}</TableCell>
-                  <TableCell>{job.company}</TableCell>
-                  <TableCell>{job.isRemote ? <Check /> : <X />}</TableCell>
-                  <TableCell>{job.location}</TableCell>
-                  <TableCell>{timePassedSince(job.postTS)}</TableCell>
+                  {columns.map(({ name, getValue, getDisplay }) => (
+                    <TableCell key={name}>
+                      {getDisplay ? getDisplay(getValue(job)) : getValue(job)}
+                    </TableCell>
+                  ))}
                 </TableRow>
               );
             })}
