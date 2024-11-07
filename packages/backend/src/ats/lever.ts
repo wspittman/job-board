@@ -1,5 +1,4 @@
 import axios from "axios";
-import { extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
 import { config } from "../config";
 import type { Company } from "../db/models";
@@ -80,34 +79,24 @@ export class Lever implements AtsEndpoint {
       existing,
     } = splitJobs(result.data, currentIds, (job) => job.id);
 
-    const rawLocations = addedRaw.map(
-      ({ workplaceType, categories }) =>
-        `${workplaceType}: [${categories.allLocations.join("; ")}]`
-    );
-
-    const locations = await extractLocations(rawLocations);
-
-    const added = addedRaw.map((job, index) => {
-      const { isRemote, location } = locations[index] ?? {
-        // Fallback if the location extraction fails
-        isRemote:
-          job.workplaceType === "remote" ||
-          job.categories.allLocations.some((x) =>
-            x.toLowerCase().includes("remote")
-          ),
-        location: job.categories.allLocations.join(" OR "),
-      };
-
+    const added = addedRaw.map((job) => {
       return {
         id: job.id,
         companyId: company.id,
         company: company.name,
         title: job.text,
-        isRemote,
-        location,
+        isRemote:
+          job.workplaceType === "remote" ||
+          job.categories.allLocations.some((x) =>
+            x.toLowerCase().includes("remote")
+          ),
+        location: `${job.workplaceType}: [${job.categories.allLocations.join(
+          "; "
+        )}]`,
         description: job.descriptionPlain,
         postTS: new Date(job.createdAt).getTime(),
         applyUrl: job.applyUrl,
+        facets: {},
       };
     });
 

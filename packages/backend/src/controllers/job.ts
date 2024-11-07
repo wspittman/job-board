@@ -1,4 +1,6 @@
 import { SqlParameter } from "@azure/cosmos";
+import { extractFacets } from "../ai/extractFacets";
+import { extractLocations } from "../ai/extractLocation";
 import { getAts, getAtsList } from "../ats/ats";
 import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
@@ -120,12 +122,31 @@ async function crawlCompany(company: Company) {
     );
 
     console.log(`${msg}: Adding ${added.length} jobs`);
-    await batchRun(added, (job) => updateJob(job));
+    if (added.length) {
+      await fillJobs(added, company);
+      await batchRun(added, (job) => updateJob(job));
+    }
 
     console.log(`${msg}: Deleting ${removed.length} jobs`);
-    await batchRun(removed, (id) => deleteJob({ id, companyId: company.id }));
+    if (removed.length) {
+      await batchRun(removed, (id) => deleteJob({ id, companyId: company.id }));
+    }
 
     console.log(`${msg}: Ignoring ${kept} jobs`);
+  });
+}
+
+async function fillJobs(jobs: Job[], company: Company) {
+  const msg = `fillJobs(${jobs.length}, ${company.id})`;
+  return logWrap(msg, async () => {
+    const locations = await extractLocations(jobs.map((job) => job.location));
+    const facets = await extractFacets(jobs.map((job) => job.description));
+
+    jobs.forEach((job, index) => {
+      job.isRemote = locations[index]?.isRemote ?? job.isRemote;
+      job.location = locations[index]?.location ?? job.location;
+      job.facets = facets[index] ?? {};
+    });
   });
 }
 

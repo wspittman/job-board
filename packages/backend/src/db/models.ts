@@ -27,11 +27,18 @@ export interface Job {
   companyId: string;
   company: string;
   title: string;
-  isRemote: boolean;
-  location: string;
   description: string;
   postTS: number;
   applyUrl: string;
+  // Extracted values with fallbacks
+  isRemote: boolean;
+  location: string;
+  // Facets extracted from the job description
+  facets: {
+    summary?: string;
+    salary?: number;
+    experience?: number;
+  };
 }
 
 export type JobKey = Pick<Job, "id" | "companyId">;
