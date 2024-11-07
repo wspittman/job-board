@@ -37,7 +37,7 @@ export const Header = (): JSX.Element => {
   const pathSegments = location.pathname.split("/").filter(Boolean);
 
   const breadcrumbs = [
-    <HeaderLink key="home" url="/" text="Job Board" variant="h5" />,
+    <HeaderLink key="home" url="/" text="Better Job Board" variant="h5" />,
     ...pathSegments.map((segment, index) => {
       const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
       const isLast = index === pathSegments.length - 1;
