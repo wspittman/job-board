@@ -7,7 +7,10 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { Check, X } from "lucide-react";
 import React, { useState } from "react";
-import { Job } from "../services/api";
+import { PageError } from "../frame/PageError";
+import { PageLoader } from "../frame/PageLoader";
+import { Filters, Job } from "../services/api";
+import { useJobs } from "../services/apiHooks";
 
 type ColKey = Partial<keyof Job>;
 
@@ -20,14 +23,16 @@ const columns: [ColKey, string][] = [
 ];
 
 interface Props {
-  jobs: Job[];
+  filters: Filters;
   onSelect: (selected: Job) => void;
 }
 
-export const JobTable = ({ jobs, onSelect }: Props) => {
+export const JobTable = ({ filters, onSelect }: Props) => {
   const [orderBy, setOrderBy] = useState<ColKey>("title");
   const [orderAsc, setOrderAsc] = useState<boolean>(true);
   const [selected, setSelected] = useState<string>();
+
+  const { data: jobs = [], isLoading, isError } = useJobs(filters);
 
   const handleSort = (key: ColKey) => {
     setOrderAsc(orderBy !== key || !orderAsc);
@@ -68,25 +73,41 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedJobs.map((job) => {
-            const isSelected = selected === job.id;
-            return (
-              <TableRow
-                key={job.id}
-                hover
-                onClick={() => handleSelect(job)}
-                role="checkbox"
-                aria-checked={isSelected}
-                selected={isSelected}
-              >
-                <TableCell>{job.title}</TableCell>
-                <TableCell>{job.company}</TableCell>
-                <TableCell>{job.isRemote ? <Check /> : <X />}</TableCell>
-                <TableCell>{job.location}</TableCell>
-                <TableCell>{timePassedSince(job.postTS)}</TableCell>
-              </TableRow>
-            );
-          })}
+          {isLoading && (
+            <TableRow>
+              <TableCell colSpan={columns.length}>
+                <PageLoader />
+              </TableCell>
+            </TableRow>
+          )}
+          {isError && (
+            <TableRow>
+              <TableCell colSpan={columns.length}>
+                <PageError />
+              </TableCell>
+            </TableRow>
+          )}
+          {!isLoading &&
+            !isError &&
+            sortedJobs.map((job) => {
+              const isSelected = selected === job.id;
+              return (
+                <TableRow
+                  key={job.id}
+                  hover
+                  onClick={() => handleSelect(job)}
+                  role="checkbox"
+                  aria-checked={isSelected}
+                  selected={isSelected}
+                >
+                  <TableCell>{job.title}</TableCell>
+                  <TableCell>{job.company}</TableCell>
+                  <TableCell>{job.isRemote ? <Check /> : <X />}</TableCell>
+                  <TableCell>{job.location}</TableCell>
+                  <TableCell>{timePassedSince(job.postTS)}</TableCell>
+                </TableRow>
+              );
+            })}
         </TableBody>
       </Table>
     </TableContainer>
