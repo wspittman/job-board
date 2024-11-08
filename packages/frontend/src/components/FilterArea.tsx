@@ -43,17 +43,18 @@ export const FilterArea = ({
   const postSinceValue = daysSince || 0;
 
   const chipStrings = useMemo(() => {
-    return [
-      title ? `Title: ${title}` : null,
-      companyId ? `Company: ${companyValue?.label}` : null,
-      isRemote !== undefined
-        ? isRemote
-          ? "Remote"
-          : "In-Person/Hybrid"
-        : null,
-      location ? `Location: ${location}` : null,
-      daysSince ? `Posted: ${daysSince} days` : null,
-    ].filter(Boolean);
+    return Object.entries({
+      title: title ? `Title: ${title}` : null,
+      companyId: companyId ? `Company: ${companyValue?.label}` : null,
+      isRemote:
+        isRemote !== undefined
+          ? isRemote
+            ? "Remote"
+            : "In-Person/Hybrid"
+          : null,
+      location: location ? `Location: ${location}` : null,
+      daysSince: daysSince ? `Posted: At most ${daysSince} days ago` : null,
+    }).filter(([, value]) => !!value);
   }, [title, companyId, isRemote, location, daysSince, companyValue]);
 
   return (
@@ -68,8 +69,13 @@ export const FilterArea = ({
             Filters
           </Typography>
           <Box display="flex" gap={0.5} flexWrap="wrap">
-            {chipStrings.map((s) => (
-              <Chip key={s} label={s} size="small" />
+            {chipStrings.map(([key, value]) => (
+              <Chip
+                key={key}
+                label={value}
+                size="small"
+                onDelete={() => onChange({ [key]: undefined })}
+              />
             ))}
           </Box>
         </Box>
