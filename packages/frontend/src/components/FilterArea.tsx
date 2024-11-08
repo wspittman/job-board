@@ -26,6 +26,8 @@ export const FilterArea = ({
   title,
   location,
   daysSince,
+  maxExperience,
+  minSalary,
   onChange,
 }: Props) => {
   const { data: metadata } = useMetadata();
@@ -41,6 +43,8 @@ export const FilterArea = ({
   const titleValue = title || "";
   const locationValue = location || "";
   const postSinceValue = daysSince || 0;
+  const experienceValue = maxExperience || 0;
+  const salaryValue = minSalary || 0;
 
   const chipStrings = useMemo(() => {
     return Object.entries({
@@ -53,9 +57,26 @@ export const FilterArea = ({
             : "In-Person/Hybrid"
           : null,
       location: location ? `Location: ${location}` : null,
-      daysSince: daysSince ? `Posted: At most ${daysSince} days ago` : null,
+      daysSince: daysSince
+        ? `Posted: At most ${daysSince.toLocaleString()} days ago`
+        : null,
+      maxExperience: maxExperience
+        ? `Experience: At most ${maxExperience} years`
+        : null,
+      minSalary: minSalary
+        ? `Salary: At least $${minSalary.toLocaleString()}`
+        : null,
     }).filter(([, value]) => !!value);
-  }, [title, companyId, isRemote, location, daysSince, companyValue]);
+  }, [
+    title,
+    companyId,
+    isRemote,
+    location,
+    daysSince,
+    companyValue,
+    maxExperience,
+    minSalary,
+  ]);
 
   return (
     <Accordion defaultExpanded>
@@ -127,6 +148,50 @@ export const FilterArea = ({
               name="location"
               value={locationValue}
               onChange={(e) => onChange({ location: e.target.value })}
+            />
+          </Grid>
+          <Grid size={gridSize}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Minimum Salary"
+              name="salary"
+              value={salaryValue}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                onChange({
+                  minSalary: isNaN(val) || val < 0 ? undefined : val,
+                });
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">$</InputAdornment>
+                  ),
+                },
+              }}
+            />
+          </Grid>
+          <Grid size={gridSize}>
+            <TextField
+              fullWidth
+              type="number"
+              label="Maximum Experience"
+              name="experience"
+              value={experienceValue}
+              onChange={(e) => {
+                const val = parseInt(e.target.value);
+                onChange({
+                  maxExperience: isNaN(val) || val < 0 ? undefined : val,
+                });
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">years</InputAdornment>
+                  ),
+                },
+              }}
             />
           </Grid>
           <Grid size={gridSize}>

@@ -36,6 +36,8 @@ export interface Filters {
   location?: string;
   // Range Match
   daysSince?: number;
+  maxExperience?: number;
+  minSalary?: number;
 }
 
 export const api = axios.create({
