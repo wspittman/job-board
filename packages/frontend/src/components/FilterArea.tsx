@@ -60,9 +60,10 @@ export const FilterArea = ({
       daysSince: daysSince
         ? `Posted: At most ${daysSince.toLocaleString()} days ago`
         : null,
-      maxExperience: maxExperience
-        ? `Experience: At most ${maxExperience} years`
-        : null,
+      maxExperience:
+        maxExperience != null
+          ? `Experience: ${maxExperience} years or less`
+          : null,
       minSalary: minSalary
         ? `Salary: At least $${minSalary.toLocaleString()}`
         : null,
@@ -176,7 +177,7 @@ export const FilterArea = ({
             <TextField
               fullWidth
               type="number"
-              label="Maximum Experience"
+              label="Maximum Required Experience"
               name="experience"
               value={experienceValue}
               onChange={(e) => {

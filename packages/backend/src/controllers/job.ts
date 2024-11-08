@@ -45,15 +45,15 @@ function validateFilters({
     filters.companyId = companyId;
   }
 
-  if (isRemote) {
-    filters.isRemote = isRemote === "true";
+  if (isRemote != null) {
+    filters.isRemote = isRemote.toLowerCase() === "true";
   }
 
-  if (title) {
+  if (title?.length > 2) {
     filters.title = title;
   }
 
-  if (location) {
+  if (location?.length > 2) {
     filters.location = location;
   }
 
@@ -65,7 +65,7 @@ function validateFilters({
     }
   }
 
-  if (maxExperience) {
+  if (maxExperience != null) {
     const value = parseInt(maxExperience);
     if (Number.isFinite(value) && value >= 0 && value <= 100) {
       filters.maxExperience = value;
@@ -205,13 +205,17 @@ async function readJobsByFilters({
     parameters.push({ name: "@sinceTS", value: sinceTS });
   }
 
-  if (maxExperience) {
-    whereClauses.push("c.facets.experience <= @maxExperience");
+  if (maxExperience != null) {
+    whereClauses.push(
+      "(NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience)"
+    );
     parameters.push({ name: "@maxExperience", value: maxExperience });
   }
 
   if (minSalary) {
-    whereClauses.push("c.facets.salary >= @minSalary");
+    whereClauses.push(
+      "(NOT IS_DEFINED(c.facets.salary) OR c.facets.salary >= @minSalary)"
+    );
     parameters.push({ name: "@minSalary", value: minSalary });
   }
 

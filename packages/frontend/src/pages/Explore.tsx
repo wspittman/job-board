@@ -47,6 +47,8 @@ export const Explore = () => {
       title: getVal("title"),
       location: getVal("location"),
       daysSince: Number(getVal("daysSince")) || undefined,
+      maxExperience: Number(getVal("maxExperience")) || undefined,
+      minSalary: Number(getVal("minSalary")) || undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
