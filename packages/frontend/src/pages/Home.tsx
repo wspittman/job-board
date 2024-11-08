@@ -1,9 +1,9 @@
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { Briefcase, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -84,6 +84,7 @@ export const Home = () => {
                 <Chip
                   key={query}
                   label={label}
+                  color="primary"
                   onClick={() => navigate(`/explore?${query}`)}
                   clickable
                 />
@@ -92,12 +93,13 @@ export const Home = () => {
             <Typography variant="h5" color="text.secondary" gutterBottom>
               Or start from scratch
             </Typography>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Search for jobs..."
-              disabled
-            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => navigate("/explore")}
+            >
+              Explore
+            </Button>
           </Paper>
           <Grid
             container
