@@ -22,6 +22,8 @@ interface Filters {
   location?: string;
   // Range Match
   daysSince?: number;
+  maxExperience?: number;
+  minSalary?: number;
 }
 
 interface CrawlOptions {
@@ -34,6 +36,8 @@ function validateFilters({
   title,
   location,
   daysSince,
+  maxExperience,
+  minSalary,
 }: Record<string, string>): Filters {
   const filters: Filters = {};
 
@@ -58,6 +62,20 @@ function validateFilters({
 
     if (Number.isFinite(value) && value >= 1 && value <= 365) {
       filters.daysSince = value;
+    }
+  }
+
+  if (maxExperience) {
+    const value = parseInt(maxExperience);
+    if (Number.isFinite(value) && value >= 0 && value <= 100) {
+      filters.maxExperience = value;
+    }
+  }
+
+  if (minSalary) {
+    const value = parseInt(minSalary);
+    if (Number.isFinite(value) && value >= 1 && value <= 10000000) {
+      filters.minSalary = value;
     }
   }
 
@@ -158,6 +176,8 @@ async function readJobsByFilters({
   title,
   location,
   daysSince,
+  maxExperience,
+  minSalary,
 }: Filters) {
   /*
   Where clauses should ideally be ordered by
@@ -183,6 +203,16 @@ async function readJobsByFilters({
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
     whereClauses.push("c.postTS >= @sinceTS");
     parameters.push({ name: "@sinceTS", value: sinceTS });
+  }
+
+  if (maxExperience) {
+    whereClauses.push("c.facets.experience <= @maxExperience");
+    parameters.push({ name: "@maxExperience", value: maxExperience });
+  }
+
+  if (minSalary) {
+    whereClauses.push("c.facets.salary >= @minSalary");
+    parameters.push({ name: "@minSalary", value: minSalary });
   }
 
   if (title) {
