@@ -65,33 +65,34 @@ export const Explore = () => {
   }, [debouncedFilters, searchParams, setSearchParams]);
 
   return (
-    <Stack sx={{ overflow: "hidden" }}>
+    <Stack spacing={2} sx={{ overflow: "hidden" }}>
       {isLoading && <PageLoader />}
       {isError && <PageError />}
 
       {!isLoading && !isError && (
         <>
-          <Box sx={{ display: { xs: "block", sm: "none" }, m: 1 }}>
-            <Button onClick={toggleFilterOpen} fullWidth variant="outlined">
-              Show Filters
-            </Button>
-          </Box>
+          <Button
+            onClick={toggleFilterOpen}
+            fullWidth
+            variant="outlined"
+            sx={{ display: { xs: "block", sm: "none" } }}
+          >
+            Show Filters
+          </Button>
 
-          <Box mb={2} sx={{ display: { xs: "none", sm: "block" } }}>
+          <Box display={{ xs: "none", sm: "block" }}>
             <FilterArea {...filters} onChange={updateFilters} />
           </Box>
 
-          <Box gap={2} sx={{ display: "flex", overflow: "hidden" }}>
+          <Box gap={2} display="flex" overflow="hidden">
             <Box sx={{ flexGrow: 1, overflow: "auto" }}>
               <JobTable filters={debouncedFilters} onSelect={setSelectedJob} />
             </Box>
             {selectedJob && (
               <Box
-                sx={{
-                  display: { xs: "none", sm: "block" },
-                  width: "50%",
-                  overflow: "auto",
-                }}
+                display={{ xs: "none", sm: "block" }}
+                width="50%"
+                overflow="auto"
               >
                 <JobCard job={selectedJob} />
               </Box>
