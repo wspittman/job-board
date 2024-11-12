@@ -77,11 +77,11 @@ export const Explore = () => {
             </Button>
           </Box>
 
-          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+          <Box mb={2} sx={{ display: { xs: "none", sm: "block" } }}>
             <FilterArea {...filters} onChange={updateFilters} />
           </Box>
 
-          <Box sx={{ display: "flex", overflow: "hidden" }}>
+          <Box gap={2} sx={{ display: "flex", overflow: "hidden" }}>
             <Box sx={{ flexGrow: 1, overflow: "auto" }}>
               <JobTable filters={debouncedFilters} onSelect={setSelectedJob} />
             </Box>

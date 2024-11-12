@@ -9,7 +9,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { ChevronsDown } from "lucide-react";
+import { ChevronsDown, X } from "lucide-react";
 import { useMemo } from "react";
 import { Filters } from "../services/api";
 import { useMetadata } from "../services/apiHooks";
@@ -87,7 +87,7 @@ export const FilterArea = ({
         id="filter-header"
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography variant="h6" fontWeight="bold" color="primary.main">
+          <Typography variant="h4" fontWeight="bold" color="primary.main">
             Filters
           </Typography>
           <Box display="flex" gap={0.5} flexWrap="wrap">
@@ -97,6 +97,7 @@ export const FilterArea = ({
                 label={value}
                 size="small"
                 onDelete={() => onChange({ [key]: undefined })}
+                deleteIcon={<X size="18" color="white" />}
               />
             ))}
           </Box>

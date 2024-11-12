@@ -37,13 +37,13 @@ export const Header = (): JSX.Element => {
   const pathSegments = location.pathname.split("/").filter(Boolean);
 
   const breadcrumbs = [
-    <HeaderLink key="home" url="/" text="Better Job Board" variant="h5" />,
+    <HeaderLink key="home" url="/" text="Better Job Board" variant="h4" />,
     ...pathSegments.map((segment, index) => {
       const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
       const isLast = index === pathSegments.length - 1;
 
       return isLast ? (
-        <Typography variant="h6" color="white" key={url}>
+        <Typography variant="h5" color="white" key={url}>
           {segment.charAt(0).toUpperCase() + segment.slice(1)}
         </Typography>
       ) : (
@@ -51,7 +51,7 @@ export const Header = (): JSX.Element => {
           key={url}
           url={url}
           text={segment.charAt(0).toUpperCase() + segment.slice(1)}
-          variant="h6"
+          variant="h5"
         />
       );
     }),
@@ -62,7 +62,7 @@ export const Header = (): JSX.Element => {
       <Toolbar variant="dense">
         <Breadcrumbs aria-label="breadcrumb">{breadcrumbs}</Breadcrumbs>
         <Box sx={{ flexGrow: 1 }} />
-        <HeaderLink url="/about" text="About" variant="h6" />
+        <HeaderLink url="/about" text="About" variant="h5" />
         <HeaderLink url="/explore" text="Explore" variant="h5" />
       </Toolbar>
     </AppBar>

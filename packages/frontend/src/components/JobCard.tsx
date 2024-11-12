@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { Building, Calendar, MapPin } from "lucide-react";
 import { Job } from "../services/api";
@@ -16,7 +17,7 @@ interface Props {
 
 export const JobCard = ({ job }: Props) => {
   return (
-    <Box sx={{ m: 2 }}>
+    <Paper sx={{ p: 2 }}>
       <Box
         sx={{
           display: "flex",
@@ -25,20 +26,16 @@ export const JobCard = ({ job }: Props) => {
         }}
       >
         <Box>
-          <Typography variant="h5">{job.title}</Typography>
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            sx={iconTextStyle}
-          >
+          <Typography variant="h4">{job.title}</Typography>
+          <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
             <Building />
             {job.company}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={iconTextStyle}>
+          <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
             <MapPin />
             {job.location}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={iconTextStyle}>
+          <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
             <Calendar />
             {new Date(job.postTS).toLocaleDateString()}
           </Typography>
@@ -46,6 +43,7 @@ export const JobCard = ({ job }: Props) => {
         <Box>
           <Button
             variant="contained"
+            size="large"
             href={job.applyUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -57,6 +55,6 @@ export const JobCard = ({ job }: Props) => {
       <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
         {job.description}
       </Typography>
-    </Box>
+    </Paper>
   );
 };

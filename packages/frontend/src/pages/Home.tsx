@@ -36,10 +36,9 @@ export const Home = () => {
   return (
     <Container maxWidth="lg">
       <Typography
-        variant="h3"
-        component="h1"
+        variant="h1"
         fontWeight="bold"
-        color="primary.main"
+        color="primary"
         align="center"
         gutterBottom
         marginTop={8}
@@ -47,7 +46,7 @@ export const Home = () => {
         Stop scrolling. Start finding.
       </Typography>
       <Typography
-        variant="h5"
+        variant="h4"
         color="text.secondary"
         align="center"
         gutterBottom
@@ -70,7 +69,7 @@ export const Home = () => {
               mx: "auto",
             }}
           >
-            <Typography variant="h5" color="text.secondary" gutterBottom>
+            <Typography variant="h4" color="text.secondary" gutterBottom>
               Start from an example search
             </Typography>
             <Box
@@ -84,18 +83,17 @@ export const Home = () => {
                 <Chip
                   key={query}
                   label={label}
-                  color="primary"
                   onClick={() => navigate(`/explore?${query}`)}
                   clickable
                 />
               ))}
             </Box>
-            <Typography variant="h5" color="text.secondary" gutterBottom>
+            <Typography variant="h4" color="text.secondary" gutterBottom>
               Or start from scratch
             </Typography>
             <Button
               variant="contained"
-              color="primary"
+              size="large"
               onClick={() => navigate("/explore")}
             >
               Explore

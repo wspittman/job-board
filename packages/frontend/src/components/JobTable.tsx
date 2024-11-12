@@ -1,3 +1,4 @@
+import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -94,62 +95,64 @@ export const JobTable = ({ filters, onSelect }: Props) => {
   }, [jobs, orderAsc, orderBy]);
 
   return (
-    <TableContainer>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell key={column.name}>
-                <TableSortLabel
-                  active={orderBy === column}
-                  direction={orderBy === column && !orderAsc ? "desc" : "asc"}
-                  onClick={() => handleSort(column)}
-                >
-                  {column.name}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {isLoading && (
+    <Paper>
+      <TableContainer>
+        <Table>
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={columns.length}>
-                <PageLoader />
-              </TableCell>
+              {columns.map((column) => (
+                <TableCell key={column.name}>
+                  <TableSortLabel
+                    active={orderBy === column}
+                    direction={orderBy === column && !orderAsc ? "desc" : "asc"}
+                    onClick={() => handleSort(column)}
+                  >
+                    {column.name}
+                  </TableSortLabel>
+                </TableCell>
+              ))}
             </TableRow>
-          )}
-          {isError && (
-            <TableRow>
-              <TableCell colSpan={columns.length}>
-                <PageError />
-              </TableCell>
-            </TableRow>
-          )}
-          {!isLoading &&
-            !isError &&
-            sortedJobs.map((job) => {
-              const isSelected = selected === job.id;
-              return (
-                <TableRow
-                  key={job.id}
-                  hover
-                  onClick={() => handleSelect(job)}
-                  role="checkbox"
-                  aria-checked={isSelected}
-                  selected={isSelected}
-                >
-                  {columns.map(({ name, getValue, getDisplay }) => (
-                    <TableCell key={name}>
-                      {getDisplay ? getDisplay(getValue(job)) : getValue(job)}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={columns.length}>
+                  <PageLoader />
+                </TableCell>
+              </TableRow>
+            )}
+            {isError && (
+              <TableRow>
+                <TableCell colSpan={columns.length}>
+                  <PageError />
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading &&
+              !isError &&
+              sortedJobs.map((job) => {
+                const isSelected = selected === job.id;
+                return (
+                  <TableRow
+                    key={job.id}
+                    hover
+                    onClick={() => handleSelect(job)}
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    selected={isSelected}
+                  >
+                    {columns.map(({ name, getValue, getDisplay }) => (
+                      <TableCell key={name}>
+                        {getDisplay ? getDisplay(getValue(job)) : getValue(job)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 };
 

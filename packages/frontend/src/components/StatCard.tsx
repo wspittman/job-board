@@ -24,8 +24,8 @@ export const StatCard = ({ icon: Icon, value, label }: StatCardProps) => {
       }}
     >
       <Icon size={40} color={theme.palette.primary.main} />
-      <Typography variant="h4">{value.toLocaleString()}</Typography>
-      <Typography variant="h6" color="text.secondary">
+      <Typography variant="h2">{value.toLocaleString()}</Typography>
+      <Typography variant="h4" color="text.secondary">
         {label}
       </Typography>
     </Paper>
