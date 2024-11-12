@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
 import Drawer from "@mui/material/Drawer";
+import Stack from "@mui/material/Stack";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FilterArea } from "../components/FilterArea";
@@ -65,7 +65,7 @@ export const Explore = () => {
   }, [debouncedFilters, searchParams, setSearchParams]);
 
   return (
-    <Container maxWidth={false}>
+    <Stack sx={{ overflow: "hidden" }}>
       {isLoading && <PageLoader />}
       {isError && <PageError />}
 
@@ -121,6 +121,6 @@ export const Explore = () => {
           </Drawer>
         </>
       )}
-    </Container>
+    </Stack>
   );
 };
