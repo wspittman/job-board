@@ -99,14 +99,7 @@ export const Home = () => {
               Explore
             </Button>
           </Paper>
-          <Grid
-            container
-            spacing={4}
-            sx={{
-              maxWidth: "md",
-              mx: "auto",
-            }}
-          >
+          <Grid container spacing={4} maxWidth="md" marginX="auto">
             <Grid size={gridSize}>
               <StatCard
                 icon={Briefcase}

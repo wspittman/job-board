@@ -65,7 +65,7 @@ export const Explore = () => {
   }, [debouncedFilters, searchParams, setSearchParams]);
 
   return (
-    <Stack spacing={2} sx={{ overflow: "hidden" }}>
+    <Stack spacing={2} overflow="hidden">
       {isLoading && <PageLoader />}
       {isError && <PageError />}
 
@@ -85,7 +85,7 @@ export const Explore = () => {
           </Box>
 
           <Box gap={2} display="flex" overflow="hidden">
-            <Box sx={{ flexGrow: 1, overflow: "auto" }}>
+            <Box flexGrow={1} overflow="auto">
               <JobTable filters={debouncedFilters} onSelect={setSelectedJob} />
             </Box>
             {selectedJob && (

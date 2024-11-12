@@ -17,13 +17,11 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              height: "100vh",
-              margin: "-8px",
-              bgcolor: "background.default",
-            }}
+            display="flex"
+            flexDirection="column"
+            height="100vh"
+            margin="-8px"
+            bgcolor="background.default"
           >
             <Header />
             <Routes>

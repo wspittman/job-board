@@ -22,7 +22,8 @@ const HeaderLink = ({ url, text, variant }: HeaderLinkProps) => {
         e.preventDefault();
         navigate(url);
       }}
-      sx={{ cursor: "pointer", mx: 1 }}
+      marginX={1}
+      sx={{ cursor: "pointer" }}
     >
       {text}
     </Link>
@@ -34,7 +35,7 @@ export const Header = (): JSX.Element => {
     <AppBar position="sticky">
       <Toolbar variant="dense">
         <HeaderLink url="/" text="Better Job Board" variant="h4" />
-        <Box sx={{ flexGrow: 1 }} />
+        <Box flexGrow={1} />
         <HeaderLink url="/about" text="About" variant="h5" />
         <HeaderLink url="/explore" text="Explore" variant="h5" />
       </Toolbar>

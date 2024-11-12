@@ -18,13 +18,7 @@ interface Props {
 export const JobCard = ({ job }: Props) => {
   return (
     <Paper sx={{ p: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          mb: 2,
-        }}
-      >
+      <Box display="flex" justifyContent="space-between" marginBottom={2}>
         <Box>
           <Typography variant="h4">{job.title}</Typography>
           <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
@@ -52,7 +46,7 @@ export const JobCard = ({ job }: Props) => {
           </Button>
         </Box>
       </Box>
-      <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+      <Typography variant="body2" whiteSpace="pre-wrap">
         {job.description}
       </Typography>
     </Paper>
