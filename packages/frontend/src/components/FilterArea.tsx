@@ -62,7 +62,7 @@ export const FilterArea = ({
         : null,
       maxExperience:
         maxExperience != null
-          ? `Experience: ${maxExperience} years or less`
+          ? `Experience: I have ${maxExperience} years`
           : null,
       minSalary: minSalary
         ? `Salary: At least $${minSalary.toLocaleString()}`
@@ -178,7 +178,7 @@ export const FilterArea = ({
             <TextField
               fullWidth
               type="number"
-              label="Maximum Required Experience"
+              label="Required Experience"
               name="experience"
               value={experienceValue}
               onChange={(e) => {
@@ -189,8 +189,15 @@ export const FilterArea = ({
               }}
               slotProps={{
                 input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      I have at least
+                    </InputAdornment>
+                  ),
                   endAdornment: (
-                    <InputAdornment position="end">years</InputAdornment>
+                    <InputAdornment position="end">
+                      years experience
+                    </InputAdornment>
                   ),
                 },
               }}
