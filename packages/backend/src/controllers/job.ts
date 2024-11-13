@@ -206,6 +206,7 @@ async function readJobsByFilters({
   }
 
   if (maxExperience != null) {
+    // If undefined: include, since we can't yet distinguish between entry level and absent
     whereClauses.push(
       "(NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience)"
     );
@@ -213,9 +214,8 @@ async function readJobsByFilters({
   }
 
   if (minSalary) {
-    whereClauses.push(
-      "(NOT IS_DEFINED(c.facets.salary) OR c.facets.salary >= @minSalary)"
-    );
+    // If undefined: exclude
+    whereClauses.push("c.facets.salary >= @minSalary");
     parameters.push({ name: "@minSalary", value: minSalary });
   }
 
@@ -225,7 +225,10 @@ async function readJobsByFilters({
   }
 
   if (location) {
-    whereClauses.push("CONTAINS(LOWER(c.location), @location)");
+    // Remote + empty location always matches
+    whereClauses.push(
+      '((c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location))'
+    );
     parameters.push({ name: "@location", value: location.toLowerCase() });
   }
 

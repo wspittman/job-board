@@ -79,7 +79,7 @@ export async function query<T>(
 }
 
 function stripItem<T>(entry: Item): T {
-  const { _rid, _self, _etag, _attachments, _ts, ...rest } = entry;
+  const { _rid, _self, _etag, _attachments, ...rest } = entry;
   return rest as T;
 }
 
