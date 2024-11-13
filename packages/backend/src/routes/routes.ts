@@ -23,7 +23,7 @@ router.put("/companies", validateAdmin, jsonWrapper(addCompanies));
 router.delete("/company", validateAdmin, jsonWrapper(removeCompany));
 
 router.get("/jobs", jsonWrapper(getJobs));
-router.post("/jobs", validateAdmin, jsonWrapper(addJobs));
+router.post("/jobs", validateAdmin, asyncWrapper(addJobs));
 router.delete("/job", validateAdmin, jsonWrapper(removeJob));
 
 router.get("/metadata", jsonWrapper(getMetadata));
@@ -33,6 +33,18 @@ function jsonWrapper(fn: (input: any) => Promise<unknown>) {
     try {
       const result = (await fn(res.locals.input)) ?? { status: "success" };
       res.json(result);
+    } catch (error: any) {
+      next(error);
+    }
+  };
+}
+
+function asyncWrapper(fn: (input: any) => Promise<unknown>) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.writeHead(202, { "Content-Type": "text/plain" });
+      res.end("Accepted");
+      await fn(res.locals.input);
     } catch (error: any) {
       next(error);
     }

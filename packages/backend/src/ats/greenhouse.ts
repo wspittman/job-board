@@ -1,5 +1,4 @@
 import axios from "axios";
-import { extractLocations } from "../ai/ai";
 import { config } from "../config";
 import type { Company } from "../db/models";
 import { checkStatus } from "../utils/axios";
@@ -80,26 +79,18 @@ export class Greenhouse implements AtsEndpoint {
       existing,
     } = splitJobs(result.data.jobs, currentIds, (job) => job.id.toString());
 
-    const rawLocations = addedRaw.map((job) => job.location.name);
-    const locations = await extractLocations(rawLocations);
-
-    const added = addedRaw.map((job, index) => {
-      const { isRemote, location } = locations[index] ?? {
-        // Fallback if the location extraction fails
-        isRemote: job.location.name.toLowerCase().includes("remote"),
-        location: job.location.name,
-      };
-
+    const added = addedRaw.map((job) => {
       return {
         id: job.id.toString(),
         companyId: company.id,
         company: company.name,
         title: job.title,
-        isRemote,
-        location,
+        isRemote: job.location.name.toLowerCase().includes("remote"),
+        location: job.location.name,
         description: removeHtml(job.content),
         postTS: new Date(job.updated_at).getTime(),
         applyUrl: job.absolute_url,
+        facets: {},
       };
     });
 

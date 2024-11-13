@@ -1,4 +1,6 @@
 import { SqlParameter } from "@azure/cosmos";
+import { extractFacets } from "../ai/extractFacets";
+import { extractLocations } from "../ai/extractLocation";
 import { getAts, getAtsList } from "../ats/ats";
 import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
@@ -20,6 +22,8 @@ interface Filters {
   location?: string;
   // Range Match
   daysSince?: number;
+  maxExperience?: number;
+  minSalary?: number;
 }
 
 interface CrawlOptions {
@@ -32,6 +36,8 @@ function validateFilters({
   title,
   location,
   daysSince,
+  maxExperience,
+  minSalary,
 }: Record<string, string>): Filters {
   const filters: Filters = {};
 
@@ -39,15 +45,15 @@ function validateFilters({
     filters.companyId = companyId;
   }
 
-  if (isRemote) {
-    filters.isRemote = isRemote === "true";
+  if (isRemote != null) {
+    filters.isRemote = isRemote.toLowerCase() === "true";
   }
 
-  if (title) {
+  if (title?.length > 2) {
     filters.title = title;
   }
 
-  if (location) {
+  if (location?.length > 2) {
     filters.location = location;
   }
 
@@ -56,6 +62,20 @@ function validateFilters({
 
     if (Number.isFinite(value) && value >= 1 && value <= 365) {
       filters.daysSince = value;
+    }
+  }
+
+  if (maxExperience != null) {
+    const value = parseInt(maxExperience);
+    if (Number.isFinite(value) && value >= 0 && value <= 100) {
+      filters.maxExperience = value;
+    }
+  }
+
+  if (minSalary) {
+    const value = parseInt(minSalary);
+    if (Number.isFinite(value) && value >= 1 && value <= 10000000) {
+      filters.minSalary = value;
     }
   }
 
@@ -120,12 +140,31 @@ async function crawlCompany(company: Company) {
     );
 
     console.log(`${msg}: Adding ${added.length} jobs`);
-    await batchRun(added, (job) => updateJob(job));
+    if (added.length) {
+      await fillJobs(added, company);
+      await batchRun(added, (job) => updateJob(job));
+    }
 
     console.log(`${msg}: Deleting ${removed.length} jobs`);
-    await batchRun(removed, (id) => deleteJob({ id, companyId: company.id }));
+    if (removed.length) {
+      await batchRun(removed, (id) => deleteJob({ id, companyId: company.id }));
+    }
 
     console.log(`${msg}: Ignoring ${kept} jobs`);
+  });
+}
+
+async function fillJobs(jobs: Job[], company: Company) {
+  const msg = `fillJobs(${jobs.length}, ${company.id})`;
+  return logWrap(msg, async () => {
+    const locations = await extractLocations(jobs.map((job) => job.location));
+    const facets = await extractFacets(jobs.map((job) => job.description));
+
+    jobs.forEach((job, index) => {
+      job.isRemote = locations[index]?.isRemote ?? job.isRemote;
+      job.location = locations[index]?.location ?? job.location;
+      job.facets = facets[index] ?? {};
+    });
   });
 }
 
@@ -137,6 +176,8 @@ async function readJobsByFilters({
   title,
   location,
   daysSince,
+  maxExperience,
+  minSalary,
 }: Filters) {
   /*
   Where clauses should ideally be ordered by
@@ -164,14 +205,31 @@ async function readJobsByFilters({
     parameters.push({ name: "@sinceTS", value: sinceTS });
   }
 
+  if (maxExperience != null) {
+    // If undefined: include, since we can't yet distinguish between entry level and absent
+    whereClauses.push(
+      "(NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience)"
+    );
+    parameters.push({ name: "@maxExperience", value: maxExperience });
+  }
+
+  if (minSalary) {
+    // If undefined: exclude
+    whereClauses.push("c.facets.salary >= @minSalary");
+    parameters.push({ name: "@minSalary", value: minSalary });
+  }
+
   if (title) {
-    whereClauses.push("CONTAINS(c.title, @title)");
-    parameters.push({ name: "@title", value: title });
+    whereClauses.push("CONTAINS(LOWER(c.title), @title)");
+    parameters.push({ name: "@title", value: title.toLowerCase() });
   }
 
   if (location) {
-    whereClauses.push("CONTAINS(c.location, @location)");
-    parameters.push({ name: "@location", value: location });
+    // Remote + empty location always matches
+    whereClauses.push(
+      '((c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location))'
+    );
+    parameters.push({ name: "@location", value: location.toLowerCase() });
   }
 
   const where = whereClauses.join(" AND ");

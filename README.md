@@ -56,86 +56,18 @@ npm run start:backend
 npm run start:frontend
 ```
 
-## In-Progress Screenshot
+## In-Progress Screenshots
 
-A screenshot of the current UI. We have a ways to go.
+Screenshot of the current UI. We have a ways to go.
 
-![An in-progress screenshot from 9/30/24](screenshots/InProgress_9_30_24.png)
+### Home Page
 
-## API Reference
+![Home page from 11/13/24](screenshots/InProgress_11_13_24_Home.png)
 
-### `GET /`
+### Explore Page
 
-Health check. Verify the API is running.
+![Explore page from 11/13/24](screenshots/InProgress_11_13_24_Explore.png)
 
-**Response:** Plain text `"API is working"`
+### About Page
 
-### `GET /metadata`
-
-Retrieve metadata about the job board, including company and job counts.
-
-**Response**
-
-```json
-{
-  "id": "metadata",
-  "companyCount": 123,
-  "companyNames": [
-    ["company1_id", "Company 1 Name"],
-    ["company2_id", "Company 2 Name"]
-  ],
-  "jobCount": 456
-}
-```
-
-### `GET /jobs`
-
-Retrieve jobs based on specified filters.
-
-**Query Parameters:**
-
-- `companyId` (optional): Filter by company ID
-- `isRemote` (optional): Filter by remote status (true/false)
-- `title` (optional): Filter by job title (substring match)
-- `location` (optional): Filter by job location (substring match)
-
-**Response**
-
-```json
-[
-  {
-    "id": "job123",
-    "companyId": "company1",
-    "company": "Company 1 Name",
-    "title": "Software Engineer",
-    "isRemote": true,
-    "location": "New York, NY",
-    "description": "Job description here...",
-    "postDate": "2023-09-27",
-    "applyUrl": "https://example.com/apply/job123"
-  }
-]
-```
-
-**Note:** If no filters are provided, an empty array will be returned.
-
-### `POST /jobs`
-
-Trigger a job crawl and metadata renewal
-
-**Response:** Plain text `"Success"`
-
-### `PUT /company`
-
-Add a new company to the job board.
-
-**Request Body:**
-
-```json
-{
-  "id": "company_id",
-  "ats": "ATS_NAME"
-}
-```
-
-**Response:** Plain text `"Success"`
+![About page from 11/13/24](screenshots/InProgress_11_13_24_About.png)

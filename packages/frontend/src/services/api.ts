@@ -12,12 +12,19 @@ export interface Job {
   id: string;
   companyId: string;
   company: string;
-  isRemote: boolean;
-  location: string;
   title: string;
   description: string;
   postTS: number;
   applyUrl: string;
+  // Extracted values with fallbacks
+  isRemote: boolean;
+  location: string;
+  // Facets extracted from the job description
+  facets?: {
+    summary?: string;
+    salary?: number;
+    experience?: number;
+  };
 }
 
 export interface Filters {
@@ -29,6 +36,8 @@ export interface Filters {
   location?: string;
   // Range Match
   daysSince?: number;
+  maxExperience?: number;
+  minSalary?: number;
 }
 
 export const api = axios.create({

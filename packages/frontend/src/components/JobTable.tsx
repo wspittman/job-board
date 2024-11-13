@@ -1,3 +1,4 @@
+import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -7,31 +8,73 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import { Check, X } from "lucide-react";
 import React, { useState } from "react";
-import { Job } from "../services/api";
+import { PageError } from "../frame/PageError";
+import { PageLoader } from "../frame/PageLoader";
+import { Filters, Job } from "../services/api";
+import { useJobs } from "../services/apiHooks";
 
-type ColKey = Partial<keyof Job>;
+interface ColDef<T> {
+  name: string;
+  getValue: (job: Job) => T;
+  getDisplay?: (value: T) => string | React.ReactNode;
+}
 
-const columns: [ColKey, string][] = [
-  ["title", "Title"],
-  ["company", "Company"],
-  ["isRemote", "Remote"],
-  ["location", "Location"],
-  ["postTS", "Posted"],
+const columns: ColDef<string | number | boolean>[] = [
+  {
+    name: "Title",
+    getValue: (job) => job.title,
+  },
+  {
+    name: "Company",
+    getValue: (job) => job.company,
+  },
+  {
+    name: "Summary",
+    getValue: (job) => job.facets?.summary ?? "",
+  },
+  {
+    name: "Remote",
+    getValue: (job) => job.isRemote,
+    getDisplay: (value) => (value ? <Check /> : <X />),
+  },
+  {
+    name: "Location",
+    getValue: (job) => job.location,
+  },
+  {
+    name: "Experience",
+    getValue: (job) => job.facets?.experience ?? 0,
+    getDisplay: (value) => (value ? `${value} years` : ""),
+  },
+  {
+    name: "Salary",
+    getValue: (job) => job.facets?.salary ?? 0,
+    getDisplay: (value) => (value ? `$${value}` : ""),
+  },
+  {
+    name: "Posted",
+    getValue: (job) => job.postTS,
+    getDisplay: (value) => timePassedSince(value as number),
+  },
 ];
 
+type Col = (typeof columns)[number];
+
 interface Props {
-  jobs: Job[];
+  filters: Filters;
   onSelect: (selected: Job) => void;
 }
 
-export const JobTable = ({ jobs, onSelect }: Props) => {
-  const [orderBy, setOrderBy] = useState<ColKey>("title");
+export const JobTable = ({ filters, onSelect }: Props) => {
+  const [orderBy, setOrderBy] = useState<Col>(columns[0]);
   const [orderAsc, setOrderAsc] = useState<boolean>(true);
   const [selected, setSelected] = useState<string>();
 
-  const handleSort = (key: ColKey) => {
-    setOrderAsc(orderBy !== key || !orderAsc);
-    setOrderBy(key);
+  const { data: jobs = [], isLoading, isError } = useJobs(filters);
+
+  const handleSort = (column: Col) => {
+    setOrderAsc(orderBy !== column || !orderAsc);
+    setOrderBy(column);
   };
 
   const handleSelect = (job: Job) => {
@@ -41,8 +84,10 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
 
   const sortedJobs = React.useMemo(() => {
     const comparator = (a: Job, b: Job) => {
-      if (b[orderBy] < a[orderBy]) return orderAsc ? 1 : -1;
-      if (b[orderBy] > a[orderBy]) return orderAsc ? -1 : 1;
+      const aValue = orderBy.getValue(a);
+      const bValue = orderBy.getValue(b);
+      if (aValue < bValue) return orderAsc ? 1 : -1;
+      if (aValue > bValue) return orderAsc ? -1 : 1;
       return 0;
     };
 
@@ -50,46 +95,64 @@ export const JobTable = ({ jobs, onSelect }: Props) => {
   }, [jobs, orderAsc, orderBy]);
 
   return (
-    <TableContainer>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {columns.map(([key, label]) => (
-              <TableCell key={key}>
-                <TableSortLabel
-                  active={orderBy === key}
-                  direction={orderBy === key && !orderAsc ? "desc" : "asc"}
-                  onClick={() => handleSort(key)}
-                >
-                  {label}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sortedJobs.map((job) => {
-            const isSelected = selected === job.id;
-            return (
-              <TableRow
-                key={job.id}
-                hover
-                onClick={() => handleSelect(job)}
-                role="checkbox"
-                aria-checked={isSelected}
-                selected={isSelected}
-              >
-                <TableCell>{job.title}</TableCell>
-                <TableCell>{job.company}</TableCell>
-                <TableCell>{job.isRemote ? <Check /> : <X />}</TableCell>
-                <TableCell>{job.location}</TableCell>
-                <TableCell>{timePassedSince(job.postTS)}</TableCell>
+    <Paper>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell key={column.name}>
+                  <TableSortLabel
+                    active={orderBy === column}
+                    direction={orderBy === column && !orderAsc ? "desc" : "asc"}
+                    onClick={() => handleSort(column)}
+                  >
+                    {column.name}
+                  </TableSortLabel>
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={columns.length}>
+                  <PageLoader />
+                </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            )}
+            {isError && (
+              <TableRow>
+                <TableCell colSpan={columns.length}>
+                  <PageError />
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading &&
+              !isError &&
+              sortedJobs.map((job) => {
+                const isSelected = selected === job.id;
+                return (
+                  <TableRow
+                    key={job.id}
+                    hover
+                    onClick={() => handleSelect(job)}
+                    role="checkbox"
+                    aria-checked={isSelected}
+                    selected={isSelected}
+                  >
+                    {columns.map(({ name, getValue, getDisplay }) => (
+                      <TableCell key={name}>
+                        {getDisplay ? getDisplay(getValue(job)) : getValue(job)}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 };
 

@@ -1,13 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchJobs, fetchMetadata, Filters, ping } from "./api";
-
-export function usePing() {
-  return useQuery({
-    queryKey: ["ping"],
-    queryFn: ping,
-    staleTime: Infinity,
-  });
-}
+import { fetchJobs, fetchMetadata, Filters } from "./api";
 
 export function useMetadata() {
   return useQuery({
