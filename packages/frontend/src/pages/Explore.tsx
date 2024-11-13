@@ -75,7 +75,10 @@ export const Explore = () => {
             onClick={toggleFilterOpen}
             fullWidth
             variant="outlined"
-            sx={{ display: { xs: "block", sm: "none" } }}
+            sx={{
+              display: { xs: "block", sm: "none" },
+              bgcolor: "background.paper",
+            }}
           >
             Show Filters
           </Button>
@@ -90,7 +93,7 @@ export const Explore = () => {
             </Box>
             {selectedJob && (
               <Box
-                display={{ xs: "none", sm: "block" }}
+                display={{ xs: "none", md: "block" }}
                 width="50%"
                 overflow="auto"
               >
@@ -113,7 +116,7 @@ export const Explore = () => {
           <Drawer
             open={!!selectedJob}
             onClose={clearJob}
-            sx={{ display: { sm: "none" } }}
+            sx={{ display: { md: "none" } }}
           >
             <Button onClick={clearJob} sx={{ m: 1 }} variant="outlined">
               Close

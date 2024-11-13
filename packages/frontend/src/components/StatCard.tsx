@@ -15,8 +15,7 @@ export const StatCard = ({ icon: Icon, value, label }: StatCardProps) => {
     <Paper
       elevation={2}
       sx={{
-        p: 3,
-        height: "100%",
+        py: 6,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-evenly",
