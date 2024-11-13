@@ -15,9 +15,9 @@ interface LocationSchema {
   remote: boolean;
   city: string;
   state: string;
-  stateAcronym: string;
+  stateCode: string;
   country: string;
-  countryAcronym: string;
+  countryCode: string;
 }
 
 const locationSchema = {
@@ -32,20 +32,23 @@ const locationSchema = {
       city: { type: "string", description: "City name" },
       state: {
         type: "string",
-        description: "Full state, province, or similar name",
+        description:
+          "The full English name for the state, province, or subdivision.",
       },
-      stateAcronym: {
+      stateCode: {
         type: "string",
-        description: "Well-known acronym for the `state` field, if one exists",
+        description:
+          "The ISO 3166-2 subdivision code for the subdivision. Examples: 'WA' for Washington, 'TX' for Texas, 'ON' for Ontario.",
       },
       country: {
         type: "string",
-        description: "Full country name. Example 'United States of America'",
+        description:
+          "The ISO 3166 English short name of the country. Examples: 'United States of America', 'Canada', 'Mexico'.",
       },
-      countryAcronym: {
+      countryCode: {
         type: "string",
         description:
-          "Well-known acronym for the `country` field, if one exists. Example 'USA' for the United States of America.",
+          "The ISO 3166-1 alpha-3 three-letter code for the country. Examples: 'USA' for the United States of America, 'CAN' for Canada, 'MEX' for Mexico.",
       },
     },
     additionalProperties: false,
@@ -114,9 +117,9 @@ async function extractLocation(text: string): Promise<Location> {
 function formatLocation({
   city,
   state,
-  stateAcronym,
+  stateCode,
   country,
-  countryAcronym,
+  countryCode,
 }: LocationSchema): string {
   const parts: string[] = [];
 
@@ -124,19 +127,19 @@ function formatLocation({
     parts.push(city);
   }
 
-  if (state || stateAcronym) {
-    if (state && stateAcronym) {
-      parts.push(`${state} (${stateAcronym})`);
+  if (state || stateCode) {
+    if (state && stateCode) {
+      parts.push(`${state} (${stateCode})`);
     } else {
-      parts.push(state || stateAcronym);
+      parts.push(state || stateCode);
     }
   }
 
-  if (country || countryAcronym) {
-    if (country && countryAcronym) {
-      parts.push(`${country} (${countryAcronym})`);
+  if (country || countryCode) {
+    if (country && countryCode) {
+      parts.push(`${country} (${countryCode})`);
     } else {
-      parts.push(country || countryAcronym);
+      parts.push(country || countryCode);
     }
   }
 
