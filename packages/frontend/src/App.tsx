@@ -19,7 +19,7 @@ function App() {
           <Box
             display="flex"
             flexDirection="column"
-            minHeight="100vh"
+            height="100vh"
             margin="-8px"
             bgcolor="background.default"
           >
