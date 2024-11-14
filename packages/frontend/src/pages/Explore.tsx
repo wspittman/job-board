@@ -41,13 +41,14 @@ export const Explore = () => {
   useEffect(() => {
     const getVal = (key: string) => searchParams.get(key) || undefined;
     const isRemote = getVal("isRemote");
+    const maxExperience = Number(getVal("maxExperience"));
     setFilters({
       companyId: getVal("companyId"),
       isRemote: isRemote == undefined ? undefined : isRemote === "true",
       title: getVal("title"),
       location: getVal("location"),
       daysSince: Number(getVal("daysSince")) || undefined,
-      maxExperience: Number(getVal("maxExperience")) || undefined,
+      maxExperience: maxExperience >= 0 ? maxExperience : undefined,
       minSalary: Number(getVal("minSalary")) || undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,7 +88,7 @@ export const Explore = () => {
             <FilterArea {...filters} onChange={updateFilters} />
           </Box>
 
-          <Box gap={2} display="flex" overflow="hidden">
+          <Box gap={2} display="flex" overflow="hidden" minHeight="300px">
             <Box flexGrow={1} overflow="auto">
               <JobTable filters={debouncedFilters} onSelect={setSelectedJob} />
             </Box>

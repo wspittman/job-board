@@ -16,8 +16,12 @@ const gridSize = { xs: 12, sm: 6 };
 
 const exampleSearches = [
   {
-    label: "Software Engineer, remote, no experience requirement",
-    query: "isRemote=true&title=Software+Engineer&maxExperience=0",
+    label: "Internships",
+    query: "title=intern",
+  },
+  {
+    label: "Remote Staff Software Engineer",
+    query: "isRemote=true&title=Staff+Software+Engineer",
   },
   {
     label: "Data Analyst in Seattle",
