@@ -1,0 +1,21 @@
+name: Refresh Jobs
+
+on:
+  schedule:
+    # Runs daily at 9 AM UTC, which is 1 AM Pacific or 4 AM Eastern
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  call_api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make API call to trigger job refresh
+        env:
+          API_URL: ${{ secrets.PROD_API_URL }}/api/jobs
+          API_TOKEN: ${{ secrets.PROD_API_TOKEN }}
+        run: |
+          curl -X POST "$API_URL" \
+          -H "Authorization: Bearer $API_TOKEN" \
+          -H "Content-Type: application/json"
