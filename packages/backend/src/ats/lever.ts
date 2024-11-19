@@ -3,6 +3,7 @@ import { AppError } from "../AppError";
 import { config } from "../config";
 import type { Company } from "../db/models";
 import { checkStatus } from "../utils/axios";
+import { standardizeUntrustedHtml } from "../utils/html";
 import type { AtsEndpoint, JobUpdates } from "./types";
 import { splitJobs } from "./utils";
 
@@ -19,7 +20,7 @@ interface LeverJob {
   country: string;
   // Available in dual properties of description (styles HTML) and descriptionPlain (plaintext)
   // Also there are opening\openingPlain, and descriptionBody\descriptionBodyPlain, which are subsets of description
-  descriptionPlain: string;
+  description: string;
   openingPlain: string;
   lists: {
     text: string;
@@ -93,7 +94,7 @@ export class Lever implements AtsEndpoint {
         location: `${job.workplaceType}: [${job.categories.allLocations.join(
           "; "
         )}]`,
-        description: job.descriptionPlain,
+        description: standardizeUntrustedHtml(job.description),
         postTS: new Date(job.createdAt).getTime(),
         applyUrl: job.applyUrl,
         facets: {},

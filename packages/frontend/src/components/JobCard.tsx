@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
+import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { Building, Calendar, MapPin } from "lucide-react";
 import { Job } from "../services/api";
@@ -14,6 +15,25 @@ const iconTextStyle = {
 interface Props {
   job: Job;
 }
+
+// Create styled component that inherits MUI typography styles
+const StyledDescription = styled("div")(({ theme }) => ({
+  "& p": {
+    ...theme.typography.body2,
+  },
+  "& h1": {
+    ...theme.typography.h2,
+  },
+  "& h2": {
+    ...theme.typography.h3,
+  },
+  "& h3": {
+    ...theme.typography.h4,
+  },
+  "& ul, & ol": {
+    ...theme.typography.body2,
+  },
+}));
 
 export const JobCard = ({ job }: Props) => {
   return (
@@ -46,9 +66,9 @@ export const JobCard = ({ job }: Props) => {
           </Button>
         </Box>
       </Box>
-      <Typography variant="body2" whiteSpace="pre-wrap">
-        {job.description}
-      </Typography>
+      <StyledDescription
+        dangerouslySetInnerHTML={{ __html: job.description }}
+      />
     </Paper>
   );
 };

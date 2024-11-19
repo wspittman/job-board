@@ -1,13 +1,34 @@
 import { decode } from "html-entities";
+import sanitizeHtml from "sanitize-html";
+import Showdown from "showdown";
+import TurndownService from "turndown";
 
 /**
- * A simple HTML-strip function that also decodes HTML entities.
+ * Standardizes untrusted HTML content by converting it to Markdown and then back to sanitized HTML.
  */
-export function removeHtml(html: string): string {
-  return decode(html)
-    .replace(/<[^>]*>/g, "\n")
-    .replace(/\s?\n\s?/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .replace(/&nbsp;/g, " ")
-    .trim();
+export function standardizeUntrustedHtml(html: string): string {
+  const decoded = decode(html);
+
+  const turndownService = new TurndownService();
+  const markdown = turndownService.turndown(decoded);
+
+  const converter = new Showdown.Converter();
+  const newHtml = converter.makeHtml(markdown);
+
+  return sanitizeHtml(newHtml, {
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      a: ["href", "name", "target", "rel"],
+    },
+    transformTags: {
+      a: (tagName, attribs) => ({
+        tagName,
+        attribs: {
+          ...attribs,
+          rel: "noopener noreferrer",
+          target: "_blank",
+        },
+      }),
+    },
+  });
 }
