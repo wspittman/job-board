@@ -1,6 +1,7 @@
 import { SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocations } from "../ai/extractLocation";
+import { AppError } from "../AppError";
 import { getAts, getAtsList } from "../ats/ats";
 import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
@@ -28,6 +29,10 @@ interface Filters {
 
 interface CrawlOptions {
   company?: CompanyKey;
+}
+
+interface DeleteOptions {
+  timestamp?: number;
 }
 
 function validateFilters({
@@ -90,6 +95,19 @@ function validateCrawlOptions({ company }: CrawlOptions): CrawlOptions {
   return { company };
 }
 
+function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
+  if (timestamp) {
+    const now = Date.now();
+    const minTimestamp = new Date("2024-01-01").getTime();
+
+    if (timestamp > now || timestamp < minTimestamp) {
+      throw new AppError("Invalid timestamp");
+    }
+  }
+
+  return { timestamp };
+}
+
 // #endregion
 
 export async function getJobs(filterInput: Record<string, string>) {
@@ -121,6 +139,23 @@ export async function addJobs(options: CrawlOptions) {
 
 export async function removeJob(key: JobKey) {
   return deleteJob(validateJobKey("removeJob", key));
+}
+
+export async function removeJobs(options: DeleteOptions) {
+  const { timestamp } = validateDeleteOptions(options);
+
+  if (!timestamp) {
+    throw new AppError("No timestamp provided");
+  }
+
+  return logWrap(
+    `removeJobs(${new Date(timestamp).toISOString()})`,
+    async () => {
+      const jobKeys = await readJobKeysByTimestamp(timestamp);
+      console.log(`Deleting ${jobKeys.length} jobs`);
+      await batchRun(jobKeys, deleteJob);
+    }
+  );
 }
 
 async function crawlAts(ats: ATS) {
@@ -234,20 +269,22 @@ async function readJobsByFilters({
 
   const where = whereClauses.join(" AND ");
 
-  return query<Job>(
-    container,
-    {
-      query: `SELECT * FROM c WHERE ${where} OFFSET 0 LIMIT 50`,
-      parameters,
-    },
-    {
-      maxItemCount: 50,
-    }
-  );
+  return query<Job>(container, {
+    query: `SELECT TOP 50 * FROM c WHERE ${where} OFFSET 0 LIMIT 50`,
+    parameters,
+  });
 }
 
 async function readJobIds(companyId: string) {
   return getAllIdsByPartitionKey(container, companyId);
+}
+
+async function readJobKeysByTimestamp(timestamp: number) {
+  return query<JobKey>(container, {
+    query: "SELECT TOP 100 c.id, c.companyId FROM c WHERE c._ts <= @timestamp",
+    // CosmosDB uses seconds, not milliseconds
+    parameters: [{ name: "@timestamp", value: timestamp / 1000 }],
+  });
 }
 
 async function updateJob(job: Job) {

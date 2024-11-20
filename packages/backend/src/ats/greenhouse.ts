@@ -2,7 +2,7 @@ import axios from "axios";
 import { config } from "../config";
 import type { Company } from "../db/models";
 import { checkStatus } from "../utils/axios";
-import { removeHtml } from "../utils/html";
+import { standardizeUntrustedHtml } from "../utils/html";
 import type { AtsEndpoint, JobUpdates } from "./types";
 import { splitJobs } from "./utils";
 
@@ -59,7 +59,7 @@ export class Greenhouse implements AtsEndpoint {
       id,
       ats: "greenhouse",
       name,
-      description: removeHtml(content),
+      description: standardizeUntrustedHtml(content),
     };
   }
 
@@ -87,7 +87,7 @@ export class Greenhouse implements AtsEndpoint {
         title: job.title,
         isRemote: job.location.name.toLowerCase().includes("remote"),
         location: job.location.name,
-        description: removeHtml(job.content),
+        description: standardizeUntrustedHtml(job.content),
         postTS: new Date(job.updated_at).getTime(),
         applyUrl: job.absolute_url,
         facets: {},

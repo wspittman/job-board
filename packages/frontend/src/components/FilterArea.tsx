@@ -34,7 +34,9 @@ export const FilterArea = ({
 
   const companyOptions = useMemo(() => {
     const companyNames = metadata?.companyNames || [];
-    return companyNames.map(([id, name]) => ({ id, label: name }));
+    return companyNames
+      .map(([id, name]) => ({ id, label: name }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   }, [metadata]);
 
   const companyValue = companyOptions.find((c) => c.id === companyId) ?? null;
