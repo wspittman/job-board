@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FilterArea } from "../components/FilterArea";
 import { JobCard } from "../components/JobCard";
@@ -27,9 +27,17 @@ export const Explore = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job>();
   const [filters, setFilters] = useState<Filters>({});
+  const jobCardRef = useRef<HTMLDivElement>(null);
+
+  const updateJob = (job?: Job) => {
+    setSelectedJob(job);
+    if (jobCardRef.current) {
+      jobCardRef.current.scrollTop = 0;
+    }
+  };
+  const clearJob = useCallback(() => updateJob(undefined), []);
 
   const toggleFilterOpen = () => setIsFilterOpen(!isFilterOpen);
-  const clearJob = () => setSelectedJob(undefined);
   const updateFilters = (newFilters: Filters) =>
     setFilters({ ...filters, ...newFilters });
 
@@ -68,7 +76,7 @@ export const Explore = () => {
   // Clear selected job when filters change
   useEffect(() => {
     clearJob();
-  }, [debouncedFilters]);
+  }, [debouncedFilters, clearJob]);
 
   return (
     <Stack spacing={2} overflow="hidden">
@@ -95,13 +103,14 @@ export const Explore = () => {
 
           <Box gap={2} display="flex" overflow="hidden" minHeight="300px">
             <Box width={selectedJob ? "50%" : "100%"} overflow="auto">
-              <JobTable filters={debouncedFilters} onSelect={setSelectedJob} />
+              <JobTable filters={debouncedFilters} onSelect={updateJob} />
             </Box>
             {selectedJob && (
               <Box
                 display={{ xs: "none", md: "block" }}
                 width="50%"
                 overflow="auto"
+                ref={jobCardRef}
               >
                 <JobCard job={selectedJob} onClose={clearJob} />
               </Box>
