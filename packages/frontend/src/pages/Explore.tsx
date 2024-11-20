@@ -89,7 +89,7 @@ export const Explore = () => {
           </Box>
 
           <Box gap={2} display="flex" overflow="hidden" minHeight="300px">
-            <Box flexGrow={1} overflow="auto">
+            <Box width={selectedJob ? "50%" : "100%"} overflow="auto">
               <JobTable filters={debouncedFilters} onSelect={setSelectedJob} />
             </Box>
             {selectedJob && (
@@ -98,7 +98,7 @@ export const Explore = () => {
                 width="50%"
                 overflow="auto"
               >
-                <JobCard job={selectedJob} />
+                <JobCard job={selectedJob} onClose={clearJob} />
               </Box>
             )}
           </Box>
