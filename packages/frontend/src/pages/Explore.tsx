@@ -65,6 +65,11 @@ export const Explore = () => {
     setSearchParams(newParams, { replace: true });
   }, [debouncedFilters, searchParams, setSearchParams]);
 
+  // Clear selected job when filters change
+  useEffect(() => {
+    clearJob();
+  }, [debouncedFilters]);
+
   return (
     <Stack spacing={2} overflow="hidden">
       {isLoading && <PageLoader />}
