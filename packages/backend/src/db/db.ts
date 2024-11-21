@@ -110,7 +110,7 @@ interface DBLog {
 }
 
 interface DBContext {
-  logs: DBLog[];
+  calls: DBLog[];
   count: number;
   ru: number;
   ms: number;
@@ -147,8 +147,8 @@ function logDBAction(
 function addDBLog(log: DBLog) {
   const context = getDBContext();
 
-  if (context.logs.length < 10) {
-    context.logs.push(log);
+  if (context.calls.length < 10) {
+    context.calls.push(log);
   }
 
   context.count++;
@@ -160,7 +160,7 @@ function addDBLog(log: DBLog) {
 function getDBContext(): DBContext {
   const context = getRequestContext();
   context.db ??= <DBContext>{
-    logs: [],
+    calls: [],
     count: 0,
     ru: 0,
     ms: 0,

@@ -1,5 +1,6 @@
 import * as appInsights from "applicationinsights";
 import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager";
+import { config } from "../config";
 
 interface RequestContext {
   [key: string]: unknown;
@@ -36,6 +37,19 @@ export function telemetryProcessor({
         ...requestData.properties,
         ...getRequestContext(),
       };
+
+      if (config.NODE_ENV === "dev") {
+        const { name, responseCode, duration, properties } = requestData;
+        console.dir(
+          {
+            name,
+            responseCode,
+            duration,
+            ...properties,
+          },
+          { depth: null }
+        );
+      }
     }
   } catch (error) {
     console.error("telemetryProcessor error:", error);

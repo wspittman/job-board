@@ -9,6 +9,7 @@ import { telemetryProcessor } from "./utils/telemetry";
 
 appInsights.setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING).start();
 appInsights.defaultClient.addTelemetryProcessor(telemetryProcessor);
+appInsights.defaultClient.config.disableAppInsights = config.NODE_ENV === "dev";
 
 const app = express();
 
