@@ -1,5 +1,5 @@
 import * as appInsights from "applicationinsights";
-import { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager";
+import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager";
 
 interface RequestContext {
   [key: string]: unknown;
@@ -13,7 +13,7 @@ interface CustomContext extends CorrelationContext {
  * Get the request context from the correlation context, initializing it if necessary
  * @returns The request context
  */
-function getRequestContext(): RequestContext {
+export function getRequestContext(): RequestContext {
   const context = <CustomContext>appInsights.getCorrelationContext();
   context.requestContext ??= {};
   return context.requestContext;

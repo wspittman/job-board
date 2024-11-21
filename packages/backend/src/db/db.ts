@@ -3,12 +3,16 @@ import {
   CosmosClient,
   Database,
   FeedOptions,
+  FeedResponse,
   ItemDefinition,
+  ItemResponse,
+  PartitionKey,
   SqlQuerySpec,
 } from "@azure/cosmos";
 import fs from "fs";
 import https from "https";
 import { config } from "../config";
+import { getRequestContext } from "../utils/telemetry";
 
 type ContainerName = "company" | "job" | "metadata";
 
@@ -32,14 +36,14 @@ export async function getItem<T>(
   id: string,
   partitionKey: string
 ) {
-  const { resource } = await getContainer(container)
-    .item(id, partitionKey)
-    .read();
-  return stripItem<T>(resource);
+  const response = await getContainer(container).item(id, partitionKey).read();
+  logDBAction("GET", container, response, partitionKey);
+  return stripItem<T>(response.resource);
 }
 
 export async function upsert(container: ContainerName, item: Object) {
-  await getContainer(container).items.upsert(item);
+  const response = await getContainer(container).items.upsert(item);
+  logDBAction("UPSERT", container, response);
 }
 
 export async function deleteItem(
@@ -47,14 +51,21 @@ export async function deleteItem(
   id: string,
   partitionKey: string
 ) {
-  await getContainer(container).item(id, partitionKey).delete();
+  const response = await getContainer(container)
+    .item(id, partitionKey)
+    .delete();
+  logDBAction("DELETE", container, response, partitionKey);
 }
 
 export async function getAllByPartitionKey<T extends ItemDefinition>(
   container: ContainerName,
   partitionKey: string
 ) {
-  return getContainer(container).items.readAll<T>({ partitionKey }).fetchAll();
+  const response = await getContainer(container)
+    .items.readAll<T>({ partitionKey })
+    .fetchAll();
+  logDBAction("GET_ALL", container, response, partitionKey);
+  return response;
 }
 
 export async function getAllIdsByPartitionKey(
@@ -72,16 +83,95 @@ export async function query<T>(
   query: string | SqlQuerySpec,
   options?: FeedOptions
 ) {
-  const { resources } = await getContainer(container)
+  const response = await getContainer(container)
     .items.query(query, options)
     .fetchAll();
-  return resources.map((entry) => stripItem<T>(entry));
+  logDBAction("QUERY", container, response, options?.partitionKey);
+  return response.resources.map((entry) => stripItem<T>(entry));
 }
 
 function stripItem<T>(entry: Item): T {
   const { _rid, _self, _etag, _attachments, ...rest } = entry;
   return rest as T;
 }
+
+// #region Telemetry
+
+type DBAction = "GET" | "UPSERT" | "DELETE" | "GET_ALL" | "QUERY";
+
+interface DBLog {
+  action: DBAction;
+  container: ContainerName;
+  pkey?: PartitionKey;
+  ru: number;
+  ms: number;
+  bytes: number;
+  count?: number;
+}
+
+interface DBContext {
+  logs: DBLog[];
+  count: number;
+  ru: number;
+  ms: number;
+  bytes: number;
+}
+
+function logDBAction(
+  action: DBAction,
+  container: ContainerName,
+  response: ItemResponse<ItemDefinition> | FeedResponse<unknown>,
+  pkey?: PartitionKey
+) {
+  const log: DBLog = {
+    action,
+    container,
+    ru: response.requestCharge,
+    ms: response.diagnostics.clientSideRequestStatistics.requestDurationInMs,
+    bytes:
+      response.diagnostics.clientSideRequestStatistics
+        .totalResponsePayloadLengthInBytes,
+  };
+
+  if (pkey) {
+    log.pkey = pkey;
+  }
+
+  if (response instanceof FeedResponse) {
+    log.count = response.resources.length;
+  }
+
+  addDBLog(log);
+}
+
+function addDBLog(log: DBLog) {
+  const context = getDBContext();
+
+  if (context.logs.length < 10) {
+    context.logs.push(log);
+  }
+
+  context.count++;
+  context.ru += log.ru;
+  context.ms += log.ms;
+  context.bytes += log.bytes;
+}
+
+function getDBContext(): DBContext {
+  const context = getRequestContext();
+  context.db ??= <DBContext>{
+    logs: [],
+    count: 0,
+    ru: 0,
+    ms: 0,
+    bytes: 0,
+  };
+  return <DBContext>context.db;
+}
+
+// #endregion
+
+// #region Initialization
 
 export async function connectDB() {
   try {
@@ -129,3 +219,5 @@ async function createContainer(
 
   containerMap[name] = container;
 }
+
+// #endregion
