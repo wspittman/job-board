@@ -270,7 +270,7 @@ async function readJobsByFilters({
   const where = whereClauses.join(" AND ");
 
   return query<Job>(container, {
-    query: `SELECT TOP 50 * FROM c WHERE ${where} OFFSET 0 LIMIT 50`,
+    query: `SELECT TOP 50 * FROM c WHERE ${where}`,
     parameters,
   });
 }
