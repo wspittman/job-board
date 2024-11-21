@@ -5,8 +5,10 @@ import helmet from "helmet";
 import { config } from "./config";
 import { connectDB } from "./db/db";
 import { router } from "./routes/routes";
+import { telemetryProcessor } from "./utils/telemetry";
 
 appInsights.setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING).start();
+appInsights.defaultClient.addTelemetryProcessor(telemetryProcessor);
 
 const app = express();
 
