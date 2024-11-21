@@ -1,9 +1,12 @@
+import * as appInsights from "applicationinsights";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import { config } from "./config";
 import { connectDB } from "./db/db";
 import { router } from "./routes/routes";
+
+appInsights.setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING).start();
 
 const app = express();
 
