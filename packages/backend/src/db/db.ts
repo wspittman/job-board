@@ -12,7 +12,7 @@ import {
 import fs from "fs";
 import https from "https";
 import { config } from "../config";
-import { getRequestContext } from "../utils/telemetry";
+import { getRequestContext, logError } from "../utils/telemetry";
 
 type ContainerName = "company" | "job" | "metadata";
 
@@ -200,7 +200,7 @@ export async function connectDB() {
 
     console.log("CosmosDB connected");
   } catch (error) {
-    console.error("CosmosDB connection error:", error);
+    logError(error);
     process.exit(1);
   }
 }

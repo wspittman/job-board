@@ -1,3 +1,5 @@
+import { logError } from "./telemetry";
+
 export async function batchRun<T>(
   values: T[],
   func: (value: T) => Promise<void>,
@@ -9,7 +11,7 @@ export async function batchRun<T>(
 
     result.forEach((r, index) => {
       if (r.status === "rejected") {
-        console.error(
+        logError(
           `batchRun: Error at values[${i + index}]="${batch[index]}": ${
             r.reason
           }`
@@ -25,6 +27,6 @@ export async function logWrap(msg: string, func: () => Promise<void>) {
     await func();
     console.log(`${msg}: End`);
   } catch (error) {
-    console.error(`${msg}: Error ${error}`);
+    logError(error);
   }
 }

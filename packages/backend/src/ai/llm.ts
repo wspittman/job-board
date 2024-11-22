@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { getRequestContext } from "../utils/telemetry";
+import { getRequestContext, logError } from "../utils/telemetry";
 
 const client = new OpenAI();
 
@@ -32,7 +32,7 @@ export async function jsonCompletion<T>(
       return JSON.parse(message) as T;
     }
   } catch (error) {
-    console.error(`AI.jsonCompletion: Error ${error}`);
+    logError(error);
   }
 }
 

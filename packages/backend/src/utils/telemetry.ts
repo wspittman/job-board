@@ -19,7 +19,8 @@ export function getRequestContext(): Record<string, unknown> {
   return context.requestContext;
 }
 
-export function logError(exception: Error) {
+export function logError(error: unknown) {
+  const exception = error instanceof Error ? error : new Error(String(error));
   appInsights.defaultClient.trackException({ exception });
 }
 
@@ -41,7 +42,7 @@ export function telemetryProcessor({
       devLogException(data.baseData as ExceptionData);
     }
   } catch (error) {
-    logError(error as Error);
+    logError(error);
   }
   return true;
 }

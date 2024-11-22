@@ -1,5 +1,6 @@
 import { AxiosResponse } from "axios";
 import { AppError } from "../AppError";
+import { logError } from "./telemetry";
 
 /**
  * A helper function to convert non-200 status codes into errors.
@@ -14,7 +15,7 @@ export function checkStatus(
   }
 
   if (status !== 200) {
-    console.error(`${tags.join(" / ")}: ${status} ${statusText}`);
+    logError(`${tags.join(" / ")}: ${status} ${statusText}`);
     throw new AppError(`${tags.join(" / ")}: Request Failed`, 500);
   }
 }
