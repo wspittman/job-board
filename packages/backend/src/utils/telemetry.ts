@@ -2,26 +2,25 @@ import * as appInsights from "applicationinsights";
 import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager";
 import { config } from "../config";
 
-interface RequestContext {
-  [key: string]: unknown;
-}
+type RequestData = appInsights.Contracts.RequestData;
+type ExceptionData = appInsights.Contracts.ExceptionData;
 
 interface CustomContext extends CorrelationContext {
-  requestContext?: RequestContext;
+  requestContext?: Record<string, unknown>;
 }
 
 /**
  * Get the request context from the correlation context, initializing it if necessary
  * @returns The request context
  */
-export function getRequestContext(): RequestContext {
+export function getRequestContext(): Record<string, unknown> {
   const context = <CustomContext>appInsights.getCorrelationContext();
   context.requestContext ??= {};
   return context.requestContext;
 }
 
-export function setRequestContext(key: string, value: unknown) {
-  getRequestContext()[key] = value;
+export function logError(exception: Error) {
+  appInsights.defaultClient.trackException({ exception });
 }
 
 /**
@@ -32,27 +31,46 @@ export function telemetryProcessor({
 }: appInsights.Contracts.EnvelopeTelemetry) {
   try {
     if (data.baseType === "RequestData" && data.baseData) {
-      const requestData = data.baseData as appInsights.Contracts.RequestData;
+      const requestData = data.baseData as RequestData;
       requestData.properties = {
         ...requestData.properties,
         ...getRequestContext(),
       };
-
-      if (config.NODE_ENV === "dev") {
-        const { name, responseCode, duration, properties } = requestData;
-        console.dir(
-          {
-            name,
-            responseCode,
-            duration,
-            ...properties,
-          },
-          { depth: null }
-        );
-      }
+      devLogRequest(requestData);
+    } else if (data.baseType === "ExceptionData" && data.baseData) {
+      devLogException(data.baseData as ExceptionData);
     }
   } catch (error) {
-    console.error("telemetryProcessor error:", error);
+    logError(error as Error);
   }
   return true;
+}
+
+function devLogRequest(requestData: RequestData) {
+  if (config.NODE_ENV === "dev") {
+    const { name, responseCode, duration, properties } = requestData;
+    console.dir(
+      {
+        name,
+        responseCode,
+        duration,
+        ...properties,
+      },
+      { depth: null }
+    );
+  }
+}
+
+function devLogException({ exceptions }: ExceptionData) {
+  if (config.NODE_ENV === "dev") {
+    console.dir(
+      exceptions.map((exception) => ({
+        exception: exception.message,
+        stack:
+          exception.stack ??
+          exception.parsedStack.map((frame) => frame.assembly),
+      })),
+      { depth: null }
+    );
+  }
 }
