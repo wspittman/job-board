@@ -1,9 +1,12 @@
 import * as appInsights from "applicationinsights";
 import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager";
+import type {
+  EnvelopeTelemetry,
+  EventData,
+  ExceptionData,
+  RequestData,
+} from "applicationinsights/out/Declarations/Contracts";
 import { config } from "../config";
-
-type RequestData = appInsights.Contracts.RequestData;
-type ExceptionData = appInsights.Contracts.ExceptionData;
 
 interface CustomContext extends CorrelationContext {
   requestContext?: Record<string, unknown>;
@@ -19,6 +22,10 @@ export function getRequestContext(): Record<string, unknown> {
   return context.requestContext;
 }
 
+export function logEvent(name: string) {
+  appInsights.defaultClient.trackEvent({ name });
+}
+
 export function logError(error: unknown) {
   const exception = error instanceof Error ? error : new Error(String(error));
   appInsights.defaultClient.trackException({ exception });
@@ -27,51 +34,83 @@ export function logError(error: unknown) {
 /**
  * Put the request context onto the customDimensions of the request event
  */
-export function telemetryProcessor({
-  data,
-}: appInsights.Contracts.EnvelopeTelemetry) {
+export function telemetryProcessor({ data }: EnvelopeTelemetry) {
   try {
-    if (data.baseType === "RequestData" && data.baseData) {
-      const requestData = data.baseData as RequestData;
-      requestData.properties = {
-        ...requestData.properties,
-        ...getRequestContext(),
-      };
-      devLogRequest(requestData);
-    } else if (data.baseType === "ExceptionData" && data.baseData) {
-      devLogException(data.baseData as ExceptionData);
+    if (!data.baseData) return true;
+
+    switch (data.baseType) {
+      case "RequestData":
+        const requestData = data.baseData as RequestData;
+        appendContext(requestData);
+        devLogRequest(requestData);
+        break;
+      case "EventData":
+        const eventData = data.baseData as EventData;
+        appendContext(eventData);
+        devLogEvent(eventData);
+        break;
+      case "ExceptionData":
+        devLogException(data.baseData as ExceptionData);
+        break;
+      case "RemoteDependencyData":
+      case "MetricData":
+        // Uncomment for local debug logging
+        // devLog(data.baseData);
+        break;
+      default:
+        // Uncomment for local debug logging
+        // devLog(data.baseData);
+        break;
     }
   } catch (error) {
-    logError(error);
+    // Can't logError here because it could cause an infinite loop
+    console.error(error);
   }
   return true;
+}
+
+function appendContext(baseData: RequestData | EventData) {
+  const requestData = baseData;
+  requestData.properties = {
+    ...requestData.properties,
+    ...getRequestContext(),
+  };
 }
 
 function devLogRequest(requestData: RequestData) {
   if (config.NODE_ENV === "dev") {
     const { name, responseCode, duration, properties } = requestData;
-    console.dir(
-      {
-        name,
-        responseCode,
-        duration,
-        ...properties,
-      },
-      { depth: null }
-    );
+    devLog({
+      name,
+      responseCode,
+      duration,
+      ...properties,
+    });
+  }
+}
+
+function devLogEvent(eventData: EventData) {
+  if (config.NODE_ENV === "dev") {
+    const { name, properties } = eventData;
+    devLog({ name, ...properties });
   }
 }
 
 function devLogException({ exceptions }: ExceptionData) {
   if (config.NODE_ENV === "dev") {
-    console.dir(
+    devLog(
       exceptions.map((exception) => ({
         exception: exception.message,
         stack:
           exception.stack ??
           exception.parsedStack.map((frame) => frame.assembly),
-      })),
-      { depth: null }
+      }))
     );
+  }
+}
+
+function devLog(data: unknown) {
+  if (config.NODE_ENV === "dev") {
+    console.dir(data, { depth: null });
   }
 }

@@ -8,6 +8,7 @@ import { addJobs, getJobs, removeJob, removeJobs } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
 import { prepInput } from "../middleware/prepInput";
+import { logEvent } from "../utils/telemetry";
 
 export const router = express.Router();
 
@@ -23,7 +24,7 @@ router.put("/companies", validateAdmin, jsonWrapper(addCompanies));
 router.delete("/company", validateAdmin, jsonWrapper(removeCompany));
 
 router.get("/jobs", jsonWrapper(getJobs));
-router.post("/jobs", validateAdmin, asyncWrapper(addJobs));
+router.post("/jobs", validateAdmin, asyncWrapper("addJobs", addJobs));
 router.delete("/job", validateAdmin, jsonWrapper(removeJob));
 router.delete("/jobs", validateAdmin, jsonWrapper(removeJobs));
 
@@ -40,12 +41,13 @@ function jsonWrapper(fn: (input: any) => Promise<unknown>) {
   };
 }
 
-function asyncWrapper(fn: (input: any) => Promise<unknown>) {
+function asyncWrapper(name: string, fn: (input: any) => Promise<unknown>) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       res.writeHead(202, { "Content-Type": "text/plain" });
       res.end("Accepted");
       await fn(res.locals.input);
+      logEvent(`Async: ${name}`);
     } catch (error: any) {
       next(error);
     }
