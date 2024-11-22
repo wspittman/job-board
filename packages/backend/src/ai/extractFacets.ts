@@ -62,19 +62,16 @@ export async function extractFacets(texts: string[]): Promise<Facets[]> {
   const results: Facets[] = [];
 
   await batchRun(withIndex, async ({ index, text }) => {
-    const result = await jsonCompletion<FacetSchema>(
+    const result = await jsonCompletion<FacetSchema, Facets>(
       "extractFacets",
       facetPrompt,
       facetSchema,
-      text
+      text,
+      formatFacets
     );
 
     if (result) {
-      const facets = formatFacets(result);
-      console.debug(`AI.extractFacets`, facets);
-      results[index] = facets;
-    } else {
-      console.debug(`AI.extractFacets = undefined`);
+      results[index] = result;
     }
   });
 

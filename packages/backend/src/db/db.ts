@@ -100,8 +100,8 @@ function stripItem<T>(entry: Item): T {
 type DBAction = "GET" | "UPSERT" | "DELETE" | "GET_ALL" | "QUERY";
 
 interface DBLog {
-  action: DBAction;
-  container: ContainerName;
+  name: DBAction;
+  in: ContainerName;
   pkey?: PartitionKey;
   ru: number;
   ms: number;
@@ -124,8 +124,8 @@ function logDBAction(
   pkey?: PartitionKey
 ) {
   const log: DBLog = {
-    action,
-    container,
+    name: action,
+    in: container,
     ru: response.requestCharge,
     ms: response.diagnostics.clientSideRequestStatistics.requestDurationInMs,
     bytes:

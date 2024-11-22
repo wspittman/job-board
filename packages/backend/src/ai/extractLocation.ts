@@ -1,6 +1,7 @@
 import { Job } from "../db/models";
 import { batchRun } from "../utils/async";
 import { LRUCache } from "../utils/cache";
+import { logCounter } from "../utils/telemetry";
 import { jsonCompletion } from "./llm";
 
 const locationCache = new LRUCache<string, Location>(1000);
@@ -89,39 +90,33 @@ async function extractLocation(text: string): Promise<Location> {
   const cachedResult = locationCache.get(normalizedText);
 
   if (cachedResult) {
-    console.debug(`AI.extractLocation: Cache hit for [${text}]`);
+    logCounter("extractLocation.cacheHit");
     return cachedResult;
   }
 
-  const result = await jsonCompletion<LocationSchema>(
+  const result = await jsonCompletion<LocationSchema, Location>(
     "extractLocation",
     locationPrompt,
     locationSchema,
-    text
+    text,
+    formatLocation
   );
 
   if (result) {
-    const locationResult = {
-      isRemote: result.remote,
-      location: formatLocation(result),
-    };
-    console.debug(`AI.extractLocation: "${text}"`, locationResult);
-
-    locationCache.set(normalizedText, locationResult);
-    return locationResult;
+    locationCache.set(normalizedText, result);
   }
 
-  console.debug(`AI.extractLocation: "${text}" = undefined`);
-  return undefined;
+  return result;
 }
 
 function formatLocation({
+  remote,
   city,
   state,
   stateCode,
   country,
   countryCode,
-}: LocationSchema): string {
+}: LocationSchema): Location {
   const parts: string[] = [];
 
   if (city) {
@@ -144,5 +139,10 @@ function formatLocation({
     }
   }
 
-  return parts.join(", ");
+  const location = parts.join(", ");
+
+  return {
+    isRemote: remote,
+    location,
+  };
 }

@@ -3,11 +3,12 @@ import { getRequestContext, logError } from "../utils/telemetry";
 
 const client = new OpenAI();
 
-export async function jsonCompletion<T>(
+export async function jsonCompletion<Schema, Result>(
   action: string,
   prompt: string,
   schema: OpenAI.ResponseFormatJSONSchema.JSONSchema,
-  input: string
+  input: string,
+  formatter: (output: Schema) => Result
 ) {
   try {
     const start = Date.now();
@@ -24,13 +25,17 @@ export async function jsonCompletion<T>(
     });
     const duration = Date.now() - start;
 
-    logLLMAction(action, duration, completion);
-
     const message = extractMessage(completion);
 
+    let formatted: Result | undefined;
     if (message) {
-      return JSON.parse(message) as T;
+      const parsed = JSON.parse(message) as Schema;
+      formatted = formatter(parsed);
     }
+
+    logLLMAction(action, input, duration, completion, formatted);
+
+    return formatted;
   } catch (error) {
     logError(error);
   }
@@ -49,30 +54,35 @@ function extractMessage(completion: OpenAI.ChatCompletion) {
 // #region Telemetry
 
 interface LLMLog {
-  action: string;
+  name: string;
+  in: string;
   tokens: number;
-  promptTokens: number;
-  completionTokens: number;
-  cachedTokens: number;
+  inTokens: number;
+  outTokens: number;
+  cacheTokens: number;
   ms: number;
   finishReason?: string;
   refusal?: string;
+  out?: unknown;
 }
 
 interface LLMContext {
   calls: LLMLog[];
+  counts: Record<string, number>;
   count: number;
   tokens: number;
-  promptTokens: number;
-  completionTokens: number;
-  cachedTokens: number;
+  inTokens: number;
+  outTokens: number;
+  cacheTokens: number;
   ms: number;
 }
 
 function logLLMAction(
   action: string,
+  input: string,
   duration: number,
-  { usage, choices }: OpenAI.ChatCompletion
+  { usage, choices }: OpenAI.ChatCompletion,
+  result?: unknown
 ) {
   if (!usage) return;
 
@@ -81,11 +91,12 @@ function logLLMAction(
   const { finish_reason, message } = choices[0] ?? {};
 
   const log: LLMLog = {
-    action,
+    name: action,
+    in: input.length > 100 ? input.slice(0, 97) + "..." : input,
     tokens: total_tokens,
-    promptTokens: prompt_tokens,
-    completionTokens: completion_tokens,
-    cachedTokens: cached_tokens,
+    inTokens: prompt_tokens,
+    outTokens: completion_tokens,
+    cacheTokens: cached_tokens,
     ms: duration,
   };
 
@@ -97,21 +108,26 @@ function logLLMAction(
     log.refusal = message.refusal;
   }
 
+  if (result) {
+    log.out = result;
+  }
+
   addLLMLog(log);
 }
 
 function addLLMLog(log: LLMLog) {
   const context = getLLMContext();
 
-  if (context.calls.length < 10) {
+  if (context.calls.length < 100) {
     context.calls.push(log);
   }
 
   context.count++;
+  context.counts[log.name] = (context.counts[log.name] ?? 0) + 1;
   context.tokens += log.tokens;
-  context.promptTokens += log.promptTokens;
-  context.completionTokens += log.completionTokens;
-  context.cachedTokens += log.cachedTokens;
+  context.inTokens += log.inTokens;
+  context.outTokens += log.outTokens;
+  context.cacheTokens += log.cacheTokens;
   context.ms += log.ms;
 }
 
@@ -119,11 +135,12 @@ function getLLMContext(): LLMContext {
   const context = getRequestContext();
   context.llm ??= <LLMContext>{
     calls: [],
+    counts: {},
     count: 0,
     tokens: 0,
-    promptTokens: 0,
-    completionTokens: 0,
-    cachedTokens: 0,
+    inTokens: 0,
+    outTokens: 0,
+    cacheTokens: 0,
     ms: 0,
   };
   return <LLMContext>context.llm;

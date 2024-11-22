@@ -22,6 +22,11 @@ export function getRequestContext(): Record<string, unknown> {
   return context.requestContext;
 }
 
+export function logCounter(name: string, value: number = 1) {
+  const context = getRequestContext();
+  context[name] = ((context[name] as number) ?? 0) + value;
+}
+
 export function logEvent(name: string) {
   appInsights.defaultClient.trackEvent({ name });
 }
