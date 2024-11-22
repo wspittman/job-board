@@ -63,6 +63,7 @@ export async function extractFacets(texts: string[]): Promise<Facets[]> {
 
   await batchRun(withIndex, async ({ index, text }) => {
     const result = await jsonCompletion<FacetSchema>(
+      "extractFacets",
       facetPrompt,
       facetSchema,
       text

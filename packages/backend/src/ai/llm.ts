@@ -1,15 +1,16 @@
 import OpenAI from "openai";
+import { getRequestContext } from "../utils/telemetry";
 
 const client = new OpenAI();
 
 export async function jsonCompletion<T>(
+  action: string,
   prompt: string,
   schema: OpenAI.ResponseFormatJSONSchema.JSONSchema,
   input: string
 ) {
-  const prefix = "AI.jsonCompletion";
-
   try {
+    const start = Date.now();
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -21,20 +22,21 @@ export async function jsonCompletion<T>(
         json_schema: schema,
       },
     });
+    const duration = Date.now() - start;
 
-    logTokens(prefix, completion);
+    logLLMAction(action, duration, completion);
 
-    const message = extractMessage(prefix, completion);
+    const message = extractMessage(completion);
 
     if (message) {
       return JSON.parse(message) as T;
     }
   } catch (error) {
-    console.error(`${prefix}: Error ${error}`);
+    console.error(`AI.jsonCompletion: Error ${error}`);
   }
 }
 
-function extractMessage(prefix: string, completion: OpenAI.ChatCompletion) {
+function extractMessage(completion: OpenAI.ChatCompletion) {
   if (!completion.choices[0]) return;
 
   const { finish_reason, message } = completion.choices[0] ?? {};
@@ -42,17 +44,89 @@ function extractMessage(prefix: string, completion: OpenAI.ChatCompletion) {
   if (finish_reason === "stop" && message && !message.refusal) {
     return message.content;
   }
-
-  console.error(`${prefix}: Refusal = ${finish_reason} / ${message?.refusal}`);
 }
 
-function logTokens(prefix: string, completion?: OpenAI.ChatCompletion) {
-  if (!completion?.usage) return;
+// #region Telemetry
 
-  const { completion_tokens, prompt_tokens, total_tokens } = completion.usage;
-  const { cached_tokens } = completion.usage.prompt_tokens_details ?? {};
-
-  console.debug(
-    `${prefix}: ${total_tokens} tokens = ${prompt_tokens} prompt (${cached_tokens} cached) + ${completion_tokens} completion)`
-  );
+interface LLMLog {
+  action: string;
+  tokens: number;
+  promptTokens: number;
+  completionTokens: number;
+  cachedTokens: number;
+  ms: number;
+  finishReason?: string;
+  refusal?: string;
 }
+
+interface LLMContext {
+  calls: LLMLog[];
+  count: number;
+  tokens: number;
+  promptTokens: number;
+  completionTokens: number;
+  cachedTokens: number;
+  ms: number;
+}
+
+function logLLMAction(
+  action: string,
+  duration: number,
+  { usage, choices }: OpenAI.ChatCompletion
+) {
+  if (!usage) return;
+
+  const { total_tokens, prompt_tokens, completion_tokens } = usage;
+  const { cached_tokens = 0 } = usage.prompt_tokens_details ?? {};
+  const { finish_reason, message } = choices[0] ?? {};
+
+  const log: LLMLog = {
+    action,
+    tokens: total_tokens,
+    promptTokens: prompt_tokens,
+    completionTokens: completion_tokens,
+    cachedTokens: cached_tokens,
+    ms: duration,
+  };
+
+  if (finish_reason !== "stop") {
+    log.finishReason = finish_reason;
+  }
+
+  if (message?.refusal) {
+    log.refusal = message.refusal;
+  }
+
+  addLLMLog(log);
+}
+
+function addLLMLog(log: LLMLog) {
+  const context = getLLMContext();
+
+  if (context.calls.length < 10) {
+    context.calls.push(log);
+  }
+
+  context.count++;
+  context.tokens += log.tokens;
+  context.promptTokens += log.promptTokens;
+  context.completionTokens += log.completionTokens;
+  context.cachedTokens += log.cachedTokens;
+  context.ms += log.ms;
+}
+
+function getLLMContext(): LLMContext {
+  const context = getRequestContext();
+  context.llm ??= <LLMContext>{
+    calls: [],
+    count: 0,
+    tokens: 0,
+    promptTokens: 0,
+    completionTokens: 0,
+    cachedTokens: 0,
+    ms: 0,
+  };
+  return <LLMContext>context.llm;
+}
+
+// #endregion

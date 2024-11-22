@@ -94,6 +94,7 @@ async function extractLocation(text: string): Promise<Location> {
   }
 
   const result = await jsonCompletion<LocationSchema>(
+    "extractLocation",
     locationPrompt,
     locationSchema,
     text
