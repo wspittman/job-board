@@ -118,7 +118,7 @@ function logLLMAction(
 function addLLMLog(log: LLMLog) {
   const context = getLLMContext();
 
-  if (context.calls.length < 100) {
+  if (context.calls.length < 10) {
     context.calls.push(log);
   }
 

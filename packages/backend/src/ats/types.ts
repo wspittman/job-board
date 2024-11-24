@@ -7,6 +7,9 @@ export interface JobUpdates {
 }
 
 export interface AtsEndpoint {
-  getCompany(id: string): Promise<Company>;
-  getJobUpdates(company: Company, currentIds: string[]): Promise<JobUpdates>;
+  getCompanyEndpoint(id: string): string;
+  getJobsEndpoint(id: string): string;
+  formatCompany(id: string, company: unknown): Company;
+  getRawJobs(data: unknown): [id: string, job: unknown][];
+  formatJobs(company: Company, jobs: unknown[]): Job[];
 }

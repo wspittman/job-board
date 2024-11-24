@@ -2,7 +2,7 @@ import { SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
-import { getAts, getAtsList } from "../ats/ats";
+import { getAtsJobs, getAtsList } from "../ats/ats";
 import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
@@ -169,10 +169,7 @@ async function crawlCompany(company: Company) {
   const msg = `crawlCompany(${company.ats}, ${company.id})`;
   return logWrap(msg, async () => {
     const dbJobIds = await readJobIds(company.id);
-    const { added, removed, kept } = await getAts(company.ats).getJobUpdates(
-      company,
-      dbJobIds
-    );
+    const { added, removed, kept } = await getAtsJobs(company, dbJobIds);
 
     console.log(`${msg}: Adding ${added.length} jobs`);
     if (added.length) {

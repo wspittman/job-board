@@ -1,10 +1,7 @@
-import axios from "axios";
 import { config } from "../config";
-import type { Company } from "../db/models";
-import { checkStatus } from "../utils/axios";
+import type { Company, Job } from "../db/models";
 import { standardizeUntrustedHtml } from "../utils/html";
-import type { AtsEndpoint, JobUpdates } from "./types";
-import { splitJobs } from "./utils";
+import type { AtsEndpoint } from "./types";
 
 interface GreenhouseCompanyResult {
   name: string;
@@ -46,15 +43,18 @@ interface GreenhouseJob {
 }
 
 export class Greenhouse implements AtsEndpoint {
-  async getCompany(id: string): Promise<Company> {
-    const result = await axios.get<GreenhouseCompanyResult>(
-      `${config.GREENHOUSE_URL}/${id}`
-    );
+  getCompanyEndpoint(id: string): string {
+    return `${config.GREENHOUSE_URL}/${id}`;
+  }
 
-    checkStatus(result, ["Greenhouse", id]);
+  getJobsEndpoint(id: string): string {
+    return `${config.GREENHOUSE_URL}/${id}/jobs?content=true`;
+  }
 
-    const { name, content } = result.data;
-
+  formatCompany(
+    id: string,
+    { name, content }: GreenhouseCompanyResult
+  ): Company {
     return {
       id,
       ats: "greenhouse",
@@ -63,23 +63,14 @@ export class Greenhouse implements AtsEndpoint {
     };
   }
 
-  async getJobUpdates(
-    company: Company,
-    currentIds: string[]
-  ): Promise<JobUpdates> {
-    const result = await axios.get<GreenhouseJobsResult>(
-      `${config.GREENHOUSE_URL}/${company.id}/jobs?content=true`
-    );
+  getRawJobs({
+    jobs,
+  }: GreenhouseJobsResult): [id: string, job: GreenhouseJob][] {
+    return jobs.map((job) => [job.id.toString(), job]);
+  }
 
-    checkStatus(result, ["Greenhouse", company.id]);
-
-    const {
-      added: addedRaw,
-      removed,
-      existing,
-    } = splitJobs(result.data.jobs, currentIds, (job) => job.id.toString());
-
-    const added = addedRaw.map((job) => {
+  formatJobs(company: Company, jobs: GreenhouseJob[]): Job[] {
+    return jobs.map((job) => {
       return {
         id: job.id.toString(),
         companyId: company.id,
@@ -93,7 +84,5 @@ export class Greenhouse implements AtsEndpoint {
         facets: {},
       };
     });
-
-    return { added, removed, kept: existing };
   }
 }

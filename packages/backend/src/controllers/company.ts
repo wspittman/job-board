@@ -1,4 +1,4 @@
-import { getAts } from "../ats/ats";
+import { getAtsCompany } from "../ats/ats";
 import { deleteItem, getAllByPartitionKey, getItem, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, CompanyKeys } from "../db/models";
 import {
@@ -32,7 +32,7 @@ export async function removeCompany(key: CompanyKey) {
 }
 
 async function addCompanyInternal({ id, ats }: CompanyKey) {
-  const company = await getAts(ats).getCompany(id);
+  const company = await getAtsCompany(ats, id);
   await updateCompany(company);
 }
 
