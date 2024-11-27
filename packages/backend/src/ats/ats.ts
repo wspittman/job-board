@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { AppError } from "../AppError";
 import type { ATS, Company } from "../db/models";
-import { getRequestContext } from "../utils/telemetry";
+import { getSubContext, logError } from "../utils/telemetry";
 import { Greenhouse } from "./greenhouse";
 import { Lever } from "./lever";
 import type { AtsEndpoint, JobUpdates } from "./types";
@@ -102,11 +102,11 @@ interface AtsLog {
   statusText?: string;
 }
 
-interface AtsContext {
-  calls: AtsLog[];
-  count: number;
-  ms: number;
-}
+const initialContext = {
+  calls: [] as AtsLog[],
+  count: 0,
+  ms: 0,
+};
 
 function logAtsCall(
   name: string,
@@ -115,23 +115,27 @@ function logAtsCall(
   ms: number,
   { status, statusText }: AxiosResponse
 ) {
-  const log: AtsLog = {
-    name,
-    ats,
-    id,
-    ms,
-  };
+  try {
+    const log: AtsLog = {
+      name,
+      ats,
+      id,
+      ms,
+    };
 
-  if (status !== 200) {
-    log.status = status;
-    log.statusText = statusText;
+    if (status !== 200) {
+      log.status = status;
+      log.statusText = statusText;
+    }
+
+    addAtsLog(log);
+  } catch (error) {
+    logError(error);
   }
-
-  addAtsLog(log);
 }
 
 function addAtsLog(log: AtsLog) {
-  const context = getAtsContext();
+  const context = getSubContext("ats", initialContext);
 
   if (context.calls.length < 100) {
     context.calls.push(log);
@@ -139,16 +143,6 @@ function addAtsLog(log: AtsLog) {
 
   context.count++;
   context.ms += log.ms;
-}
-
-function getAtsContext(): AtsContext {
-  const context = getRequestContext();
-  context.ats ??= <AtsContext>{
-    calls: [],
-    count: 0,
-    ms: 0,
-  };
-  return <AtsContext>context.ats;
 }
 
 // #endregion

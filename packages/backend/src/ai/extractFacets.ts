@@ -1,5 +1,5 @@
 import { Job } from "../db/models";
-import { batchRun } from "../utils/async";
+import { BatchOptions, batchRun } from "../utils/async";
 import { jsonCompletion } from "./llm";
 
 const facetPrompt = `You are an experienced job seeker whose goal is to quickly find relevant information from job descriptions.
@@ -54,26 +54,34 @@ const facetSchema = {
   },
 };
 
-export async function extractFacets(texts: string[]): Promise<Facets[]> {
+export async function extractFacets(
+  texts: string[],
+  batchOpts: BatchOptions
+): Promise<Facets[]> {
   const withIndex = texts.map((text, index) => ({
     index,
     text,
   }));
   const results: Facets[] = [];
 
-  await batchRun(withIndex, async ({ index, text }) => {
-    const result = await jsonCompletion<FacetSchema, Facets>(
-      "extractFacets",
-      facetPrompt,
-      facetSchema,
-      text,
-      formatFacets
-    );
+  await batchRun(
+    withIndex,
+    async ({ index, text }) => {
+      const result = await jsonCompletion<FacetSchema, Facets>(
+        "extractFacets",
+        facetPrompt,
+        facetSchema,
+        text,
+        formatFacets
+      );
 
-    if (result) {
-      results[index] = result;
-    }
-  });
+      if (result) {
+        results[index] = result;
+      }
+    },
+    "ExtractFacets",
+    batchOpts
+  );
 
   return results;
 }

@@ -1,5 +1,5 @@
 import { Job } from "../db/models";
-import { batchRun } from "../utils/async";
+import { BatchOptions, batchRun } from "../utils/async";
 import { LRUCache } from "../utils/cache";
 import { logCounter } from "../utils/telemetry";
 import { jsonCompletion } from "./llm";
@@ -56,7 +56,10 @@ const locationSchema = {
   },
 };
 
-export async function extractLocations(texts: string[]): Promise<Location[]> {
+export async function extractLocations(
+  texts: string[],
+  batchOpts: BatchOptions
+): Promise<Location[]> {
   // All original texts -> normalized text
   const normalizeMap = new Map<string, string>();
   // All normalized texts -> an example of original text
@@ -74,12 +77,17 @@ export async function extractLocations(texts: string[]): Promise<Location[]> {
   const normalizedTexts = Array.from(normalizeExampleMap.keys());
 
   // For each normalization text, extract the location using an example of original text
-  await batchRun(normalizedTexts, async (normalizedText) => {
-    const result = await extractLocation(
-      normalizeExampleMap.get(normalizedText)!
-    );
-    extractMap.set(normalizedText, result);
-  });
+  await batchRun(
+    normalizedTexts,
+    async (normalizedText) => {
+      const result = await extractLocation(
+        normalizeExampleMap.get(normalizedText)!
+      );
+      extractMap.set(normalizedText, result);
+    },
+    "ExtractLocation",
+    batchOpts
+  );
 
   // Return the extracted location objects in the order of the original texts
   return texts.map((text) => extractMap.get(normalizeMap.get(text)!));

@@ -16,10 +16,21 @@ interface CustomContext extends CorrelationContext {
  * Get the request context from the correlation context, initializing it if necessary
  * @returns The request context
  */
-export function getRequestContext(): Record<string, unknown> {
+function getRequestContext(): Record<string, unknown> {
   const context = <CustomContext>appInsights.getCorrelationContext();
   context.requestContext ??= {};
   return context.requestContext;
+}
+
+export function getSubContext<T>(name: string, init: T): T {
+  const context = getRequestContext();
+  context[name] ??= init;
+  return <T>context[name];
+}
+
+export function logProperty(name: string, value: unknown) {
+  const context = getRequestContext();
+  context[name] = value;
 }
 
 export function logCounter(name: string, value: number = 1) {

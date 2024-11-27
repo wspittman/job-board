@@ -12,7 +12,7 @@ import {
 import fs from "fs";
 import https from "https";
 import { config } from "../config";
-import { getRequestContext, logError } from "../utils/telemetry";
+import { getSubContext, logError } from "../utils/telemetry";
 
 type ContainerName = "company" | "job" | "metadata";
 
@@ -109,13 +109,13 @@ interface DBLog {
   count?: number;
 }
 
-interface DBContext {
-  calls: DBLog[];
-  count: number;
-  ru: number;
-  ms: number;
-  bytes: number;
-}
+const initialContext = {
+  calls: [] as DBLog[],
+  count: 0,
+  ru: 0,
+  ms: 0,
+  bytes: 0,
+};
 
 function logDBAction(
   action: DBAction,
@@ -123,29 +123,33 @@ function logDBAction(
   response: ItemResponse<ItemDefinition> | FeedResponse<unknown>,
   pkey?: PartitionKey
 ) {
-  const log: DBLog = {
-    name: action,
-    in: container,
-    ru: response.requestCharge,
-    ms: response.diagnostics.clientSideRequestStatistics.requestDurationInMs,
-    bytes:
-      response.diagnostics.clientSideRequestStatistics
-        .totalResponsePayloadLengthInBytes,
-  };
+  try {
+    const log: DBLog = {
+      name: action,
+      in: container,
+      ru: response.requestCharge,
+      ms: response.diagnostics.clientSideRequestStatistics.requestDurationInMs,
+      bytes:
+        response.diagnostics.clientSideRequestStatistics
+          .totalResponsePayloadLengthInBytes,
+    };
 
-  if (pkey) {
-    log.pkey = pkey;
+    if (pkey) {
+      log.pkey = pkey;
+    }
+
+    if (response instanceof FeedResponse) {
+      log.count = response.resources.length;
+    }
+
+    addDBLog(log);
+  } catch (error) {
+    logError(error);
   }
-
-  if (response instanceof FeedResponse) {
-    log.count = response.resources.length;
-  }
-
-  addDBLog(log);
 }
 
 function addDBLog(log: DBLog) {
-  const context = getDBContext();
+  const context = getSubContext("db", initialContext);
 
   if (context.calls.length < 10) {
     context.calls.push(log);
@@ -155,18 +159,6 @@ function addDBLog(log: DBLog) {
   context.ru += log.ru;
   context.ms += log.ms;
   context.bytes += log.bytes;
-}
-
-function getDBContext(): DBContext {
-  const context = getRequestContext();
-  context.db ??= <DBContext>{
-    calls: [],
-    count: 0,
-    ru: 0,
-    ms: 0,
-    bytes: 0,
-  };
-  return <DBContext>context.db;
 }
 
 // #endregion
