@@ -98,7 +98,7 @@ async function extractLocation(text: string): Promise<Location> {
   const cachedResult = locationCache.get(normalizedText);
 
   if (cachedResult) {
-    logCounter("extractLocation.cacheHit");
+    logCounter("ExtractLocation.CacheHit");
     return cachedResult;
   }
 

@@ -113,14 +113,14 @@ function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
 
 export async function getJobs(filterInput: Record<string, string>) {
   const filters = validateFilters(filterInput);
-  logProperty("filters", filters);
+  logProperty("Filters", filters);
 
   if (!Object.keys(filters).length) {
     return [];
   }
 
   const result = await readJobsByFilters(filters);
-  logProperty("count", result.length);
+  logProperty("JobCount", result.length);
   return result;
 }
 
@@ -139,7 +139,7 @@ export async function addJobs(options: CrawlOptions) {
 
 export async function removeJob(key: JobKey) {
   const jobKey = validateJobKey("removeJob", key);
-  logProperty("jobKey", jobKey);
+  logProperty("JobKey", jobKey);
   return deleteJob(jobKey);
 }
 
@@ -150,10 +150,10 @@ export async function removeJobs(options: DeleteOptions) {
     throw new AppError("No timestamp provided");
   }
 
-  logProperty("timestamp", timestamp);
+  logProperty("Timestamp", timestamp);
 
   const jobKeys = await readJobKeysByTimestamp(timestamp);
-  logProperty("count", jobKeys.length);
+  logProperty("Count", jobKeys.length);
 
   await batchRun(jobKeys, deleteJob, "DeleteJob");
 }

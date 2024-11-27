@@ -1,5 +1,6 @@
 import { getContainer, getItem, upsert } from "../db/db";
 import type { Metadata } from "../db/models";
+import { logProperty } from "../utils/telemetry";
 
 let cachedMetadata: Metadata | undefined;
 
@@ -22,6 +23,8 @@ export async function renewMetadata() {
     companyNames: companies.map((company) => [company.id, company.name]),
     jobCount,
   });
+
+  logProperty("MetadataUpdate", { companyCount: companies.length, jobCount });
 
   cachedMetadata = undefined;
 }
