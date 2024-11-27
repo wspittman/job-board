@@ -40,10 +40,6 @@ export function batchLog(
 
 // #region Telemetry
 
-interface BatchContext {
-  [key: string]: number | BatchContext;
-}
-
 function logBatchAction(
   logPath: string[] = [],
   batchId: string = "Batch",
