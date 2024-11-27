@@ -47,9 +47,10 @@ function asyncWrapper(name: string, fn: (input: any) => Promise<unknown>) {
       res.writeHead(202, { "Content-Type": "text/plain" });
       res.end("Accepted");
       await fn(res.locals.input);
-      logEvent(`Async: ${name}`);
     } catch (error: any) {
       next(error);
+    } finally {
+      logEvent(`Async: ${name}`);
     }
   };
 }
