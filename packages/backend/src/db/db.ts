@@ -68,6 +68,14 @@ export async function getAllByPartitionKey<T extends ItemDefinition>(
   return response;
 }
 
+export async function getContainerCount(container: ContainerName) {
+  const response = await query<number>(
+    container,
+    "SELECT VALUE COUNT(1) FROM c"
+  );
+  return response[0];
+}
+
 export async function getAllIdsByPartitionKey(
   container: ContainerName,
   partitionKey: string
@@ -87,7 +95,9 @@ export async function query<T>(
     .items.query(query, options)
     .fetchAll();
   logDBAction("QUERY", container, response, options?.partitionKey);
-  return response.resources.map((entry) => stripItem<T>(entry));
+  return response.resources.map((entry) =>
+    typeof entry === "object" ? stripItem<T>(entry) : entry
+  );
 }
 
 function stripItem<T>(entry: Item): T {

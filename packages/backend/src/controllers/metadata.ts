@@ -1,4 +1,4 @@
-import { getItem, query, upsert } from "../db/db";
+import { getContainerCount, getItem, query, upsert } from "../db/db";
 import type { Metadata } from "../db/models";
 import { logProperty } from "../utils/telemetry";
 
@@ -10,7 +10,7 @@ export async function renewMetadata() {
     "SELECT c.id, c.name FROM c"
   );
 
-  const [jobCount] = await query<number>("job", "SELECT VALUE COUNT(1) FROM c");
+  const jobCount = await getContainerCount("job");
 
   await upsert("metadata", {
     id: "metadata",
