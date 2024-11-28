@@ -200,16 +200,28 @@ export async function connectDB() {
 async function createContainer(
   database: Database,
   name: ContainerName,
-  partitionKey: string
+  partitionKey: string,
+  isRetry: boolean = false
 ) {
-  const { container } = await database.containers.createIfNotExists({
-    id: name,
-    partitionKey: {
-      paths: [`/${partitionKey}`],
-    },
-  });
+  try {
+    const { container } = await database.containers.createIfNotExists({
+      id: name,
+      partitionKey: {
+        paths: [`/${partitionKey}`],
+      },
+    });
 
-  containerMap[name] = container;
+    containerMap[name] = container;
+  } catch (error) {
+    console.log(`Failed to create container: ${name}.`);
+    logError(error);
+    if (!isRetry) {
+      console.log(`Retrying to create container: ${name}.`);
+      createContainer(database, name, partitionKey, true);
+    } else {
+      console.log(`Retry failed to create container: ${name}.`);
+    }
+  }
 }
 
 // #endregion
