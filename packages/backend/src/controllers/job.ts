@@ -290,7 +290,7 @@ async function readJobKeysByTimestamp(timestamp: number) {
 }
 
 async function updateJob(job: Job) {
-  upsert(container, job);
+  return upsert(container, job);
 }
 
 async function deleteJob({ id, companyId }: JobKey) {

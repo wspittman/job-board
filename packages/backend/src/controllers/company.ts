@@ -59,11 +59,11 @@ async function readCompanies(ats: ATS) {
 }
 
 async function updateCompany(company: Company) {
-  upsert(container, company);
+  return upsert(container, company);
 }
 
 async function deleteCompany({ id, ats }: CompanyKey) {
-  deleteItem(container, id, ats);
+  return deleteItem(container, id, ats);
 }
 
 // #endregion
