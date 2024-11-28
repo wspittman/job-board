@@ -88,12 +88,20 @@ function validateFilters({
   return filters;
 }
 
-function validateCrawlOptions({ company }: CrawlOptions): CrawlOptions {
+function validateCrawlOptions(options: CrawlOptions): CrawlOptions {
+  let { company } = options;
+
   if (company) {
     company = validateCompanyKey("getJobs", company);
   }
 
-  return { company };
+  const result = { company };
+
+  if (Object.keys(result).length !== Object.keys(options).length) {
+    throw new AppError("Invalid options");
+  }
+
+  return result;
 }
 
 function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
