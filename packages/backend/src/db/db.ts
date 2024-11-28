@@ -29,7 +29,7 @@ interface Item {
 
 let containerMap: Record<ContainerName, Container>;
 
-export const getContainer = (name: ContainerName) => containerMap[name];
+const getContainer = (name: ContainerName) => containerMap[name];
 
 export async function getItem<T>(
   container: ContainerName,
