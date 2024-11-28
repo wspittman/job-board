@@ -109,13 +109,13 @@ interface DBLog {
   count?: number;
 }
 
-const initialContext = {
+const initialContext = () => ({
   calls: [] as DBLog[],
   count: 0,
   ru: 0,
   ms: 0,
   bytes: 0,
-};
+});
 
 function logDBAction(
   action: DBAction,

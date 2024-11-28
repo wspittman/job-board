@@ -22,9 +22,9 @@ function getRequestContext(): Record<string, unknown> {
   return context.requestContext;
 }
 
-export function getSubContext<T>(name: string, init: T): T {
+export function getSubContext<T>(name: string, init: () => T): T {
   const context = getRequestContext();
-  context[name] ??= init;
+  context[name] ??= init();
   return <T>context[name];
 }
 

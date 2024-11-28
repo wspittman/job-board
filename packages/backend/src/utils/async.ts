@@ -59,7 +59,7 @@ function logBatchAction(
 }
 
 function pathToContext(logPath: string[]) {
-  const context = getSubContext<Record<string, unknown>>("batch", {});
+  const context = getSubContext<Record<string, unknown>>("batch", () => ({}));
 
   let current = context;
   for (let key of logPath) {

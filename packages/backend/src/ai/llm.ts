@@ -66,7 +66,7 @@ interface LLMLog {
   out?: unknown;
 }
 
-const initialContext = {
+const initialContext = () => ({
   calls: [] as LLMLog[],
   counts: {} as Record<string, number>,
   count: 0,
@@ -75,7 +75,7 @@ const initialContext = {
   outTokens: 0,
   cacheTokens: 0,
   ms: 0,
-};
+});
 
 function logLLMAction(
   action: string,

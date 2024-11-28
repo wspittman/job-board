@@ -102,11 +102,11 @@ interface AtsLog {
   statusText?: string;
 }
 
-const initialContext = {
+const initialContext = () => ({
   calls: [] as AtsLog[],
   count: 0,
   ms: 0,
-};
+});
 
 function logAtsCall(
   name: string,
