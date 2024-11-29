@@ -89,19 +89,17 @@ function validateFilters({
 }
 
 function validateCrawlOptions(options: CrawlOptions): CrawlOptions {
-  let { company } = options;
+  let { company, ...rest } = options;
+
+  if (Object.keys(rest).length) {
+    throw new AppError("Unknown options");
+  }
 
   if (company) {
     company = validateCompanyKey("getJobs", company);
   }
 
-  const result = { company };
-
-  if (Object.keys(result).length !== Object.keys(options).length) {
-    throw new AppError("Invalid options");
-  }
-
-  return result;
+  return { company };
 }
 
 function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
