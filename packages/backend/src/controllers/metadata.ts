@@ -19,7 +19,7 @@ export async function renewMetadata() {
     jobCount,
   });
 
-  logProperty("MetadataUpdate", { companyCount: companies.length, jobCount });
+  logProperty("Metadata", { companyCount: companies.length, jobCount });
 
   cachedMetadata = undefined;
 }

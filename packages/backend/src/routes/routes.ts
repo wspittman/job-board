@@ -8,7 +8,7 @@ import { addJobs, getJobs, removeJob, removeJobs } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
 import { prepInput } from "../middleware/prepInput";
-import { logError, logEvent, logProperty } from "../utils/telemetry";
+import { logAsyncEvent, logError } from "../utils/telemetry";
 
 export const router = express.Router();
 
@@ -52,8 +52,7 @@ function asyncWrapper(name: string, fn: (input: any) => Promise<unknown>) {
       logError(error);
     } finally {
       const duration = Date.now() - start;
-      logProperty("Duration", duration);
-      logEvent(`Async: ${name}`);
+      logAsyncEvent(name, duration);
     }
   };
 }

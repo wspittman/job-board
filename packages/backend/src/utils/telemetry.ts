@@ -29,8 +29,19 @@ export function getSubContext<T>(name: string, init: () => T): T {
 }
 
 export function logProperty(name: string, value: unknown) {
-  const context = getRequestContext();
-  context[name] = value;
+  const context = getSubContext<Record<string, unknown>>("prop", () => ({}));
+
+  if (name in context) {
+    const current = context[name];
+
+    if (Array.isArray(current) && !Array.isArray(value)) {
+      current.push(value);
+    } else {
+      context[name] = [current, value];
+    }
+  } else {
+    context[name] = value;
+  }
 }
 
 export function logCounter(name: string, value: number = 1) {
@@ -38,8 +49,10 @@ export function logCounter(name: string, value: number = 1) {
   context[name] = ((context[name] as number) ?? 0) + value;
 }
 
-export function logEvent(name: string) {
-  appInsights.defaultClient.trackEvent({ name });
+export function logAsyncEvent(name: string, duration: number) {
+  const context = getRequestContext();
+  context.duration = duration;
+  appInsights.defaultClient.trackEvent({ name: `Async: ${name}` });
 }
 
 export function logError(error: unknown) {
