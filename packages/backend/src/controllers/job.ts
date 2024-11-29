@@ -2,11 +2,12 @@ import { SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
-import { getAts, getAtsList } from "../ats/ats";
+import { getAtsJobs, getAtsList } from "../ats/ats";
 import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
-import { batchRun, logWrap } from "../utils/async";
+import { batchLog, BatchOptions, batchRun } from "../utils/async";
+import { logProperty } from "../utils/telemetry";
 import { getCompanies, getCompany } from "./company";
 import { renewMetadata } from "./metadata";
 
@@ -46,7 +47,7 @@ function validateFilters({
 }: Record<string, string>): Filters {
   const filters: Filters = {};
 
-  if (companyId) {
+  if (companyId && companyId.length < 100) {
     filters.companyId = companyId;
   }
 
@@ -54,11 +55,11 @@ function validateFilters({
     filters.isRemote = isRemote.toLowerCase() === "true";
   }
 
-  if (title?.length > 2) {
+  if (title?.length > 2 && title.length < 100) {
     filters.title = title;
   }
 
-  if (location?.length > 2) {
+  if (location?.length > 2 && location.length < 100) {
     filters.location = location;
   }
 
@@ -87,7 +88,13 @@ function validateFilters({
   return filters;
 }
 
-function validateCrawlOptions({ company }: CrawlOptions): CrawlOptions {
+function validateCrawlOptions(options: CrawlOptions): CrawlOptions {
+  let { company, ...rest } = options;
+
+  if (Object.keys(rest).length) {
+    throw new AppError("Unknown options");
+  }
+
   if (company) {
     company = validateCompanyKey("getJobs", company);
   }
@@ -112,33 +119,34 @@ function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
 
 export async function getJobs(filterInput: Record<string, string>) {
   const filters = validateFilters(filterInput);
+  logProperty("GetJobs_Filters", filters);
 
   if (!Object.keys(filters).length) {
     return [];
   }
 
-  return readJobsByFilters(filters);
+  const result = await readJobsByFilters(filters);
+  logProperty("GetJobs_Count", result.length);
+  return result;
 }
 
 export async function addJobs(options: CrawlOptions) {
   const { company: companyKey } = validateCrawlOptions(options);
 
   if (companyKey) {
-    return logWrap(`addJobs(${companyKey.id})`, async () => {
-      const company = await getCompany(companyKey);
-      await crawlCompany(company);
-      await renewMetadata();
-    });
+    const company = await getCompany(companyKey);
+    await crawlCompany(company);
+  } else {
+    await batchRun(getAtsList(), crawlAts, "CrawlAts");
   }
 
-  return logWrap("addJobs", async () => {
-    await Promise.all(getAtsList().map(crawlAts));
-    await renewMetadata();
-  });
+  await renewMetadata();
 }
 
 export async function removeJob(key: JobKey) {
-  return deleteJob(validateJobKey("removeJob", key));
+  const jobKey = validateJobKey("removeJob", key);
+  logProperty("RemoveJob_Key", jobKey);
+  return deleteJob(jobKey);
 }
 
 export async function removeJobs(options: DeleteOptions) {
@@ -148,58 +156,58 @@ export async function removeJobs(options: DeleteOptions) {
     throw new AppError("No timestamp provided");
   }
 
-  return logWrap(
-    `removeJobs(${new Date(timestamp).toISOString()})`,
-    async () => {
-      const jobKeys = await readJobKeysByTimestamp(timestamp);
-      console.log(`Deleting ${jobKeys.length} jobs`);
-      await batchRun(jobKeys, deleteJob);
-    }
-  );
+  logProperty("RemoveJobs_Timestamp", timestamp);
+
+  const jobKeys = await readJobKeysByTimestamp(timestamp);
+  logProperty("RemoveJobs_Count", jobKeys.length);
+
+  await batchRun(jobKeys, deleteJob, "DeleteJob");
 }
 
-async function crawlAts(ats: ATS) {
-  return logWrap(`crawlAts(${ats})`, async () => {
-    const companies = await getCompanies(ats);
-    await batchRun(companies, (company) => crawlCompany(company));
+async function crawlAts(ats: ATS, logPath: string[]) {
+  const companies = await getCompanies(ats);
+  await batchRun(companies, crawlCompany, "CrawlCompany", {
+    batchId: ats,
+    logPath,
   });
 }
 
-async function crawlCompany(company: Company) {
-  const msg = `crawlCompany(${company.ats}, ${company.id})`;
-  return logWrap(msg, async () => {
-    const dbJobIds = await readJobIds(company.id);
-    const { added, removed, kept } = await getAts(company.ats).getJobUpdates(
-      company,
-      dbJobIds
+async function crawlCompany(company: Company, logPath: string[] = []) {
+  const batchOpts = { batchId: company.id, logPath };
+  const dbJobIds = await readJobIds(company.id);
+  const { added, removed, kept } = await getAtsJobs(company, dbJobIds);
+
+  if (added.length) {
+    await fillJobs(added, batchOpts);
+    await batchRun(added, updateJob, "AddJob", batchOpts);
+  }
+
+  if (removed.length) {
+    await batchRun(
+      removed,
+      (id) => deleteJob({ id, companyId: company.id }),
+      "DeleteJob",
+      batchOpts
     );
+  }
 
-    console.log(`${msg}: Adding ${added.length} jobs`);
-    if (added.length) {
-      await fillJobs(added, company);
-      await batchRun(added, (job) => updateJob(job));
-    }
-
-    console.log(`${msg}: Deleting ${removed.length} jobs`);
-    if (removed.length) {
-      await batchRun(removed, (id) => deleteJob({ id, companyId: company.id }));
-    }
-
-    console.log(`${msg}: Ignoring ${kept} jobs`);
-  });
+  batchLog("Ignored", kept, batchOpts);
 }
 
-async function fillJobs(jobs: Job[], company: Company) {
-  const msg = `fillJobs(${jobs.length}, ${company.id})`;
-  return logWrap(msg, async () => {
-    const locations = await extractLocations(jobs.map((job) => job.location));
-    const facets = await extractFacets(jobs.map((job) => job.description));
+async function fillJobs(jobs: Job[], batchOpts: BatchOptions) {
+  const locations = await extractLocations(
+    jobs.map((job) => job.location),
+    batchOpts
+  );
+  const facets = await extractFacets(
+    jobs.map((job) => job.description),
+    batchOpts
+  );
 
-    jobs.forEach((job, index) => {
-      job.isRemote = locations[index]?.isRemote ?? job.isRemote;
-      job.location = locations[index]?.location ?? job.location;
-      job.facets = facets[index] ?? {};
-    });
+  jobs.forEach((job, index) => {
+    job.isRemote = locations[index]?.isRemote ?? job.isRemote;
+    job.location = locations[index]?.location ?? job.location;
+    job.facets = facets[index] ?? {};
   });
 }
 
@@ -288,7 +296,7 @@ async function readJobKeysByTimestamp(timestamp: number) {
 }
 
 async function updateJob(job: Job) {
-  upsert(container, job);
+  return upsert(container, job);
 }
 
 async function deleteJob({ id, companyId }: JobKey) {

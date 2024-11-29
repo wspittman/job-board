@@ -3,12 +3,16 @@ import {
   CosmosClient,
   Database,
   FeedOptions,
+  FeedResponse,
   ItemDefinition,
+  ItemResponse,
+  PartitionKey,
   SqlQuerySpec,
 } from "@azure/cosmos";
 import fs from "fs";
 import https from "https";
 import { config } from "../config";
+import { getSubContext, logError } from "../utils/telemetry";
 
 type ContainerName = "company" | "job" | "metadata";
 
@@ -25,21 +29,21 @@ interface Item {
 
 let containerMap: Record<ContainerName, Container>;
 
-export const getContainer = (name: ContainerName) => containerMap[name];
+const getContainer = (name: ContainerName) => containerMap[name];
 
 export async function getItem<T>(
   container: ContainerName,
   id: string,
   partitionKey: string
 ) {
-  const { resource } = await getContainer(container)
-    .item(id, partitionKey)
-    .read();
-  return stripItem<T>(resource);
+  const response = await getContainer(container).item(id, partitionKey).read();
+  logDBAction("GET", container, response, partitionKey);
+  return stripItem<T>(response.resource);
 }
 
 export async function upsert(container: ContainerName, item: Object) {
-  await getContainer(container).items.upsert(item);
+  const response = await getContainer(container).items.upsert(item);
+  logDBAction("UPSERT", container, response);
 }
 
 export async function deleteItem(
@@ -47,14 +51,29 @@ export async function deleteItem(
   id: string,
   partitionKey: string
 ) {
-  await getContainer(container).item(id, partitionKey).delete();
+  const response = await getContainer(container)
+    .item(id, partitionKey)
+    .delete();
+  logDBAction("DELETE", container, response, partitionKey);
 }
 
 export async function getAllByPartitionKey<T extends ItemDefinition>(
   container: ContainerName,
   partitionKey: string
 ) {
-  return getContainer(container).items.readAll<T>({ partitionKey }).fetchAll();
+  const response = await getContainer(container)
+    .items.readAll<T>({ partitionKey })
+    .fetchAll();
+  logDBAction("GET_ALL", container, response, partitionKey);
+  return response;
+}
+
+export async function getContainerCount(container: ContainerName) {
+  const response = await query<number>(
+    container,
+    "SELECT VALUE COUNT(1) FROM c"
+  );
+  return response[0];
 }
 
 export async function getAllIdsByPartitionKey(
@@ -72,16 +91,89 @@ export async function query<T>(
   query: string | SqlQuerySpec,
   options?: FeedOptions
 ) {
-  const { resources } = await getContainer(container)
+  const response = await getContainer(container)
     .items.query(query, options)
     .fetchAll();
-  return resources.map((entry) => stripItem<T>(entry));
+  logDBAction("QUERY", container, response, options?.partitionKey);
+  return response.resources.map((entry) =>
+    typeof entry === "object" ? stripItem<T>(entry) : entry
+  );
 }
 
 function stripItem<T>(entry: Item): T {
   const { _rid, _self, _etag, _attachments, ...rest } = entry;
   return rest as T;
 }
+
+// #region Telemetry
+
+type DBAction = "GET" | "UPSERT" | "DELETE" | "GET_ALL" | "QUERY";
+
+interface DBLog {
+  name: DBAction;
+  in: ContainerName;
+  pkey?: PartitionKey;
+  ru: number;
+  ms: number;
+  bytes: number;
+  count?: number;
+}
+
+const initialContext = () => ({
+  calls: [] as DBLog[],
+  count: 0,
+  ru: 0,
+  ms: 0,
+  bytes: 0,
+});
+
+function logDBAction(
+  action: DBAction,
+  container: ContainerName,
+  response: ItemResponse<ItemDefinition> | FeedResponse<unknown>,
+  pkey?: PartitionKey
+) {
+  try {
+    const log: DBLog = {
+      name: action,
+      in: container,
+      ru: response.requestCharge,
+      ms: response.diagnostics.clientSideRequestStatistics.requestDurationInMs,
+      bytes:
+        response.diagnostics.clientSideRequestStatistics
+          .totalResponsePayloadLengthInBytes,
+    };
+
+    if (pkey) {
+      log.pkey = pkey;
+    }
+
+    if (response instanceof FeedResponse) {
+      log.count = response.resources.length;
+    }
+
+    addDBLog(log);
+  } catch (error) {
+    logError(error);
+  }
+}
+
+function addDBLog(log: DBLog) {
+  const context = getSubContext("db", initialContext);
+
+  if (context.calls.length < 10) {
+    context.calls.push(log);
+  }
+
+  context.count++;
+  context.ru += log.ru;
+  context.ms += log.ms;
+  context.bytes += log.bytes;
+}
+
+// #endregion
+
+// #region Initialization
 
 export async function connectDB() {
   try {
@@ -110,7 +202,7 @@ export async function connectDB() {
 
     console.log("CosmosDB connected");
   } catch (error) {
-    console.error("CosmosDB connection error:", error);
+    logError(error);
     process.exit(1);
   }
 }
@@ -118,14 +210,28 @@ export async function connectDB() {
 async function createContainer(
   database: Database,
   name: ContainerName,
-  partitionKey: string
+  partitionKey: string,
+  isRetry: boolean = false
 ) {
-  const { container } = await database.containers.createIfNotExists({
-    id: name,
-    partitionKey: {
-      paths: [`/${partitionKey}`],
-    },
-  });
+  try {
+    const { container } = await database.containers.createIfNotExists({
+      id: name,
+      partitionKey: {
+        paths: [`/${partitionKey}`],
+      },
+    });
 
-  containerMap[name] = container;
+    containerMap[name] = container;
+  } catch (error) {
+    console.log(`Failed to create container: ${name}.`);
+    logError(error);
+    if (!isRetry) {
+      console.log(`Retrying to create container: ${name}.`);
+      createContainer(database, name, partitionKey, true);
+    } else {
+      console.log(`Retry failed to create container: ${name}.`);
+    }
+  }
 }
+
+// #endregion

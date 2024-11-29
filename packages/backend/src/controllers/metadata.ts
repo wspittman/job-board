@@ -1,20 +1,16 @@
-import { getContainer, getItem, upsert } from "../db/db";
+import { getContainerCount, getItem, query, upsert } from "../db/db";
 import type { Metadata } from "../db/models";
+import { logProperty } from "../utils/telemetry";
 
 let cachedMetadata: Metadata | undefined;
 
 export async function renewMetadata() {
-  const companies = (
-    await getContainer("company")
-      .items.query<{ id: string; name: string }>("SELECT c.id, c.name FROM c")
-      .fetchAll()
-  ).resources;
+  const companies = await query<{ id: string; name: string }>(
+    "company",
+    "SELECT c.id, c.name FROM c"
+  );
 
-  const [jobCount] = (
-    await getContainer("job")
-      .items.query<number>("SELECT VALUE COUNT(1) FROM c")
-      .fetchAll()
-  ).resources;
+  const jobCount = await getContainerCount("job");
 
   await upsert("metadata", {
     id: "metadata",
@@ -22,6 +18,8 @@ export async function renewMetadata() {
     companyNames: companies.map((company) => [company.id, company.name]),
     jobCount,
   });
+
+  logProperty("Metadata", { companyCount: companies.length, jobCount });
 
   cachedMetadata = undefined;
 }

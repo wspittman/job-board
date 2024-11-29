@@ -53,5 +53,9 @@ export function validateJobKey(prefix: string, key: JobKey): JobKey {
     throw new AppError(`${prefix}: Job companyId field is required`);
   }
 
+  if (id.length > 100 || companyId.length > 100) {
+    throw new AppError(`${prefix}: Job id or companyId field is too long`);
+  }
+
   return { id, companyId };
 }

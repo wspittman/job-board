@@ -1,11 +1,8 @@
-import axios from "axios";
 import { AppError } from "../AppError";
 import { config } from "../config";
-import type { Company } from "../db/models";
-import { checkStatus } from "../utils/axios";
+import type { Company, Job } from "../db/models";
 import { standardizeUntrustedHtml } from "../utils/html";
-import type { AtsEndpoint, JobUpdates } from "./types";
-import { splitJobs } from "./utils";
+import type { AtsEndpoint } from "./types";
 
 interface LeverJob {
   id: string;
@@ -41,19 +38,21 @@ interface LeverJob {
 }
 
 export class Lever implements AtsEndpoint {
-  async getCompany(id: string): Promise<Company> {
-    const result = await axios.get<LeverJob[]>(
-      `${config.LEVER_URL}/${id}?mode=json&limit=1`
-    );
+  getCompanyEndpoint(id: string): string {
+    return `${config.LEVER_URL}/${id}?mode=json&limit=1`;
+  }
 
-    checkStatus(result, ["Lever", id]);
+  getJobsEndpoint(id: string): string {
+    return `${config.LEVER_URL}/${id}?mode=json`;
+  }
 
-    if (!result.data.length) {
+  formatCompany(id: string, data: LeverJob[]): Company {
+    if (!data.length) {
       // Since we can't gather proper name/description, treat as not found
       throw new AppError(`Lever / ${id}: Not Found`, 404);
     }
 
-    const { openingPlain } = result.data[0];
+    const { openingPlain } = data[0];
 
     return {
       id,
@@ -64,23 +63,12 @@ export class Lever implements AtsEndpoint {
     };
   }
 
-  async getJobUpdates(
-    company: Company,
-    currentIds: string[]
-  ): Promise<JobUpdates> {
-    const result = await axios.get<LeverJob[]>(
-      `${config.LEVER_URL}/${company.id}?mode=json`
-    );
+  getRawJobs(data: LeverJob[]): [string, LeverJob][] {
+    return data.map((job) => [job.id, job]);
+  }
 
-    checkStatus(result, ["Lever", company.id]);
-
-    const {
-      added: addedRaw,
-      removed,
-      existing,
-    } = splitJobs(result.data, currentIds, (job) => job.id);
-
-    const added = addedRaw.map((job) => {
+  formatJobs(company: Company, jobs: LeverJob[]): Job[] {
+    return jobs.map((job) => {
       return {
         id: job.id,
         companyId: company.id,
@@ -100,7 +88,5 @@ export class Lever implements AtsEndpoint {
         facets: {},
       };
     });
-
-    return { added, removed, kept: existing };
   }
 }

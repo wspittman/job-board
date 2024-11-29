@@ -1,4 +1,4 @@
-import { getAts } from "../ats/ats";
+import { getAtsCompany } from "../ats/ats";
 import { deleteItem, getAllByPartitionKey, getItem, upsert } from "../db/db";
 import type { ATS, Company, CompanyKey, CompanyKeys } from "../db/models";
 import {
@@ -6,33 +6,45 @@ import {
   validateCompanyKey,
   validateCompanyKeys,
 } from "../db/validation";
+import { logProperty } from "../utils/telemetry";
 
 const container = "company";
 
 export async function getCompany(key: CompanyKey) {
-  return readCompany(validateCompanyKey("getCompany", key));
+  const companyKey = validateCompanyKey("getCompany", key);
+  logProperty("GetCompany_Key", companyKey);
+  return readCompany(companyKey);
 }
 
 export async function getCompanies(ats: ATS) {
   validateAts("getCompanies", ats);
-  return readCompanies(ats);
+  logProperty("GetCompanies_ATS", ats);
+  const result = await readCompanies(ats);
+  logProperty("GetCompanies_Count", result.length);
+  return result;
 }
 
 export async function addCompany(key: CompanyKey) {
-  return addCompanyInternal(validateCompanyKey("addCompany", key));
+  const companyKey = validateCompanyKey("addCompany", key);
+  logProperty("AddCompany_Key", companyKey);
+  return addCompanyInternal(companyKey);
 }
 
 export async function addCompanies(keys: CompanyKeys) {
   const { ids, ats } = validateCompanyKeys("addCompanies", keys);
+  logProperty("AddCompanies._ATS", ats);
+  logProperty("AddCompanies_Ids", ids);
   await Promise.all(ids.map((id) => addCompanyInternal({ id, ats })));
 }
 
 export async function removeCompany(key: CompanyKey) {
-  return deleteCompany(validateCompanyKey("removeCompany", key));
+  const companyKey = validateCompanyKey("removeCompany", key);
+  logProperty("RemoveCompany_Key", companyKey);
+  return deleteCompany(companyKey);
 }
 
 async function addCompanyInternal({ id, ats }: CompanyKey) {
-  const company = await getAts(ats).getCompany(id);
+  const company = await getAtsCompany(ats, id);
   await updateCompany(company);
 }
 
@@ -47,11 +59,11 @@ async function readCompanies(ats: ATS) {
 }
 
 async function updateCompany(company: Company) {
-  upsert(container, company);
+  return upsert(container, company);
 }
 
 async function deleteCompany({ id, ats }: CompanyKey) {
-  deleteItem(container, id, ats);
+  return deleteItem(container, id, ats);
 }
 
 // #endregion

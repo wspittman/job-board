@@ -28,4 +28,9 @@ export const config = {
 
   // Auth configs
   ADMIN_TOKEN: process.env.ADMIN_TOKEN || "admin",
+
+  // App Insights configs
+  // In theory App Insights SDK should pick up this env var automatically, but it doesn't
+  APPLICATIONINSIGHTS_CONNECTION_STRING:
+    process.env.APPLICATIONINSIGHTS_CONNECTION_STRING || "",
 };
