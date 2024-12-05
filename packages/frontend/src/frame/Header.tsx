@@ -2,14 +2,11 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Link, { LinkProps } from "@mui/material/Link";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import { useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
-import { MenuIcon } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FilterLogo } from "../components/FilterLogo";
+import { HeaderMenu } from "./HeaderMenu";
 
 interface HeaderLinkProps {
   url: string;
@@ -39,12 +36,6 @@ const HeaderLink = ({ url, text, variant }: HeaderLinkProps) => {
 
 export const Header = () => {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState<HTMLElement>();
-
-  const menuClick = (url: string) => {
-    navigate(url);
-    setAnchorEl(undefined);
-  };
 
   return (
     <AppBar position="sticky">
@@ -63,25 +54,9 @@ export const Header = () => {
         <Box flexGrow={1} />
         <Box gap={2} sx={{ display: { xs: "none", sm: "flex" } }}>
           <HeaderLink url="/explore" text="Explore" variant="h5" />
-          <HeaderLink url="/about" text="About" variant="h5" />
+          <HeaderLink url="/faq" text="FAQ" variant="h5" />
         </Box>
-        <Box sx={{ display: { xs: "flex", sm: "none" } }}>
-          <IconButton
-            edge="end"
-            color="inherit"
-            onClick={(event) => setAnchorEl(event.currentTarget)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(undefined)}
-          >
-            <MenuItem onClick={() => menuClick("/explore")}>Explore</MenuItem>
-            <MenuItem onClick={() => menuClick("/about")}>About</MenuItem>
-          </Menu>
-        </Box>
+        <HeaderMenu />
       </Toolbar>
     </AppBar>
   );
