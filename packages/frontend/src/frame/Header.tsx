@@ -37,7 +37,7 @@ const HeaderLink = ({ url, text, variant }: HeaderLinkProps) => {
   );
 };
 
-export const Header = (): JSX.Element => {
+export const Header = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLElement>();
 
@@ -49,10 +49,16 @@ export const Header = (): JSX.Element => {
   return (
     <AppBar position="sticky">
       <Toolbar variant="dense">
-        <FilterLogo
-          size={32}
-          style={{ backgroundColor: "white", borderRadius: 8, marginRight: 8 }}
-        />
+        <IconButton onClick={() => navigate("/")}>
+          <FilterLogo
+            size={32}
+            style={{
+              backgroundColor: "white",
+              borderRadius: 8,
+              marginRight: 8,
+            }}
+          />
+        </IconButton>
         <HeaderLink url="/" text="Better Job Board" variant="h4" />
         <Box flexGrow={1} />
         <Box gap={2} sx={{ display: { xs: "none", sm: "flex" } }}>
