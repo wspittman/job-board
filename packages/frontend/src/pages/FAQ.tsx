@@ -4,13 +4,15 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import { ChevronsDown } from "lucide-react";
+import { useMetadata } from "../services/apiHooks";
 
-interface FAQProps {
+interface QAProps {
   q: string;
   a: string;
+  extra?: string;
 }
 
-const QA = ({ q, a }: FAQProps) => (
+const QA = ({ q, a, extra }: QAProps) => (
   <Accordion sx={{ py: 1 }}>
     <AccordionSummary expandIcon={<ChevronsDown />}>
       <Typography variant="h4" fontWeight="bold">
@@ -19,11 +21,20 @@ const QA = ({ q, a }: FAQProps) => (
     </AccordionSummary>
     <AccordionDetails>
       <Typography>{a}</Typography>
+      {extra && <Typography color="text.secondary">{extra}</Typography>}
     </AccordionDetails>
   </Accordion>
 );
 
 export const FAQ = () => {
+  const { data } = useMetadata();
+
+  const lastRefreshed = data
+    ? // _ts is in seconds, but Date expects milliseconds
+      // TBD: The backend should return ts in milliseconds
+      `Last refreshed: ${new Date(data._ts * 1000).toLocaleString()}`
+    : undefined;
+
   return (
     <Container maxWidth="lg">
       <Typography
@@ -47,6 +58,7 @@ export const FAQ = () => {
       <QA
         q="How fresh are these job posts?"
         a="We refresh our job posts daily to ensure you're seeing the latest opportunities. With that level of freshness, you can apply while they're still hot!"
+        extra={lastRefreshed}
       />
       <QA
         q="I found a great job! How do I apply?"
@@ -63,6 +75,7 @@ export const FAQ = () => {
       <QA
         q="How do I know these jobs are still up for grabs?"
         a="We update our job posts every day and remove any that are no longer accepting applications. If you see it here, it was verified as active within the last 24 hours! If you do find a job that has been taken down since our last update, the apply link won't work."
+        extra={lastRefreshed}
       />
       <QA
         q="What data do you collect about me?"
