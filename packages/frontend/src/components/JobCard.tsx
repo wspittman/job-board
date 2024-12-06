@@ -67,10 +67,12 @@ export const JobCard = ({ job, onClose }: Props) => {
           <Building />
           {job.company}
         </Typography>
-        <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
-          <MapPin />
-          {job.location}
-        </Typography>
+        {job.location && (
+          <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
+            <MapPin />
+            {job.location}
+          </Typography>
+        )}
         <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
           <Calendar />
           {new Date(job.postTS).toLocaleDateString()}
