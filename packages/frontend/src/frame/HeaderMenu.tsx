@@ -5,6 +5,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { MenuIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { GitHubButton } from "../components/GitHubButton";
 
 export const HeaderMenu = () => {
   const navigate = useNavigate();
@@ -31,6 +32,9 @@ export const HeaderMenu = () => {
       >
         <MenuItem onClick={() => menuClick("/explore")}>Explore</MenuItem>
         <MenuItem onClick={() => menuClick("/faq")}>FAQ</MenuItem>
+        <MenuItem>
+          <GitHubButton size="small" edge="start" />
+        </MenuItem>
       </Menu>
     </Box>
   );

@@ -6,6 +6,7 @@ import { useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import { useNavigate } from "react-router-dom";
 import { FilterLogo } from "../components/FilterLogo";
+import { GitHubButton } from "../components/GitHubButton";
 import { HeaderMenu } from "./HeaderMenu";
 
 interface HeaderLinkProps {
@@ -52,9 +53,23 @@ export const Header = () => {
         </IconButton>
         <HeaderLink url="/" text="Better Job Board" variant="h4" />
         <Box flexGrow={1} />
-        <Box gap={2} sx={{ display: { xs: "none", sm: "flex" } }}>
+        <Box
+          gap={2}
+          alignItems="center"
+          sx={{ display: { xs: "none", sm: "flex" } }}
+        >
           <HeaderLink url="/explore" text="Explore" variant="h5" />
           <HeaderLink url="/faq" text="FAQ" variant="h5" />
+          <GitHubButton
+            size="small"
+            edge="start"
+            sx={{
+              backgroundColor: "grey.200",
+              "&:hover": {
+                backgroundColor: "grey.300",
+              },
+            }}
+          />
         </Box>
         <HeaderMenu />
       </Toolbar>
