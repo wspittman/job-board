@@ -87,7 +87,7 @@ export const FAQ = () => {
       />
       <QA
         q="Got an idea to make this better?"
-        a="We'd love to hear it! Send your thoughts to [PLACEHOLDER]. We read every message and use your feedback to shape our improvements. While we can't reply to every message personally, your input goes a long way in helping us build a better experience for all job seekers."
+        a="We'd love to hear it! Send your thoughts to contact@betterjobboard.net. We read every message and use your feedback to shape our improvements. While we can't reply to every message personally, your input goes a long way in helping us build a better experience for all job seekers."
       />
     </Container>
   );
