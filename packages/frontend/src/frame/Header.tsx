@@ -64,9 +64,9 @@ export const Header = () => {
             size="small"
             edge="start"
             sx={{
-              backgroundColor: "grey.200",
+              backgroundColor: "primary.light",
               "&:hover": {
-                backgroundColor: "grey.300",
+                backgroundColor: "primary",
               },
             }}
           />
