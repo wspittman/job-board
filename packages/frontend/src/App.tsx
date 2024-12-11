@@ -3,8 +3,8 @@ import { ThemeProvider } from "@mui/material/styles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Header } from "./frame/Header";
-import { About } from "./pages/About";
 import { Explore } from "./pages/Explore";
+import { FAQ } from "./pages/FAQ";
 import { Home } from "./pages/Home";
 import { NotFound } from "./pages/NotFound";
 import { theme } from "./theme";
@@ -27,7 +27,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/explore" element={<Explore />} />
-              <Route path="/about" element={<About />} />
+              <Route path="/faq" element={<FAQ />} />
               <Route path="/404" element={<NotFound />} />
               <Route path="*" element={<Navigate to="/404" replace />} />
             </Routes>

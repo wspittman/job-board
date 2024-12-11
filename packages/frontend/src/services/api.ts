@@ -6,6 +6,7 @@ export interface Metadata {
   companyCount: number;
   companyNames: [string, string][];
   jobCount: number;
+  _ts: number;
 }
 
 export interface Job {
