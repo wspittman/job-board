@@ -5,7 +5,6 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Grid from "@mui/material/Grid2";
-import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -13,6 +12,7 @@ import { ChevronsDown, X } from "lucide-react";
 import { useMemo } from "react";
 import { Filters } from "../services/api";
 import { useMetadata } from "../services/apiHooks";
+import { NumberField } from "./NumberField";
 
 const gridSize = { xs: 12, sm: 6, md: 4, lg: 3 };
 
@@ -44,9 +44,6 @@ export const FilterArea = ({
     isRemote === undefined ? "" : isRemote ? "true" : "false";
   const titleValue = title || "";
   const locationValue = location || "";
-  const postSinceValue = daysSince || 0;
-  const experienceValue = maxExperience || 0;
-  const salaryValue = minSalary || 0;
 
   const chipStrings = useMemo(() => {
     return Object.entries({
@@ -155,76 +152,32 @@ export const FilterArea = ({
             />
           </Grid>
           <Grid size={gridSize}>
-            <TextField
-              fullWidth
-              type="number"
+            <NumberField
+              value={minSalary}
+              onChange={(minSalary) => onChange({ minSalary })}
               label="Minimum Salary"
-              name="salary"
-              value={salaryValue}
-              onChange={(e) => {
-                const val = parseInt(e.target.value);
-                onChange({
-                  minSalary: isNaN(val) || val < 0 ? undefined : val,
-                });
-              }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">$</InputAdornment>
-                  ),
-                },
-              }}
+              prefix="$"
+              max={10000000}
             />
           </Grid>
           <Grid size={gridSize}>
-            <TextField
-              fullWidth
-              type="number"
+            <NumberField
+              value={maxExperience}
+              onChange={(maxExperience) => onChange({ maxExperience })}
               label="Required Experience"
-              name="experience"
-              value={experienceValue}
-              onChange={(e) => {
-                const val = parseInt(e.target.value);
-                onChange({
-                  maxExperience: isNaN(val) || val < 0 ? undefined : val,
-                });
-              }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      I have at least
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      years experience
-                    </InputAdornment>
-                  ),
-                },
-              }}
+              prefix="I have at least"
+              suffix="years experience"
+              max={100}
             />
           </Grid>
           <Grid size={gridSize}>
-            <TextField
-              fullWidth
-              type="number"
+            <NumberField
+              value={daysSince}
+              onChange={(daysSince) => onChange({ daysSince })}
               label="Posted Since"
-              name="postSince"
-              value={postSinceValue}
-              onChange={(e) => {
-                const val = parseInt(e.target.value);
-                onChange({
-                  daysSince: isNaN(val) || val < 1 ? undefined : val,
-                });
-              }}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">days ago</InputAdornment>
-                  ),
-                },
-              }}
+              suffix="days ago"
+              min={1}
+              max={365}
             />
           </Grid>
         </Grid>
