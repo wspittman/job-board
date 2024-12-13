@@ -5,7 +5,7 @@ import Stack from "@mui/material/Stack";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FilterArea } from "../components/FilterArea";
-import { JobCard } from "../components/JobCard";
+import { JobDetail } from "../components/JobDetail";
 import { JobTable } from "../components/JobTable";
 import { PageError } from "../frame/PageError";
 import { PageLoader } from "../frame/PageLoader";
@@ -112,7 +112,7 @@ export const Explore = () => {
                 overflow="auto"
                 ref={jobCardRef}
               >
-                <JobCard job={selectedJob} onClose={clearJob} />
+                <JobDetail job={selectedJob} onClose={clearJob} />
               </Box>
             )}
           </Box>
@@ -136,7 +136,7 @@ export const Explore = () => {
             <Button onClick={clearJob} sx={{ m: 1 }} variant="outlined">
               Close
             </Button>
-            {selectedJob && <JobCard job={selectedJob} />}
+            {selectedJob && <JobDetail job={selectedJob} />}
           </Drawer>
         </>
       )}

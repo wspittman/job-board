@@ -37,7 +37,7 @@ const StyledDescription = styled("div")(({ theme }) => ({
   },
 }));
 
-export const JobCard = ({ job, onClose }: Props) => {
+export const JobDetail = ({ job, onClose }: Props) => {
   return (
     <Paper sx={{ p: 2 }}>
       <Grid container spacing={2}>
