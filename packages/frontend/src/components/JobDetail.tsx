@@ -5,12 +5,7 @@ import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { Building, Calendar, MapPin } from "lucide-react";
 import { Job } from "../services/api";
-
-const iconTextStyle = {
-  display: "flex",
-  alignItems: "center",
-  gap: 1,
-};
+import { IconTypography } from "./IconTypography";
 
 interface Props {
   job?: Job;
@@ -56,24 +51,29 @@ export const JobDetail = ({ job }: Props) => {
             href={job.applyUrl}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label={`Apply for ${job.title} position at ${job.company}`}
           >
             Apply
           </Button>
         </Grid>
-        <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
-          <Building />
-          {job.company}
-        </Typography>
-        {job.location && (
-          <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
-            <MapPin />
-            {job.location}
-          </Typography>
-        )}
-        <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
-          <Calendar />
-          {new Date(job.postTS).toLocaleDateString()}
-        </Typography>
+        <IconTypography
+          Icon={Building}
+          text={job.company}
+          variant="h5"
+          color="text.secondary"
+        />
+        <IconTypography
+          Icon={MapPin}
+          text={job.location}
+          variant="h5"
+          color="text.secondary"
+        />
+        <IconTypography
+          Icon={Calendar}
+          text={new Date(job.postTS).toLocaleDateString()}
+          variant="h5"
+          color="text.secondary"
+        />
       </Grid>
       <StyledDescription
         dangerouslySetInnerHTML={{ __html: job.description }}

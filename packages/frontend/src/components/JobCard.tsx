@@ -1,42 +1,16 @@
 import { Paper } from "@mui/material";
-import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Briefcase, Clock, DollarSign, MapPin } from "lucide-react";
-import { ElementType } from "react";
 import { Job } from "../services/api";
+import { IconTypography } from "./IconTypography";
 
 interface Props {
   job: Job;
   selected?: boolean;
   onClick?: () => void;
 }
-
-interface DisplayFacetProps {
-  Icon: ElementType;
-  text?: string | number;
-  suffix?: string;
-}
-
-/**
- * Renders a single facet of job information with an icon
- * @param Icon The icon component to display
- * @param text The text content to display
- * @param suffix Optional suffix to append to the text
- */
-const DisplayFacet = ({ Icon, text, suffix }: DisplayFacetProps) => {
-  if (!text) return null;
-
-  return (
-    <Box display="flex" alignItems="center">
-      <Icon size={16} />
-      <Typography variant="body2" marginLeft={1}>
-        {`${text} ${suffix ?? ""}`}
-      </Typography>
-    </Box>
-  );
-};
 
 interface DisplayChipProps {
   condition?: boolean;
@@ -93,17 +67,20 @@ export const JobCard = ({ job, selected, onClick }: Props) => {
         />
       </Stack>
 
-      <DisplayFacet Icon={MapPin} text={job.location} />
-      <DisplayFacet
+      <IconTypography Icon={MapPin} text={job.location} />
+      <IconTypography
         Icon={DollarSign}
         text={job.facets?.salary?.toLocaleString()}
       />
-      <DisplayFacet
+      <IconTypography
         Icon={Briefcase}
         text={job.facets?.experience}
         suffix="years experience"
       />
-      <DisplayFacet Icon={Clock} text={`Posted ${daysSincePosted} days ago`} />
+      <IconTypography
+        Icon={Clock}
+        text={`Posted ${daysSincePosted} days ago`}
+      />
 
       {job.facets?.summary && (
         <Typography variant="body2" color="text.secondary" marginTop={2}>
