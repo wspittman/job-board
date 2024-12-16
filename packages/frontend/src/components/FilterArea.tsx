@@ -116,6 +116,7 @@ export const FilterArea = ({
           <Grid size={gridSize}>
             <Autocomplete
               disablePortal
+              handleHomeEndKeys={false}
               options={companyOptions}
               renderInput={(params) => (
                 <TextField {...params} label="Company" />
