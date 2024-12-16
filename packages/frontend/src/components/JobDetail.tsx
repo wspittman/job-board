@@ -1,10 +1,9 @@
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
-import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
-import { Building, Calendar, MapPin, X } from "lucide-react";
+import { Building, Calendar, MapPin } from "lucide-react";
 import { Job } from "../services/api";
 
 const iconTextStyle = {
@@ -14,8 +13,7 @@ const iconTextStyle = {
 };
 
 interface Props {
-  job: Job;
-  onClose?: () => void;
+  job?: Job;
 }
 
 // Create styled component that inherits MUI typography styles
@@ -37,7 +35,9 @@ const StyledDescription = styled("div")(({ theme }) => ({
   },
 }));
 
-export const JobDetail = ({ job, onClose }: Props) => {
+export const JobDetail = ({ job }: Props) => {
+  if (!job) return null;
+
   return (
     <Paper sx={{ p: 2 }}>
       <Grid container spacing={2}>
@@ -56,13 +56,6 @@ export const JobDetail = ({ job, onClose }: Props) => {
             Apply
           </Button>
         </Grid>
-        {onClose && (
-          <Grid size={1}>
-            <IconButton size="large" onClick={onClose}>
-              <X />
-            </IconButton>
-          </Grid>
-        )}
         <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
           <Building />
           {job.company}

@@ -12,11 +12,7 @@ export const JobGrid = ({ jobs, selectedId, onSelect }: Props) => {
   return (
     <Grid container spacing={2}>
       {jobs.map((job) => (
-        <Grid
-          key={job.id}
-          marginBottom={2}
-          size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
-        >
+        <Grid key={job.id} marginBottom={2} size={{ xs: 12, md: 6, lg: 4 }}>
           <JobCard
             job={job}
             selected={selectedId === job.id}

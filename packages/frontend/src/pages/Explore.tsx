@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FilterArea } from "../components/FilterArea";
 import { JobDetail } from "../components/JobDetail";
@@ -23,47 +23,29 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-export const Explore = () => {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<Job>();
-  const [filters, setFilters] = useState<Filters>({});
-  const jobCardRef = useRef<HTMLDivElement>(null);
-
-  const updateJob = (job?: Job) => {
-    setSelectedJob(job);
-    if (jobCardRef.current) {
-      jobCardRef.current.scrollTop = 0;
-    }
+function urlToFilters(searchParams: URLSearchParams): Filters {
+  const getVal = (key: string) => searchParams.get(key) || undefined;
+  const isRemote = getVal("isRemote");
+  const maxExperience = Number(getVal("maxExperience"));
+  return {
+    companyId: getVal("companyId"),
+    isRemote: isRemote == undefined ? undefined : isRemote === "true",
+    title: getVal("title"),
+    location: getVal("location"),
+    daysSince: Number(getVal("daysSince")) || undefined,
+    maxExperience: maxExperience >= 0 ? maxExperience : undefined,
+    minSalary: Number(getVal("minSalary")) || undefined,
   };
-  const clearJob = useCallback(() => updateJob(undefined), []);
+}
 
-  const toggleFilterOpen = () => setIsFilterOpen(!isFilterOpen);
-  const updateFilters = (newFilters: Filters) =>
-    setFilters({ ...filters, ...newFilters });
-
-  const [searchParams, setSearchParams] = useSearchParams();
+function useFilters() {
+  const [filters, setFilters] = useState<Filters>({});
   const debouncedFilters = useDebounce(filters, 500);
-  const {
-    data: jobs = [],
-    isLoading: jobsLoading,
-    isError: jobsError,
-  } = useJobs(debouncedFilters);
-  const { isLoading: metaLoading, isError: metaError } = useMetadata();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Update filter state from URL params on initial load
   useEffect(() => {
-    const getVal = (key: string) => searchParams.get(key) || undefined;
-    const isRemote = getVal("isRemote");
-    const maxExperience = Number(getVal("maxExperience"));
-    setFilters({
-      companyId: getVal("companyId"),
-      isRemote: isRemote == undefined ? undefined : isRemote === "true",
-      title: getVal("title"),
-      location: getVal("location"),
-      daysSince: Number(getVal("daysSince")) || undefined,
-      maxExperience: maxExperience >= 0 ? maxExperience : undefined,
-      minSalary: Number(getVal("minSalary")) || undefined,
-    });
+    setFilters(urlToFilters(searchParams));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -76,12 +58,50 @@ export const Explore = () => {
       }
     });
     setSearchParams(newParams, { replace: true });
-  }, [debouncedFilters, searchParams, setSearchParams]);
+  }, [debouncedFilters, setSearchParams]);
 
-  // Clear selected job when filters change
+  return {
+    filters,
+    debouncedFilters,
+    updateFilters: (newFilters: Filters) =>
+      setFilters({ ...filters, ...newFilters }),
+  };
+}
+
+export const Explore = () => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<Job>();
+  const jobCardRef = useRef<HTMLDivElement>(null);
+
+  const { filters, debouncedFilters, updateFilters } = useFilters();
+  const { isLoading: metaLoading, isError: metaError } = useMetadata();
+  const {
+    data: jobs = [],
+    isLoading: jobsLoading,
+    isError: jobsError,
+  } = useJobs(debouncedFilters);
+
+  const toggleFilterOpen = () => setIsFilterOpen(!isFilterOpen);
+  const selectJob = (job?: Job) => {
+    setSelectedJob(job);
+    if (jobCardRef.current) {
+      jobCardRef.current.scrollTop = 0;
+    }
+  };
+  const clearJob = () => {
+    selectJob();
+    setIsDetailOpen(false);
+  };
+  const selectJobAndOpen = (job: Job) => {
+    selectJob(job);
+    setIsDetailOpen(true);
+  };
+
+  // Select first job when list changes
   useEffect(() => {
-    clearJob();
-  }, [debouncedFilters, clearJob]);
+    selectJob(jobs[0]);
+  }, [jobs]);
 
   if (metaLoading) return <PageLoader />;
   if (metaError) return <PageError />;
@@ -93,14 +113,14 @@ export const Explore = () => {
         fullWidth
         variant="outlined"
         sx={{
-          display: { xs: "block", sm: "none" },
+          display: { xs: "block", md: "none" },
           bgcolor: "background.paper",
         }}
       >
         Show Filters
       </Button>
 
-      <Box display={{ xs: "none", sm: "block" }}>
+      <Box display={{ xs: "none", md: "block" }}>
         <FilterArea {...filters} onChange={updateFilters} />
       </Box>
 
@@ -108,30 +128,28 @@ export const Explore = () => {
       {jobsError && <PageError />}
       {!jobsLoading && !jobsError && (
         <Box gap={2} display="flex" overflow="hidden" minHeight="300px">
-          <Box width={selectedJob ? "50%" : "100%"} overflow="auto">
+          <Box width={{ xs: "100%", md: "50%" }} overflow="auto">
             <JobGrid
               jobs={jobs}
               selectedId={selectedJob?.id}
-              onSelect={updateJob}
+              onSelect={selectJobAndOpen}
             />
           </Box>
-          {selectedJob && (
-            <Box
-              display={{ xs: "none", md: "block" }}
-              width="50%"
-              overflow="auto"
-              ref={jobCardRef}
-            >
-              <JobDetail job={selectedJob} onClose={clearJob} />
-            </Box>
-          )}
+          <Box
+            display={{ xs: "none", md: "block" }}
+            width="50%"
+            overflow="auto"
+            ref={jobCardRef}
+          >
+            <JobDetail job={selectedJob} />
+          </Box>
         </Box>
       )}
 
       <Drawer
         open={isFilterOpen}
         onClose={toggleFilterOpen}
-        sx={{ display: { sm: "none" } }}
+        sx={{ display: { md: "none" } }}
       >
         <Button onClick={toggleFilterOpen} sx={{ m: 1 }} variant="outlined">
           Close
@@ -140,14 +158,14 @@ export const Explore = () => {
       </Drawer>
 
       <Drawer
-        open={!!selectedJob}
+        open={!!isDetailOpen}
         onClose={clearJob}
         sx={{ display: { md: "none" } }}
       >
         <Button onClick={clearJob} sx={{ m: 1 }} variant="outlined">
           Close
         </Button>
-        {selectedJob && <JobDetail job={selectedJob} />}
+        <JobDetail job={selectedJob} />
       </Drawer>
     </Stack>
   );
