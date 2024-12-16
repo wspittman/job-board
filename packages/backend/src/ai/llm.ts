@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { ResponseFormatJSONSchema } from "openai/resources";
 import { getSubContext, logError } from "../utils/telemetry";
 
 const client = new OpenAI();
@@ -6,7 +7,7 @@ const client = new OpenAI();
 export async function jsonCompletion<Schema, Result>(
   action: string,
   prompt: string,
-  schema: OpenAI.ResponseFormatJSONSchema.JSONSchema,
+  schema: ResponseFormatJSONSchema.JSONSchema,
   input: string,
   formatter: (output: Schema) => Result
 ) {
