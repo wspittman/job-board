@@ -8,6 +8,12 @@ interface Props {
   onSelect: (selected: Job) => void;
 }
 
+/**
+ * Grid layout component that displays a collection of job cards
+ * @param jobs Array of jobs to display
+ * @param selectedId ID of the currently selected job
+ * @param onSelect Callback function when a job is selected
+ */
 export const JobGrid = ({ jobs, selectedId, onSelect }: Props) => {
   return (
     <Grid container spacing={2}>

@@ -12,6 +12,12 @@ import { PageLoader } from "../frame/PageLoader";
 import { Filters, Job } from "../services/api";
 import { useJobs, useMetadata } from "../services/apiHooks";
 
+/**
+ * Custom hook that debounces a value by delaying its update
+ * @param value The value to debounce
+ * @param delay The delay in milliseconds
+ * @returns The debounced value
+ */
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -23,6 +29,11 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+/**
+ * Converts URL search parameters to a Filters object
+ * @param searchParams URLSearchParams object containing filter parameters
+ * @returns Filters object with parsed values
+ */
 function urlToFilters(searchParams: URLSearchParams): Filters {
   const getVal = (key: string) => searchParams.get(key) || undefined;
   const isRemote = getVal("isRemote");
@@ -38,6 +49,10 @@ function urlToFilters(searchParams: URLSearchParams): Filters {
   };
 }
 
+/**
+ * Custom hook that manages filter state and synchronizes with URL parameters
+ * @returns Object containing filters, debounced filters, and update function
+ */
 function useFilters() {
   const [filters, setFilters] = useState<Filters>({});
   const debouncedFilters = useDebounce(filters, 500);
@@ -68,6 +83,10 @@ function useFilters() {
   };
 }
 
+/**
+ * Main explore page component that displays job listings with filtering capabilities
+ * Shows a grid of jobs and detailed view with responsive layout
+ */
 export const Explore = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);

@@ -19,6 +19,12 @@ interface DisplayFacetProps {
   suffix?: string;
 }
 
+/**
+ * Renders a single facet of job information with an icon
+ * @param Icon The icon component to display
+ * @param text The text content to display
+ * @param suffix Optional suffix to append to the text
+ */
 const DisplayFacet = ({ Icon, text, suffix }: DisplayFacetProps) => {
   if (!text) return null;
 
@@ -37,11 +43,22 @@ interface DisplayChipProps {
   label: string;
 }
 
+/**
+ * Renders a chip component if the condition is true
+ * @param condition Boolean determining if the chip should be displayed
+ * @param label Text to display in the chip
+ */
 const DisplayChip = ({ condition, label }: DisplayChipProps) => {
   if (!condition) return null;
   return <Chip size="small" label={label} color="primary" variant="outlined" />;
 };
 
+/**
+ * Card component that displays a job posting summary
+ * @param job The job to display
+ * @param selected Whether this card is currently selected
+ * @param onClick Callback function when card is clicked
+ */
 export const JobCard = ({ job, selected, onClick }: Props) => {
   const daysSincePosted = Math.floor(
     (Date.now() - job.postTS) / (1000 * 60 * 60 * 24)

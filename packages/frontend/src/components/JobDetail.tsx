@@ -35,6 +35,10 @@ const StyledDescription = styled("div")(({ theme }) => ({
   },
 }));
 
+/**
+ * Component that displays detailed information about a job posting
+ * @param job The job details to display
+ */
 export const JobDetail = ({ job }: Props) => {
   if (!job) return null;
 
