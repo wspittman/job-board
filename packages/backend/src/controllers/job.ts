@@ -278,7 +278,7 @@ async function readJobsByFilters({
   const where = whereClauses.join(" AND ");
 
   return query<Job>(container, {
-    query: `SELECT TOP 50 * FROM c WHERE ${where}`,
+    query: `SELECT TOP 24 * FROM c WHERE ${where}`,
     parameters,
   });
 }
