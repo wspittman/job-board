@@ -32,6 +32,16 @@ const DisplayFacet = ({ Icon, text, suffix }: DisplayFacetProps) => {
   );
 };
 
+interface DisplayChipProps {
+  condition?: boolean;
+  label: string;
+}
+
+const DisplayChip = ({ condition, label }: DisplayChipProps) => {
+  if (!condition) return null;
+  return <Chip size="small" label={label} color="primary" variant="outlined" />;
+};
+
 export const JobCard = ({ job, selected, onClick }: Props) => {
   const daysSincePosted = Math.floor(
     (Date.now() - job.postTS) / (1000 * 60 * 60 * 24)
@@ -58,15 +68,12 @@ export const JobCard = ({ job, selected, onClick }: Props) => {
         {job.company}
       </Typography>
 
-      <Stack direction="row" spacing={2} sx={{ mb: 1 }}>
-        {job.isRemote && (
-          <Chip
-            size="small"
-            label="Remote"
-            color="primary"
-            variant="outlined"
-          />
-        )}
+      <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+        <DisplayChip condition={job.isRemote} label="Remote" />
+        <DisplayChip
+          condition={daysSincePosted < 30}
+          label={daysSincePosted < 7 ? "New" : "Recent"}
+        />
       </Stack>
 
       <DisplayFacet Icon={MapPin} text={job.location} />
