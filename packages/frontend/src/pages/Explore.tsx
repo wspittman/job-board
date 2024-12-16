@@ -6,11 +6,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FilterArea } from "../components/FilterArea";
 import { JobDetail } from "../components/JobDetail";
-import { JobTable } from "../components/JobTable";
+import { JobGrid } from "../components/JobGrid";
 import { PageError } from "../frame/PageError";
 import { PageLoader } from "../frame/PageLoader";
 import { Filters, Job } from "../services/api";
-import { useMetadata } from "../services/apiHooks";
+import { useJobs, useMetadata } from "../services/apiHooks";
 
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -43,7 +43,12 @@ export const Explore = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const debouncedFilters = useDebounce(filters, 500);
-  const { isLoading, isError } = useMetadata();
+  const {
+    data: jobs = [],
+    isLoading: jobsLoading,
+    isError: jobsError,
+  } = useJobs(debouncedFilters);
+  const { isLoading: metaLoading, isError: metaError } = useMetadata();
 
   // Update filter state from URL params on initial load
   useEffect(() => {
@@ -78,68 +83,72 @@ export const Explore = () => {
     clearJob();
   }, [debouncedFilters, clearJob]);
 
+  if (metaLoading) return <PageLoader />;
+  if (metaError) return <PageError />;
+
   return (
     <Stack spacing={2} overflow="hidden">
-      {isLoading && <PageLoader />}
-      {isError && <PageError />}
+      <Button
+        onClick={toggleFilterOpen}
+        fullWidth
+        variant="outlined"
+        sx={{
+          display: { xs: "block", sm: "none" },
+          bgcolor: "background.paper",
+        }}
+      >
+        Show Filters
+      </Button>
 
-      {!isLoading && !isError && (
-        <>
-          <Button
-            onClick={toggleFilterOpen}
-            fullWidth
-            variant="outlined"
-            sx={{
-              display: { xs: "block", sm: "none" },
-              bgcolor: "background.paper",
-            }}
-          >
-            Show Filters
-          </Button>
+      <Box display={{ xs: "none", sm: "block" }}>
+        <FilterArea {...filters} onChange={updateFilters} />
+      </Box>
 
-          <Box display={{ xs: "none", sm: "block" }}>
-            <FilterArea {...filters} onChange={updateFilters} />
+      {jobsLoading && <PageLoader />}
+      {jobsError && <PageError />}
+      {!jobsLoading && !jobsError && (
+        <Box gap={2} display="flex" overflow="hidden" minHeight="300px">
+          <Box width={selectedJob ? "50%" : "100%"} overflow="auto">
+            <JobGrid
+              jobs={jobs}
+              selectedId={selectedJob?.id}
+              onSelect={updateJob}
+            />
           </Box>
-
-          <Box gap={2} display="flex" overflow="hidden" minHeight="300px">
-            <Box width={selectedJob ? "50%" : "100%"} overflow="auto">
-              <JobTable filters={debouncedFilters} onSelect={updateJob} />
+          {selectedJob && (
+            <Box
+              display={{ xs: "none", md: "block" }}
+              width="50%"
+              overflow="auto"
+              ref={jobCardRef}
+            >
+              <JobDetail job={selectedJob} onClose={clearJob} />
             </Box>
-            {selectedJob && (
-              <Box
-                display={{ xs: "none", md: "block" }}
-                width="50%"
-                overflow="auto"
-                ref={jobCardRef}
-              >
-                <JobDetail job={selectedJob} onClose={clearJob} />
-              </Box>
-            )}
-          </Box>
-
-          <Drawer
-            open={isFilterOpen}
-            onClose={toggleFilterOpen}
-            sx={{ display: { sm: "none" } }}
-          >
-            <Button onClick={toggleFilterOpen} sx={{ m: 1 }} variant="outlined">
-              Close
-            </Button>
-            <FilterArea {...filters} onChange={updateFilters} />
-          </Drawer>
-
-          <Drawer
-            open={!!selectedJob}
-            onClose={clearJob}
-            sx={{ display: { md: "none" } }}
-          >
-            <Button onClick={clearJob} sx={{ m: 1 }} variant="outlined">
-              Close
-            </Button>
-            {selectedJob && <JobDetail job={selectedJob} />}
-          </Drawer>
-        </>
+          )}
+        </Box>
       )}
+
+      <Drawer
+        open={isFilterOpen}
+        onClose={toggleFilterOpen}
+        sx={{ display: { sm: "none" } }}
+      >
+        <Button onClick={toggleFilterOpen} sx={{ m: 1 }} variant="outlined">
+          Close
+        </Button>
+        <FilterArea {...filters} onChange={updateFilters} />
+      </Drawer>
+
+      <Drawer
+        open={!!selectedJob}
+        onClose={clearJob}
+        sx={{ display: { md: "none" } }}
+      >
+        <Button onClick={clearJob} sx={{ m: 1 }} variant="outlined">
+          Close
+        </Button>
+        {selectedJob && <JobDetail job={selectedJob} />}
+      </Drawer>
     </Stack>
   );
 };
