@@ -1,86 +1,94 @@
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid2";
-import IconButton from "@mui/material/IconButton";
-import Paper from "@mui/material/Paper";
-import { styled } from "@mui/material/styles";
+import { Paper } from "@mui/material";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { Building, Calendar, MapPin, X } from "lucide-react";
+import { Briefcase, Clock, DollarSign, MapPin } from "lucide-react";
 import { Job } from "../services/api";
-
-const iconTextStyle = {
-  display: "flex",
-  alignItems: "center",
-  gap: 1,
-};
+import { IconTypography } from "./IconTypography";
 
 interface Props {
   job: Job;
-  onClose?: () => void;
+  selected?: boolean;
+  onClick?: () => void;
 }
 
-// Create styled component that inherits MUI typography styles
-const StyledDescription = styled("div")(({ theme }) => ({
-  "& p": {
-    ...theme.typography.body2,
-  },
-  "& h1": {
-    ...theme.typography.h2,
-  },
-  "& h2": {
-    ...theme.typography.h3,
-  },
-  "& h3": {
-    ...theme.typography.h4,
-  },
-  "& ul, & ol": {
-    ...theme.typography.body2,
-  },
-}));
+interface DisplayChipProps {
+  condition?: boolean;
+  label: string;
+}
 
-export const JobCard = ({ job, onClose }: Props) => {
+/**
+ * Renders a chip component if the condition is true
+ * @param condition Boolean determining if the chip should be displayed
+ * @param label Text to display in the chip
+ */
+const DisplayChip = ({ condition, label }: DisplayChipProps) => {
+  if (!condition) return null;
+  return <Chip size="small" label={label} color="primary" variant="outlined" />;
+};
+
+/**
+ * Card component that displays a job posting summary
+ * @param job The job to display
+ * @param selected Whether this card is currently selected
+ * @param onClick Callback function when card is clicked
+ */
+export const JobCard = ({ job, selected, onClick }: Props) => {
+  const daysSincePosted = Math.floor(
+    (Date.now() - job.postTS) / (1000 * 60 * 60 * 24)
+  );
+
   return (
-    <Paper sx={{ p: 2 }}>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 9 }}>
-          <Typography variant="h4">{job.title}</Typography>
-        </Grid>
-        <Grid size={{ xs: 12, md: 2 }}>
-          <Button
-            variant="contained"
-            size="large"
-            fullWidth
-            href={job.applyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Apply
-          </Button>
-        </Grid>
-        {onClose && (
-          <Grid size={1}>
-            <IconButton size="large" onClick={onClose}>
-              <X />
-            </IconButton>
-          </Grid>
-        )}
-        <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
-          <Building />
-          {job.company}
-        </Typography>
-        {job.location && (
-          <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
-            <MapPin />
-            {job.location}
-          </Typography>
-        )}
-        <Typography variant="h5" color="text.secondary" sx={iconTextStyle}>
-          <Calendar />
-          {new Date(job.postTS).toLocaleDateString()}
-        </Typography>
-      </Grid>
-      <StyledDescription
-        dangerouslySetInnerHTML={{ __html: job.description }}
+    <Paper
+      sx={{
+        p: 2,
+        paddingBottom: 0,
+        height: "100%",
+        bgcolor: selected ? "action.selected" : "background.paper",
+        cursor: onClick ? "pointer" : "default",
+        "&:hover": {
+          bgcolor: onClick ? "action.hover" : "background.paper",
+        },
+      }}
+      onClick={onClick}
+    >
+      <Typography variant="h5" fontWeight="bold" gutterBottom>
+        {job.title}
+      </Typography>
+      <Typography variant="h5" color="primary" gutterBottom>
+        {job.company}
+      </Typography>
+
+      <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+        <DisplayChip condition={job.isRemote} label="Remote" />
+        <DisplayChip
+          condition={daysSincePosted < 30}
+          label={daysSincePosted < 7 ? "New" : "Recent"}
+        />
+      </Stack>
+
+      <IconTypography Icon={MapPin} text={job.location} />
+      <IconTypography
+        Icon={DollarSign}
+        text={job.facets?.salary?.toLocaleString()}
       />
+      <IconTypography
+        Icon={Briefcase}
+        text={job.facets?.experience}
+        suffix="years experience"
+      />
+      <IconTypography
+        Icon={Clock}
+        prefix="Posted"
+        text={daysSincePosted}
+        suffix="days ago"
+      />
+
+      {job.facets?.summary && (
+        <Typography variant="body2" color="text.secondary" marginTop={2}>
+          {job.facets.summary}
+        </Typography>
+      )}
     </Paper>
   );
 };
