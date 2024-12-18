@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Filters } from "../services/api";
+import { useMetadata } from "../services/apiHooks";
 import { useDebounce } from "./utilHooks";
 
 /**
@@ -55,4 +56,17 @@ export function useFilters() {
     updateFilters: (newFilters: Filters) =>
       setFilters({ ...filters, ...newFilters }),
   };
+}
+
+export function useCompanyOptions() {
+  const { data: metadata } = useMetadata();
+
+  const companyOptions = useMemo(() => {
+    const companyNames = metadata?.companyNames || [];
+    return companyNames
+      .map(([id, name]) => ({ id, label: name }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [metadata]);
+
+  return companyOptions;
 }
