@@ -3,7 +3,8 @@ import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
 import { useEffect, useRef, useState } from "react";
-import { FilterArea } from "../components/FilterArea";
+import { FilterAccordion } from "../components/filterArea/FilterAccordion";
+import { FilterDrawer } from "../components/filterArea/FilterDrawer";
 import { JobDetail } from "../components/JobDetail";
 import { JobGrid } from "../components/JobGrid";
 import { PageError } from "../frame/PageError";
@@ -69,7 +70,7 @@ export const Explore = () => {
       </Button>
 
       <Box display={{ xs: "none", md: "block" }}>
-        <FilterArea {...filters} onChange={updateFilters} />
+        <FilterAccordion filters={filters} onChange={updateFilters} />
       </Box>
 
       {jobsLoading && <PageLoader />}
@@ -94,16 +95,12 @@ export const Explore = () => {
         </Box>
       )}
 
-      <Drawer
-        open={isFilterOpen}
+      <FilterDrawer
+        isOpen={isFilterOpen}
+        filters={filters}
         onClose={toggleFilterOpen}
-        sx={{ display: { md: "none" } }}
-      >
-        <Button onClick={toggleFilterOpen} sx={{ m: 1 }} variant="outlined">
-          Close
-        </Button>
-        <FilterArea {...filters} onChange={updateFilters} />
-      </Drawer>
+        onChange={updateFilters}
+      />
 
       <Drawer
         open={!!isDetailOpen}

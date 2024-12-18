@@ -2,16 +2,17 @@ import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import { ChevronsDown } from "lucide-react";
-import { useCompanyOptions } from "../hooks/filterHooks";
-import { Filters } from "../services/api";
-import { FilterHeader } from "./filterArea/FilterHeader";
-import { FilterInputs } from "./filterArea/FilterInputs";
+import { useCompanyOptions } from "../../hooks/filterHooks";
+import { Filters } from "../../services/api";
+import { FilterHeader } from "./FilterHeader";
+import { FilterInputs } from "./FilterInputs";
 
-interface Props extends Filters {
+interface Props {
+  filters: Filters;
   onChange: (value: Filters) => void;
 }
 
-export const FilterArea = ({ onChange, ...filters }: Props) => {
+export const FilterAccordion = ({ filters, onChange }: Props) => {
   const companyOptions = useCompanyOptions();
 
   return (
