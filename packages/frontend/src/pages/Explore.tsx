@@ -3,85 +3,14 @@ import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { FilterArea } from "../components/FilterArea";
 import { JobDetail } from "../components/JobDetail";
 import { JobGrid } from "../components/JobGrid";
 import { PageError } from "../frame/PageError";
 import { PageLoader } from "../frame/PageLoader";
-import { Filters, Job } from "../services/api";
+import { useFilters } from "../hooks/filterHooks";
+import { Job } from "../services/api";
 import { useJobs, useMetadata } from "../services/apiHooks";
-
-/**
- * Custom hook that debounces a value by delaying its update
- * @param value The value to debounce
- * @param delay The delay in milliseconds
- * @returns The debounced value
- */
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-
-  return debouncedValue;
-}
-
-/**
- * Converts URL search parameters to a Filters object
- * @param searchParams URLSearchParams object containing filter parameters
- * @returns Filters object with parsed values
- */
-function urlToFilters(searchParams: URLSearchParams): Filters {
-  const getVal = (key: string) => searchParams.get(key) || undefined;
-  const isRemote = getVal("isRemote");
-  const maxExperience = Number(getVal("maxExperience"));
-  return {
-    companyId: getVal("companyId"),
-    isRemote: isRemote == undefined ? undefined : isRemote === "true",
-    title: getVal("title"),
-    location: getVal("location"),
-    daysSince: Number(getVal("daysSince")) || undefined,
-    maxExperience: maxExperience >= 0 ? maxExperience : undefined,
-    minSalary: Number(getVal("minSalary")) || undefined,
-  };
-}
-
-/**
- * Custom hook that manages filter state and synchronizes with URL parameters
- * @returns Object containing filters, debounced filters, and update function
- */
-function useFilters() {
-  const [filters, setFilters] = useState<Filters>({});
-  const debouncedFilters = useDebounce(filters, 500);
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // Update filter state from URL params on initial load
-  useEffect(() => {
-    setFilters(urlToFilters(searchParams));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Update URL params when filter state changes
-  useEffect(() => {
-    const newParams = new URLSearchParams();
-    Object.entries(debouncedFilters).forEach(([key, value]) => {
-      if (value !== undefined && value !== "") {
-        newParams.set(key, value);
-      }
-    });
-    setSearchParams(newParams, { replace: true });
-  }, [debouncedFilters, setSearchParams]);
-
-  return {
-    filters,
-    debouncedFilters,
-    updateFilters: (newFilters: Filters) =>
-      setFilters({ ...filters, ...newFilters }),
-  };
-}
 
 /**
  * Main explore page component that displays job listings with filtering capabilities
