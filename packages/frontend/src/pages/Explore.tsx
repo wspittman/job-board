@@ -26,7 +26,7 @@ export const Explore = () => {
   const { filters, debouncedFilters, updateFilters } = useFilters();
   const { isLoading: metaLoading, isError: metaError } = useMetadata();
   const {
-    data: jobs = [],
+    data: jobs,
     isLoading: jobsLoading,
     isError: jobsError,
   } = useJobs(debouncedFilters);
@@ -49,7 +49,7 @@ export const Explore = () => {
 
   // Select first job when list changes
   useEffect(() => {
-    selectJob(jobs[0]);
+    selectJob(jobs?.[0]);
   }, [jobs]);
 
   if (metaLoading) return <PageLoader />;

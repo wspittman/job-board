@@ -4,6 +4,7 @@ import { ElementType } from "react";
 interface Props {
   Icon: ElementType;
   text?: string | number;
+  prefix?: string;
   suffix?: string;
   variant?: TypographyProps["variant"];
   color?: TypographyProps["color"];
@@ -13,6 +14,7 @@ interface Props {
  * Renders an Icon/Text pair
  * @param Icon The icon component to display
  * @param text The text content to display
+ * @param prefix Optional prefix to prepend to the text
  * @param suffix Optional suffix to append to the text
  * @param variant Typography variant
  * @param color Typography color
@@ -20,11 +22,15 @@ interface Props {
 export const IconTypography = ({
   Icon,
   text,
+  prefix,
   suffix,
   variant = "body2",
   color = "textPrimary",
 }: Props) => {
   if (!text) return null;
+
+  let displayText = prefix ? `${prefix} ${text}` : text;
+  displayText = suffix ? `${displayText} ${suffix}` : displayText;
 
   return (
     <Typography
@@ -35,7 +41,7 @@ export const IconTypography = ({
       gap={1}
     >
       <Icon size={16} />
-      {suffix ? `${text} ${suffix}` : text}
+      {displayText}
     </Typography>
   );
 };

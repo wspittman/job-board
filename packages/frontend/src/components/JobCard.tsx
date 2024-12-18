@@ -79,7 +79,9 @@ export const JobCard = ({ job, selected, onClick }: Props) => {
       />
       <IconTypography
         Icon={Clock}
-        text={`Posted ${daysSincePosted} days ago`}
+        prefix="Posted"
+        text={daysSincePosted}
+        suffix="days ago"
       />
 
       {job.facets?.summary && (
