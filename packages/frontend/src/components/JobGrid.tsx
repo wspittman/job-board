@@ -2,6 +2,8 @@ import Grid from "@mui/material/Grid2";
 import { Job } from "../services/api";
 import { JobCard } from "./JobCard";
 
+const cardSize = { xs: 12, sm: 6, lg: 4 };
+
 interface Props {
   jobs?: Job[];
   selectedId?: string;
@@ -13,7 +15,7 @@ function infoMessage(jobs?: Job[]) {
     case -1:
       return [
         "Add Filters To Begin",
-        "Try to have fun with it",
+        "Try to have fun with it!",
         "As you apply filters, jobs will begin appearing here. We'll return the first 24 matches we find for your filter set. You can always adjust your filters until you have a great set of matches.",
       ];
     case 0:
@@ -50,7 +52,7 @@ export const JobGrid = ({ jobs, selectedId, onSelect }: Props) => {
     <Grid container spacing={2}>
       {jobs &&
         jobs.map((job) => (
-          <Grid key={job.id} marginBottom={2} size={{ xs: 12, md: 6, lg: 4 }}>
+          <Grid key={job.id} marginBottom={2} size={cardSize}>
             <JobCard
               job={job}
               selected={selectedId === job.id}
@@ -58,7 +60,7 @@ export const JobGrid = ({ jobs, selectedId, onSelect }: Props) => {
             />
           </Grid>
         ))}
-      <Grid marginBottom={2} size={{ xs: 12, md: 6, lg: 4 }}>
+      <Grid marginBottom={2} size={cardSize}>
         <JobCard
           job={
             {

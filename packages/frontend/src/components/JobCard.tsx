@@ -45,9 +45,9 @@ export const JobCard = ({ job, selected, onClick }: Props) => {
         paddingBottom: 0,
         height: "100%",
         bgcolor: selected ? "action.selected" : "background.paper",
-        cursor: "pointer",
+        cursor: onClick ? "pointer" : "default",
         "&:hover": {
-          bgcolor: "action.hover",
+          bgcolor: onClick ? "action.hover" : "background.paper",
         },
       }}
       onClick={onClick}
