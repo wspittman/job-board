@@ -18,15 +18,15 @@ const gridSize = { xs: 12, sm: 6 };
 const exampleSearches = [
   {
     label: "Internships",
-    query: "title=intern",
+    query: "title=intern+",
   },
   {
-    label: "Remote Staff Software Engineer",
-    query: "isRemote=true&title=Staff+Software+Engineer",
+    label: "Remote Staff Software Engineer, USA-based",
+    query: "isRemote=true&title=Staff+Software+Engineer&location=USA",
   },
   {
-    label: "Data Analyst in Seattle",
-    query: "isRemote=false&title=Data+Analyst&location=Seattle",
+    label: "Sales in New York",
+    query: "isRemote=false&title=Sales&location=New+York",
   },
   {
     label: "6-figure remote roles posted this week",
