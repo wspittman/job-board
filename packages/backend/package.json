@@ -2,8 +2,8 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "nodemon src/app.ts",
+    "start": "node --env-file=./.env dist/app.js",
+    "dev": "nodemon --exec \"node --env-file=./.env -r ts-node/register\" ./src/app.ts",
     "build": "tsc"
   },
   "dependencies": {
@@ -11,7 +11,6 @@
     "applicationinsights": "^2.9.5",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "helmet": "^8.0.0",
     "html-entities": "^2.5.2",
