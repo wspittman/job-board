@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "node --env-file=./.env dist/app.js",
+    "start": "node dist/app.js",
     "dev": "nodemon --exec \"node --env-file=./.env -r ts-node/register\" ./src/app.ts",
     "build": "tsc"
   },
