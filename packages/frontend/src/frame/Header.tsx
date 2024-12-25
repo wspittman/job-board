@@ -4,7 +4,7 @@ import IconButton from "@mui/material/IconButton";
 import Link, { LinkProps } from "@mui/material/Link";
 import { useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { FilterLogo } from "../components/FilterLogo";
 import { GitHubButton } from "../components/GitHubButton";
 import { HeaderMenu } from "./HeaderMenu";

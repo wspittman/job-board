@@ -6,7 +6,7 @@ import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { Briefcase, Building2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { FilterLogo } from "../components/FilterLogo";
 import { StatCard } from "../components/StatCard";
 import { PageError } from "../frame/PageError";
