@@ -3,15 +3,13 @@ import { extractFacets } from "../ai/extractFacets";
 import { extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
 import { getAtsJobs, getAtsList } from "../ats/ats";
-import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
+import { db } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
 import { getCompanies, getCompany } from "./company";
 import { renewMetadata } from "./metadata";
-
-const container = "job";
 
 // #region Input Types and Validations
 
@@ -135,6 +133,7 @@ export async function addJobs(options: CrawlOptions) {
 
   if (companyKey) {
     const company = await getCompany(companyKey);
+    if (!company) return;
     await crawlCompany(company);
   } else {
     await batchRun(getAtsList(), crawlAts, "CrawlAts");
@@ -277,18 +276,18 @@ async function readJobsByFilters({
 
   const where = whereClauses.join(" AND ");
 
-  return query<Job>(container, {
+  return db.job.query({
     query: `SELECT TOP 24 * FROM c WHERE ${where}`,
     parameters,
   });
 }
 
 async function readJobIds(companyId: string) {
-  return getAllIdsByPartitionKey(container, companyId);
+  return db.job.getAllIdsByPartitionKey(companyId);
 }
 
 async function readJobKeysByTimestamp(timestamp: number) {
-  return query<JobKey>(container, {
+  return db.job.query<JobKey>({
     query: "SELECT TOP 100 c.id, c.companyId FROM c WHERE c._ts <= @timestamp",
     // CosmosDB uses seconds, not milliseconds
     parameters: [{ name: "@timestamp", value: timestamp / 1000 }],
@@ -296,11 +295,11 @@ async function readJobKeysByTimestamp(timestamp: number) {
 }
 
 async function updateJob(job: Job) {
-  return upsert(container, job);
+  return db.job.upsert(job);
 }
 
 async function deleteJob({ id, companyId }: JobKey) {
-  return deleteItem(container, id, companyId);
+  return db.job.deleteItem(id, companyId);
 }
 
 // #endregion
