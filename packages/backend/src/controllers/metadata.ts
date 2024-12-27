@@ -1,8 +1,8 @@
 import { db } from "../db/db";
-import type { Metadata } from "../db/models";
 import { logProperty } from "../utils/telemetry";
+import type { ClientMetadata } from "./clientModels";
 
-let cachedMetadata: Metadata | undefined;
+let cachedMetadata: ClientMetadata | undefined;
 
 export async function renewMetadata() {
   const companies = await db.company.query<{ id: string; name: string }>(
@@ -26,8 +26,19 @@ export async function renewMetadata() {
 export async function getMetadata() {
   if (!cachedMetadata) {
     // TBD: This would benefit from a lock
-    cachedMetadata = await db.metadata.getItem("metadata", "metadata");
+    const metadata = await db.metadata.getItem("metadata", "metadata");
+
+    if (metadata) {
+      const { companyCount, companyNames, jobCount, _ts } = metadata;
+      cachedMetadata = {
+        companyCount,
+        companyNames,
+        jobCount,
+        // _ts is in seconds, but the client expects milliseconds
+        timestamp: _ts * 1000,
+      };
+    }
   }
 
-  return cachedMetadata!;
+  return cachedMetadata;
 }

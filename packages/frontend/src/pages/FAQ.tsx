@@ -30,9 +30,7 @@ export const FAQ = () => {
   const { data } = useMetadata();
 
   const lastRefreshed = data
-    ? // _ts is in seconds, but Date expects milliseconds
-      // TBD: The backend should return ts in milliseconds
-      `Last refreshed: ${new Date(data._ts * 1000).toLocaleString()}`
+    ? `Last refreshed: ${new Date(data.timestamp).toLocaleString()}`
     : undefined;
 
   return (
