@@ -1,7 +1,4 @@
 import {
-  Container,
-  CosmosClient,
-  Database,
   FeedOptions,
   FeedResponse,
   ItemDefinition,
@@ -9,14 +6,8 @@ import {
   PartitionKey,
   SqlQuerySpec,
 } from "@azure/cosmos";
-import fs from "fs";
-import https from "https";
-import { config } from "../config";
 import { getSubContext, logError } from "../utils/telemetry";
-
-type ContainerName = "company" | "job" | "metadata";
-
-const DB_NAME = "jobboard";
+import { ContainerName, getContainer } from "./dbInit";
 
 interface Item {
   id: string;
@@ -26,10 +17,6 @@ interface Item {
   _attachments: string;
   _ts: number;
 }
-
-let containerMap: Record<ContainerName, Container>;
-
-const getContainer = (name: ContainerName) => containerMap[name];
 
 export async function getItem<T>(
   container: ContainerName,
@@ -169,69 +156,6 @@ function addDBLog(log: DBLog) {
   context.ru += log.ru;
   context.ms += log.ms;
   context.bytes += log.bytes;
-}
-
-// #endregion
-
-// #region Initialization
-
-export async function connectDB() {
-  try {
-    let agent;
-    if (config.NODE_ENV === "dev") {
-      agent = new https.Agent({
-        ca: fs.readFileSync(config.DATABASE_LOCAL_CERT_PATH),
-      });
-    }
-
-    const cosmosClient = new CosmosClient({
-      endpoint: config.DATABASE_URL,
-      key: config.DATABASE_KEY,
-      agent,
-    });
-
-    const { database } = await cosmosClient.databases.createIfNotExists({
-      id: DB_NAME,
-    });
-
-    containerMap = {} as Record<ContainerName, Container>;
-
-    createContainer(database, "company", "ats");
-    createContainer(database, "job", "companyId");
-    createContainer(database, "metadata", "id");
-
-    console.log("CosmosDB connected");
-  } catch (error) {
-    logError(error);
-    process.exit(1);
-  }
-}
-
-async function createContainer(
-  database: Database,
-  name: ContainerName,
-  partitionKey: string,
-  isRetry: boolean = false
-) {
-  try {
-    const { container } = await database.containers.createIfNotExists({
-      id: name,
-      partitionKey: {
-        paths: [`/${partitionKey}`],
-      },
-    });
-
-    containerMap[name] = container;
-  } catch (error) {
-    console.log(`Failed to create container: ${name}.`);
-    logError(error);
-    if (!isRetry) {
-      console.log(`Retrying to create container: ${name}.`);
-      createContainer(database, name, partitionKey, true);
-    } else {
-      console.log(`Retry failed to create container: ${name}.`);
-    }
-  }
 }
 
 // #endregion
