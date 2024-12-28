@@ -1,8 +1,28 @@
+import { setTimeout } from "node:timers/promises";
 import OpenAI from "openai";
 import { ResponseFormatJSONSchema } from "openai/resources";
-import { getSubContext, logError } from "../utils/telemetry";
+import { getSubContext, logCounter, logError } from "../utils/telemetry";
 
 const client = new OpenAI();
+const MAX_RETRIES = 3;
+const INITIAL_BACKOFF = 500;
+
+function getBackoffDelay(attempt: number) {
+  const backoff = INITIAL_BACKOFF * Math.pow(2, attempt);
+  const jitter = Math.random() * 0.1 * backoff;
+  return backoff + jitter;
+}
+
+async function backoff(attempt: number, error: unknown) {
+  if (
+    error instanceof OpenAI.APIError &&
+    error.status === 429 &&
+    attempt < MAX_RETRIES
+  ) {
+    logCounter("llm_backoff");
+    return await setTimeout(getBackoffDelay(attempt), true);
+  }
+}
 
 export async function jsonCompletion<Schema, Result>(
   action: string,
@@ -11,35 +31,53 @@ export async function jsonCompletion<Schema, Result>(
   input: string,
   formatter: (output: Schema) => Result
 ) {
-  try {
-    const start = Date.now();
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: prompt },
-        { role: "user", content: input },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: schema,
-      },
-    });
-    const duration = Date.now() - start;
+  let attempt = 0;
 
-    const message = extractMessage(completion);
-
-    let formatted: Result | undefined;
-    if (message) {
-      const parsed = JSON.parse(message) as Schema;
-      formatted = formatter(parsed);
+  while (true) {
+    try {
+      return await jsonComplete(action, prompt, schema, input, formatter);
+    } catch (error) {
+      if (!(await backoff(attempt, error))) {
+        logError(error);
+        return;
+      }
+      attempt++;
     }
-
-    logLLMAction(action, input, duration, completion, formatted);
-
-    return formatted;
-  } catch (error) {
-    logError(error);
   }
+}
+
+async function jsonComplete<Schema, Result>(
+  action: string,
+  prompt: string,
+  schema: ResponseFormatJSONSchema.JSONSchema,
+  input: string,
+  formatter: (output: Schema) => Result
+) {
+  const start = Date.now();
+  const completion = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: prompt },
+      { role: "user", content: input },
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: schema,
+    },
+  });
+  const duration = Date.now() - start;
+
+  const message = extractMessage(completion);
+
+  let formatted: Result | undefined;
+  if (message) {
+    const parsed = JSON.parse(message) as Schema;
+    formatted = formatter(parsed);
+  }
+
+  logLLMAction(action, input, duration, completion, formatted);
+
+  return formatted;
 }
 
 function extractMessage(completion: OpenAI.ChatCompletion) {
