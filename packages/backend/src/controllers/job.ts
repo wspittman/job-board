@@ -211,7 +211,18 @@ async function crawlCompany(company: Company, logPath: string[] = []) {
 
   if (added.length) {
     await fillJobs(added, batchOpts);
-    await batchRun(added, updateJob, "AddJob", batchOpts);
+
+    // Remove any jobs that failed to extract facets
+    const filled = added.filter((job) => Object.keys(job.facets).length);
+
+    const failed = added.length - filled.length;
+    if (failed) {
+      batchLog("Failed", failed, batchOpts);
+    }
+
+    if (filled.length) {
+      await batchRun(filled, updateJob, "AddJob", batchOpts);
+    }
   }
 
   if (removed.length) {
