@@ -1,4 +1,4 @@
-import { SqlParameter } from "@azure/cosmos";
+import { Resource, SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
@@ -8,6 +8,7 @@ import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
+import { ClientJob } from "./clientModels";
 import { getCompanies, getCompany } from "./company";
 import { renewMetadata } from "./metadata";
 
@@ -114,6 +115,38 @@ function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
 }
 
 // #endregion
+
+export async function getClientJobs(filterInput: Record<string, string>) {
+  const dbResults = await getJobs(filterInput);
+
+  const toClientJob = ({
+    id,
+    companyId,
+    company,
+    title,
+    description,
+    postTS,
+    applyUrl,
+    isRemote,
+    location,
+    facets,
+  }: Job): ClientJob => {
+    return {
+      id,
+      companyId,
+      company,
+      title,
+      description,
+      postTS,
+      applyUrl,
+      isRemote,
+      location,
+      facets,
+    };
+  };
+
+  return dbResults.map(toClientJob);
+}
 
 export async function getJobs(filterInput: Record<string, string>) {
   const filters = validateFilters(filterInput);
@@ -276,7 +309,7 @@ async function readJobsByFilters({
 
   const where = whereClauses.join(" AND ");
 
-  return db.job.query({
+  return db.job.query<Job & Resource>({
     query: `SELECT TOP 24 * FROM c WHERE ${where}`,
     parameters,
   });
