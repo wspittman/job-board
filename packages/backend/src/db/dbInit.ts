@@ -4,7 +4,7 @@ import https from "https";
 import { config } from "../config";
 import { logError } from "../utils/telemetry";
 
-export type ContainerName = "company" | "job" | "metadata";
+export type ContainerName = "company" | "job" | "metadata" | "locationCache";
 
 const DB_NAME = "jobboard";
 
@@ -38,6 +38,7 @@ export async function connectDB() {
     createContainer(database, "company", "ats");
     createContainer(database, "job", "companyId");
     createContainer(database, "metadata", "id");
+    createContainer(database, "locationCache", "pKey");
 
     console.log("CosmosDB connected");
   } catch (error) {

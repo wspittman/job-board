@@ -9,7 +9,7 @@ import {
 } from "@azure/cosmos";
 import { getSubContext, logError } from "../utils/telemetry";
 import { ContainerName, getContainer } from "./dbInit";
-import { Company, Job, Metadata } from "./models";
+import { Company, Job, LocationCache, Metadata } from "./models";
 
 class Container<Item extends ItemDefinition> {
   constructor(protected name: ContainerName) {}
@@ -64,27 +64,16 @@ class Container<Item extends ItemDefinition> {
 }
 
 class DB {
-  private static instance: DB;
-  readonly job: Container<Job>;
-  readonly company: Container<Company>;
-  readonly metadata: Container<Metadata>;
+  readonly job = new Container<Job>("job");
+  readonly company = new Container<Company>("company");
+  readonly metadata = new Container<Metadata>("metadata");
+  readonly locationCache = new Container<LocationCache>("locationCache");
 
-  private constructor() {
-    this.job = new Container("job");
-    this.company = new Container("company");
-    this.metadata = new Container("metadata");
-  }
-
-  static getInstance(): DB {
-    if (!DB.instance) {
-      DB.instance = new DB();
-    }
-    return DB.instance;
-  }
+  constructor() {}
 }
 
 // Export the singleton instance
-export const db = DB.getInstance();
+export const db = new DB();
 
 // #region Telemetry
 

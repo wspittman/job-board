@@ -54,3 +54,15 @@ export interface Metadata {
   companyNames: [string, string][];
   jobCount: number;
 }
+
+/**
+ * A cache of freehand location string -> normalized location
+ * - id: The freehand location string
+ * - pKey: The first character of the freehand location string
+ */
+export interface LocationCache {
+  id: string;
+  pKey: string;
+  isRemote: boolean;
+  location: string;
+}
