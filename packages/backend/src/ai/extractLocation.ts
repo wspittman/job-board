@@ -70,7 +70,7 @@ export async function extractLocations(
 
   // Create the normalization maps
   texts.forEach((text) => {
-    const normalizedText = text.toLowerCase().trim();
+    const normalizedText = normalize(text);
     normalizeMap.set(text, normalizedText);
     normalizeExampleMap.set(normalizedText, text);
   });
@@ -95,7 +95,7 @@ export async function extractLocations(
 }
 
 export async function extractLocation(text: string): Promise<Location> {
-  const normalizedText = text.toLowerCase().trim();
+  const normalizedText = normalize(text);
 
   if (!normalizedText) {
     return undefined;
@@ -123,6 +123,16 @@ export async function extractLocation(text: string): Promise<Location> {
   }
 
   return result;
+}
+
+function normalize(text: string) {
+  return (
+    text
+      .toLowerCase()
+      .trim()
+      // ['/', '\\', '#'] cannot be used in CosmosDB keys (ie. for the DB cache)
+      .replace(/[/\\#]/g, "_")
+  );
 }
 
 async function extractFromCache(text: string): Promise<Location> {
