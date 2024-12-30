@@ -1,3 +1,4 @@
+import { db } from "../db/db";
 import { Job } from "../db/models";
 import { BatchOptions, batchRun } from "../utils/async";
 import { LRUCache } from "../utils/cache";
@@ -95,10 +96,17 @@ export async function extractLocations(
 
 async function extractLocation(text: string): Promise<Location> {
   const normalizedText = text.toLowerCase().trim();
-  const cachedResult = locationCache.get(normalizedText);
+
+  if (!normalizedText) {
+    return {
+      isRemote: false,
+      location: "",
+    };
+  }
+
+  const cachedResult = await extractFromCache(normalizedText);
 
   if (cachedResult) {
-    logCounter("ExtractLocation_CacheHit");
     return cachedResult;
   }
 
@@ -110,11 +118,39 @@ async function extractLocation(text: string): Promise<Location> {
     formatLocation
   );
 
-  if (result) {
-    locationCache.set(normalizedText, result);
-  }
+  insertToCache(normalizedText, result);
 
   return result;
+}
+
+async function extractFromCache(text: string): Promise<Location> {
+  const cachedResult = locationCache.get(text);
+
+  if (cachedResult) {
+    logCounter("ExtractLocation_CacheHit");
+    return cachedResult;
+  }
+
+  const dbCachedResult = await db.locationCache.getItem(text, text[0]);
+
+  if (dbCachedResult) {
+    logCounter("ExtractLocation_DBCacheHit");
+    const { isRemote, location } = dbCachedResult;
+    locationCache.set(text, { isRemote, location });
+    return { isRemote, location };
+  }
+}
+
+function insertToCache(text: string, result: Location) {
+  if (!result) return;
+
+  locationCache.set(text, result);
+  // Don't await on cache insertion
+  db.locationCache.upsert({
+    id: text,
+    pKey: text[0],
+    ...result,
+  });
 }
 
 function formatLocation({
