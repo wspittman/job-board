@@ -1,6 +1,6 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
-import { extractLocations } from "../ai/extractLocation";
+import { extractLocation, extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
 import { getAtsJobs, getAtsList } from "../ats/ats";
 import { db } from "../db/db";
@@ -25,6 +25,10 @@ interface Filters {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+}
+
+interface EnhancedFilters extends Filters {
+  normalizedLocation?: string;
 }
 
 interface CrawlOptions {
@@ -149,11 +153,19 @@ export async function getClientJobs(filterInput: Record<string, string>) {
 }
 
 export async function getJobs(filterInput: Record<string, string>) {
-  const filters = validateFilters(filterInput);
-  logProperty("GetJobs_Filters", filters);
+  const inputFilters = validateFilters(filterInput);
+  logProperty("GetJobs_Filters", inputFilters);
 
-  if (!Object.keys(filters).length) {
+  if (!Object.keys(inputFilters).length) {
     return [];
+  }
+
+  let filters: EnhancedFilters = { ...inputFilters };
+  if (filters.location) {
+    const location = (await extractLocation(filters.location))?.location;
+    if (location) {
+      filters.normalizedLocation = location;
+    }
   }
 
   const result = await readJobsByFilters(filters);
@@ -264,7 +276,8 @@ async function readJobsByFilters({
   daysSince,
   maxExperience,
   minSalary,
-}: Filters) {
+  normalizedLocation,
+}: EnhancedFilters) {
   /*
   Where clauses should ideally be ordered by
   1. The most selective filter first (ie. likely to filter out the most documents)
@@ -310,7 +323,9 @@ async function readJobsByFilters({
     parameters.push({ name: "@title", value: title.toLowerCase() });
   }
 
-  if (location) {
+  if (normalizedLocation) {
+    addLocationClause(whereClauses, parameters, normalizedLocation, isRemote);
+  } else if (location) {
     // Remote + empty location always matches
     whereClauses.push(
       '((c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location))'
@@ -324,6 +339,36 @@ async function readJobsByFilters({
     query: `SELECT TOP 24 * FROM c WHERE ${where}`,
     parameters,
   });
+}
+
+function addLocationClause(
+  whereClauses: string[],
+  parameters: SqlParameter[],
+  location: string,
+  isRemote?: boolean
+) {
+  location = location.toLowerCase();
+  const country = location.split(",").at(-1)?.trim() ?? location;
+  const hybridParam = { name: "@location", value: location };
+  const hybridClause = "ENDSWITH(LOWER(c.location), @location)";
+  // Remote + empty location always matches
+  const remoteParam = { name: "@country", value: country };
+  const remoteClause =
+    '(ENDSWITH(LOWER(c.location), @country) OR c.location = "")';
+
+  if (isRemote) {
+    whereClauses.push(remoteClause);
+    parameters.push(remoteParam);
+  } else if (isRemote === false) {
+    whereClauses.push(hybridClause);
+    parameters.push(hybridParam);
+  } else {
+    whereClauses.push(
+      `(${hybridClause} OR (c.isRemote = true AND ${remoteClause}))`
+    );
+    parameters.push(hybridParam);
+    parameters.push(remoteParam);
+  }
 }
 
 async function readJobIds(companyId: string) {

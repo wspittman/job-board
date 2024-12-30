@@ -94,14 +94,11 @@ export async function extractLocations(
   return texts.map((text) => extractMap.get(normalizeMap.get(text)!));
 }
 
-async function extractLocation(text: string): Promise<Location> {
+export async function extractLocation(text: string): Promise<Location> {
   const normalizedText = text.toLowerCase().trim();
 
   if (!normalizedText) {
-    return {
-      isRemote: false,
-      location: "",
-    };
+    return undefined;
   }
 
   const cachedResult = await extractFromCache(normalizedText);
@@ -119,6 +116,11 @@ async function extractLocation(text: string): Promise<Location> {
   );
 
   insertToCache(normalizedText, result);
+
+  if (result?.isRemote === false && result.location === "") {
+    // This means the LLM call couldn't extract a location
+    return undefined;
+  }
 
   return result;
 }
