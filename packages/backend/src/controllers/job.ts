@@ -1,17 +1,16 @@
-import { SqlParameter } from "@azure/cosmos";
+import { Resource, SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
-import { extractLocations } from "../ai/extractLocation";
+import { extractLocation, extractLocations } from "../ai/extractLocation";
 import { AppError } from "../AppError";
 import { getAtsJobs, getAtsList } from "../ats/ats";
-import { deleteItem, getAllIdsByPartitionKey, query, upsert } from "../db/db";
+import { db } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
+import { ClientJob } from "./clientModels";
 import { getCompanies, getCompany } from "./company";
 import { renewMetadata } from "./metadata";
-
-const container = "job";
 
 // #region Input Types and Validations
 
@@ -26,6 +25,10 @@ interface Filters {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+}
+
+interface EnhancedFilters extends Filters {
+  normalizedLocation?: string;
 }
 
 interface CrawlOptions {
@@ -117,12 +120,52 @@ function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
 
 // #endregion
 
-export async function getJobs(filterInput: Record<string, string>) {
-  const filters = validateFilters(filterInput);
-  logProperty("GetJobs_Filters", filters);
+export async function getClientJobs(filterInput: Record<string, string>) {
+  const dbResults = await getJobs(filterInput);
 
-  if (!Object.keys(filters).length) {
+  const toClientJob = ({
+    id,
+    companyId,
+    company,
+    title,
+    description,
+    postTS,
+    applyUrl,
+    isRemote,
+    location,
+    facets,
+  }: Job): ClientJob => {
+    return {
+      id,
+      companyId,
+      company,
+      title,
+      description,
+      postTS,
+      applyUrl,
+      isRemote,
+      location,
+      facets,
+    };
+  };
+
+  return dbResults.map(toClientJob);
+}
+
+export async function getJobs(filterInput: Record<string, string>) {
+  const inputFilters = validateFilters(filterInput);
+  logProperty("GetJobs_Filters", inputFilters);
+
+  if (!Object.keys(inputFilters).length) {
     return [];
+  }
+
+  let filters: EnhancedFilters = { ...inputFilters };
+  if (filters.location) {
+    const location = (await extractLocation(filters.location))?.location;
+    if (location) {
+      filters.normalizedLocation = location;
+    }
   }
 
   const result = await readJobsByFilters(filters);
@@ -135,6 +178,7 @@ export async function addJobs(options: CrawlOptions) {
 
   if (companyKey) {
     const company = await getCompany(companyKey);
+    if (!company) return;
     await crawlCompany(company);
   } else {
     await batchRun(getAtsList(), crawlAts, "CrawlAts");
@@ -179,7 +223,18 @@ async function crawlCompany(company: Company, logPath: string[] = []) {
 
   if (added.length) {
     await fillJobs(added, batchOpts);
-    await batchRun(added, updateJob, "AddJob", batchOpts);
+
+    // Remove any jobs that failed to extract facets
+    const filled = added.filter((job) => Object.keys(job.facets).length);
+
+    const failed = added.length - filled.length;
+    if (failed) {
+      batchLog("Failed", failed, batchOpts);
+    }
+
+    if (filled.length) {
+      await batchRun(filled, updateJob, "AddJob", batchOpts);
+    }
   }
 
   if (removed.length) {
@@ -221,7 +276,8 @@ async function readJobsByFilters({
   daysSince,
   maxExperience,
   minSalary,
-}: Filters) {
+  normalizedLocation,
+}: EnhancedFilters) {
   /*
   Where clauses should ideally be ordered by
   1. The most selective filter first (ie. likely to filter out the most documents)
@@ -267,7 +323,9 @@ async function readJobsByFilters({
     parameters.push({ name: "@title", value: title.toLowerCase() });
   }
 
-  if (location) {
+  if (normalizedLocation) {
+    addLocationClause(whereClauses, parameters, normalizedLocation, isRemote);
+  } else if (location) {
     // Remote + empty location always matches
     whereClauses.push(
       '((c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location))'
@@ -277,18 +335,48 @@ async function readJobsByFilters({
 
   const where = whereClauses.join(" AND ");
 
-  return query<Job>(container, {
+  return db.job.query<Job & Resource>({
     query: `SELECT TOP 24 * FROM c WHERE ${where}`,
     parameters,
   });
 }
 
+function addLocationClause(
+  whereClauses: string[],
+  parameters: SqlParameter[],
+  location: string,
+  isRemote?: boolean
+) {
+  location = location.toLowerCase();
+  const country = location.split(",").at(-1)?.trim() ?? location;
+  const hybridParam = { name: "@location", value: location };
+  const hybridClause = "ENDSWITH(LOWER(c.location), @location)";
+  // Remote + empty location always matches
+  const remoteParam = { name: "@country", value: country };
+  const remoteClause =
+    '(ENDSWITH(LOWER(c.location), @country) OR c.location = "")';
+
+  if (isRemote) {
+    whereClauses.push(remoteClause);
+    parameters.push(remoteParam);
+  } else if (isRemote === false) {
+    whereClauses.push(hybridClause);
+    parameters.push(hybridParam);
+  } else {
+    whereClauses.push(
+      `(${hybridClause} OR (c.isRemote = true AND ${remoteClause}))`
+    );
+    parameters.push(hybridParam);
+    parameters.push(remoteParam);
+  }
+}
+
 async function readJobIds(companyId: string) {
-  return getAllIdsByPartitionKey(container, companyId);
+  return db.job.getAllIdsByPartitionKey(companyId);
 }
 
 async function readJobKeysByTimestamp(timestamp: number) {
-  return query<JobKey>(container, {
+  return db.job.query<JobKey>({
     query: "SELECT TOP 100 c.id, c.companyId FROM c WHERE c._ts <= @timestamp",
     // CosmosDB uses seconds, not milliseconds
     parameters: [{ name: "@timestamp", value: timestamp / 1000 }],
@@ -296,11 +384,11 @@ async function readJobKeysByTimestamp(timestamp: number) {
 }
 
 async function updateJob(job: Job) {
-  return upsert(container, job);
+  return db.job.upsert(job);
 }
 
 async function deleteJob({ id, companyId }: JobKey) {
-  return deleteItem(container, id, companyId);
+  return db.job.deleteItem(id, companyId);
 }
 
 // #endregion

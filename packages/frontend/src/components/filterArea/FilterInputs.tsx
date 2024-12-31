@@ -1,5 +1,6 @@
 import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid2";
+import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import { Filters } from "../../services/api";
@@ -75,6 +76,13 @@ export const FilterInputs = ({
           name="location"
           value={locationValue}
           onChange={(e) => onChange({ location: e.target.value })}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">Working from</InputAdornment>
+              ),
+            },
+          }}
         />
       </Grid>
       <Grid size={gridSize}>

@@ -3,7 +3,7 @@ import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import helmet from "helmet";
 import { config } from "./config";
-import { connectDB } from "./db/db";
+import { connectDB } from "./db/dbInit";
 import { router } from "./routes/routes";
 import { logError, telemetryProcessor } from "./utils/telemetry";
 

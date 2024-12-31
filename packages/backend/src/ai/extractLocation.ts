@@ -1,3 +1,4 @@
+import { db } from "../db/db";
 import { Job } from "../db/models";
 import { BatchOptions, batchRun } from "../utils/async";
 import { LRUCache } from "../utils/cache";
@@ -69,7 +70,7 @@ export async function extractLocations(
 
   // Create the normalization maps
   texts.forEach((text) => {
-    const normalizedText = text.toLowerCase().trim();
+    const normalizedText = normalize(text);
     normalizeMap.set(text, normalizedText);
     normalizeExampleMap.set(normalizedText, text);
   });
@@ -93,12 +94,16 @@ export async function extractLocations(
   return texts.map((text) => extractMap.get(normalizeMap.get(text)!));
 }
 
-async function extractLocation(text: string): Promise<Location> {
-  const normalizedText = text.toLowerCase().trim();
-  const cachedResult = locationCache.get(normalizedText);
+export async function extractLocation(text: string): Promise<Location> {
+  const normalizedText = normalize(text);
+
+  if (!normalizedText) {
+    return undefined;
+  }
+
+  const cachedResult = await extractFromCache(normalizedText);
 
   if (cachedResult) {
-    logCounter("ExtractLocation.CacheHit");
     return cachedResult;
   }
 
@@ -110,11 +115,54 @@ async function extractLocation(text: string): Promise<Location> {
     formatLocation
   );
 
-  if (result) {
-    locationCache.set(normalizedText, result);
+  insertToCache(normalizedText, result);
+
+  if (result?.isRemote === false && result.location === "") {
+    // This means the LLM call couldn't extract a location
+    return undefined;
   }
 
   return result;
+}
+
+function normalize(text: string) {
+  return (
+    text
+      .toLowerCase()
+      .trim()
+      // ['/', '\\', '#'] cannot be used in CosmosDB keys (ie. for the DB cache)
+      .replace(/[/\\#]/g, "_")
+  );
+}
+
+async function extractFromCache(text: string): Promise<Location> {
+  const cachedResult = locationCache.get(text);
+
+  if (cachedResult) {
+    logCounter("ExtractLocation_CacheHit");
+    return cachedResult;
+  }
+
+  const dbCachedResult = await db.locationCache.getItem(text, text[0]);
+
+  if (dbCachedResult) {
+    logCounter("ExtractLocation_DBCacheHit");
+    const { isRemote, location } = dbCachedResult;
+    locationCache.set(text, { isRemote, location });
+    return { isRemote, location };
+  }
+}
+
+function insertToCache(text: string, result: Location) {
+  if (!result) return;
+
+  locationCache.set(text, result);
+  // Don't await on cache insertion
+  db.locationCache.upsert({
+    id: text,
+    pKey: text[0],
+    ...result,
+  });
 }
 
 function formatLocation({

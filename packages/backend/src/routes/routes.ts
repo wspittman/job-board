@@ -4,11 +4,20 @@ import {
   addCompany,
   removeCompany,
 } from "../controllers/company";
-import { addJobs, getJobs, removeJob, removeJobs } from "../controllers/job";
+import {
+  addJobs,
+  getClientJobs,
+  removeJob,
+  removeJobs,
+} from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
 import { prepInput } from "../middleware/prepInput";
 import { logAsyncEvent, logError } from "../utils/telemetry";
+
+type AsyncFunction = (input: any) => Promise<unknown>;
+
+const SUCCESS = { status: "success" };
 
 export const router = express.Router();
 
@@ -23,25 +32,25 @@ router.put("/company", jsonWrapper(addCompany));
 router.put("/companies", validateAdmin, jsonWrapper(addCompanies));
 router.delete("/company", validateAdmin, jsonWrapper(removeCompany));
 
-router.get("/jobs", jsonWrapper(getJobs));
+router.get("/jobs", jsonWrapper(getClientJobs));
 router.post("/jobs", validateAdmin, asyncWrapper("addJobs", addJobs));
 router.delete("/job", validateAdmin, jsonWrapper(removeJob));
 router.delete("/jobs", validateAdmin, jsonWrapper(removeJobs));
 
 router.get("/metadata", jsonWrapper(getMetadata));
 
-function jsonWrapper(fn: (input: any) => Promise<unknown>) {
+function jsonWrapper(fn: AsyncFunction) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = (await fn(res.locals.input)) ?? { status: "success" };
-      res.json(result);
+      const result = await fn(res.locals.input);
+      res.json(result ?? SUCCESS);
     } catch (error: any) {
       next(error);
     }
   };
 }
 
-function asyncWrapper(name: string, fn: (input: any) => Promise<unknown>) {
+function asyncWrapper(name: string, fn: AsyncFunction) {
   return async (req: Request, res: Response, next: NextFunction) => {
     const start = Date.now();
     try {

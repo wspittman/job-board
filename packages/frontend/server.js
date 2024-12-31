@@ -27,6 +27,23 @@ app.use(
   })
 );
 
+// Malicious request patterns
+const maliciousPatterns = [
+  /\/wp-admin/i,
+  /\/wp-includes/i,
+  /\.php$/i,
+  /\.git\/config/i,
+];
+
+// Middleware to check for malicious requests
+app.use((req, res, next) => {
+  if (maliciousPatterns.some((pattern) => pattern.test(req.path))) {
+    console.log(`Blocked malicious request to: ${req.path}`);
+    return res.status(404).send("Not Found");
+  }
+  next();
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname, "dist")));
 

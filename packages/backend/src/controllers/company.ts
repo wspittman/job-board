@@ -1,14 +1,12 @@
 import { getAtsCompany } from "../ats/ats";
-import { deleteItem, getAllByPartitionKey, getItem, upsert } from "../db/db";
-import type { ATS, Company, CompanyKey, CompanyKeys } from "../db/models";
+import { db } from "../db/db";
+import type { ATS, CompanyKey, CompanyKeys } from "../db/models";
 import {
   validateAts,
   validateCompanyKey,
   validateCompanyKeys,
 } from "../db/validation";
 import { logProperty } from "../utils/telemetry";
-
-const container = "company";
 
 export async function getCompany(key: CompanyKey) {
   const companyKey = validateCompanyKey("getCompany", key);
@@ -45,25 +43,17 @@ export async function removeCompany(key: CompanyKey) {
 
 async function addCompanyInternal({ id, ats }: CompanyKey) {
   const company = await getAtsCompany(ats, id);
-  await updateCompany(company);
+  await db.company.upsert(company);
 }
 
-// #region DB Operations
-
 async function readCompany({ id, ats }: CompanyKey) {
-  return getItem<Company>(container, id, ats);
+  return db.company.getItem(id, ats);
 }
 
 async function readCompanies(ats: ATS) {
-  return (await getAllByPartitionKey<Company>(container, ats)).resources;
-}
-
-async function updateCompany(company: Company) {
-  return upsert(container, company);
+  return db.company.getAllByPartitionKey(ats);
 }
 
 async function deleteCompany({ id, ats }: CompanyKey) {
-  return deleteItem(container, id, ats);
+  return db.company.deleteItem(id, ats);
 }
-
-// #endregion

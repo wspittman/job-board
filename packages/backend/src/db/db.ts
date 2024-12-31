@@ -1,113 +1,83 @@
 import {
-  Container,
-  CosmosClient,
-  Database,
   FeedOptions,
   FeedResponse,
   ItemDefinition,
   ItemResponse,
   PartitionKey,
+  Resource,
   SqlQuerySpec,
 } from "@azure/cosmos";
-import fs from "fs";
-import https from "https";
-import { config } from "../config";
 import { getSubContext, logError } from "../utils/telemetry";
+import { ContainerName, getContainer } from "./dbInit";
+import { Company, Job, LocationCache, Metadata } from "./models";
 
-type ContainerName = "company" | "job" | "metadata";
+class Container<Item extends ItemDefinition> {
+  constructor(protected name: ContainerName) {}
 
-const DB_NAME = "jobboard";
+  async getItem(id: string, partitionKey: string) {
+    const response = await getContainer(this.name)
+      .item(id, partitionKey)
+      .read<Item>();
+    logDBAction("READ", this.name, response, partitionKey);
+    return response.resource;
+  }
 
-interface Item {
-  id: string;
-  _rid: string;
-  _self: string;
-  _etag: string;
-  _attachments: string;
-  _ts: number;
+  async getAllByPartitionKey(partitionKey: string) {
+    const response = await getContainer(this.name)
+      .items.readAll<Item & Resource>({ partitionKey })
+      .fetchAll();
+    logDBAction("READ_ALL", this.name, response, partitionKey);
+    return response.resources;
+  }
+
+  async getAllIdsByPartitionKey(partitionKey: string) {
+    const result = await this.query<{ id: string }>("SELECT c.id FROM c", {
+      partitionKey,
+    });
+    return result.map((entry) => entry.id);
+  }
+
+  async getCount() {
+    const response = await this.query<number>("SELECT VALUE COUNT(1) FROM c");
+    return response[0];
+  }
+
+  async query<T>(query: string | SqlQuerySpec, options?: FeedOptions) {
+    const response = await getContainer(this.name)
+      .items.query<T>(query, options)
+      .fetchAll();
+    logDBAction("QUERY", this.name, response, options?.partitionKey);
+    return response.resources;
+  }
+
+  async upsert(item: Item) {
+    const response = await getContainer(this.name).items.upsert(item);
+    logDBAction("UPSERT", this.name, response);
+  }
+
+  async deleteItem(id: string, partitionKey: string) {
+    const response = await getContainer(this.name)
+      .item(id, partitionKey)
+      .delete();
+    logDBAction("DELETE", this.name, response, partitionKey);
+  }
 }
 
-let containerMap: Record<ContainerName, Container>;
+class DB {
+  readonly job = new Container<Job>("job");
+  readonly company = new Container<Company>("company");
+  readonly metadata = new Container<Metadata>("metadata");
+  readonly locationCache = new Container<LocationCache>("locationCache");
 
-const getContainer = (name: ContainerName) => containerMap[name];
-
-export async function getItem<T>(
-  container: ContainerName,
-  id: string,
-  partitionKey: string
-) {
-  const response = await getContainer(container).item(id, partitionKey).read();
-  logDBAction("GET", container, response, partitionKey);
-  return stripItem<T>(response.resource);
+  constructor() {}
 }
 
-export async function upsert(container: ContainerName, item: Object) {
-  const response = await getContainer(container).items.upsert(item);
-  logDBAction("UPSERT", container, response);
-}
-
-export async function deleteItem(
-  container: ContainerName,
-  id: string,
-  partitionKey: string
-) {
-  const response = await getContainer(container)
-    .item(id, partitionKey)
-    .delete();
-  logDBAction("DELETE", container, response, partitionKey);
-}
-
-export async function getAllByPartitionKey<T extends ItemDefinition>(
-  container: ContainerName,
-  partitionKey: string
-) {
-  const response = await getContainer(container)
-    .items.readAll<T>({ partitionKey })
-    .fetchAll();
-  logDBAction("GET_ALL", container, response, partitionKey);
-  return response;
-}
-
-export async function getContainerCount(container: ContainerName) {
-  const response = await query<number>(
-    container,
-    "SELECT VALUE COUNT(1) FROM c"
-  );
-  return response[0];
-}
-
-export async function getAllIdsByPartitionKey(
-  container: ContainerName,
-  partitionKey: string
-) {
-  const result = await query<{ id: string }>(container, "SELECT c.id FROM c", {
-    partitionKey,
-  });
-  return result.map((entry) => entry.id);
-}
-
-export async function query<T>(
-  container: ContainerName,
-  query: string | SqlQuerySpec,
-  options?: FeedOptions
-) {
-  const response = await getContainer(container)
-    .items.query(query, options)
-    .fetchAll();
-  logDBAction("QUERY", container, response, options?.partitionKey);
-  return response.resources.map((entry) =>
-    typeof entry === "object" ? stripItem<T>(entry) : entry
-  );
-}
-
-function stripItem<T>(entry: Item): T {
-  const { _rid, _self, _etag, _attachments, ...rest } = entry;
-  return rest as T;
-}
+// Export the singleton instance
+export const db = new DB();
 
 // #region Telemetry
 
-type DBAction = "GET" | "UPSERT" | "DELETE" | "GET_ALL" | "QUERY";
+type DBAction = "READ" | "READ_ALL" | "UPSERT" | "DELETE" | "QUERY";
 
 interface DBLog {
   name: DBAction;
@@ -169,69 +139,6 @@ function addDBLog(log: DBLog) {
   context.ru += log.ru;
   context.ms += log.ms;
   context.bytes += log.bytes;
-}
-
-// #endregion
-
-// #region Initialization
-
-export async function connectDB() {
-  try {
-    let agent;
-    if (config.NODE_ENV === "dev") {
-      agent = new https.Agent({
-        ca: fs.readFileSync(config.DATABASE_LOCAL_CERT_PATH),
-      });
-    }
-
-    const cosmosClient = new CosmosClient({
-      endpoint: config.DATABASE_URL,
-      key: config.DATABASE_KEY,
-      agent,
-    });
-
-    const { database } = await cosmosClient.databases.createIfNotExists({
-      id: DB_NAME,
-    });
-
-    containerMap = {} as Record<ContainerName, Container>;
-
-    createContainer(database, "company", "ats");
-    createContainer(database, "job", "companyId");
-    createContainer(database, "metadata", "id");
-
-    console.log("CosmosDB connected");
-  } catch (error) {
-    logError(error);
-    process.exit(1);
-  }
-}
-
-async function createContainer(
-  database: Database,
-  name: ContainerName,
-  partitionKey: string,
-  isRetry: boolean = false
-) {
-  try {
-    const { container } = await database.containers.createIfNotExists({
-      id: name,
-      partitionKey: {
-        paths: [`/${partitionKey}`],
-      },
-    });
-
-    containerMap[name] = container;
-  } catch (error) {
-    console.log(`Failed to create container: ${name}.`);
-    logError(error);
-    if (!isRetry) {
-      console.log(`Retrying to create container: ${name}.`);
-      createContainer(database, name, partitionKey, true);
-    } else {
-      console.log(`Retry failed to create container: ${name}.`);
-    }
-  }
 }
 
 // #endregion
