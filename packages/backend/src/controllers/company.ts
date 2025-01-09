@@ -1,4 +1,3 @@
-import { getAtsCompany } from "../ats/ats";
 import { db } from "../db/db";
 import type { ATS, CompanyKey, CompanyKeys } from "../db/models";
 import {
@@ -6,7 +5,9 @@ import {
   validateCompanyKey,
   validateCompanyKeys,
 } from "../db/validation";
+import { batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
+import { findCompanyInfo } from "./crawl";
 
 export async function getCompany(key: CompanyKey) {
   const companyKey = validateCompanyKey("getCompany", key);
@@ -32,18 +33,25 @@ export async function addCompanies(keys: CompanyKeys) {
   const { ids, ats } = validateCompanyKeys("addCompanies", keys);
   logProperty("AddCompanies._ATS", ats);
   logProperty("AddCompanies_Ids", ids);
-  await Promise.all(ids.map((id) => addCompanyInternal({ id, ats })));
+  await batchRun(ids, (id) => addCompanyInternal({ id, ats }), "AddCompanies");
 }
 
 export async function removeCompany(key: CompanyKey) {
   const companyKey = validateCompanyKey("removeCompany", key);
   logProperty("RemoveCompany_Key", companyKey);
+  // TODO: Delete company's jobs also
   return deleteCompany(companyKey);
 }
 
-async function addCompanyInternal({ id, ats }: CompanyKey) {
-  const company = await getAtsCompany(ats, id);
+async function addCompanyInternal(key: CompanyKey) {
+  const exists = await readCompany(key);
+  if (exists) return;
+
+  const company = await ats.createCompany(key);
+  if (!company) return;
+
   await db.company.upsert(company);
+  findCompanyInfo.add(key);
 }
 
 async function readCompany({ id, ats }: CompanyKey) {
