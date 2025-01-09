@@ -1,14 +1,35 @@
+import type {
+  Education,
+  JobType,
+  Office,
+  OrgSize,
+  PayRate,
+  Stage,
+  Visa,
+} from "./enums";
+
 export type ATS = "greenhouse" | "lever";
+type MetadataType = "company" | "companyPrep" | "job" | "jobPrep";
 
 /**
  * - id: The ATS company name
  * - pKey: ats
  */
 export interface Company {
+  // Keys
   id: string;
   ats: ATS;
+
+  // Basic - Not Indexed
   name: string;
-  description: string;
+
+  // Extracted Details
+  description?: string;
+  website?: string;
+  industry?: string;
+  stage?: Stage;
+  size?: OrgSize;
+  visa?: Visa;
 }
 
 export type CompanyKey = Pick<Company, "id" | "ats">;
@@ -23,38 +44,83 @@ export interface CompanyKeys {
  * - pKey: companyId
  */
 export interface Job {
+  // Keys
   id: string;
   companyId: string;
-  company: string;
+
+  // Basic - Indexed
   title: string;
-  description: string;
   postTS: number;
+
+  // Basic - Not Indexed
+  company: string;
   applyUrl: string;
-  // Extracted values with fallbacks
-  isRemote: boolean;
-  location: string;
-  // Facets extracted from the job description
-  facets: {
-    summary?: string;
-    salary?: number;
+  description: string;
+
+  // Extracted Details
+  locations: {
+    remote: Office;
+    normalized: string;
+    city?: string;
+    state?: string;
+    stateCode?: string;
+    country?: string;
+    countryCode?: string;
+    timezone?: string;
+  }[];
+  compensation: {
+    min?: number;
+    max?: number;
+    currency?: string;
+    rate?: PayRate;
+    hasEquity?: boolean;
+    pto?: number | "Unlimited";
+  };
+  role: {
+    summary?: string; // or Why you want this job? or something else?
+    education?: Education;
     experience?: number;
+    function?: string;
+    type?: JobType;
+    skills?: string[]; // or tags?
+    travelRequired?: boolean; // or percentage?
+    manager?: boolean;
   };
 }
 
 export type JobKey = Pick<Job, "id" | "companyId">;
 
 /**
- * Metadata for the database. Refreshed after Crawl and cached in the backend service.
- * - id: "metadata"
+ * Aggregated metadata for other containers. Cached in the backend service.
+ * - id: The type of metadata
  * - pKey: id
  */
 export interface Metadata {
-  id: "metadata";
-  companyCount: number;
-  companyNames: [string, string][];
-  jobCount: number;
+  // Keys
+  id: MetadataType;
+
+  // For company type
+  company?: {
+    count: number;
+    names: [string, string][];
+    industry: Record<string, number>;
+    stage: Record<string, number>;
+    size: Record<string, number>;
+  };
+
+  // For job type
+  job?: {
+    count: number;
+    // Added last refresh
+    company: Record<string, number>;
+    remote: Record<string, number>;
+    country: Record<string, number>;
+    function: Record<string, number>;
+    type: Record<string, number>;
+  };
 }
 
+// TODO: Redo how location caching works when we get to filters
 /**
  * A cache of freehand location string -> normalized location
  * - id: The freehand location string
