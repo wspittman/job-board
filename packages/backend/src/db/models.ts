@@ -20,12 +20,14 @@ export interface Company {
   id: string;
   ats: ATS;
 
-  // Basic - Not Indexed
+  // Basic
   name: string;
 
-  // Extracted Details
+  // Extracted Details - Not Indexed
   description?: string;
   website?: string;
+
+  // Extracted Details
   industry?: string;
   stage?: Stage;
   size?: OrgSize;
@@ -48,12 +50,12 @@ export interface Job {
   id: string;
   companyId: string;
 
-  // Basic - Indexed
+  // Basic
   title: string;
   postTS: number;
+  company: string;
 
   // Basic - Not Indexed
-  company: string;
   applyUrl: string;
   description: string;
 
@@ -94,6 +96,7 @@ export type JobKey = Pick<Job, "id" | "companyId">;
  * Aggregated metadata for other containers. Cached in the backend service.
  * - id: The type of metadata
  * - pKey: id
+ * Only indexed for point reads.
  */
 export interface Metadata {
   // Keys
@@ -125,6 +128,7 @@ export interface Metadata {
  * A cache of freehand location string -> normalized location
  * - id: The freehand location string
  * - pKey: The first character of the freehand location string
+ * Only indexed for point reads.
  */
 export interface LocationCache {
   id: string;
