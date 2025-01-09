@@ -1,11 +1,11 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocation, extractLocations } from "../ai/extractLocation";
-import { AppError } from "../AppError";
 import { getAtsJobs, getAtsList } from "../ats/ats";
 import { db } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
+import { AppError } from "../utils/AppError";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
 import { ClientJob } from "./clientModels";

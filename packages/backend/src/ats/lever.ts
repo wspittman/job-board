@@ -1,6 +1,6 @@
-import { AppError } from "../AppError";
 import { config } from "../config";
 import type { Company, Job } from "../db/models";
+import { AppError } from "../utils/AppError";
 import { standardizeUntrustedHtml } from "../utils/html";
 import type { AtsEndpoint } from "./types";
 

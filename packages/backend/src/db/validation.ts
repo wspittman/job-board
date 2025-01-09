@@ -1,4 +1,4 @@
-import { AppError } from "../AppError";
+import { AppError } from "../utils/AppError";
 import type { ATS, CompanyKey, CompanyKeys, JobKey } from "./models";
 
 export function validateAts(prefix: string, ats: ATS) {
