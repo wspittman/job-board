@@ -3,12 +3,12 @@ import { extractFacets } from "../ai/extractFacets";
 import { extractLocation, extractLocations } from "../ai/extractLocation";
 import { getAtsJobs, getAtsList } from "../ats/ats";
 import { db } from "../db/db";
-import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import { validateCompanyKey, validateJobKey } from "../db/validation";
+import type { ClientJob } from "../models/clientModels";
+import type { ATS, Company, CompanyKey, Job, JobKey } from "../models/dbModels";
 import { AppError } from "../utils/AppError";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
-import { ClientJob } from "./clientModels";
 import { getCompanies, getCompany } from "./company";
 import { renewMetadata } from "./metadata";
 

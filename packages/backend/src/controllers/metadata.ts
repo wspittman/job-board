@@ -1,6 +1,6 @@
 import { db } from "../db/db";
+import type { ClientMetadata } from "../models/clientModels";
 import { logProperty } from "../utils/telemetry";
-import type { ClientMetadata } from "./clientModels";
 
 let cachedMetadata: ClientMetadata | undefined;
 

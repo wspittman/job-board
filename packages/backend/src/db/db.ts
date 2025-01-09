@@ -7,9 +7,9 @@ import {
   Resource,
   SqlQuerySpec,
 } from "@azure/cosmos";
+import type { Company, Job, LocationCache, Metadata } from "../models/dbModels";
 import { getSubContext, logError } from "../utils/telemetry";
 import { ContainerName, getContainer } from "./dbInit";
-import { Company, Job, LocationCache, Metadata } from "./models";
 
 class Container<Item extends ItemDefinition> {
   constructor(protected name: ContainerName) {}

@@ -1,10 +1,10 @@
 import { db } from "../db/db";
-import type { ATS, CompanyKey, CompanyKeys } from "../db/models";
 import {
   validateAts,
   validateCompanyKey,
   validateCompanyKeys,
 } from "../db/validation";
+import type { ATS, CompanyKey, CompanyKeys } from "../models/dbModels";
 import { batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
 import { findCompanyInfo } from "./crawl";

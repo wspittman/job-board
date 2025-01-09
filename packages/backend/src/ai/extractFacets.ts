@@ -1,4 +1,4 @@
-import { Job } from "../db/models";
+import { Job } from "../models/dbModels";
 import { BatchOptions, batchRun } from "../utils/async";
 import { jsonCompletion } from "./llm";
 

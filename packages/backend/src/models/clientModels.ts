@@ -1,4 +1,4 @@
-import { Job, Metadata } from "../db/models";
+import { Job, Metadata } from "./dbModels";
 
 export type ClientJob = Job;
 
