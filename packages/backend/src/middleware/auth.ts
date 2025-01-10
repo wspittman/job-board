@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { config } from "../config";
+import { AppError } from "../utils/AppError";
 
 /**
  * Simple token-match auth for only-me endpoints
@@ -11,6 +12,6 @@ export function validateAdmin(req: Request, res: Response, next: NextFunction) {
   if (token === config.ADMIN_TOKEN) {
     next();
   } else {
-    res.status(401).json({ message: "Unauthorized" });
+    next(new AppError("Unauthorized", 401));
   }
 }

@@ -12,7 +12,11 @@ import {
 } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
-import { prepInput } from "../middleware/prepInput";
+import {
+  prepInput,
+  useCompanyKey,
+  useCompanyKeys,
+} from "../middleware/prepInput";
 import { logAsyncEvent, logError } from "../utils/telemetry";
 
 type AsyncFunction = (input: any) => Promise<unknown>;
@@ -28,9 +32,19 @@ router.get(
   jsonWrapper(() => Promise.resolve())
 );
 
-router.put("/company", jsonWrapper(addCompany));
-router.put("/companies", validateAdmin, jsonWrapper(addCompanies));
-router.delete("/company", validateAdmin, jsonWrapper(removeCompany));
+router.put("/company", useCompanyKey, jsonWrapper(addCompany));
+router.put(
+  "/companies",
+  validateAdmin,
+  useCompanyKeys,
+  jsonWrapper(addCompanies)
+);
+router.delete(
+  "/company",
+  validateAdmin,
+  useCompanyKey,
+  jsonWrapper(removeCompany)
+);
 
 router.get("/jobs", jsonWrapper(getClientJobs));
 router.post("/jobs", validateAdmin, asyncWrapper("addJobs", addJobs));
