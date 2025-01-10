@@ -17,9 +17,19 @@ import type {
 import { getSubContext, logError } from "../utils/telemetry";
 import { ContainerName, getContainer } from "./dbInit";
 
+/**
+ * Generic container class for database operations
+ * @template Item The type of items stored in the container
+ */
 class Container<Item extends ItemDefinition> {
   constructor(protected name: ContainerName) {}
 
+  /**
+   * Retrieves a single item from the container
+   * @param id The unique identifier of the item
+   * @param partitionKey The partition key for the item
+   * @returns The requested item or undefined if not found
+   */
   async getItem(id: string, partitionKey: string) {
     const response = await getContainer(this.name)
       .item(id, partitionKey)
@@ -28,6 +38,11 @@ class Container<Item extends ItemDefinition> {
     return response.resource;
   }
 
+  /**
+   * Retrieves all items from a partition
+   * @param partitionKey The partition key to query
+   * @returns Array of items in the partition
+   */
   async getItemsByPartitionKey(partitionKey: string) {
     const response = await getContainer(this.name)
       .items.readAll<Item & Resource>({ partitionKey })
@@ -36,6 +51,11 @@ class Container<Item extends ItemDefinition> {
     return response.resources;
   }
 
+  /**
+   * Retrieves all item IDs from a partition
+   * @param partitionKey The partition key to query
+   * @returns Array of item IDs in the partition
+   */
   async getIdsByPartitionKey(partitionKey: string) {
     const result = await this.query<{ id: string }>("SELECT c.id FROM c", {
       partitionKey,
@@ -43,11 +63,21 @@ class Container<Item extends ItemDefinition> {
     return result.map((entry) => entry.id);
   }
 
+  /**
+   * Gets the total count of items in the container
+   * @returns The total number of items
+   */
   async getCount() {
     const response = await this.query<number>("SELECT VALUE COUNT(1) FROM c");
     return response[0];
   }
 
+  /**
+   * Executes a query against the container
+   * @param query SQL query string or query spec
+   * @param options Optional feed options including partition key
+   * @returns Query results
+   */
   async query<T>(query: string | SqlQuerySpec, options?: FeedOptions) {
     const response = await getContainer(this.name)
       .items.query<T>(query, options)
@@ -56,11 +86,20 @@ class Container<Item extends ItemDefinition> {
     return response.resources;
   }
 
+  /**
+   * Creates or updates an item in the container
+   * @param item The item to upsert
+   */
   async upsertItem(item: Item) {
     const response = await getContainer(this.name).items.upsert(item);
     logDBAction("UPSERT", this.name, response);
   }
 
+  /**
+   * Deletes an item from the container
+   * @param id The unique identifier of the item
+   * @param partitionKey The partition key for the item
+   */
   async deleteItem(id: string, partitionKey: string) {
     const response = await getContainer(this.name)
       .item(id, partitionKey)
@@ -80,6 +119,10 @@ class CompanyContainer extends Container<Company> {
 
   async getAll(ats: string) {
     return this.getItemsByPartitionKey(ats);
+  }
+
+  async getKeys() {
+    return this.query<CompanyKey>(`SELECT c.id, c.ats FROM c`);
   }
 
   async upsert(company: Company) {
