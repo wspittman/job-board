@@ -1,9 +1,11 @@
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import type { ATS, CompanyKey, CompanyKeys } from "../models/dbModels";
+import type { ATS, Company, CompanyKey, CompanyKeys } from "../models/dbModels";
 import { batchRun } from "../utils/async";
+import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
-import { queueCompanyInfo } from "./crawl";
+
+const companyInfoQueue = new AsyncQueue<Company>(refreshCompanyInfo);
 
 export async function getCompany(key: CompanyKey) {
   return db.company.get(key);
@@ -28,6 +30,14 @@ export async function removeCompany(key: CompanyKey) {
   return db.company.remove(key);
 }
 
+export async function refreshCompanies() {
+  // TODO: WithAsyncContext
+  // Note: We currently fetch groups by partition key, but we could also use a single cross-partition query or change feed
+  const companyLists = await Promise.all(ats.getAtsList().map(getCompanies));
+  // TODO: How does metadata clearing fit in here?
+  companyLists.forEach((companies) => companyInfoQueue.addMany(companies));
+}
+
 async function addCompanyInternal(key: CompanyKey) {
   const exists = await db.company.get(key);
   if (exists) return;
@@ -36,5 +46,15 @@ async function addCompanyInternal(key: CompanyKey) {
   if (!company) return;
 
   await db.company.upsert(company);
-  queueCompanyInfo(key);
+  companyInfoQueue.add(company);
+}
+
+async function refreshCompanyInfo(expired: Company) {
+  // TODO: WithAsyncContext
+  const { company, context } = await ats.companyInfo(expired);
+  // extracts into company object
+  await llm.extractCompanyInfo(company, expired, context);
+  db.company.upsert(company);
+
+  //TODO: Update company metadata object
 }

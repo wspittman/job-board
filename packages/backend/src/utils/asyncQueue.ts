@@ -17,6 +17,11 @@ export class AsyncQueue<T> {
     this.begin();
   }
 
+  addMany(tasks: T[]) {
+    tasks.forEach((task) => this.enqueue(task));
+    this.begin();
+  }
+
   private begin() {
     // If there are no tasks or the batch is full, return
     if (!this.head || this.active >= this.batchSize) return;

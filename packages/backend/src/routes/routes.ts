@@ -2,6 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import {
   addCompanies,
   addCompany,
+  refreshCompanies,
   removeCompany,
 } from "../controllers/company";
 import {
@@ -44,6 +45,11 @@ router.delete(
   validateAdmin,
   useCompanyKey,
   jsonWrapper(removeCompany)
+);
+router.post(
+  "/companies/refresh",
+  validateAdmin,
+  asyncWrapper("refreshCompanies", refreshCompanies)
 );
 
 router.get("/jobs", jsonWrapper(getClientJobs));
