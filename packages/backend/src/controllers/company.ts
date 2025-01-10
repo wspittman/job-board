@@ -1,16 +1,16 @@
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import type { ATS, Company, CompanyKey, CompanyKeys } from "../models/dbModels";
+import type { ATS, CompanyKey, CompanyKeys } from "../models/dbModels";
 import { batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
 import { queueCompanyInfo } from "./crawl";
 
 export async function getCompany(key: CompanyKey) {
-  return read(key);
+  return db.company.get(key);
 }
 
 export async function getCompanies(ats: ATS) {
-  const result = await reads(ats);
+  const result = await db.company.getAll(ats);
   logProperty("GetCompanies_Count", result.length);
   return result;
 }
@@ -25,21 +25,16 @@ export async function addCompanies({ ids, ats }: CompanyKeys) {
 
 export async function removeCompany(key: CompanyKey) {
   // TODO: Delete company's jobs also
-  return del(key);
+  return db.company.remove(key);
 }
 
 async function addCompanyInternal(key: CompanyKey) {
-  const exists = await read(key);
+  const exists = await db.company.get(key);
   if (exists) return;
 
   const company = await ats.companyInit(key);
   if (!company) return;
 
-  await upsert(company);
+  await db.company.upsert(company);
   queueCompanyInfo(key);
 }
-
-const upsert = (company: Company) => db.company.upsert(company);
-const read = ({ id, ats }: CompanyKey) => db.company.getItem(id, ats);
-const reads = (ats: ATS) => db.company.getAllByPartitionKey(ats);
-const del = ({ id, ats }: CompanyKey) => db.company.deleteItem(id, ats);

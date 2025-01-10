@@ -11,7 +11,7 @@ export async function renewMetadata() {
 
   const jobCount = await db.job.getCount();
 
-  await db.metadata.upsert({
+  await db.metadata.upsertItem({
     id: "metadata",
     companyCount: companies.length,
     companyNames: companies.map((company) => [company.id, company.name]),

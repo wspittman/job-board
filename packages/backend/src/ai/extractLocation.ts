@@ -158,7 +158,7 @@ function insertToCache(text: string, result: Location) {
 
   locationCache.set(text, result);
   // Don't await on cache insertion
-  db.locationCache.upsert({
+  db.locationCache.upsertItem({
     id: text,
     pKey: text[0],
     ...result,

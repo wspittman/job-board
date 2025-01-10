@@ -7,7 +7,13 @@ import {
   Resource,
   SqlQuerySpec,
 } from "@azure/cosmos";
-import type { Company, Job, LocationCache, Metadata } from "../models/dbModels";
+import type {
+  Company,
+  CompanyKey,
+  Job,
+  LocationCache,
+  Metadata,
+} from "../models/dbModels";
 import { getSubContext, logError } from "../utils/telemetry";
 import { ContainerName, getContainer } from "./dbInit";
 
@@ -22,7 +28,7 @@ class Container<Item extends ItemDefinition> {
     return response.resource;
   }
 
-  async getAllByPartitionKey(partitionKey: string) {
+  async getItemsByPartitionKey(partitionKey: string) {
     const response = await getContainer(this.name)
       .items.readAll<Item & Resource>({ partitionKey })
       .fetchAll();
@@ -30,7 +36,7 @@ class Container<Item extends ItemDefinition> {
     return response.resources;
   }
 
-  async getAllIdsByPartitionKey(partitionKey: string) {
+  async getIdsByPartitionKey(partitionKey: string) {
     const result = await this.query<{ id: string }>("SELECT c.id FROM c", {
       partitionKey,
     });
@@ -50,7 +56,7 @@ class Container<Item extends ItemDefinition> {
     return response.resources;
   }
 
-  async upsert(item: Item) {
+  async upsertItem(item: Item) {
     const response = await getContainer(this.name).items.upsert(item);
     logDBAction("UPSERT", this.name, response);
   }
@@ -63,9 +69,31 @@ class Container<Item extends ItemDefinition> {
   }
 }
 
+class CompanyContainer extends Container<Company> {
+  constructor() {
+    super("company");
+  }
+
+  async get({ id, ats }: CompanyKey) {
+    return this.getItem(id, ats);
+  }
+
+  async getAll(ats: string) {
+    return this.getItemsByPartitionKey(ats);
+  }
+
+  async upsert(company: Company) {
+    db.company.upsertItem(company);
+  }
+
+  async remove({ id, ats }: CompanyKey) {
+    db.company.deleteItem(id, ats);
+  }
+}
+
 class DB {
   readonly job = new Container<Job>("job");
-  readonly company = new Container<Company>("company");
+  readonly company = new CompanyContainer();
   readonly metadata = new Container<Metadata>("metadata");
   readonly locationCache = new Container<LocationCache>("locationCache");
 
