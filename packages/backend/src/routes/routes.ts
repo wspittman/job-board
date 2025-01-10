@@ -3,14 +3,10 @@ import {
   addCompanies,
   addCompany,
   refreshCompanies,
+  refreshJobs,
   removeCompany,
 } from "../controllers/company";
-import {
-  addJobs,
-  getClientJobs,
-  removeJob,
-  removeJobs,
-} from "../controllers/job";
+import { getClientJobs, removeJob, removeJobs } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
 import {
@@ -33,6 +29,17 @@ router.get(
   jsonWrapper(() => Promise.resolve())
 );
 
+router.post(
+  "/refresh/companies",
+  validateAdmin,
+  asyncWrapper("refreshCompanies", refreshCompanies)
+);
+router.post(
+  "/refresh/jobs",
+  validateAdmin,
+  asyncWrapper("refreshJobs", refreshJobs)
+);
+
 router.put("/company", useCompanyKey, jsonWrapper(addCompany));
 router.put(
   "/companies",
@@ -46,14 +53,8 @@ router.delete(
   useCompanyKey,
   jsonWrapper(removeCompany)
 );
-router.post(
-  "/companies/refresh",
-  validateAdmin,
-  asyncWrapper("refreshCompanies", refreshCompanies)
-);
 
 router.get("/jobs", jsonWrapper(getClientJobs));
-router.post("/jobs", validateAdmin, asyncWrapper("addJobs", addJobs));
 router.delete("/job", validateAdmin, jsonWrapper(removeJob));
 router.delete("/jobs", validateAdmin, jsonWrapper(removeJobs));
 

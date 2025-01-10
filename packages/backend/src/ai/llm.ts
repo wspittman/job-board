@@ -7,11 +7,7 @@ import { getSubContext, logCounter, logError } from "../utils/telemetry";
 class LLMConnector {
   constructor() {}
 
-  async extractCompanyInfo(
-    company: Company,
-    previous: Company,
-    context: Record<string, unknown>
-  ) {
+  async extractCompanyInfo(company: Company, context: Record<string, unknown>) {
     throw new Error("Not Implemented");
   }
 }

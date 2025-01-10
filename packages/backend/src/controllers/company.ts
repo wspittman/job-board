@@ -1,21 +1,15 @@
 import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import type { ATS, Company, CompanyKey, CompanyKeys } from "../models/dbModels";
+import type { CompanyKey, CompanyKeys } from "../models/dbModels";
 import { batchRun } from "../utils/async";
 import { AsyncQueue } from "../utils/asyncQueue";
-import { logProperty } from "../utils/telemetry";
 
-const companyInfoQueue = new AsyncQueue<Company>(refreshCompanyInfo);
+const companyInfoQueue = new AsyncQueue<CompanyKey>(refreshCompanyInfo);
+const companyJobQueue = new AsyncQueue<CompanyKey>(refreshCompanyJobs);
 
 export async function getCompany(key: CompanyKey) {
   return db.company.get(key);
-}
-
-export async function getCompanies(ats: ATS) {
-  const result = await db.company.getAll(ats);
-  logProperty("GetCompanies_Count", result.length);
-  return result;
 }
 
 export async function addCompany(key: CompanyKey) {
@@ -33,10 +27,16 @@ export async function removeCompany(key: CompanyKey) {
 
 export async function refreshCompanies() {
   // TODO: WithAsyncContext
-  // Note: We currently fetch groups by partition key, but we could also use a single cross-partition query or change feed
-  const companyLists = await Promise.all(ats.getAtsList().map(getCompanies));
+  const keys = await db.company.getKeys();
   // TODO: How does metadata clearing fit in here?
-  companyLists.forEach((companies) => companyInfoQueue.addMany(companies));
+  companyInfoQueue.addMany(keys);
+}
+
+export async function refreshJobs() {
+  // TODO: WithAsyncContext
+  const keys = await db.company.getKeys();
+  // TODO: How does metadata clearing fit in here?
+  companyJobQueue.addMany(keys);
 }
 
 async function addCompanyInternal(key: CompanyKey) {
@@ -50,12 +50,36 @@ async function addCompanyInternal(key: CompanyKey) {
   companyInfoQueue.add(company);
 }
 
-async function refreshCompanyInfo(expired: Company) {
+async function refreshCompanyInfo(key: CompanyKey) {
   // TODO: WithAsyncContext
-  const { company, context } = await ats.companyInfo(expired);
+  const { company, context } = await ats.companyInfo(key);
   // extracts into company object
-  await llm.extractCompanyInfo(company, expired, context);
+  await llm.extractCompanyInfo(company, context);
   db.company.upsert(company);
 
   //TODO: Update company metadata object
+}
+
+async function refreshCompanyJobs(key: CompanyKey) {
+  const ids = await db.job.getIdsByPartitionKey(key.id);
+  /*
+   DB: Read in all job ids for the company id (partition key)
+  If no jobs are found, assume newly added company
+    ATS: Make an API call fetching the full JD data for all jobs with this company id
+  else 
+    ATS: Make an API call fetching the id-minimal data for all jobs with this company id
+      Greenhouse allows id-minimal, but Lever doesn't
+  Figure out which jobs are added/removed/ignored
+  If 9 * added.length > removed.length + ignored.length (the percentage of added jobs is above 10%)
+    ATS: Make an API call fetching the full JD data for all jobs with this company id
+  If any jobs are removed:
+    In Parallel Batches, do this for each removed job:
+      DB: Delete the job
+      Update the cached job metadata object
+        DB: Upsert the metadata object
+          on a debounce-like timer, 5 seconds of no updates updates metadata prep?
+          And 60 seconds of no updates updates metadata prime?
+  If any jobs are added:
+    Queue<{ CompanyKey, JobKey, ATSContext }>(FindJobInfo): Add all added jobs
+  */
 }
