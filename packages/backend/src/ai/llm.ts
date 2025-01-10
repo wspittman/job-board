@@ -1,7 +1,22 @@
 import { setTimeout } from "node:timers/promises";
 import OpenAI from "openai";
 import { ResponseFormatJSONSchema } from "openai/resources";
+import { Company } from "../models/dbModels";
 import { getSubContext, logCounter, logError } from "../utils/telemetry";
+
+class LLMConnector {
+  constructor() {}
+
+  async extractCompanyInfo(
+    company: Company,
+    previous: Company,
+    context: Record<string, unknown>
+  ) {
+    throw new Error("Not Implemented");
+  }
+}
+
+export const llm = new LLMConnector();
 
 const client = new OpenAI();
 const MAX_RETRIES = 3;
