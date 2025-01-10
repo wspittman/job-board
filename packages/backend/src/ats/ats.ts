@@ -1,19 +1,58 @@
 import axios, { AxiosResponse } from "axios";
-import type { ATS, Company } from "../models/dbModels";
+import type { ATS, Company, CompanyKey, Job, JobKey } from "../models/dbModels";
 import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
 import { Greenhouse } from "./greenhouse";
 import { Lever } from "./lever";
 import type { AtsEndpoint, JobUpdates } from "./types";
 
-const atsEndpoints: Record<ATS, AtsEndpoint> = {
-  greenhouse: new Greenhouse(),
-  lever: new Lever(),
-};
+class ATSConnector {
+  private readonly atsEndpoints: Record<ATS, AtsEndpoint> = {
+    greenhouse: new Greenhouse(),
+    lever: new Lever(),
+  };
 
-export function getAtsList(): ATS[] {
-  return Object.keys(atsEndpoints) as ATS[];
+  constructor() {}
+
+  getAtsList(): ATS[] {
+    return Object.keys(this.atsEndpoints) as ATS[];
+  }
+
+  async companyInit({ id, ats }: CompanyKey): Promise<Company | undefined> {
+    throw new Error("Not Implemented");
+  }
+
+  async companyInfo({ id, ats }: CompanyKey): Promise<{
+    company: Company;
+    context: Record<string, unknown>;
+  }> {
+    throw new Error("Not Implemented");
+  }
+
+  async jobKeys(
+    { id, ats }: CompanyKey,
+    preferPartial = true
+  ): Promise<{
+    isPartial: boolean;
+    jobs: JobKey[];
+  }> {
+    throw new Error("Not Implemented");
+  }
+
+  async jobInfo(
+    { id, ats }: CompanyKey,
+    { id: jobId }: JobKey
+  ): Promise<{
+    job: Job;
+    context: Record<string, unknown>;
+  }> {
+    throw new Error("Not Implemented");
+  }
+
+  // STOPPED HERE...
 }
+
+export const ats = new ATSConnector();
 
 export async function getAtsCompany(
   atsName: ATS,

@@ -1,15 +1,16 @@
+import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import type { ATS, CompanyKey, CompanyKeys } from "../models/dbModels";
+import type { ATS, Company, CompanyKey, CompanyKeys } from "../models/dbModels";
 import { batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
-import { findCompanyInfo } from "./crawl";
+import { queueCompanyInfo } from "./crawl";
 
 export async function getCompany(key: CompanyKey) {
-  return readCompany(key);
+  return read(key);
 }
 
 export async function getCompanies(ats: ATS) {
-  const result = await readCompanies(ats);
+  const result = await reads(ats);
   logProperty("GetCompanies_Count", result.length);
   return result;
 }
@@ -19,33 +20,26 @@ export async function addCompany(key: CompanyKey) {
 }
 
 export async function addCompanies({ ids, ats }: CompanyKeys) {
-  await batchRun(ids, (id) => addCompanyInternal({ id, ats }), "AddCompanies");
+  return batchRun(ids, (id) => addCompanyInternal({ id, ats }), "AddCompanies");
 }
 
 export async function removeCompany(key: CompanyKey) {
   // TODO: Delete company's jobs also
-  return deleteCompany(key);
+  return del(key);
 }
 
 async function addCompanyInternal(key: CompanyKey) {
-  const exists = await readCompany(key);
+  const exists = await read(key);
   if (exists) return;
 
-  const company = await ats.createCompany(key);
+  const company = await ats.companyInit(key);
   if (!company) return;
 
-  await db.company.upsert(company);
-  findCompanyInfo.add(key);
+  await upsert(company);
+  queueCompanyInfo(key);
 }
 
-async function readCompany({ id, ats }: CompanyKey) {
-  return db.company.getItem(id, ats);
-}
-
-async function readCompanies(ats: ATS) {
-  return db.company.getAllByPartitionKey(ats);
-}
-
-async function deleteCompany({ id, ats }: CompanyKey) {
-  return db.company.deleteItem(id, ats);
-}
+const upsert = (company: Company) => db.company.upsert(company);
+const read = ({ id, ats }: CompanyKey) => db.company.getItem(id, ats);
+const reads = (ats: ATS) => db.company.getAllByPartitionKey(ats);
+const del = ({ id, ats }: CompanyKey) => db.company.deleteItem(id, ats);

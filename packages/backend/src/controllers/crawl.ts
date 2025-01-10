@@ -1,6 +1,10 @@
 import { CompanyKey } from "../models/dbModels";
 import { AsyncQueue } from "../utils/asyncQueue";
 
-export const findCompanyInfo = new AsyncQueue<CompanyKey>(async (key) => {});
-export const findCompanyJobs = new AsyncQueue<CompanyKey>(async (key) => {});
-export const findJobInfo = new AsyncQueue<string>(async (id) => {});
+const companyInfoQueue = new AsyncQueue<CompanyKey>(async (key) => {});
+const companyJobsQueue = new AsyncQueue<CompanyKey>(async (key) => {});
+const jobInfoQueue = new AsyncQueue<string>(async (id) => {});
+
+export function queueCompanyInfo(key: CompanyKey) {
+  companyInfoQueue.add(key);
+}
