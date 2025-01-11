@@ -1,16 +1,17 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocation, extractLocations } from "../ai/extractLocation";
-import { getAtsJobs, getAtsList } from "../ats/ats";
+import { ats, getAtsJobs } from "../ats/ats";
 import { db } from "../db/db";
-import { validateCompanyKey, validateJobKey } from "../db/validation";
 import type { ClientJob } from "../models/clientModels";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../models/dbModels";
 import { AppError } from "../utils/AppError";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
+import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
-import { getCompanies, getCompany } from "./company";
-import { renewMetadata } from "./metadata";
+import { getCompanies } from "./company";
+
+const jobInfoQueue = new AsyncQueue<any>(refreshJobInfo);
 
 // #region Input Types and Validations
 
@@ -173,20 +174,6 @@ export async function getJobs(filterInput: Record<string, string>) {
   return result;
 }
 
-export async function addJobs(options: CrawlOptions) {
-  const { company: companyKey } = validateCrawlOptions(options);
-
-  if (companyKey) {
-    const company = await getCompany(companyKey);
-    if (!company) return;
-    await crawlCompany(company);
-  } else {
-    await batchRun(getAtsList(), crawlAts, "CrawlAts");
-  }
-
-  await renewMetadata();
-}
-
 export async function removeJob(key: JobKey) {
   const jobKey = validateJobKey("removeJob", key);
   logProperty("RemoveJob_Key", jobKey);
@@ -206,6 +193,61 @@ export async function removeJobs(options: DeleteOptions) {
   logProperty("RemoveJobs_Count", jobKeys.length);
 
   await batchRun(jobKeys, deleteJob, "DeleteJob");
+}
+
+export async function refreshJobsForCompany(key: CompanyKey) {
+  const currentIds = await db.job.getIds(key.id);
+
+  // If no jobs are found, assume newly added company and get full job data
+  const getFullJobInfo = !currentIds.length;
+  const atsJobsResult = await ats.getJobs(key, getFullJobInfo);
+  const atsJobs = atsJobsResult.jobs;
+
+  // Figure out which jobs are added/removed/ignored
+  const jobIdSet = new Set(atsJobs.map(({ id }) => id));
+  const currentIdSet = new Set(currentIds);
+
+  // Any ATS job not in the current set needs to be added
+  const added = atsJobs.filter(({ id }) => !currentIdSet.has(id));
+
+  // Any jobs in the current set but not in the ATS need to be deleted
+  const removed = currentIds.filter((id) => !jobIdSet.has(id));
+
+  // If job is in both ATS and DB, do nothing but keep a count
+  const existing = jobIdSet.size - added.length;
+
+  if (atsJobsResult.isPartial && 9 * added.length > removed.length + existing) {
+    await ats.getJobs(key, true);
+    // Where to stuff this data?
+  }
+
+  if (removed.length) {
+    await batchRun(
+      removed,
+      (id) => db.job.remove({ id, companyId: key.id }),
+      "DeleteJob"
+    );
+    // TODO: How to update the metadata object?
+  }
+
+  if (added.length) {
+    // What exactly do we need to add here?
+    jobInfoQueue.addMany(added);
+  }
+}
+
+async function refreshJobInfo(options: CrawlOptions) {
+  /*const { company: companyKey } = validateCrawlOptions(options);
+
+  if (companyKey) {
+    const company = await getCompany(companyKey);
+    if (!company) return;
+    await crawlCompany(company);
+  } else {
+    await batchRun(getAtsList(), crawlAts, "CrawlAts");
+  }
+
+  await renewMetadata();*/
 }
 
 async function crawlAts(ats: ATS, logPath: string[]) {
@@ -372,7 +414,7 @@ function addLocationClause(
 }
 
 async function readJobIds(companyId: string) {
-  return db.job.getAllIdsByPartitionKey(companyId);
+  return db.job.getIdsByPartitionKey(companyId);
 }
 
 async function readJobKeysByTimestamp(timestamp: number) {
@@ -381,14 +423,6 @@ async function readJobKeysByTimestamp(timestamp: number) {
     // CosmosDB uses seconds, not milliseconds
     parameters: [{ name: "@timestamp", value: timestamp / 1000 }],
   });
-}
-
-async function updateJob(job: Job) {
-  return db.job.upsert(job);
-}
-
-async function deleteJob({ id, companyId }: JobKey) {
-  return db.job.deleteItem(id, companyId);
 }
 
 // #endregion

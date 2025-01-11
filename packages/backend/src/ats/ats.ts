@@ -18,20 +18,20 @@ class ATSConnector {
     return Object.keys(this.atsEndpoints) as ATS[];
   }
 
-  async companyInit({ id, ats }: CompanyKey): Promise<Company | undefined> {
+  async initCompany({ id, ats }: CompanyKey): Promise<Company | undefined> {
     throw new Error("Not Implemented");
   }
 
-  async companyInfo({ id, ats }: CompanyKey): Promise<{
+  async getCompany({ id, ats }: CompanyKey): Promise<{
     company: Company;
     context: Record<string, unknown>;
   }> {
     throw new Error("Not Implemented");
   }
 
-  async jobKeys(
+  async getJobs(
     { id, ats }: CompanyKey,
-    preferPartial = true
+    getFull = false
   ): Promise<{
     isPartial: boolean;
     jobs: JobKey[];
@@ -39,7 +39,7 @@ class ATSConnector {
     throw new Error("Not Implemented");
   }
 
-  async jobInfo(
+  async getJob(
     { id, ats }: CompanyKey,
     { id: jobId }: JobKey
   ): Promise<{

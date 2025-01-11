@@ -11,6 +11,7 @@ import type {
   Company,
   CompanyKey,
   Job,
+  JobKey,
   LocationCache,
   Metadata,
 } from "../models/dbModels";
@@ -126,16 +127,38 @@ class CompanyContainer extends Container<Company> {
   }
 
   async upsert(company: Company) {
-    db.company.upsertItem(company);
+    return this.upsertItem(company);
   }
 
   async remove({ id, ats }: CompanyKey) {
-    db.company.deleteItem(id, ats);
+    return this.deleteItem(id, ats);
+  }
+}
+
+class JobContainer extends Container<Job> {
+  constructor() {
+    super("job");
+  }
+
+  async get({ id, companyId }: JobKey) {
+    return this.getItem(id, companyId);
+  }
+
+  async getIds(companyId: string) {
+    return this.getIdsByPartitionKey(companyId);
+  }
+
+  async upsert(job: Job) {
+    return this.upsertItem(job);
+  }
+
+  async remove({ id, companyId }: JobKey) {
+    return this.deleteItem(id, companyId);
   }
 }
 
 class DB {
-  readonly job = new Container<Job>("job");
+  readonly job = new JobContainer();
   readonly company = new CompanyContainer();
   readonly metadata = new Container<Metadata>("metadata");
   readonly locationCache = new Container<LocationCache>("locationCache");
