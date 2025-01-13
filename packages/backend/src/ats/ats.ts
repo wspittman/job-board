@@ -1,5 +1,12 @@
 import axios, { AxiosResponse } from "axios";
-import type { ATS, Company, CompanyKey, Job, JobKey } from "../models/dbModels";
+import type {
+  ATS,
+  Company,
+  CompanyContext,
+  CompanyKey,
+  JobContext,
+  JobKey,
+} from "../models/dbModels";
 import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
 import { Greenhouse } from "./greenhouse";
@@ -22,30 +29,21 @@ class ATSConnector {
     throw new Error("Not Implemented");
   }
 
-  async getCompany({ id, ats }: CompanyKey): Promise<{
-    company: Company;
-    context: Record<string, unknown>;
-  }> {
+  async getCompany({ id, ats }: CompanyKey): Promise<CompanyContext> {
     throw new Error("Not Implemented");
   }
 
   async getJobs(
     { id, ats }: CompanyKey,
     getFull = false
-  ): Promise<{
-    isPartial: boolean;
-    jobs: JobKey[];
-  }> {
+  ): Promise<JobContext[]> {
     throw new Error("Not Implemented");
   }
 
   async getJob(
     { id, ats }: CompanyKey,
     { id: jobId }: JobKey
-  ): Promise<{
-    job: Job;
-    context: Record<string, unknown>;
-  }> {
+  ): Promise<JobContext> {
     throw new Error("Not Implemented");
   }
 

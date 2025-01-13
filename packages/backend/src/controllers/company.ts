@@ -33,6 +33,7 @@ export async function refreshCompanies() {
   companyInfoQueue.addMany(keys);
 }
 
+// TODO: This should take in options: single company, timestamp for all before
 export async function refreshJobs() {
   // TODO: WithAsyncContext
   const keys = await db.company.getKeys();
@@ -56,7 +57,7 @@ async function refreshCompanyInfo(key: CompanyKey) {
   const { company, context } = await ats.getCompany(key);
   // extracts into company object
   await llm.extractCompanyInfo(company, context);
-  db.company.upsert(company);
+  await db.company.upsert(company);
 
   //TODO: Update company metadata object
 }

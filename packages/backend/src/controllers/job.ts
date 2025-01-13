@@ -1,17 +1,28 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocation, extractLocations } from "../ai/extractLocation";
+import { llm } from "../ai/llm";
 import { ats, getAtsJobs } from "../ats/ats";
 import { db } from "../db/db";
 import type { ClientJob } from "../models/clientModels";
-import type { ATS, Company, CompanyKey, Job, JobKey } from "../models/dbModels";
+import type {
+  ATS,
+  Company,
+  CompanyKey,
+  Job,
+  JobContext,
+  JobKey,
+} from "../models/dbModels";
 import { AppError } from "../utils/AppError";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
 import { getCompanies } from "./company";
 
-const jobInfoQueue = new AsyncQueue<any>(refreshJobInfo);
+const jobInfoQueue = new AsyncQueue<{
+  companyKey: CompanyKey;
+  jobContext: JobContext;
+}>(refreshJobInfo);
 
 // #region Input Types and Validations
 
@@ -30,10 +41,6 @@ interface Filters {
 
 interface EnhancedFilters extends Filters {
   normalizedLocation?: string;
-}
-
-interface CrawlOptions {
-  company?: CompanyKey;
 }
 
 interface DeleteOptions {
@@ -200,15 +207,14 @@ export async function refreshJobsForCompany(key: CompanyKey) {
 
   // If no jobs are found, assume newly added company and get full job data
   const getFullJobInfo = !currentIds.length;
-  const atsJobsResult = await ats.getJobs(key, getFullJobInfo);
-  const atsJobs = atsJobsResult.jobs;
+  const atsJobs = await ats.getJobs(key, getFullJobInfo);
 
   // Figure out which jobs are added/removed/ignored
-  const jobIdSet = new Set(atsJobs.map(({ id }) => id));
+  const jobIdSet = new Set(atsJobs.map(({ job }) => job.id));
   const currentIdSet = new Set(currentIds);
 
   // Any ATS job not in the current set needs to be added
-  const added = atsJobs.filter(({ id }) => !currentIdSet.has(id));
+  const added = atsJobs.filter(({ job }) => !currentIdSet.has(job.id));
 
   // Any jobs in the current set but not in the ATS need to be deleted
   const removed = currentIds.filter((id) => !jobIdSet.has(id));
@@ -216,7 +222,11 @@ export async function refreshJobsForCompany(key: CompanyKey) {
   // If job is in both ATS and DB, do nothing but keep a count
   const existing = jobIdSet.size - added.length;
 
-  if (atsJobsResult.isPartial && 9 * added.length > removed.length + existing) {
+  if (
+    added.length &&
+    !atsJobs[0].context &&
+    9 * added.length > removed.length + existing
+  ) {
     await ats.getJobs(key, true);
     // Where to stuff this data?
   }
@@ -236,18 +246,21 @@ export async function refreshJobsForCompany(key: CompanyKey) {
   }
 }
 
-async function refreshJobInfo(options: CrawlOptions) {
-  /*const { company: companyKey } = validateCrawlOptions(options);
-
-  if (companyKey) {
-    const company = await getCompany(companyKey);
-    if (!company) return;
-    await crawlCompany(company);
-  } else {
-    await batchRun(getAtsList(), crawlAts, "CrawlAts");
+async function refreshJobInfo({
+  companyKey,
+  jobContext,
+}: {
+  companyKey: CompanyKey;
+  jobContext: JobContext;
+}) {
+  if (!jobContext.context) {
+    jobContext = await ats.getJob(companyKey, jobContext.job);
   }
 
-  await renewMetadata();*/
+  await llm.extractJobInfo(jobContext);
+  await db.job.upsert(jobContext.job);
+
+  //TODO: Update job metadata object
 }
 
 async function crawlAts(ats: ATS, logPath: string[]) {
