@@ -1,7 +1,7 @@
 import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import type { CompanyKey, CompanyKeys } from "../models/dbModels";
+import type { CompanyKey, CompanyKeys } from "../types/dbModels";
 import { batchRun } from "../utils/async";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { refreshJobsForCompany } from "./job";

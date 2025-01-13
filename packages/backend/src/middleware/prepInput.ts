@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import type { ATS } from "../models/dbModels";
+import type { ATS } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { logProperty } from "../utils/telemetry";
 

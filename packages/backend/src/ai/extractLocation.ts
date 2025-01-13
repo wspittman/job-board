@@ -1,5 +1,5 @@
 import { db } from "../db/db";
-import { Job } from "../models/dbModels";
+import type { Job } from "../types/dbModels";
 import { BatchOptions, batchRun } from "../utils/async";
 import { LRUCache } from "../utils/cache";
 import { logCounter } from "../utils/telemetry";

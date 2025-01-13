@@ -14,7 +14,7 @@ import type {
   JobKey,
   LocationCache,
   Metadata,
-} from "../models/dbModels";
+} from "../types/dbModels";
 import { getSubContext, logError } from "../utils/telemetry";
 import { ContainerName, getContainer } from "./dbInit";
 

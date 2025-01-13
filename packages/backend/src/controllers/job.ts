@@ -4,7 +4,7 @@ import { extractLocation, extractLocations } from "../ai/extractLocation";
 import { llm } from "../ai/llm";
 import { ats, getAtsJobs } from "../ats/ats";
 import { db } from "../db/db";
-import type { ClientJob } from "../models/clientModels";
+import type { ClientJob } from "../types/clientModels";
 import type {
   ATS,
   Company,
@@ -12,7 +12,7 @@ import type {
   Job,
   JobContext,
   JobKey,
-} from "../models/dbModels";
+} from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { AsyncQueue } from "../utils/asyncQueue";

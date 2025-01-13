@@ -1,7 +1,7 @@
 import { setTimeout } from "node:timers/promises";
 import OpenAI from "openai";
 import { ResponseFormatJSONSchema } from "openai/resources";
-import type { CompanyContext, JobContext } from "../models/dbModels";
+import type { CompanyContext, JobContext } from "../types/dbModels";
 import { getSubContext, logCounter, logError } from "../utils/telemetry";
 
 class LLMConnector {
