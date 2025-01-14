@@ -54,10 +54,10 @@ async function addCompanyInternal(key: CompanyKey) {
 
 async function refreshCompanyInfo(key: CompanyKey) {
   // TODO: WithAsyncContext
-  const { company, context } = await ats.getCompany(key);
+  const companyContext = await ats.getCompany(key);
   // extracts into company object
-  await llm.extractCompanyInfo(company, context);
-  await db.company.upsert(company);
+  await llm.extractCompanyInfo(companyContext);
+  await db.company.upsert(companyContext.item);
 
   //TODO: Update company metadata object
 }

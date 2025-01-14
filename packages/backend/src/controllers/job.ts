@@ -1,23 +1,14 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
-import { extractFacets } from "../ai/extractFacets";
-import { extractLocation, extractLocations } from "../ai/extractLocation";
+import { extractLocation } from "../ai/extractLocation";
 import { llm } from "../ai/llm";
-import { ats, getAtsJobs } from "../ats/ats";
+import { ats } from "../ats/ats";
 import { db } from "../db/db";
 import type { ClientJob } from "../types/clientModels";
-import type {
-  ATS,
-  Company,
-  CompanyKey,
-  Job,
-  JobContext,
-  JobKey,
-} from "../types/dbModels";
+import type { CompanyKey, Job, JobContext, JobKey } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
-import { batchLog, BatchOptions, batchRun } from "../utils/async";
+import { batchLog, batchRun } from "../utils/async";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
-import { getCompanies } from "./company";
 
 const jobInfoQueue = new AsyncQueue<{
   companyKey: CompanyKey;
@@ -210,17 +201,18 @@ export async function refreshJobsForCompany(key: CompanyKey) {
   const atsJobs = await ats.getJobs(key, getFullJobInfo);
 
   // Figure out which jobs are added/removed/ignored
-  const jobIdSet = new Set(atsJobs.map(({ job }) => job.id));
+  const jobIdSet = new Set(atsJobs.map(({ item }) => item.id));
   const currentIdSet = new Set(currentIds);
 
   // Any ATS job not in the current set needs to be added
-  const added = atsJobs.filter(({ job }) => !currentIdSet.has(job.id));
+  const added = atsJobs.filter(({ item }) => !currentIdSet.has(item.id));
 
   // Any jobs in the current set but not in the ATS need to be deleted
   const removed = currentIds.filter((id) => !jobIdSet.has(id));
 
   // If job is in both ATS and DB, do nothing but keep a count
   const existing = jobIdSet.size - added.length;
+  batchLog("Ignored", existing);
 
   if (
     added.length &&
@@ -241,8 +233,9 @@ export async function refreshJobsForCompany(key: CompanyKey) {
   }
 
   if (added.length) {
-    // What exactly do we need to add here?
-    jobInfoQueue.addMany(added);
+    jobInfoQueue.addMany(
+      added.map((add) => ({ companyKey: key, jobContext: add }))
+    );
   }
 }
 
@@ -257,68 +250,12 @@ async function refreshJobInfo({
     jobContext = await ats.getJob(companyKey, jobContext.job);
   }
 
+  // TODO: Remove job on external failures
+
   await llm.extractJobInfo(jobContext);
   await db.job.upsert(jobContext.job);
 
   //TODO: Update job metadata object
-}
-
-async function crawlAts(ats: ATS, logPath: string[]) {
-  const companies = await getCompanies(ats);
-  await batchRun(companies, crawlCompany, "CrawlCompany", {
-    batchId: ats,
-    logPath,
-  });
-}
-
-async function crawlCompany(company: Company, logPath: string[] = []) {
-  const batchOpts = { batchId: company.id, logPath };
-  const dbJobIds = await readJobIds(company.id);
-  const { added, removed, kept } = await getAtsJobs(company, dbJobIds);
-
-  if (added.length) {
-    await fillJobs(added, batchOpts);
-
-    // Remove any jobs that failed to extract facets
-    const filled = added.filter((job) => Object.keys(job.facets).length);
-
-    const failed = added.length - filled.length;
-    if (failed) {
-      batchLog("Failed", failed, batchOpts);
-    }
-
-    if (filled.length) {
-      await batchRun(filled, updateJob, "AddJob", batchOpts);
-    }
-  }
-
-  if (removed.length) {
-    await batchRun(
-      removed,
-      (id) => deleteJob({ id, companyId: company.id }),
-      "DeleteJob",
-      batchOpts
-    );
-  }
-
-  batchLog("Ignored", kept, batchOpts);
-}
-
-async function fillJobs(jobs: Job[], batchOpts: BatchOptions) {
-  const locations = await extractLocations(
-    jobs.map((job) => job.location),
-    batchOpts
-  );
-  const facets = await extractFacets(
-    jobs.map((job) => job.description),
-    batchOpts
-  );
-
-  jobs.forEach((job, index) => {
-    job.isRemote = locations[index]?.isRemote ?? job.isRemote;
-    job.location = locations[index]?.location ?? job.location;
-    job.facets = facets[index] ?? {};
-  });
 }
 
 // #region DB Operations
@@ -424,10 +361,6 @@ function addLocationClause(
     parameters.push(hybridParam);
     parameters.push(remoteParam);
   }
-}
-
-async function readJobIds(companyId: string) {
-  return db.job.getIdsByPartitionKey(companyId);
 }
 
 async function readJobKeysByTimestamp(timestamp: number) {
