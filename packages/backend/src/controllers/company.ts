@@ -4,10 +4,17 @@ import { db } from "../db/db";
 import type { CompanyKey, CompanyKeys } from "../types/dbModels";
 import { batchRun } from "../utils/async";
 import { AsyncQueue } from "../utils/asyncQueue";
+import { logProperty, withAsyncContext } from "../utils/telemetry";
 import { refreshJobsForCompany } from "./job";
 
-const companyInfoQueue = new AsyncQueue<CompanyKey>(refreshCompanyInfo);
-const companyJobQueue = new AsyncQueue<CompanyKey>(refreshJobsForCompany);
+const companyInfoQueue = new AsyncQueue<CompanyKey>(
+  "refreshCompanyInfo",
+  refreshCompanyInfo
+);
+const companyJobQueue = new AsyncQueue<CompanyKey>(
+  "refreshJobsForCompany",
+  refreshJobsForCompany
+);
 
 export async function getCompany(key: CompanyKey) {
   return db.company.get(key);
@@ -27,18 +34,20 @@ export async function removeCompany(key: CompanyKey) {
 }
 
 export async function refreshCompanies() {
-  // TODO: WithAsyncContext
-  const keys = await db.company.getKeys();
-  // TODO: How does metadata clearing fit in here?
-  companyInfoQueue.addMany(keys);
+  withAsyncContext("refreshCompanies", async () => {
+    const keys = await db.company.getKeys();
+    // TODO: How does metadata clearing fit in here?
+    companyInfoQueue.addMany(keys);
+  });
 }
 
 // TODO: This should take in options: single company, timestamp for all before
 export async function refreshJobs() {
-  // TODO: WithAsyncContext
-  const keys = await db.company.getKeys();
-  // TODO: How does metadata clearing fit in here?
-  companyJobQueue.addMany(keys);
+  withAsyncContext("refreshJobs", async () => {
+    const keys = await db.company.getKeys();
+    // TODO: How does metadata clearing fit in here?
+    companyJobQueue.addMany(keys);
+  });
 }
 
 async function addCompanyInternal(key: CompanyKey) {
@@ -53,7 +62,7 @@ async function addCompanyInternal(key: CompanyKey) {
 }
 
 async function refreshCompanyInfo(key: CompanyKey) {
-  // TODO: WithAsyncContext
+  logProperty("Input", key);
   const companyContext = await ats.getCompany(key);
   // extracts into company object
   await llm.extractCompanyInfo(companyContext);

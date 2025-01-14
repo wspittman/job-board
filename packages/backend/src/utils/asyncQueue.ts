@@ -1,3 +1,5 @@
+import { logError, withAsyncContext } from "./telemetry";
+
 class Node<T> {
   constructor(public value: T, public next?: Node<T>) {}
 }
@@ -8,6 +10,7 @@ export class AsyncQueue<T> {
   private active = 0;
 
   constructor(
+    protected name: string,
     protected action: (task: T) => Promise<void>,
     protected batchSize = 5
   ) {}
@@ -59,11 +62,11 @@ export class AsyncQueue<T> {
     try {
       if (!item) return;
       this.active++;
-      // TBD: Telemetry WithAsyncContext
-      await this.action(item);
-    } catch (e) {
-      // TODO: proper telemetry
-      console.error(e);
+      withAsyncContext(this.name, async () => {
+        await this.action(item);
+      });
+    } catch (error) {
+      logError(error);
     } finally {
       this.active--;
       this.begin();

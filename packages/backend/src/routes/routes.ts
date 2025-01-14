@@ -14,7 +14,6 @@ import {
   useCompanyKey,
   useCompanyKeys,
 } from "../middleware/prepInput";
-import { logAsyncEvent, logError } from "../utils/telemetry";
 
 type AsyncFunction = (input: any) => Promise<unknown>;
 
@@ -73,16 +72,8 @@ function jsonWrapper(fn: AsyncFunction) {
 
 function asyncWrapper(name: string, fn: AsyncFunction) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const start = Date.now();
-    try {
-      res.writeHead(202, { "Content-Type": "text/plain" });
-      res.end("Accepted");
-      await fn(res.locals.input);
-    } catch (error: any) {
-      logError(error);
-    } finally {
-      const duration = Date.now() - start;
-      logAsyncEvent(name, duration);
-    }
+    res.writeHead(202, { "Content-Type": "text/plain" });
+    res.end("Accepted");
+    fn(res.locals.input);
   };
 }

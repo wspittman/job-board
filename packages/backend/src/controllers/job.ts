@@ -4,16 +4,17 @@ import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
 import type { ClientJob } from "../types/clientModels";
-import type { CompanyKey, Job, JobContext, JobKey } from "../types/dbModels";
+import type { CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { LLMContext } from "../types/types";
 import { AppError } from "../utils/AppError";
-import { batchLog, batchRun } from "../utils/async";
+import { batchRun } from "../utils/async";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
 
 const jobInfoQueue = new AsyncQueue<{
   companyKey: CompanyKey;
-  jobContext: JobContext;
-}>(refreshJobInfo);
+  jobContext: LLMContext<Job>;
+}>("refreshJobInfo", refreshJobInfo);
 
 // #region Input Types and Validations
 
@@ -194,6 +195,7 @@ export async function removeJobs(options: DeleteOptions) {
 }
 
 export async function refreshJobsForCompany(key: CompanyKey) {
+  logProperty("Input", key);
   const currentIds = await db.job.getIds(key.id);
 
   // If no jobs are found, assume newly added company and get full job data
@@ -212,7 +214,7 @@ export async function refreshJobsForCompany(key: CompanyKey) {
 
   // If job is in both ATS and DB, do nothing but keep a count
   const existing = jobIdSet.size - added.length;
-  batchLog("Ignored", existing);
+  logProperty("Ignored", existing);
 
   if (
     added.length &&
@@ -244,16 +246,17 @@ async function refreshJobInfo({
   jobContext,
 }: {
   companyKey: CompanyKey;
-  jobContext: JobContext;
+  jobContext: LLMContext<Job>;
 }) {
+  logProperty("Input", { ...companyKey, jobId: jobContext.item.id });
   if (!jobContext.context) {
-    jobContext = await ats.getJob(companyKey, jobContext.job);
+    jobContext = await ats.getJob(companyKey, jobContext.item);
   }
 
   // TODO: Remove job on external failures
 
   await llm.extractJobInfo(jobContext);
-  await db.job.upsert(jobContext.job);
+  await db.job.upsert(jobContext.item);
 
   //TODO: Update job metadata object
 }
