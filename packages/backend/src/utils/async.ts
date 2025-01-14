@@ -30,14 +30,6 @@ export async function batchRun<T>(
   }
 }
 
-export function batchLog(
-  logName: string,
-  value: unknown,
-  { batchId, logPath }: BatchOptions = {}
-) {
-  logBatchAction(logPath, batchId, logName, value);
-}
-
 // #region Telemetry
 
 function logBatchAction(

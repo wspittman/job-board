@@ -1,5 +1,4 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
-import { extractLocation } from "../ai/extractLocation";
 import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
@@ -162,7 +161,7 @@ export async function getJobs(filterInput: Record<string, string>) {
 
   let filters: EnhancedFilters = { ...inputFilters };
   if (filters.location) {
-    const location = (await extractLocation(filters.location))?.location;
+    const location = (await llm.normalizeLocation(filters.location))?.location;
     if (location) {
       filters.normalizedLocation = location;
     }

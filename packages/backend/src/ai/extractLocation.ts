@@ -3,7 +3,7 @@ import type { Job } from "../types/dbModels";
 import { BatchOptions, batchRun } from "../utils/async";
 import { LRUCache } from "../utils/cache";
 import { logCounter } from "../utils/telemetry";
-import { jsonCompletion } from "./llm";
+import { jsonCompletion } from "./openai";
 
 const locationCache = new LRUCache<string, Location>(1000);
 
