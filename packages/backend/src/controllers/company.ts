@@ -45,7 +45,7 @@ async function addCompanyInternal(key: CompanyKey) {
   const exists = await db.company.get(key);
   if (exists) return;
 
-  const company = await ats.initCompany(key);
+  const company = await ats.getBasicCompany(key);
   if (!company) return;
 
   await db.company.upsert(company);

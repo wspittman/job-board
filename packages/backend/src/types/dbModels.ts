@@ -41,11 +41,6 @@ export interface CompanyKeys {
   ats: Company["ats"];
 }
 
-export interface CompanyContext {
-  company: Company;
-  context: Record<string, unknown>;
-}
-
 /**
  * - id: The ATS-granted job id
  * - pKey: companyId
@@ -95,11 +90,6 @@ export interface Job {
 }
 
 export type JobKey = Pick<Job, "id" | "companyId">;
-
-export interface JobContext {
-  job: Job;
-  context?: Record<string, unknown>;
-}
 
 /**
  * Aggregated metadata for other containers. Cached in the backend service.

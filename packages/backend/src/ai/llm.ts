@@ -1,17 +1,18 @@
 import { setTimeout } from "node:timers/promises";
 import OpenAI from "openai";
 import { ResponseFormatJSONSchema } from "openai/resources";
-import type { CompanyContext, JobContext } from "../types/dbModels";
+import type { Company, Job } from "../types/dbModels";
+import type { LLMContext } from "../types/types";
 import { getSubContext, logCounter, logError } from "../utils/telemetry";
 
 class LLMConnector {
   constructor() {}
 
-  async extractCompanyInfo(companyContext: CompanyContext) {
+  async extractCompanyInfo(companyContext: LLMContext<Company>) {
     throw new Error("Not Implemented");
   }
 
-  async extractJobInfo(jobContext: JobContext) {
+  async extractJobInfo(jobContext: LLMContext<Job>) {
     throw new Error("Not Implemented");
   }
 }
