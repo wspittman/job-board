@@ -254,7 +254,7 @@ async function refreshJobInfo({
 
   // TODO: Remove job on external failures
 
-  await llm.extractJobInfo(jobContext);
+  await llm.fillJobInfo(jobContext);
   await db.job.upsert(jobContext.item);
 
   //TODO: Update job metadata object

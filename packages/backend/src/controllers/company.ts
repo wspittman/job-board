@@ -65,7 +65,7 @@ async function refreshCompanyInfo(key: CompanyKey) {
   logProperty("Input", key);
   const companyContext = await ats.getCompany(key);
   // extracts into company object
-  await llm.extractCompanyInfo(companyContext);
+  await llm.fillCompanyInfo(companyContext);
   await db.company.upsert(companyContext.item);
 
   //TODO: Update company metadata object

@@ -29,6 +29,7 @@ export interface Company {
 
   // Extracted Details
   industry?: string;
+  foundingYear?: number;
   stage?: Stage;
   size?: OrgSize;
   visa?: Visa;

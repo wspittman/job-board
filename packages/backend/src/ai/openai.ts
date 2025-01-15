@@ -1,6 +1,8 @@
 import { setTimeout } from "node:timers/promises";
 import OpenAI from "openai";
-import { ResponseFormatJSONSchema } from "openai/resources";
+import { zodResponseFormat } from "openai/helpers/zod";
+import type { ParsedChatCompletion } from "openai/resources/beta/chat/completions";
+import type { ZodType } from "zod";
 import { getSubContext, logCounter, logError } from "../utils/telemetry";
 
 const client = new OpenAI();
@@ -24,18 +26,17 @@ async function backoff(attempt: number, error: unknown) {
   }
 }
 
-export async function jsonCompletion<Schema, Result>(
+export async function jsonCompletion<T>(
   action: string,
   prompt: string,
-  schema: ResponseFormatJSONSchema.JSONSchema,
-  input: string,
-  formatter: (output: Schema) => Result
+  schema: ZodType<T>,
+  input: string | object
 ) {
   let attempt = 0;
 
   while (true) {
     try {
-      return await jsonComplete(action, prompt, schema, input, formatter);
+      return await jsonComplete<T>(action, prompt, schema, input);
     } catch (error) {
       if (!(await backoff(attempt, error))) {
         logError(error);
@@ -46,47 +47,39 @@ export async function jsonCompletion<Schema, Result>(
   }
 }
 
-async function jsonComplete<Schema, Result>(
+async function jsonComplete<T>(
   action: string,
   prompt: string,
-  schema: ResponseFormatJSONSchema.JSONSchema,
-  input: string,
-  formatter: (output: Schema) => Result
+  schema: ZodType<T>,
+  input: string | object
 ) {
+  input = typeof input === "string" ? input : JSON.stringify(input);
+
   const start = Date.now();
-  const completion = await client.chat.completions.create({
+  const completion = await client.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [
       { role: "system", content: prompt },
       { role: "user", content: input },
     ],
-    response_format: {
-      type: "json_schema",
-      json_schema: schema,
-    },
+    response_format: zodResponseFormat(schema, action),
   });
   const duration = Date.now() - start;
 
-  const message = extractMessage(completion);
+  const parsed = extractMessage(completion);
 
-  let formatted: Result | undefined;
-  if (message) {
-    const parsed = JSON.parse(message) as Schema;
-    formatted = formatter(parsed);
-  }
+  logLLMAction(action, input, duration, completion, parsed);
 
-  logLLMAction(action, input, duration, completion, formatted);
-
-  return formatted;
+  return parsed;
 }
 
-function extractMessage(completion: OpenAI.ChatCompletion) {
+function extractMessage<T>(completion: ParsedChatCompletion<T>) {
   if (!completion.choices[0]) return;
 
   const { finish_reason, message } = completion.choices[0] ?? {};
 
   if (finish_reason === "stop" && message && !message.refusal) {
-    return message.content;
+    return message.parsed;
   }
 }
 

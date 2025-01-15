@@ -4,11 +4,11 @@ import type { LLMContext } from "../types/types";
 class LLMConnector {
   constructor() {}
 
-  async extractCompanyInfo(companyContext: LLMContext<Company>) {
+  async fillCompanyInfo(companyContext: LLMContext<Company>) {
     throw new Error("Not Implemented");
   }
 
-  async extractJobInfo(jobContext: LLMContext<Job>) {
+  async fillJobInfo(jobContext: LLMContext<Job>) {
     throw new Error("Not Implemented");
   }
 

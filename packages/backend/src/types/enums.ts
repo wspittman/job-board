@@ -13,8 +13,8 @@ export enum Stage {
 }
 
 export enum Visa {
-  Sponsor = 0,
-  Transfer = 1,
+  SponsorshipAvailable = 0,
+  TransferAccepted = 1,
   NotAvailable = 2,
 }
 
