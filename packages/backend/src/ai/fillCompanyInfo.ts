@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Company } from "../types/dbModels";
 import { OrgSize, Stage, Visa } from "../types/enums";
 import type { LLMContext } from "../types/types";
-import { jsonCompletion } from "./openai";
+import { jsonCompletion, setExtractedData } from "./openai";
 
 const prompt = `You are a detail-oriented job seeker who excels at understanding company profiles through job descriptions.
 Your goal is to extract key company insights from available context.
@@ -62,5 +62,5 @@ export async function fillCompanyInfo(
 
   if (!result) return;
 
-  throw new Error("Not Implemented");
+  setExtractedData(companyContext.item, result);
 }

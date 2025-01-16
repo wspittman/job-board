@@ -1,11 +1,12 @@
 import type { Company, Job } from "../types/dbModels";
 import type { LLMContext } from "../types/types";
+import { fillCompanyInfo } from "./fillCompanyInfo";
 
 class LLMConnector {
   constructor() {}
 
   async fillCompanyInfo(companyContext: LLMContext<Company>) {
-    throw new Error("Not Implemented");
+    return fillCompanyInfo(companyContext);
   }
 
   async fillJobInfo(jobContext: LLMContext<Job>) {

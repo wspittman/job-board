@@ -2,7 +2,7 @@ import { setTimeout } from "node:timers/promises";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import type { ParsedChatCompletion } from "openai/resources/beta/chat/completions";
-import type { ZodType } from "zod";
+import { z, ZodType } from "zod";
 import { getSubContext, logCounter, logError } from "../utils/telemetry";
 
 const client = new OpenAI();
@@ -23,6 +23,24 @@ async function backoff(attempt: number, error: unknown) {
   ) {
     logCounter("llm_backoff");
     return await setTimeout(getBackoffDelay(attempt), true);
+  }
+}
+
+/**
+ * Fill a parent item with extracted data from matching keys in the LLM completion.
+ * The typing is wild here but this function saves us a lot of boilerplate.
+ * @param item The parent item (eg. Company)
+ * @param completion The LLM completion object as returned by jsonCompletion()
+ */
+export function setExtractedData<
+  Item,
+  Schema extends ZodType,
+  Key extends keyof Item & keyof z.infer<Schema>
+>(item: Item, completion: Pick<z.infer<Schema>, Key>) {
+  for (const key in completion) {
+    if (completion[key]) {
+      item[key as Key] = completion[key] as Item[Key];
+    }
   }
 }
 

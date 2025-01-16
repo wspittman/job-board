@@ -66,6 +66,8 @@ const enumLookups = new Map<Enum, EnumLookup<any>>([
 
 // #endregion
 
+// TODO: We might not need any of this since ZOD/OpenAI Parse takes care of it for us
+
 /**
  * Given a string value and an enum, return the enum value that matches the string, or undefined.
  */
