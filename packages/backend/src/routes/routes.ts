@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import {
   addCompanies,
   addCompany,
@@ -8,74 +8,29 @@ import {
 } from "../controllers/company";
 import { getClientJobs, removeJob } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
-import { validateAdmin } from "../middleware/auth";
-import {
-  prepInput,
-  useCompanyKey,
-  useCompanyKeys,
-} from "../middleware/prepInput";
-import { withAsyncContext } from "../utils/telemetry";
-
-type AsyncFunction = (input: any) => Promise<unknown>;
-
-const SUCCESS = { status: "success" };
+import { adminOnly } from "../middleware/auth";
+import { useCompanyKey, useCompanyKeys } from "../middleware/inputValidators";
+import { asyncRoute, jsonRoute } from "../middleware/wrappers";
 
 export const router = express.Router();
 
-router.use(prepInput);
-
 router.get(
   "/",
-  jsonWrapper(() => Promise.resolve())
+  jsonRoute(() => Promise.resolve())
 );
 
 router.post(
   "/refresh/companies",
-  validateAdmin,
-  asyncWrapper("refreshCompanies", refreshCompanies)
+  adminOnly,
+  asyncRoute("refreshCompanies", refreshCompanies)
 );
-router.post(
-  "/refresh/jobs",
-  validateAdmin,
-  asyncWrapper("refreshJobs", refreshJobs)
-);
+router.post("/refresh/jobs", adminOnly, asyncRoute("refreshJobs", refreshJobs));
 
-router.put("/company", useCompanyKey, jsonWrapper(addCompany));
-router.put(
-  "/companies",
-  validateAdmin,
-  useCompanyKeys,
-  jsonWrapper(addCompanies)
-);
-router.delete(
-  "/company",
-  validateAdmin,
-  useCompanyKey,
-  jsonWrapper(removeCompany)
-);
+router.put("/company", jsonRoute(addCompany, useCompanyKey));
+router.put("/companies", adminOnly, jsonRoute(addCompanies, useCompanyKeys));
+router.delete("/company", adminOnly, jsonRoute(removeCompany, useCompanyKey));
 
-router.get("/jobs", jsonWrapper(getClientJobs));
-router.delete("/job", validateAdmin, jsonWrapper(removeJob));
+router.get("/jobs", jsonRoute(getClientJobs));
+router.delete("/job", adminOnly, jsonRoute(removeJob));
 
-router.get("/metadata", jsonWrapper(getMetadata));
-
-function jsonWrapper(fn: AsyncFunction) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const result = await fn(res.locals.input);
-      res.json(result ?? SUCCESS);
-    } catch (error: any) {
-      next(error);
-    }
-  };
-}
-
-function asyncWrapper(name: string, fn: AsyncFunction) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    res.writeHead(202, { "Content-Type": "text/plain" });
-    res.end("Accepted");
-    withAsyncContext(name, async () => {
-      fn(res.locals.input);
-    });
-  };
-}
+router.get("/metadata", jsonRoute(getMetadata));

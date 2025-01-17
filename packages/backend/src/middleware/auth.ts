@@ -5,7 +5,7 @@ import { AppError } from "../utils/AppError";
 /**
  * Simple token-match auth for only-me endpoints
  */
-export function validateAdmin(req: Request, res: Response, next: NextFunction) {
+export function adminOnly(req: Request, res: Response, next: NextFunction) {
   // Authorization: Bearer <token>
   const token = req.header("Authorization")?.split(" ")[1];
 
