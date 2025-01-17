@@ -6,7 +6,7 @@ import type { ClientJob } from "../types/clientModels";
 import type { CompanyKey, Job, JobKey } from "../types/dbModels";
 import type { LLMContext } from "../types/types";
 import { AppError } from "../utils/AppError";
-import { batchRun } from "../utils/async";
+import { asyncBatch } from "../utils/asyncBatch";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
 
@@ -28,10 +28,6 @@ interface Filters {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
-}
-
-interface DeleteOptions {
-  timestamp?: number;
 }
 
 function validateFilters({
@@ -100,19 +96,6 @@ function validateCrawlOptions(options: CrawlOptions): CrawlOptions {
   return { company };
 }
 
-function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
-  if (timestamp) {
-    const now = Date.now();
-    const minTimestamp = new Date("2024-01-01").getTime();
-
-    if (timestamp > now || timestamp < minTimestamp) {
-      throw new AppError("Invalid timestamp");
-    }
-  }
-
-  return { timestamp };
-}
-
 // #endregion
 
 export async function getClientJobs(filterInput: Record<string, string>) {
@@ -166,21 +149,6 @@ export async function removeJob(key: JobKey) {
   return deleteJob(jobKey);
 }
 
-export async function removeJobs(options: DeleteOptions) {
-  const { timestamp } = validateDeleteOptions(options);
-
-  if (!timestamp) {
-    throw new AppError("No timestamp provided");
-  }
-
-  logProperty("RemoveJobs_Timestamp", timestamp);
-
-  const jobKeys = await readJobKeysByTimestamp(timestamp);
-  logProperty("RemoveJobs_Count", jobKeys.length);
-
-  await batchRun(jobKeys, deleteJob, "DeleteJob");
-}
-
 export async function refreshJobsForCompany(key: CompanyKey) {
   logProperty("Input", key);
   const currentIds = await db.job.getIds(key.id);
@@ -213,10 +181,8 @@ export async function refreshJobsForCompany(key: CompanyKey) {
   }
 
   if (removed.length) {
-    await batchRun(
-      removed,
-      (id) => db.job.remove({ id, companyId: key.id }),
-      "DeleteJob"
+    await asyncBatch("DeleteJob", removed, (id) =>
+      db.job.remove({ id, companyId: key.id })
     );
     // TODO: How to update the metadata object?
   }

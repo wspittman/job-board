@@ -2,7 +2,7 @@ import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
 import type { CompanyKey, CompanyKeys } from "../types/dbModels";
-import { batchRun } from "../utils/async";
+import { asyncBatch } from "../utils/asyncBatch";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
 import { refreshJobsForCompany } from "./job";
@@ -25,7 +25,9 @@ export async function addCompany(key: CompanyKey) {
 }
 
 export async function addCompanies({ ids, ats }: CompanyKeys) {
-  return batchRun(ids, (id) => addCompanyInternal({ id, ats }), "AddCompanies");
+  return asyncBatch("AddCompanies", ids, (id) =>
+    addCompanyInternal({ id, ats })
+  );
 }
 
 export async function removeCompany(key: CompanyKey) {

@@ -6,7 +6,7 @@ import {
   refreshJobs,
   removeCompany,
 } from "../controllers/company";
-import { getClientJobs, removeJob, removeJobs } from "../controllers/job";
+import { getClientJobs, removeJob } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
 import { validateAdmin } from "../middleware/auth";
 import {
@@ -56,7 +56,6 @@ router.delete(
 
 router.get("/jobs", jsonWrapper(getClientJobs));
 router.delete("/job", validateAdmin, jsonWrapper(removeJob));
-router.delete("/jobs", validateAdmin, jsonWrapper(removeJobs));
 
 router.get("/metadata", jsonWrapper(getMetadata));
 
