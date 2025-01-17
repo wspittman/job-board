@@ -31,8 +31,12 @@ export async function addCompanies({ ids, ats }: CompanyKeys) {
 }
 
 export async function removeCompany(key: CompanyKey) {
-  // TODO: Delete company's jobs also
-  return db.company.remove(key);
+  const companyId = key.id;
+  const jobIds = await db.job.getIds(companyId);
+  await db.company.remove(key);
+  return asyncBatch("RemoveCompanyJobs", jobIds, (id) =>
+    db.job.remove({ id, companyId })
+  );
 }
 
 export async function refreshCompanies() {
