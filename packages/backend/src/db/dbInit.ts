@@ -46,7 +46,6 @@ export async function connectDB() {
       "/description",
     ]);
     createContainer(database, "metadata", "id", "all");
-    createContainer(database, "locationCache", "pKey", "all");
 
     console.log("CosmosDB connected");
   } catch (error) {

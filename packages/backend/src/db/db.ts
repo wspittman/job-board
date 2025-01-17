@@ -12,7 +12,6 @@ import type {
   CompanyKey,
   Job,
   JobKey,
-  LocationCache,
   Metadata,
 } from "../types/dbModels";
 import { getSubContext, logError } from "../utils/telemetry";
@@ -161,7 +160,6 @@ class DB {
   readonly job = new JobContainer();
   readonly company = new CompanyContainer();
   readonly metadata = new Container<Metadata>("metadata");
-  readonly locationCache = new Container<LocationCache>("locationCache");
 
   constructor() {}
 }

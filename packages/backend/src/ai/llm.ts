@@ -13,11 +13,6 @@ class LLMConnector {
   async fillJobInfo(jobContext: LLMContext<Job>) {
     return fillJobInfo(jobContext);
   }
-
-  // What type should this return?
-  async normalizeLocation(location: string) {
-    throw new Error("Not Implemented");
-  }
 }
 
 export const llm = new LLMConnector();

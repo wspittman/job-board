@@ -30,10 +30,6 @@ interface Filters {
   minSalary?: number;
 }
 
-interface EnhancedFilters extends Filters {
-  normalizedLocation?: string;
-}
-
 interface DeleteOptions {
   timestamp?: number;
 }
@@ -157,14 +153,6 @@ export async function getJobs(filterInput: Record<string, string>) {
 
   if (!Object.keys(inputFilters).length) {
     return [];
-  }
-
-  let filters: EnhancedFilters = { ...inputFilters };
-  if (filters.location) {
-    const location = (await llm.normalizeLocation(filters.location))?.location;
-    if (location) {
-      filters.normalizedLocation = location;
-    }
   }
 
   const result = await readJobsByFilters(filters);
