@@ -1,6 +1,7 @@
 import type { Company, Job } from "../types/dbModels";
 import type { LLMContext } from "../types/types";
 import { fillCompanyInfo } from "./fillCompanyInfo";
+import { fillJobInfo } from "./fillJobInfo";
 
 class LLMConnector {
   constructor() {}
@@ -10,7 +11,7 @@ class LLMConnector {
   }
 
   async fillJobInfo(jobContext: LLMContext<Job>) {
-    throw new Error("Not Implemented");
+    return fillJobInfo(jobContext);
   }
 
   // What type should this return?

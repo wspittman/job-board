@@ -59,10 +59,12 @@ export interface Job {
   applyUrl: string;
   description: string;
 
+  // Normalized from extracted details
+  location: string;
+
   // Extracted Details
   locations: {
-    remote: Office;
-    normalized: string;
+    remote?: Office;
     city?: string;
     state?: string;
     stateCode?: string;
@@ -71,22 +73,26 @@ export interface Job {
     timezone?: string;
   }[];
   compensation: {
+    rate?: PayRate;
     min?: number;
     max?: number;
     currency?: string;
-    rate?: PayRate;
     hasEquity?: boolean;
     pto?: number | "Unlimited";
   };
   role: {
-    summary?: string; // or Why you want this job? or something else?
     education?: Education;
     experience?: number;
     function?: string;
     type?: JobType;
-    skills?: string[]; // or tags?
-    travelRequired?: boolean; // or percentage?
+    skills?: string[];
+    travelRequired?: boolean;
     manager?: boolean;
+  };
+  summary: {
+    role?: string;
+    impact?: string;
+    growth?: string;
   };
 }
 

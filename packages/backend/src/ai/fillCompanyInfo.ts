@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Company } from "../types/dbModels";
 import { OrgSize, Stage, Visa } from "../types/enums";
 import type { LLMContext } from "../types/types";
+import { zEnum, zNumber, zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
 
 const prompt = `You are a detail-oriented job seeker who excels at understanding company profiles through job descriptions.
@@ -12,42 +13,25 @@ Then, compose a concise, clear, and engaging one-line company description.
 Format your response in JSON, adhering to the provided schema.`;
 
 const schema = z.object({
-  website: z
-    .string()
-    .nullable()
-    .describe("The company's website URL, or null if not specified."),
-  industry: z
-    .string()
-    .nullable()
-    .describe(
-      "The ISIC Revision 4 Section most representative of the company, or null if not specified."
-    ),
-  foundingYear: z
-    .number()
-    .nullable()
-    .describe("The year the company was founded, or null if not specified."),
-  stage: z
-    .nativeEnum(Stage)
-    .nullable()
-    .describe("The stage of the company, or null if not specified."),
-  size: z
-    .nativeEnum(OrgSize)
-    .nullable()
-    .describe(
-      "The lower bound of the number of employees at the company, or null if not specified."
-    ),
-  visa: z
-    .nativeEnum(Visa)
-    .nullable()
-    .describe(
-      "The visa sponsorship status of the company, or null if not specified."
-    ),
-  description: z
-    .string()
-    .nullable()
-    .describe(
-      "A concise, clear, and engaging one-line company description. Be sure to highlight key company attributes and values. If no information is available, use null."
-    ),
+  website: zString("The company's website URL, or null if not specified."),
+  industry: zString(
+    "The ISIC Revision 4 Section most representative of the company, or null if not specified."
+  ),
+  foundingYear: zNumber(
+    "The year the company was founded, or null if not specified."
+  ),
+  stage: zEnum(Stage, "The stage of the company, or null if not specified."),
+  size: zEnum(
+    OrgSize,
+    "The lower bound of the number of employees at the company, or null if not specified."
+  ),
+  visa: zEnum(
+    Visa,
+    "The visa sponsorship status of the company, or null if not specified."
+  ),
+  description: zString(
+    "A concise, clear, and engaging one-line company description. Be sure to highlight key company attributes and values. If no information is available, use null."
+  ),
 });
 
 export async function fillCompanyInfo(
