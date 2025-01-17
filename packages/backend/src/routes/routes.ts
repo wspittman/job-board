@@ -14,6 +14,7 @@ import {
   useCompanyKey,
   useCompanyKeys,
 } from "../middleware/prepInput";
+import { withAsyncContext } from "../utils/telemetry";
 
 type AsyncFunction = (input: any) => Promise<unknown>;
 
@@ -74,6 +75,8 @@ function asyncWrapper(name: string, fn: AsyncFunction) {
   return async (req: Request, res: Response, next: NextFunction) => {
     res.writeHead(202, { "Content-Type": "text/plain" });
     res.end("Accepted");
-    fn(res.locals.input);
+    withAsyncContext(name, async () => {
+      fn(res.locals.input);
+    });
   };
 }
