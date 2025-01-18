@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "express";
+import express from "express";
 import {
   addCompanies,
   addCompany,
@@ -11,57 +11,31 @@ import {
   removeJobs,
 } from "../controllers/job";
 import { getMetadata } from "../controllers/metadata";
-import { validateAdmin } from "../middleware/auth";
-import { prepInput } from "../middleware/prepInput";
-import { logAsyncEvent, logError } from "../utils/telemetry";
-
-type AsyncFunction = (input: any) => Promise<unknown>;
-
-const SUCCESS = { status: "success" };
+import { adminOnly } from "../middleware/auth";
+import {
+  useCompanyKey,
+  useCompanyKeys,
+  useFilters,
+  useJobKey,
+} from "../middleware/inputValidators";
+import { asyncRoute, jsonRoute } from "../middleware/wrappers";
 
 export const router = express.Router();
 
-router.use(prepInput);
-
 router.get(
   "/",
-  jsonWrapper(() => Promise.resolve())
+  jsonRoute(() => Promise.resolve())
 );
 
-router.put("/company", jsonWrapper(addCompany));
-router.put("/companies", validateAdmin, jsonWrapper(addCompanies));
-router.delete("/company", validateAdmin, jsonWrapper(removeCompany));
+router.put("/company", jsonRoute(addCompany, useCompanyKey));
+router.put("/companies", adminOnly, jsonRoute(addCompanies, useCompanyKeys));
+router.delete("/company", adminOnly, jsonRoute(removeCompany, useCompanyKey));
 
-router.get("/jobs", jsonWrapper(getClientJobs));
-router.post("/jobs", validateAdmin, asyncWrapper("addJobs", addJobs));
-router.delete("/job", validateAdmin, jsonWrapper(removeJob));
-router.delete("/jobs", validateAdmin, jsonWrapper(removeJobs));
+router.get("/jobs", jsonRoute(getClientJobs, useFilters));
+// Ignore input: crawl updates incoming
+router.post("/jobs", adminOnly, asyncRoute("addJobs", addJobs));
+router.delete("/job", adminOnly, jsonRoute(removeJob, useJobKey));
+// Ignore input: route on chopping block
+router.delete("/jobs", adminOnly, jsonRoute(removeJobs));
 
-router.get("/metadata", jsonWrapper(getMetadata));
-
-function jsonWrapper(fn: AsyncFunction) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const result = await fn(res.locals.input);
-      res.json(result ?? SUCCESS);
-    } catch (error: any) {
-      next(error);
-    }
-  };
-}
-
-function asyncWrapper(name: string, fn: AsyncFunction) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const start = Date.now();
-    try {
-      res.writeHead(202, { "Content-Type": "text/plain" });
-      res.end("Accepted");
-      await fn(res.locals.input);
-    } catch (error: any) {
-      logError(error);
-    } finally {
-      const duration = Date.now() - start;
-      logAsyncEvent(name, duration);
-    }
-  };
-}
+router.get("/metadata", jsonRoute(getMetadata));

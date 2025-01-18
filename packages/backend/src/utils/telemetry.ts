@@ -6,24 +6,45 @@ import type {
   ExceptionData,
   RequestData,
 } from "applicationinsights/out/Declarations/Contracts";
+import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config";
 
 interface CustomContext extends CorrelationContext {
   requestContext?: Record<string, unknown>;
 }
 
+const asyncLocalStorage = new AsyncLocalStorage<Record<string, unknown>>();
+
+export function withAsyncContext(name: string, fn: () => Promise<void>) {
+  const start = Date.now();
+  asyncLocalStorage.run({}, async () => {
+    try {
+      await fn();
+    } catch (error) {
+      logError(error);
+    } finally {
+      const duration = Date.now() - start;
+      appInsights.defaultClient.trackEvent({ name, properties: { duration } });
+    }
+  });
+}
+
 /**
- * Get the request context from the correlation context, initializing it if necessary
- * @returns The request context
+ * Get the current logging context, initializing it if necessary
  */
-function getRequestContext(): Record<string, unknown> {
+function getContext(): Record<string, unknown> {
+  // If an async context is already set, use it
+  const asyncContext = asyncLocalStorage.getStore();
+  if (asyncContext) return asyncContext;
+
+  // Otherwise, use the request-level context
   const context = <CustomContext>appInsights.getCorrelationContext();
   context.requestContext ??= {};
   return context.requestContext;
 }
 
 export function getSubContext<T>(name: string, init: () => T): T {
-  const context = getRequestContext();
+  const context = getContext();
   context[name] ??= init();
   return <T>context[name];
 }
@@ -45,14 +66,8 @@ export function logProperty(name: string, value: unknown) {
 }
 
 export function logCounter(name: string, value: number = 1) {
-  const context = getRequestContext();
+  const context = getContext();
   context[name] = ((context[name] as number) ?? 0) + value;
-}
-
-export function logAsyncEvent(name: string, duration: number) {
-  const context = getRequestContext();
-  context.duration = duration;
-  appInsights.defaultClient.trackEvent({ name: `Async: ${name}` });
 }
 
 export function logError(error: unknown) {
@@ -102,9 +117,11 @@ function appendContext(baseData: RequestData | EventData) {
   const requestData = baseData;
   requestData.properties = {
     ...requestData.properties,
-    ...getRequestContext(),
+    ...getContext(),
   };
 }
+
+// #region Development Logging
 
 function devLogRequest(requestData: RequestData) {
   if (config.NODE_ENV === "dev") {
@@ -143,3 +160,5 @@ function devLog(data: unknown) {
     console.dir(data, { depth: null });
   }
 }
+
+// #endregion

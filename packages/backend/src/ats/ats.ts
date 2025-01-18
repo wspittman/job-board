@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
-import { AppError } from "../AppError";
 import type { ATS, Company } from "../db/models";
+import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
 import { Greenhouse } from "./greenhouse";
 import { Lever } from "./lever";
