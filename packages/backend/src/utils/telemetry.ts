@@ -15,6 +15,12 @@ interface CustomContext extends CorrelationContext {
 
 const asyncLocalStorage = new AsyncLocalStorage<Record<string, unknown>>();
 
+/**
+ * Executes an async function within a new telemetry context
+ * @param name - Name of the operation for tracking
+ * @param fn - Async function to execute
+ * @remarks Automatically tracks duration and errors
+ */
 export function withAsyncContext(name: string, fn: () => Promise<void>) {
   const start = Date.now();
   asyncLocalStorage.run({}, async () => {
@@ -43,12 +49,24 @@ function getContext(): Record<string, unknown> {
   return context.requestContext;
 }
 
+/**
+ * Gets a named sub-section of the telemetry context
+ * @param name - Name of the sub-context
+ * @param init - Function to initialize the sub-context if it doesn't exist
+ * @returns The requested sub-context
+ */
 export function getSubContext<T>(name: string, init: () => T): T {
   const context = getContext();
   context[name] ??= init();
   return <T>context[name];
 }
 
+/**
+ * Logs a property to the current telemetry context
+ * @param name - Name of the property
+ * @param value - Value to log
+ * @remarks If property already exists, converts to array of values
+ */
 export function logProperty(name: string, value: unknown) {
   const context = getSubContext<Record<string, unknown>>("prop", () => ({}));
 
@@ -65,18 +83,29 @@ export function logProperty(name: string, value: unknown) {
   }
 }
 
+/**
+ * Increments a counter in the current telemetry context
+ * @param name - Name of the counter
+ * @param value - Amount to increment by (default: 1)
+ */
 export function logCounter(name: string, value: number = 1) {
   const context = getContext();
   context[name] = ((context[name] as number) ?? 0) + value;
 }
 
+/**
+ * Logs an error to Application Insights
+ * @param error - Error to log
+ */
 export function logError(error: unknown) {
   const exception = error instanceof Error ? error : new Error(String(error));
   appInsights.defaultClient.trackException({ exception });
 }
 
 /**
- * Put the request context onto the customDimensions of the request event
+ * Application Insights telemetry processor that enriches telemetry with context
+ * @param envelope - Telemetry envelope to process
+ * @returns true to allow the event to be sent
  */
 export function telemetryProcessor({ data }: EnvelopeTelemetry) {
   try {

@@ -1,8 +1,15 @@
 import { NextFunction, Request, Response } from "express";
-import { withAsyncContext } from "../utils/telemetry";
+import { logError, withAsyncContext } from "../utils/telemetry";
 
 const SUCCESS = { status: "success" };
 
+/**
+ * Creates an Express route handler that processes JSON requests and responses
+ * @param fn - Async function that processes the validated input and returns a result
+ * @param inputValidator - Optional function to validate and transform the input
+ * @returns Express middleware that handles the request
+ * @throws Forwards any errors to Express error handler
+ */
 export function jsonRoute<T>(
   fn: (input: T) => Promise<unknown>,
   inputValidator?: (input: any) => T
@@ -18,18 +25,31 @@ export function jsonRoute<T>(
   };
 }
 
+/**
+ * Creates an Express route handler for long-running async operations
+ * @param name - Name of the operation for telemetry
+ * @param fn - Async function that processes the validated input
+ * @param inputValidator - Optional function to validate and transform the input
+ * @returns Express middleware that immediately responds with 202 Accepted
+ */
 export function asyncRoute<T>(
   name: string,
-  fn: (input: T) => Promise<unknown>,
+  fn: (input: T) => Promise<void>,
   inputValidator?: (input: any) => T
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const input = getInput(req, inputValidator);
-    res.writeHead(202, { "Content-Type": "text/plain" });
-    res.end("Accepted");
-    withAsyncContext(name, async () => {
-      fn(input);
-    });
+    try {
+      const input = getInput(req, inputValidator);
+      res.writeHead(202, { "Content-Type": "text/plain" });
+      res.end("Accepted");
+      withAsyncContext(name, async () => fn(input));
+    } catch (error) {
+      if (!res.headersSent) {
+        next(error);
+      } else {
+        logError(error);
+      }
+    }
   };
 }
 

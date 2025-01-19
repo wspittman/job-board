@@ -1,8 +1,12 @@
-import { ATS } from "../db/models";
-import { Filters } from "../types/clientModels";
+import type { ATS, CompanyKey, CompanyKeys, JobKey } from "../db/models";
+import type { Filters } from "../types/clientModels";
 import { AppError } from "../utils/AppError";
 import { logProperty } from "../utils/telemetry";
 
+/**
+ * Validate search filter options
+ * @returns Validated Filters
+ */
 export function useFilters({
   companyId,
   isRemote,
@@ -11,7 +15,7 @@ export function useFilters({
   daysSince,
   maxExperience,
   minSalary,
-}: any = {}) {
+}: any = {}): Filters {
   const filters: Filters = {};
 
   if (companyId && companyId.length < 100) {
@@ -56,7 +60,12 @@ export function useFilters({
   return filters;
 }
 
-export function useCompanyKey({ id, ats }: any = {}) {
+/**
+ * Validate company identifiers
+ * @returns Validated CompanyKey
+ * @throws AppError if validation fails
+ */
+export function useCompanyKey({ id, ats }: any = {}): CompanyKey {
   const companyKey = {
     id: validateId("id", id),
     ats: validateAts("ats", ats),
@@ -65,7 +74,12 @@ export function useCompanyKey({ id, ats }: any = {}) {
   return companyKey;
 }
 
-export function useCompanyKeys({ ids, ats }: any = {}) {
+/**
+ * Validate multiple company identifiers
+ * @returns Validated CompanyKeys
+ * @throws AppError if validation fails
+ */
+export function useCompanyKeys({ ids, ats }: any = {}): CompanyKeys {
   const companyKeys = {
     ids: validateIds("ids", ids),
     ats: validateAts("ats", ats),
@@ -74,7 +88,12 @@ export function useCompanyKeys({ ids, ats }: any = {}) {
   return companyKeys;
 }
 
-export function useJobKey({ id, companyId }: any = {}) {
+/**
+ * Validate job identifiers
+ * @returns Validated JobKey
+ * @throws AppError if validation fails
+ */
+export function useJobKey({ id, companyId }: any = {}): JobKey {
   const jobKey = {
     id: validateId("id", id),
     companyId: validateId("companyId", companyId),
