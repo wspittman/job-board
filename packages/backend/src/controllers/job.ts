@@ -1,31 +1,17 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
 import { extractFacets } from "../ai/extractFacets";
 import { extractLocation, extractLocations } from "../ai/extractLocation";
-import { AppError } from "../AppError";
 import { getAtsJobs, getAtsList } from "../ats/ats";
 import { db } from "../db/db";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
-import { validateCompanyKey, validateJobKey } from "../db/validation";
+import type { ClientJob, Filters } from "../types/clientModels";
+import { AppError } from "../utils/AppError";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
-import { ClientJob } from "./clientModels";
 import { getCompanies, getCompany } from "./company";
 import { renewMetadata } from "./metadata";
 
 // #region Input Types and Validations
-
-interface Filters {
-  // Exact Match
-  companyId?: string;
-  isRemote?: boolean;
-  // Substring Match
-  title?: string;
-  location?: string;
-  // Range Match
-  daysSince?: number;
-  maxExperience?: number;
-  minSalary?: number;
-}
 
 interface EnhancedFilters extends Filters {
   normalizedLocation?: string;
@@ -39,58 +25,6 @@ interface DeleteOptions {
   timestamp?: number;
 }
 
-function validateFilters({
-  companyId,
-  isRemote,
-  title,
-  location,
-  daysSince,
-  maxExperience,
-  minSalary,
-}: Record<string, string>): Filters {
-  const filters: Filters = {};
-
-  if (companyId && companyId.length < 100) {
-    filters.companyId = companyId;
-  }
-
-  if (isRemote != null) {
-    filters.isRemote = isRemote.toLowerCase() === "true";
-  }
-
-  if (title?.length > 2 && title.length < 100) {
-    filters.title = title;
-  }
-
-  if (location?.length > 2 && location.length < 100) {
-    filters.location = location;
-  }
-
-  if (daysSince) {
-    const value = parseInt(daysSince);
-
-    if (Number.isFinite(value) && value >= 1 && value <= 365) {
-      filters.daysSince = value;
-    }
-  }
-
-  if (maxExperience != null) {
-    const value = parseInt(maxExperience);
-    if (Number.isFinite(value) && value >= 0 && value <= 100) {
-      filters.maxExperience = value;
-    }
-  }
-
-  if (minSalary) {
-    const value = parseInt(minSalary);
-    if (Number.isFinite(value) && value >= 1 && value <= 10000000) {
-      filters.minSalary = value;
-    }
-  }
-
-  return filters;
-}
-
 function validateCrawlOptions(options: CrawlOptions): CrawlOptions {
   let { company, ...rest } = options;
 
@@ -99,7 +33,8 @@ function validateCrawlOptions(options: CrawlOptions): CrawlOptions {
   }
 
   if (company) {
-    company = validateCompanyKey("getJobs", company);
+    // Ignore for now: incoming crawl overhaul
+    // company = validateCompanyKey("getJobs", company);
   }
 
   return { company };
@@ -120,7 +55,7 @@ function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
 
 // #endregion
 
-export async function getClientJobs(filterInput: Record<string, string>) {
+export async function getClientJobs(filterInput: Filters) {
   const dbResults = await getJobs(filterInput);
 
   const toClientJob = ({
@@ -152,15 +87,12 @@ export async function getClientJobs(filterInput: Record<string, string>) {
   return dbResults.map(toClientJob);
 }
 
-export async function getJobs(filterInput: Record<string, string>) {
-  const inputFilters = validateFilters(filterInput);
-  logProperty("GetJobs_Filters", inputFilters);
-
-  if (!Object.keys(inputFilters).length) {
+export async function getJobs(filterInput: Filters) {
+  if (!Object.keys(filterInput).length) {
     return [];
   }
 
-  let filters: EnhancedFilters = { ...inputFilters };
+  let filters: EnhancedFilters = { ...filterInput };
   if (filters.location) {
     const location = (await extractLocation(filters.location))?.location;
     if (location) {
@@ -188,9 +120,7 @@ export async function addJobs(options: CrawlOptions) {
 }
 
 export async function removeJob(key: JobKey) {
-  const jobKey = validateJobKey("removeJob", key);
-  logProperty("RemoveJob_Key", jobKey);
-  return deleteJob(jobKey);
+  return deleteJob(key);
 }
 
 export async function removeJobs(options: DeleteOptions) {

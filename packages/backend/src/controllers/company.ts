@@ -1,44 +1,28 @@
 import { getAtsCompany } from "../ats/ats";
 import { db } from "../db/db";
 import type { ATS, CompanyKey, CompanyKeys } from "../db/models";
-import {
-  validateAts,
-  validateCompanyKey,
-  validateCompanyKeys,
-} from "../db/validation";
 import { logProperty } from "../utils/telemetry";
 
 export async function getCompany(key: CompanyKey) {
-  const companyKey = validateCompanyKey("getCompany", key);
-  logProperty("GetCompany_Key", companyKey);
-  return readCompany(companyKey);
+  return readCompany(key);
 }
 
 export async function getCompanies(ats: ATS) {
-  validateAts("getCompanies", ats);
-  logProperty("GetCompanies_ATS", ats);
   const result = await readCompanies(ats);
   logProperty("GetCompanies_Count", result.length);
   return result;
 }
 
 export async function addCompany(key: CompanyKey) {
-  const companyKey = validateCompanyKey("addCompany", key);
-  logProperty("AddCompany_Key", companyKey);
-  return addCompanyInternal(companyKey);
+  return addCompanyInternal(key);
 }
 
-export async function addCompanies(keys: CompanyKeys) {
-  const { ids, ats } = validateCompanyKeys("addCompanies", keys);
-  logProperty("AddCompanies._ATS", ats);
-  logProperty("AddCompanies_Ids", ids);
+export async function addCompanies({ ids, ats }: CompanyKeys) {
   await Promise.all(ids.map((id) => addCompanyInternal({ id, ats })));
 }
 
 export async function removeCompany(key: CompanyKey) {
-  const companyKey = validateCompanyKey("removeCompany", key);
-  logProperty("RemoveCompany_Key", companyKey);
-  return deleteCompany(companyKey);
+  return deleteCompany(key);
 }
 
 async function addCompanyInternal({ id, ats }: CompanyKey) {
