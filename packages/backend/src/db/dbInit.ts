@@ -12,46 +12,60 @@ import { logError } from "../utils/telemetry";
 export type ContainerName = "company" | "job" | "metadata" | "locationCache";
 
 const DB_NAME = "jobboard";
+const MAX_CREATE_ATTEMPTS = 3;
 
 let containerMap: Record<ContainerName, Container>;
 
+/**
+ * Retrieves a Cosmos DB container by name
+ * @param name - The name of the container to retrieve
+ * @returns The requested Container instance
+ */
 export function getContainer(name: ContainerName) {
   return containerMap[name];
 }
 
-export async function connectDB() {
-  try {
-    let agent;
-    if (config.NODE_ENV === "dev") {
-      agent = new https.Agent({
-        ca: fs.readFileSync(config.DATABASE_LOCAL_CERT_PATH),
-      });
-    }
-
-    const cosmosClient = new CosmosClient({
-      endpoint: config.DATABASE_URL,
-      key: config.DATABASE_KEY,
-      agent,
+/**
+ * Establishes connection to Cosmos DB and initializes containers
+ * Creates database and containers if they don't exist
+ * @throws {Error} If database connection fails
+ * @returns Promise that resolves when all containers are initialized
+ */
+export async function connectDB(): Promise<void> {
+  let agent;
+  if (config.NODE_ENV === "dev") {
+    agent = new https.Agent({
+      ca: fs.readFileSync(config.DATABASE_LOCAL_CERT_PATH),
     });
-
-    const { database } = await cosmosClient.databases.createIfNotExists({
-      id: DB_NAME,
-    });
-
-    containerMap = {} as Record<ContainerName, Container>;
-
-    //createContainer(database, "company", "ats", ["/description", "/website"]);
-    createContainer(database, "company", "ats");
-    //createContainer(database, "job", "companyId", ["/applyUrl","/description"]);
-    createContainer(database, "job", "companyId");
-    createContainer(database, "metadata", "id", "all");
-    createContainer(database, "locationCache", "pKey", "all");
-
-    console.log("CosmosDB connected");
-  } catch (error) {
-    logError(error);
-    process.exit(1);
   }
+
+  const cosmosClient = new CosmosClient({
+    endpoint: config.DATABASE_URL,
+    key: config.DATABASE_KEY,
+    agent,
+  });
+
+  const { database } = await cosmosClient.databases.createIfNotExists({
+    id: DB_NAME,
+  });
+
+  containerMap = {} as Record<ContainerName, Container>;
+
+  const containerPromises = [
+    createContainer(database, "company", "ats"),
+    createContainer(database, "job", "companyId"),
+    createContainer(database, "metadata", "id", "all"),
+    createContainer(database, "locationCache", "pKey", "all"),
+  ];
+
+  const results = await Promise.allSettled(containerPromises);
+  const hasFailure = results.some((r) => r.status === "rejected");
+
+  if (hasFailure) {
+    throw new Error(`Failed to initialize all containers`);
+  }
+
+  console.log("CosmosDB connected");
 }
 
 async function createContainer(
@@ -59,8 +73,8 @@ async function createContainer(
   name: ContainerName,
   partitionKey: string,
   indexExclusions: "none" | "all" | string[] = "none",
-  isRetry: boolean = false
-) {
+  attempt = 1
+): Promise<void> {
   try {
     const details: ContainerRequest = {
       id: name,
@@ -80,16 +94,23 @@ async function createContainer(
     }
 
     const { container } = await database.containers.createIfNotExists(details);
-
     containerMap[name] = container;
   } catch (error) {
-    console.log(`Failed to create container: ${name}.`);
+    console.log(`Failed to create container: ${name} (attempt ${attempt})`);
     logError(error);
-    if (!isRetry) {
-      console.log(`Retrying to create container: ${name}.`);
-      createContainer(database, name, partitionKey, indexExclusions, true);
-    } else {
-      console.log(`Retry failed to create container: ${name}.`);
+
+    if (attempt < MAX_CREATE_ATTEMPTS) {
+      return createContainer(
+        database,
+        name,
+        partitionKey,
+        indexExclusions,
+        attempt + 1
+      );
     }
+
+    throw new Error(
+      `Failed to create container ${name} after ${attempt} attempts`
+    );
   }
 }

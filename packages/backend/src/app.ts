@@ -37,8 +37,22 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-connectDB().then(() => {
-  app.listen(config.PORT, () => {
-    console.log(`Server running on port ${config.PORT}`);
-  });
-});
+/**
+ * Starts the server after establishing database connection
+ */
+async function startServer() {
+  try {
+    await connectDB();
+
+    app.listen(config.PORT, () => {
+      console.log(`Server running on port ${config.PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    logError(error);
+    process.exit(1);
+  }
+}
+
+// Initialize server
+startServer();
