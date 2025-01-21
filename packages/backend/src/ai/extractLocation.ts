@@ -1,5 +1,5 @@
 import { db } from "../db/db";
-import { Job } from "../db/models";
+import type { Job } from "../types/dbModels";
 import { BatchOptions, batchRun } from "../utils/async";
 import { LRUCache } from "../utils/cache";
 import { logCounter } from "../utils/telemetry";
@@ -158,7 +158,7 @@ function insertToCache(text: string, result: Location) {
 
   locationCache.set(text, result);
   // Don't await on cache insertion
-  db.locationCache.upsert({
+  db.locationCache.upsertItem({
     id: text,
     pKey: text[0],
     ...result,

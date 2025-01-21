@@ -1,5 +1,5 @@
 import { config } from "../config";
-import type { Company, Job } from "../db/models";
+import type { Company, Job } from "../types/dbModels";
 import { standardizeUntrustedHtml } from "../utils/html";
 import type { AtsEndpoint } from "./types";
 

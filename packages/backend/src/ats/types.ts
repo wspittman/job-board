@@ -1,4 +1,4 @@
-import type { Company, Job } from "../db/models";
+import type { Company, Job } from "../types/dbModels";
 
 export interface JobUpdates {
   added: Job[];

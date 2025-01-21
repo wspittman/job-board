@@ -1,6 +1,6 @@
 import { getAtsCompany } from "../ats/ats";
 import { db } from "../db/db";
-import type { ATS, CompanyKey, CompanyKeys } from "../db/models";
+import type { ATS, CompanyKey, CompanyKeys } from "../types/dbModels";
 import { logProperty } from "../utils/telemetry";
 
 export async function getCompany(key: CompanyKey) {
@@ -35,7 +35,7 @@ async function readCompany({ id, ats }: CompanyKey) {
 }
 
 async function readCompanies(ats: ATS) {
-  return db.company.getAllByPartitionKey(ats);
+  return db.company.getItemsByPartitionKey(ats);
 }
 
 async function deleteCompany({ id, ats }: CompanyKey) {

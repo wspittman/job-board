@@ -1,4 +1,9 @@
-import { Container, CosmosClient, Database } from "@azure/cosmos";
+import {
+  Container,
+  ContainerRequest,
+  CosmosClient,
+  Database,
+} from "@azure/cosmos";
 import fs from "fs";
 import https from "https";
 import { config } from "../config";
@@ -35,10 +40,12 @@ export async function connectDB() {
 
     containerMap = {} as Record<ContainerName, Container>;
 
+    //createContainer(database, "company", "ats", ["/description", "/website"]);
     createContainer(database, "company", "ats");
+    //createContainer(database, "job", "companyId", ["/applyUrl","/description"]);
     createContainer(database, "job", "companyId");
-    createContainer(database, "metadata", "id");
-    createContainer(database, "locationCache", "pKey");
+    createContainer(database, "metadata", "id", "all");
+    createContainer(database, "locationCache", "pKey", "all");
 
     console.log("CosmosDB connected");
   } catch (error) {
@@ -51,15 +58,28 @@ async function createContainer(
   database: Database,
   name: ContainerName,
   partitionKey: string,
+  indexExclusions: "none" | "all" | string[] = "none",
   isRetry: boolean = false
 ) {
   try {
-    const { container } = await database.containers.createIfNotExists({
+    const details: ContainerRequest = {
       id: name,
       partitionKey: {
         paths: [`/${partitionKey}`],
       },
-    });
+    };
+
+    if (indexExclusions === "all") {
+      indexExclusions = ["/*"];
+    }
+
+    if (indexExclusions !== "none") {
+      details.indexingPolicy = {
+        excludedPaths: indexExclusions.map((path) => ({ path })),
+      };
+    }
+
+    const { container } = await database.containers.createIfNotExists(details);
 
     containerMap[name] = container;
   } catch (error) {
@@ -67,7 +87,7 @@ async function createContainer(
     logError(error);
     if (!isRetry) {
       console.log(`Retrying to create container: ${name}.`);
-      createContainer(database, name, partitionKey, true);
+      createContainer(database, name, partitionKey, indexExclusions, true);
     } else {
       console.log(`Retry failed to create container: ${name}.`);
     }
