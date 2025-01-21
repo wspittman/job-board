@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import type { ATS, Company } from "../db/models";
+import type { ATS, Company } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
 import { Greenhouse } from "./greenhouse";

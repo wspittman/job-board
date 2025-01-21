@@ -1,5 +1,5 @@
-import type { ATS, CompanyKey, CompanyKeys, JobKey } from "../db/models";
 import type { Filters } from "../types/clientModels";
+import type { ATS, CompanyKey, CompanyKeys, JobKey } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { logProperty } from "../utils/telemetry";
 

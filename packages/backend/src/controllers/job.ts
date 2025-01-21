@@ -3,8 +3,8 @@ import { extractFacets } from "../ai/extractFacets";
 import { extractLocation, extractLocations } from "../ai/extractLocation";
 import { getAtsJobs, getAtsList } from "../ats/ats";
 import { db } from "../db/db";
-import type { ATS, Company, CompanyKey, Job, JobKey } from "../db/models";
 import type { ClientJob, Filters } from "../types/clientModels";
+import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
@@ -302,7 +302,7 @@ function addLocationClause(
 }
 
 async function readJobIds(companyId: string) {
-  return db.job.getAllIdsByPartitionKey(companyId);
+  return db.job.getIdsByPartitionKey(companyId);
 }
 
 async function readJobKeysByTimestamp(timestamp: number) {

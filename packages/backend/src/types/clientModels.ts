@@ -1,4 +1,4 @@
-import { Job, Metadata } from "../db/models";
+import type { Job, Metadata } from "./dbModels";
 
 export interface Filters {
   // Exact Match
