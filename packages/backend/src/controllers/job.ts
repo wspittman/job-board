@@ -1,6 +1,5 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
-import { extractFacets } from "../ai/extractFacets";
-import { extractLocation, extractLocations } from "../ai/extractLocation";
+import { llm } from "../ai/llm";
 import { getAtsJobs, getAtsList } from "../ats/ats";
 import { db } from "../db/db";
 import type { ClientJob, Filters } from "../types/clientModels";
@@ -94,7 +93,7 @@ export async function getJobs(filterInput: Filters) {
 
   let filters: EnhancedFilters = { ...filterInput };
   if (filters.location) {
-    const location = (await extractLocation(filters.location))?.location;
+    const location = await llm.extractLocation(filters.location);
     if (location) {
       filters.normalizedLocation = location;
     }
@@ -180,20 +179,15 @@ async function crawlCompany(company: Company, logPath: string[] = []) {
 }
 
 async function fillJobs(jobs: Job[], batchOpts: BatchOptions) {
-  const locations = await extractLocations(
-    jobs.map((job) => job.location),
+  await batchRun(
+    jobs,
+    async (job) => {
+      await llm.extractLocations(job);
+      await llm.extractFacets(job);
+    },
+    "FillJob",
     batchOpts
   );
-  const facets = await extractFacets(
-    jobs.map((job) => job.description),
-    batchOpts
-  );
-
-  jobs.forEach((job, index) => {
-    job.isRemote = locations[index]?.isRemote ?? job.isRemote;
-    job.location = locations[index]?.location ?? job.location;
-    job.facets = facets[index] ?? {};
-  });
 }
 
 // #region DB Operations
