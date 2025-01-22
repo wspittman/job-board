@@ -39,7 +39,7 @@ export function setExtractedData<
   Key extends keyof Item & keyof z.infer<Schema>
 >(item: Item, completion: Pick<z.infer<Schema>, Key>) {
   for (const key in completion) {
-    if (completion[key]) {
+    if (completion[key] != null) {
       item[key as Key] = completion[key] as Item[Key];
     }
   }
