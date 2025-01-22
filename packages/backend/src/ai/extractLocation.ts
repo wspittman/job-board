@@ -31,6 +31,10 @@ const schema = z.object({
   ),
 });
 
+/**
+ * Extracts location information from and update a job object.
+ * @param job The job object
+ */
 export async function extractLocations(job: Job): Promise<void> {
   const location = await extractLocation(job.location);
 
@@ -39,6 +43,11 @@ export async function extractLocations(job: Job): Promise<void> {
   setExtractedData(job, location);
 }
 
+/**
+ * Extracts location information from a text string.
+ * @param text The location text to analyze
+ * @returns Location object containing isRemote flag and formatted location string, or undefined if location cannot be determined
+ */
 export async function extractLocation(text: string): Promise<Location> {
   const normalizedText = normalize(text);
 

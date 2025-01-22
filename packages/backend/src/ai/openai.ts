@@ -28,9 +28,10 @@ async function backoff(attempt: number, error: unknown) {
 
 /**
  * Fill a parent item with extracted data from matching keys in the LLM completion.
+ * Ignores any undefined/null values in the completion object.
  * The typing is wild here but this function saves us a lot of boilerplate.
- * @param item The parent item (eg. Company)
- * @param completion The LLM completion object as returned by jsonCompletion()
+ * @param item The parent object to update with extracted data
+ * @param completion The LLM completion object containing the extracted data
  */
 export function setExtractedData<
   Item,
@@ -44,6 +45,15 @@ export function setExtractedData<
   }
 }
 
+/**
+ * Makes an OpenAI completion request with JSON response validation using a Zod schema.
+ * Includes automatic retries with exponential backoff for rate limiting.
+ * @param action The name of the action for logging purposes
+ * @param prompt The system prompt
+ * @param schema The Zod schema to validate the response
+ * @param input The user input string or object
+ * @returns The parsed and validated completion, or undefined if the request fails
+ */
 export async function jsonCompletion<T>(
   action: string,
   prompt: string,

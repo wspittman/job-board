@@ -22,6 +22,10 @@ const schema = z.object({
   ),
 });
 
+/**
+ * Extracts facets from and update a job object.
+ * @param job The job object
+ */
 export async function extractFacets(job: Job): Promise<void> {
   const result = await jsonCompletion("extractFacets", prompt, schema, job);
 
