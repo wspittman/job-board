@@ -34,9 +34,13 @@ const DisplayChip = ({ condition, label }: DisplayChipProps) => {
  * @param onClick Callback function when card is clicked
  */
 export const JobCard = ({ job, selected, onClick }: Props) => {
-  const daysSincePosted = Math.floor(
+  const postDays = Math.floor(
     (Date.now() - job.postTS) / (1000 * 60 * 60 * 24)
   );
+  const showRecencyChip = postDays < 30;
+  const recencyChipText = postDays < 7 ? "New" : "Recent";
+  const postedText = !Number.isNaN(postDays) && (postDays || "today");
+  const postedSuffix = postDays ? "days ago" : "";
 
   return (
     <Paper
@@ -61,10 +65,7 @@ export const JobCard = ({ job, selected, onClick }: Props) => {
 
       <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
         <DisplayChip condition={job.isRemote} label="Remote" />
-        <DisplayChip
-          condition={daysSincePosted < 30}
-          label={daysSincePosted < 7 ? "New" : "Recent"}
-        />
+        <DisplayChip condition={showRecencyChip} label={recencyChipText} />
       </Stack>
 
       <IconTypography Icon={MapPin} text={job.location} />
@@ -80,8 +81,8 @@ export const JobCard = ({ job, selected, onClick }: Props) => {
       <IconTypography
         Icon={Clock}
         prefix="Posted"
-        text={daysSincePosted}
-        suffix="days ago"
+        text={postedText}
+        suffix={postedSuffix}
       />
 
       {job.facets?.summary && (
