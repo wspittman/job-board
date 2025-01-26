@@ -15,7 +15,7 @@ const schema = z.object({
   ),
   isHourly: zBoolean("True if the job is paid hourly, false otherwise."),
   experience: zNumber(
-    "Minimum years of experience required for the role, or null if not specified."
+    "Minimum years of experience explicitly required for the role, or null if not specified."
   ),
   summary: zString(
     "A resume-style one-line summary of the role's responsibilities. Be concise and focus on the most important aspects. Do not repeat the company or job title."
