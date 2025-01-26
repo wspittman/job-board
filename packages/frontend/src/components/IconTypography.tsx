@@ -3,7 +3,7 @@ import { ElementType } from "react";
 
 interface Props {
   Icon: ElementType;
-  text?: string | number;
+  text?: string | number | boolean;
   prefix?: string;
   suffix?: string;
   variant?: TypographyProps["variant"];
@@ -27,7 +27,8 @@ export const IconTypography = ({
   variant = "body2",
   color = "textPrimary",
 }: Props) => {
-  if (!text) return null;
+  // Allow 0 to be displayed
+  if (!text && text !== 0) return null;
 
   let displayText = prefix ? `${prefix} ${text}` : text;
   displayText = suffix ? `${displayText} ${suffix}` : displayText;
