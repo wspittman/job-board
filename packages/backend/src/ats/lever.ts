@@ -42,6 +42,10 @@ interface JobResult {
   };
 }
 
+/**
+ * Lever ATS integration implementation that handles job and company data retrieval
+ * from Lever's job board API
+ */
 export class Lever extends ATSBase {
   constructor() {
     super("lever", config.LEVER_URL);

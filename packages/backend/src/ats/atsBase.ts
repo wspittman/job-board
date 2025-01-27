@@ -3,13 +3,37 @@ import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
 
+/**
+ * Base class for ATS (Applicant Tracking System) implementations
+ * providing common functionality and required interface
+ */
 export abstract class ATSBase {
   constructor(protected ats: ATS, protected baseUrl: string) {}
 
+  /**
+   * Retrieves company information from the ATS
+   */
   abstract getCompany(key: CompanyKey): Promise<Company>;
+
+  /**
+   * Fetches jobs for a company from the ATS
+   * @param full - Whether to fetch full job details
+   */
   abstract getJobs(key: CompanyKey, full?: boolean): Promise<Job[]>;
+
+  /**
+   * Retrieves detailed information for a specific job
+   */
   abstract getJob(key: CompanyKey, jobKey: JobKey): Promise<Job>;
 
+  /**
+   * Makes an HTTP GET request to the ATS API
+   * @param name - Name of the operation for logging
+   * @param id - Company identifier
+   * @param url - API endpoint URL
+   * @returns API response data
+   * @throws AppError for 404 or other error responses
+   */
   protected async axiosCall<T>(
     name: string,
     id: string,

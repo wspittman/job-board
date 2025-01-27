@@ -42,6 +42,10 @@ interface JobResult {
   }[];
 }
 
+/**
+ * Greenhouse ATS integration implementation that handles job and company data retrieval
+ * from Greenhouse's job board API
+ */
 export class Greenhouse extends ATSBase {
   constructor() {
     super("greenhouse", config.GREENHOUSE_URL);
