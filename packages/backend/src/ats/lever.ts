@@ -6,7 +6,25 @@ import { ATSBase } from "./atsBase";
 
 interface JobResult {
   id: string;
+  createdAt: number;
+  applyUrl: string;
+
+  // Job title
   text: string;
+
+  // JD sections, available in pairs of X (styled HTML) and XPlain (plaintext)
+  // "description" is always "opening" + "descriptionBody"
+  description: string;
+  additional: string;
+  salaryDescription: string;
+
+  // JD sections, but text is a plaintext name and content is a styled HTML list
+  lists: {
+    text: string;
+    content: string;
+  }[];
+
+  // Useful metadata
   categories: {
     commitment: string;
     location: string;
@@ -15,17 +33,6 @@ interface JobResult {
     allLocations: string[];
   };
   country: string;
-  // Available in dual properties of description (styles HTML) and descriptionPlain (plaintext)
-  // Also there are opening\openingPlain, and descriptionBody\descriptionBodyPlain, which are subsets of description
-  description: string;
-  openingPlain: string;
-  lists: {
-    text: string;
-    content: string;
-  }[];
-  additionalPlain: string;
-  hostedUrl: string;
-  applyUrl: string;
   workplaceType: "unspecified" | "on-site" | "remote" | "hybrid";
   salaryRange?: {
     currency: string;
@@ -33,8 +40,6 @@ interface JobResult {
     min: number;
     max: number;
   };
-  salaryDescriptionPlain?: string;
-  createdAt: number;
 }
 
 export class Lever extends ATSBase {
@@ -44,12 +49,6 @@ export class Lever extends ATSBase {
 
   async getCompany({ id }: CompanyKey): Promise<Company> {
     const [exampleJob] = await this.fetchJobs(id, true);
-
-    if (!exampleJob) {
-      // Since we can't gather proper name/description, treat as not found
-      throw new AppError(`Lever / ${id}: Not Found`, 404);
-    }
-
     return this.formatCompany(id, exampleJob);
   }
 
@@ -67,33 +66,50 @@ export class Lever extends ATSBase {
     return this.axiosCall<JobResult[]>("Jobs", id, query);
   }
 
-  private formatCompany(id: string, { openingPlain }: JobResult): Company {
+  private formatCompany(id: string, _toBeUsedLater: JobResult): Company {
     return {
       id,
       ats: "lever",
       // No name field, just use token until we have a better solution
       name: id[0].toUpperCase() + id.slice(1),
-      description: openingPlain,
+      // No descriptions until we do better company info crawls
+      description: "",
     };
   }
 
-  private formatJob({ id: companyId }: CompanyKey, job: JobResult): Job {
+  private formatJob(
+    { id: companyId }: CompanyKey,
+    {
+      id,
+      createdAt,
+      applyUrl,
+      text,
+      description,
+      additional,
+      salaryDescription,
+      lists = [],
+      categories,
+      workplaceType,
+    }: JobResult
+  ): Job {
+    const listHtml = lists
+      .map(({ text, content }) => `<h3>${text}</h3><ul>${content}</ul>`)
+      .join("");
+
+    const jdHtml = `<div>${description}<div>${listHtml}<div>${salaryDescription}${additional}</div>`;
+
     return {
-      id: job.id,
+      id,
       companyId: companyId,
       company: companyId,
-      title: job.text,
+      title: text,
       isRemote:
-        job.workplaceType === "remote" ||
-        job.categories.allLocations.some((x) =>
-          x.toLowerCase().includes("remote")
-        ),
-      location: `${job.workplaceType}: [${job.categories.allLocations.join(
-        "; "
-      )}]`,
-      description: standardizeUntrustedHtml(job.description),
-      postTS: new Date(job.createdAt).getTime(),
-      applyUrl: job.applyUrl,
+        workplaceType === "remote" ||
+        categories.allLocations.some((x) => x.toLowerCase().includes("remote")),
+      location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
+      description: standardizeUntrustedHtml(jdHtml),
+      postTS: new Date(createdAt).getTime(),
+      applyUrl,
       facets: {},
     };
   }
