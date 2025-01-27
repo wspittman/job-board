@@ -16,7 +16,7 @@ interface JobResult {
   // "description" is always "opening" + "descriptionBody"
   description: string;
   additional: string;
-  salaryDescription: string;
+  salaryDescription?: string;
 
   // JD sections, but text is a plaintext name and content is a styled HTML list
   lists: {
@@ -90,7 +90,7 @@ export class Lever extends ATSBase {
       text,
       description,
       additional,
-      salaryDescription,
+      salaryDescription = "",
       lists = [],
       categories,
       workplaceType,
@@ -100,7 +100,7 @@ export class Lever extends ATSBase {
       .map(({ text, content }) => `<h3>${text}</h3><ul>${content}</ul>`)
       .join("");
 
-    const jdHtml = `<div>${description}<div>${listHtml}<div>${salaryDescription}${additional}</div>`;
+    const jdHtml = `<div>${description}<div>${listHtml}</div>${salaryDescription}${additional}</div>`;
 
     return {
       id,
