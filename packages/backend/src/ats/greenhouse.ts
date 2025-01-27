@@ -1,21 +1,21 @@
 import { config } from "../config";
-import type { Company, Job } from "../types/dbModels";
+import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels";
 import { standardizeUntrustedHtml } from "../utils/html";
-import type { AtsEndpoint } from "./types";
+import { ATSBase } from "./atsBase";
 
-interface GreenhouseCompanyResult {
+interface CompanyResult {
   name: string;
   content: string;
 }
 
-interface GreenhouseJobsResult {
-  jobs: GreenhouseJob[];
+interface JobsResult {
+  jobs: JobResult[];
   meta: {
     total: number;
   };
 }
 
-interface GreenhouseJob {
+interface JobResult {
   id: number;
   internal_job_id: number;
   title: string;
@@ -42,19 +42,41 @@ interface GreenhouseJob {
   }[];
 }
 
-export class Greenhouse implements AtsEndpoint {
-  getCompanyEndpoint(id: string): string {
-    return `${config.GREENHOUSE_URL}/${id}`;
+export class Greenhouse extends ATSBase {
+  constructor() {
+    super("greenhouse", config.GREENHOUSE_URL);
   }
 
-  getJobsEndpoint(id: string): string {
-    return `${config.GREENHOUSE_URL}/${id}/jobs?content=true`;
+  async getCompany({ id }: CompanyKey): Promise<Company> {
+    return this.fetchCompany(id);
   }
 
-  formatCompany(
-    id: string,
-    { name, content }: GreenhouseCompanyResult
-  ): Company {
+  async getJobs(key: CompanyKey, full = false): Promise<Job[]> {
+    const { jobs } = await this.fetchJobs(key.id, full);
+    return jobs.map((job) => this.formatJob(key, job));
+  }
+
+  async getJob(key: CompanyKey, { id, companyId }: JobKey): Promise<Job> {
+    const response = await this.fetchJob(companyId, id);
+    return this.formatJob(key, response);
+  }
+
+  private async fetchCompany(id: string): Promise<Company> {
+    const response = await this.axiosCall<CompanyResult>("Company", id, "");
+    return this.formatCompany(id, response);
+  }
+
+  private async fetchJob(id: string, jobId: string): Promise<JobResult> {
+    return this.axiosCall<JobResult>("Job", id, `jobs/${jobId}`);
+  }
+
+  private async fetchJobs(id: string, full: boolean): Promise<JobsResult> {
+    const callName = `Jobs${full ? " (full)" : ""}`;
+    const url = `/jobs${full ? "?content=true" : ""}`;
+    return this.axiosCall<JobsResult>(callName, id, url);
+  }
+
+  private formatCompany(id: string, { name, content }: CompanyResult): Company {
     return {
       id,
       ats: "greenhouse",
@@ -63,26 +85,18 @@ export class Greenhouse implements AtsEndpoint {
     };
   }
 
-  getRawJobs({
-    jobs,
-  }: GreenhouseJobsResult): [id: string, job: GreenhouseJob][] {
-    return jobs.map((job) => [job.id.toString(), job]);
-  }
-
-  formatJobs(company: Company, jobs: GreenhouseJob[]): Job[] {
-    return jobs.map((job) => {
-      return {
-        id: job.id.toString(),
-        companyId: company.id,
-        company: company.name,
-        title: job.title,
-        isRemote: job.location.name.toLowerCase().includes("remote"),
-        location: job.location.name,
-        description: standardizeUntrustedHtml(job.content),
-        postTS: new Date(job.updated_at).getTime(),
-        applyUrl: job.absolute_url,
-        facets: {},
-      };
-    });
+  private formatJob({ id: companyId }: CompanyKey, job: JobResult): Job {
+    return {
+      id: job.id.toString(),
+      companyId: companyId,
+      company: companyId,
+      title: job.title,
+      isRemote: job.location.name.toLowerCase().includes("remote"),
+      location: job.location.name,
+      description: standardizeUntrustedHtml(job.content),
+      postTS: new Date(job.updated_at).getTime(),
+      applyUrl: job.absolute_url,
+      facets: {},
+    };
   }
 }

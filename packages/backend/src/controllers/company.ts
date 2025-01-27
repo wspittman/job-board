@@ -1,4 +1,4 @@
-import { getAtsCompany } from "../ats/ats";
+import { ats } from "../ats/ats";
 import { db } from "../db/db";
 import type { ATS, CompanyKey, CompanyKeys } from "../types/dbModels";
 import { logProperty } from "../utils/telemetry";
@@ -25,8 +25,8 @@ export async function removeCompany(key: CompanyKey) {
   return deleteCompany(key);
 }
 
-async function addCompanyInternal({ id, ats }: CompanyKey) {
-  const company = await getAtsCompany(ats, id);
+async function addCompanyInternal(key: CompanyKey) {
+  const company = await ats.getCompany(key);
   await db.company.upsert(company);
 }
 

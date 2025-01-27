@@ -1,6 +1,6 @@
 import { Resource, SqlParameter } from "@azure/cosmos";
 import { llm } from "../ai/llm";
-import { getAtsJobs, getAtsList } from "../ats/ats";
+import { ats } from "../ats/ats";
 import { db } from "../db/db";
 import type { ClientJob, Filters } from "../types/clientModels";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
@@ -112,7 +112,7 @@ export async function addJobs(options: CrawlOptions) {
     if (!company) return;
     await crawlCompany(company);
   } else {
-    await batchRun(getAtsList(), crawlAts, "CrawlAts");
+    await batchRun(ats.getAtsList(), crawlAts, "CrawlAts");
   }
 
   await renewMetadata();
@@ -147,8 +147,31 @@ async function crawlAts(ats: ATS, logPath: string[]) {
 
 async function crawlCompany(company: Company, logPath: string[] = []) {
   const batchOpts = { batchId: company.id, logPath };
-  const dbJobIds = await readJobIds(company.id);
-  const { added, removed, kept } = await getAtsJobs(company, dbJobIds);
+  const currentIds = await readJobIds(company.id);
+  const atsJobs = await ats.getJobs(company, true);
+
+  // Figure out which jobs are added/removed/ignored
+  const jobIdSet = new Set(atsJobs.map((item) => item.id));
+  const currentIdSet = new Set(currentIds);
+
+  // Any ATS job not in the current set needs to be added
+  const added = atsJobs.filter((item) => !currentIdSet.has(item.id));
+
+  // Any jobs in the current set but not in the ATS need to be deleted
+  const removed = currentIds.filter((id) => !jobIdSet.has(id));
+
+  // If job is in both ATS and DB, do nothing but keep a count
+  const existing = jobIdSet.size - added.length;
+  batchLog("Ignored", existing, batchOpts);
+
+  if (removed.length) {
+    await batchRun(
+      removed,
+      (id) => deleteJob({ id, companyId: company.id }),
+      "DeleteJob",
+      batchOpts
+    );
+  }
 
   if (added.length) {
     await fillJobs(added, batchOpts);
@@ -165,17 +188,6 @@ async function crawlCompany(company: Company, logPath: string[] = []) {
       await batchRun(filled, updateJob, "AddJob", batchOpts);
     }
   }
-
-  if (removed.length) {
-    await batchRun(
-      removed,
-      (id) => deleteJob({ id, companyId: company.id }),
-      "DeleteJob",
-      batchOpts
-    );
-  }
-
-  batchLog("Ignored", kept, batchOpts);
 }
 
 async function fillJobs(jobs: Job[], batchOpts: BatchOptions) {
