@@ -1,12 +1,30 @@
 import { config } from "../config";
-import type { Company, Job } from "../types/dbModels";
+import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { standardizeUntrustedHtml } from "../utils/html";
-import type { AtsEndpoint } from "./types";
+import { ATSBase } from "./atsBase";
 
-interface LeverJob {
+interface JobResult {
   id: string;
+  createdAt: number;
+  applyUrl: string;
+
+  // Job title
   text: string;
+
+  // JD sections, available in pairs of X (styled HTML) and XPlain (plaintext)
+  // "description" is always "opening" + "descriptionBody"
+  description: string;
+  additional: string;
+  salaryDescription?: string;
+
+  // JD sections, but text is a plaintext name and content is a styled HTML list
+  lists: {
+    text: string;
+    content: string;
+  }[];
+
+  // Useful metadata
   categories: {
     commitment: string;
     location: string;
@@ -15,17 +33,6 @@ interface LeverJob {
     allLocations: string[];
   };
   country: string;
-  // Available in dual properties of description (styles HTML) and descriptionPlain (plaintext)
-  // Also there are opening\openingPlain, and descriptionBody\descriptionBodyPlain, which are subsets of description
-  description: string;
-  openingPlain: string;
-  lists: {
-    text: string;
-    content: string;
-  }[];
-  additionalPlain: string;
-  hostedUrl: string;
-  applyUrl: string;
   workplaceType: "unspecified" | "on-site" | "remote" | "hybrid";
   salaryRange?: {
     currency: string;
@@ -33,60 +40,81 @@ interface LeverJob {
     min: number;
     max: number;
   };
-  salaryDescriptionPlain?: string;
-  createdAt: number;
 }
 
-export class Lever implements AtsEndpoint {
-  getCompanyEndpoint(id: string): string {
-    return `${config.LEVER_URL}/${id}?mode=json&limit=1`;
+/**
+ * Lever ATS integration implementation that handles job and company data retrieval
+ * from Lever's job board API
+ */
+export class Lever extends ATSBase {
+  constructor() {
+    super("lever", config.LEVER_URL);
   }
 
-  getJobsEndpoint(id: string): string {
-    return `${config.LEVER_URL}/${id}?mode=json`;
+  async getCompany({ id }: CompanyKey): Promise<Company> {
+    const [exampleJob] = await this.fetchJobs(id, true);
+    return this.formatCompany(id, exampleJob);
   }
 
-  formatCompany(id: string, data: LeverJob[]): Company {
-    if (!data.length) {
-      // Since we can't gather proper name/description, treat as not found
-      throw new AppError(`Lever / ${id}: Not Found`, 404);
-    }
+  async getJobs(key: CompanyKey, _: boolean): Promise<Job[]> {
+    const jobs = await this.fetchJobs(key.id);
+    return jobs.map((job) => this.formatJob(key, job));
+  }
 
-    const { openingPlain } = data[0];
+  async getJob(_1: CompanyKey, _2: JobKey): Promise<Job> {
+    throw new AppError("This should never be called", 500);
+  }
 
+  private async fetchJobs(id: string, single = false): Promise<JobResult[]> {
+    const query = single ? "?mode=json&limit=1" : "?mode=json";
+    return this.axiosCall<JobResult[]>("Jobs", id, query);
+  }
+
+  private formatCompany(id: string, _toBeUsedLater: JobResult): Company {
     return {
       id,
       ats: "lever",
       // No name field, just use token until we have a better solution
-      name: id,
-      description: openingPlain,
+      name: id[0].toUpperCase() + id.slice(1),
+      // No descriptions until we do better company info crawls
+      description: "",
     };
   }
 
-  getRawJobs(data: LeverJob[]): [string, LeverJob][] {
-    return data.map((job) => [job.id, job]);
-  }
+  private formatJob(
+    { id: companyId }: CompanyKey,
+    {
+      id,
+      createdAt,
+      applyUrl,
+      text,
+      description,
+      additional,
+      salaryDescription = "",
+      lists = [],
+      categories,
+      workplaceType,
+    }: JobResult
+  ): Job {
+    const listHtml = lists
+      .map(({ text, content }) => `<p>${text}</p><ul>${content}</ul>`)
+      .join("");
 
-  formatJobs(company: Company, jobs: LeverJob[]): Job[] {
-    return jobs.map((job) => {
-      return {
-        id: job.id,
-        companyId: company.id,
-        company: company.name,
-        title: job.text,
-        isRemote:
-          job.workplaceType === "remote" ||
-          job.categories.allLocations.some((x) =>
-            x.toLowerCase().includes("remote")
-          ),
-        location: `${job.workplaceType}: [${job.categories.allLocations.join(
-          "; "
-        )}]`,
-        description: standardizeUntrustedHtml(job.description),
-        postTS: new Date(job.createdAt).getTime(),
-        applyUrl: job.applyUrl,
-        facets: {},
-      };
-    });
+    const jdHtml = `<div>${description}<div>${listHtml}</div>${salaryDescription}${additional}</div>`;
+
+    return {
+      id,
+      companyId: companyId,
+      company: companyId,
+      title: text,
+      isRemote:
+        workplaceType === "remote" ||
+        categories.allLocations.some((x) => x.toLowerCase().includes("remote")),
+      location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
+      description: standardizeUntrustedHtml(jdHtml),
+      postTS: new Date(createdAt).getTime(),
+      applyUrl,
+      facets: {},
+    };
   }
 }
