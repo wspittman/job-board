@@ -40,7 +40,9 @@ export abstract class ATSBase {
     url: string
   ): Promise<T> {
     const start = Date.now();
-    const result = await axios.get<T>(`${this.baseUrl}/${id}/${url}`);
+    const result = await axios.get<T>(`${this.baseUrl}/${id}/${url}`, {
+      timeout: 5000,
+    });
     const duration = Date.now() - start;
 
     logAtsCall(`GET ${name}`, this.ats, id, duration, result);
