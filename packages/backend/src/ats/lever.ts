@@ -72,7 +72,7 @@ export class Lever extends ATSBase {
       id,
       ats: "lever",
       // No name field, just use token until we have a better solution
-      name: id,
+      name: id[0].toUpperCase() + id.slice(1),
       description: openingPlain,
     };
   }
