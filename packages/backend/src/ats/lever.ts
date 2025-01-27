@@ -97,7 +97,7 @@ export class Lever extends ATSBase {
     }: JobResult
   ): Job {
     const listHtml = lists
-      .map(({ text, content }) => `<h3>${text}</h3><ul>${content}</ul>`)
+      .map(({ text, content }) => `<p>${text}</p><ul>${content}</ul>`)
       .join("");
 
     const jdHtml = `<div>${description}<div>${listHtml}</div>${salaryDescription}${additional}</div>`;

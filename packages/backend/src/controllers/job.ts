@@ -174,6 +174,11 @@ async function crawlCompany(company: Company, logPath: string[] = []) {
   }
 
   if (added.length) {
+    // To keep things the same for the client until we update data model
+    added.forEach((job) => {
+      job.company = company.name;
+    });
+
     await fillJobs(added, batchOpts);
 
     // Remove any jobs that failed to extract facets
