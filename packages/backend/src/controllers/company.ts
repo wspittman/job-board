@@ -59,6 +59,10 @@ export async function refreshJobs({
   let keys: (CompanyKey & { replaceJobsOlderThan?: number })[];
 
   if (companyId && ats) {
+    const company = await db.company.get({ id: companyId, ats });
+    if (!company) {
+      throw new AppError("Company not found");
+    }
     keys = [{ id: companyId, ats }];
   } else if (ats) {
     const ids = await db.company.getIds(ats);
