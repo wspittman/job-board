@@ -1,7 +1,8 @@
-import { Resource, SqlParameter } from "@azure/cosmos";
+import type { Resource } from "@azure/cosmos";
 import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
+import { QueryBuilder } from "../db/QueryBuilder";
 import type { Filters } from "../types/clientModels";
 import type { CompanyKey, Job, JobKey } from "../types/dbModels";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
@@ -147,90 +148,80 @@ async function readJobsByFilters({
   2. Filter efficiency (equality > range > contains)
   */
 
-  const whereClauses: string[] = [];
-  const parameters: SqlParameter[] = [];
+  const query = new QueryBuilder();
 
   if (companyId) {
-    whereClauses.push("c.companyId = @companyId");
-    parameters.push({ name: "@companyId", value: companyId });
+    query.where("c.companyId = @companyId", { "@companyId": companyId });
   }
 
   if (isRemote !== undefined) {
-    whereClauses.push("c.isRemote = @isRemote");
-    parameters.push({ name: "@isRemote", value: isRemote });
+    query.where("c.isRemote = @isRemote", { "@isRemote": isRemote });
   }
 
   if (daysSince) {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
-    whereClauses.push("c.postTS >= @sinceTS");
-    parameters.push({ name: "@sinceTS", value: sinceTS });
+    query.where("c.postTS >= @sinceTS", { "@sinceTS": sinceTS });
   }
 
   if (maxExperience != null) {
     // If undefined: include, since we can't yet distinguish between entry level and absent
-    whereClauses.push(
-      "(NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience)"
+    query.where(
+      "NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience",
+      { "@maxExperience": maxExperience }
     );
-    parameters.push({ name: "@maxExperience", value: maxExperience });
   }
 
   if (minSalary) {
     // If undefined: exclude
-    whereClauses.push("c.facets.salary >= @minSalary");
-    parameters.push({ name: "@minSalary", value: minSalary });
+    query.where("c.facets.salary >= @minSalary", { "@minSalary": minSalary });
   }
 
   if (title) {
-    whereClauses.push("CONTAINS(LOWER(c.title), @title)");
-    parameters.push({ name: "@title", value: title.toLowerCase() });
+    query.where("CONTAINS(LOWER(c.title), @title)", {
+      "@title": title.toLowerCase(),
+    });
   }
 
   if (normalizedLocation) {
-    addLocationClause(whereClauses, parameters, normalizedLocation, isRemote);
+    addLocationClause(query, normalizedLocation, isRemote);
   } else if (location) {
     // Remote + empty location always matches
-    whereClauses.push(
-      '((c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location))'
+    query.where(
+      '(c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location)',
+      { "@location": location.toLowerCase() }
     );
-    parameters.push({ name: "@location", value: location.toLowerCase() });
   }
 
-  const where = whereClauses.join(" AND ");
-
-  return db.job.query<Job & Resource>({
-    query: `SELECT TOP 24 * FROM c WHERE ${where}`,
-    parameters,
-  });
+  return db.job.query<Job & Resource>(query.build());
 }
 
 function addLocationClause(
-  whereClauses: string[],
-  parameters: SqlParameter[],
+  query: QueryBuilder,
   location: string,
   isRemote?: boolean
 ) {
   location = location.toLowerCase();
   const country = location.split(",").at(-1)?.trim() ?? location;
-  const hybridParam = { name: "@location", value: location };
+  const hybridParam = { "@location": location };
   const hybridClause = "ENDSWITH(LOWER(c.location), @location)";
   // Remote + empty location always matches
-  const remoteParam = { name: "@country", value: country };
+  const remoteParam = { "@country": country };
   const remoteClause =
-    '(ENDSWITH(LOWER(c.location), @country) OR c.location = "")';
+    'ENDSWITH(LOWER(c.location), @country) OR c.location = ""';
 
   if (isRemote) {
-    whereClauses.push(remoteClause);
-    parameters.push(remoteParam);
+    query.where(remoteClause, remoteParam);
   } else if (isRemote === false) {
-    whereClauses.push(hybridClause);
-    parameters.push(hybridParam);
+    query.where(hybridClause, hybridParam);
   } else {
-    whereClauses.push(
-      `(${hybridClause} OR (c.isRemote = true AND ${remoteClause}))`
+    query.where(
+      `${hybridClause} OR (c.isRemote = true AND (${remoteClause}))`,
+      {
+        ...hybridParam,
+        ...remoteParam,
+      }
     );
-    parameters.push(hybridParam);
-    parameters.push(remoteParam);
   }
 }
 
