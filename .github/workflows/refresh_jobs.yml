@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Make API call to trigger job refresh
         env:
-          API_URL: ${{ secrets.PROD_API_URL }}/api/jobs
+          API_URL: ${{ secrets.PROD_API_URL }}/api/refresh/jobs
           API_TOKEN: ${{ secrets.PROD_API_TOKEN }}
         run: |
           curl -X POST "$API_URL" \

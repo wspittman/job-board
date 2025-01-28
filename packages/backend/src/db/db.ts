@@ -118,6 +118,10 @@ class CompanyContainer extends Container<Company> {
     return this.getItem(id, ats);
   }
 
+  async getIds(ats: string) {
+    return this.getIdsByPartitionKey(ats);
+  }
+
   async getAll(ats: string) {
     return this.getItemsByPartitionKey(ats);
   }
@@ -146,6 +150,13 @@ class JobContainer extends Container<Job> {
 
   async getIds(companyId: string) {
     return this.getIdsByPartitionKey(companyId);
+  }
+
+  async getIdsAndTimestamps(companyId: string) {
+    return this.query<{ id: string; _ts: number }>(
+      "SELECT c.id, c._ts FROM c",
+      { partitionKey: companyId }
+    );
   }
 
   async upsert(job: Job) {

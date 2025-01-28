@@ -1,4 +1,4 @@
-import type { Filters } from "../types/clientModels";
+import type { Filters, RefreshJobsOptions } from "../types/clientModels";
 import type { ATS, CompanyKey, CompanyKeys, JobKey } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { logProperty } from "../utils/telemetry";
@@ -102,6 +102,43 @@ export function useJobKey({ id, companyId }: any = {}): JobKey {
   return jobKey;
 }
 
+export function useRefreshJobsOptions({
+  ats,
+  companyId,
+  replaceJobsOlderThan,
+  ...rest
+}: any = {}): RefreshJobsOptions {
+  const options: RefreshJobsOptions = {};
+
+  if (Object.keys(rest).length) {
+    throw new AppError("Unknown options");
+  }
+
+  if (ats) {
+    options.ats = validateAts("ats", ats);
+  }
+
+  if (companyId) {
+    options.companyId = validateId("companyId", companyId);
+  }
+
+  if (options.companyId && !options.ats) {
+    throw new AppError("ats field is required when using companyId");
+  }
+
+  if (replaceJobsOlderThan) {
+    options.replaceJobsOlderThan = validateTimestamp(
+      "replaceJobsOlderThan",
+      replaceJobsOlderThan,
+      new Date("2024-01-01").getTime(),
+      Date.now()
+    );
+  }
+
+  logProperty("Input_RefreshJobsOptions", options);
+  return options;
+}
+
 function validateId(field: string, id: unknown): string {
   if (!id) {
     throw new AppError(`${field} field is required`);
@@ -144,4 +181,33 @@ function validateAts(field: string, ats: unknown): ATS {
   }
 
   return ats;
+}
+
+function validateTimestamp(
+  field: string,
+  timestamp: unknown,
+  min?: number,
+  max?: number
+): number {
+  if (!timestamp) {
+    throw new AppError(`${field} field is required`);
+  }
+
+  if (typeof timestamp !== "number") {
+    throw new AppError(`${field} field is invalid`);
+  }
+
+  if (!Number.isFinite(timestamp)) {
+    throw new AppError(`${field} field is invalid`);
+  }
+
+  if (min && timestamp < min) {
+    throw new AppError(`${field} field is too low`);
+  }
+
+  if (max && timestamp > max) {
+    throw new AppError(`${field} field is too high`);
+  }
+
+  return timestamp;
 }

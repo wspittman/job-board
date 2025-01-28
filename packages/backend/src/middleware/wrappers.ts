@@ -7,18 +7,21 @@ const SUCCESS = { status: "success" };
  * Creates an Express route handler that processes JSON requests and responses
  * @param fn - Async function that processes the validated input and returns a result
  * @param inputValidator - Optional function to validate and transform the input
+ * @param outputFormatter - Optional function to format the output before sending
  * @returns Express middleware that handles the request
  * @throws Forwards any errors to Express error handler
  */
-export function jsonRoute<T>(
-  fn: (input: T) => Promise<unknown>,
-  inputValidator?: (input: any) => T
+export function jsonRoute<IN, OUT>(
+  fn: (input: IN) => Promise<OUT>,
+  inputValidator?: (input: unknown) => IN,
+  outputFormatter?: (output: OUT) => unknown
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const input = getInput(req, inputValidator);
       const result = await fn(input);
-      res.json(result ?? SUCCESS);
+      const output = outputFormatter ? outputFormatter(result) : result;
+      res.json(output ?? SUCCESS);
     } catch (error: any) {
       next(error);
     }
