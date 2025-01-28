@@ -11,6 +11,11 @@ interface EnhancedFilters extends Filters {
   normalizedLocation?: string;
 }
 
+/**
+ * Retrieves jobs matching the specified filters
+ * @param filterInput - Filter criteria for jobs search
+ * @returns Array of jobs matching the filters, empty if no filters provided
+ */
 export async function getJobs(filterInput: Filters) {
   if (!Object.keys(filterInput).length) {
     return [];
@@ -29,10 +34,21 @@ export async function getJobs(filterInput: Filters) {
   return result;
 }
 
+/**
+ * Removes a job from the database
+ * @param key - Job identifier containing id and companyId
+ * @returns Promise resolving when the job is deleted
+ */
 export async function removeJob(key: JobKey) {
   return deleteJob(key);
 }
 
+/**
+ * Refreshes jobs for a specific company by synchronizing with ATS
+ * @param key - Company identifier and optional timestamp to replace older jobs
+ * @param logPath - Optional array of strings for logging path
+ * @returns Promise resolving when jobs are refreshed
+ */
 export async function refreshJobsForCompany(
   key: CompanyKey & { replaceJobsOlderThan?: number },
   logPath: string[] = []

@@ -7,18 +7,29 @@ import { batchRun } from "../utils/async";
 import { refreshJobsForCompany } from "./job";
 import { renewMetadata } from "./metadata";
 
-export async function getCompany(key: CompanyKey) {
-  return db.company.get(key);
-}
-
+/**
+ * Adds a single company to the database if it doesn't exist
+ * @param key - Company identifier containing id and ATS type
+ * @returns Promise resolving when company is added
+ */
 export async function addCompany(key: CompanyKey) {
   return addCompanyInternal(key);
 }
 
+/**
+ * Adds multiple companies to the database
+ * @param param0 - Object containing array of company IDs and ATS type
+ * @returns Promise resolving when all companies are added
+ */
 export async function addCompanies({ ids, ats }: CompanyKeys) {
   return batchRun(ids, (id) => addCompanyInternal({ id, ats }), "AddCompanies");
 }
 
+/**
+ * Removes a company and all its associated jobs from the database
+ * @param key - Company identifier containing id and ATS type
+ * @returns Promise resolving when company and its jobs are removed
+ */
 export async function removeCompany(key: CompanyKey) {
   const companyId = key.id;
   const jobIds = await db.job.getIds(companyId);
@@ -35,6 +46,11 @@ export async function refreshCompanies() {
   throw new AppError("Not implemented");
 }
 
+/**
+ * Refreshes jobs for specified companies and updates metadata
+ * @param param0 - Options for refreshing jobs including ATS type, company ID, and age threshold
+ * @returns Promise resolving when jobs are refreshed and metadata is updated
+ */
 export async function refreshJobs({
   ats,
   companyId,
