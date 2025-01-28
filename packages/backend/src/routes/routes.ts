@@ -26,15 +26,11 @@ router.get(
   jsonRoute(() => Promise.resolve())
 );
 
-router.post(
-  "/refresh/companies",
-  adminOnly,
-  asyncRoute("refreshCompanies", refreshCompanies)
-);
+router.post("/refresh/companies", adminOnly, asyncRoute(refreshCompanies));
 router.post(
   "/refresh/jobs",
   adminOnly,
-  asyncRoute("refreshJobs", refreshJobs, useRefreshJobsOptions)
+  asyncRoute(refreshJobs, useRefreshJobsOptions)
 );
 
 router.put("/company", jsonRoute(addCompany, useCompanyKey));
