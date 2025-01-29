@@ -83,7 +83,7 @@ class Container<Item extends ItemDefinition> {
     const response = await getContainer(this.name)
       .items.query<T>(query, options)
       .fetchAll();
-    logDBAction("QUERY", this.name, response, options?.partitionKey);
+    logDBAction("QUERY", this.name, response, options?.partitionKey, query);
     return response.resources;
   }
 
