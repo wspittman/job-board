@@ -34,7 +34,7 @@ export function useFilters({
   }
 
   if (isRemote != null) {
-    filters.isRemote = isRemote.toLowerCase() === "true";
+    filters.isRemote = String(isRemote).toLowerCase() === "true";
   }
 
   if (title?.length >= MIN_SEARCH_LENGTH && title.length <= MAX_SEARCH_LENGTH) {
