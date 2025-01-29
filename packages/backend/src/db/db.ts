@@ -188,6 +188,7 @@ interface DBLog {
   name: DBAction;
   in: ContainerName;
   pkey?: PartitionKey;
+  query?: string;
   ru: number;
   ms: number;
   bytes: number;
@@ -206,7 +207,8 @@ function logDBAction(
   action: DBAction,
   container: ContainerName,
   response: ItemResponse<ItemDefinition> | FeedResponse<unknown>,
-  pkey?: PartitionKey
+  pkey?: PartitionKey,
+  query?: string | SqlQuerySpec
 ) {
   try {
     const log: DBLog = {
@@ -221,6 +223,10 @@ function logDBAction(
 
     if (pkey) {
       log.pkey = pkey;
+    }
+
+    if (query) {
+      log.query = typeof query === "string" ? query : query.query;
     }
 
     if (response instanceof FeedResponse) {
