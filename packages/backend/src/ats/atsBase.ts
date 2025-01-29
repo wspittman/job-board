@@ -42,6 +42,7 @@ export abstract class ATSBase {
     const start = Date.now();
     const result = await axios.get<T>(`${this.baseUrl}/${id}/${url}`, {
       timeout: 5000,
+      validateStatus: () => true,
     });
     const duration = Date.now() - start;
 
