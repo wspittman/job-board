@@ -1,5 +1,5 @@
 import { AsyncExecutor } from "./asyncExecutor";
-import { logError, withAsyncContext } from "./telemetry";
+import { logError, logProperty, withAsyncContext } from "./telemetry";
 
 class Node<T> {
   constructor(public value: T, public next?: Node<T>) {}
@@ -33,6 +33,7 @@ export class AsyncQueue<T> {
    * @param tasks - Array of tasks to be added to the queue
    */
   add(tasks: T[]) {
+    logProperty(`Queue_${this.name}_Add`, tasks.length);
     tasks.forEach((task) => this.enqueue(task));
     this.begin();
   }

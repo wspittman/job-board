@@ -10,12 +10,12 @@ import { refreshJobsForCompany } from "./job";
 import { metadataExecutor } from "./metadata";
 
 const companyInfoQueue = new AsyncQueue(
-  "refreshCompanyInfo",
+  "RefreshCompanyInfo",
   refreshCompanyInfo,
   metadataExecutor
 );
 const companyJobQueue = new AsyncQueue(
-  "refreshJobsForCompany",
+  "RefreshJobsForCompany",
   refreshJobsForCompany,
   metadataExecutor
 );

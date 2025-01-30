@@ -7,7 +7,7 @@ import { getSubContext, logCounter, logError } from "../utils/telemetry";
 
 const client = new OpenAI();
 const MAX_RETRIES = 3;
-const INITIAL_BACKOFF = 500;
+const INITIAL_BACKOFF = 1000;
 
 function getBackoffDelay(attempt: number) {
   const backoff = INITIAL_BACKOFF * Math.pow(2, attempt);
@@ -15,13 +15,13 @@ function getBackoffDelay(attempt: number) {
   return backoff + jitter;
 }
 
-async function backoff(attempt: number, error: unknown) {
+async function backoff(action: string, attempt: number, error: unknown) {
   if (
     error instanceof OpenAI.APIError &&
     error.status === 429 &&
     attempt < MAX_RETRIES
   ) {
-    logCounter("OpenAI_Backoff");
+    logCounter(`OpenAI_Backoff_${action}`);
     return await setTimeout(getBackoffDelay(attempt), true);
   }
 }
@@ -66,7 +66,7 @@ export async function jsonCompletion<T>(
     try {
       return await jsonComplete<T>(action, prompt, schema, input);
     } catch (error) {
-      if (!(await backoff(attempt, error))) {
+      if (!(await backoff(action, attempt, error))) {
         logError(error);
         return;
       }

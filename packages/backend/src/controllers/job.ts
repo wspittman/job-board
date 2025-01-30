@@ -15,7 +15,7 @@ interface EnhancedFilters extends Filters {
 }
 
 const jobInfoQueue = new AsyncQueue(
-  "refreshJobInfo",
+  "RefreshJobInfo",
   refreshJobInfo,
   metadataExecutor
 );

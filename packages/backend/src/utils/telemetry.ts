@@ -4,6 +4,7 @@ import type {
   EnvelopeTelemetry,
   EventData,
   ExceptionData,
+  ExceptionDetails,
   RequestData,
 } from "applicationinsights/out/Declarations/Contracts";
 import { AsyncLocalStorage } from "node:async_hooks";
@@ -173,20 +174,28 @@ function devLogEvent(eventData: EventData) {
 
 function devLogException({ exceptions }: ExceptionData) {
   if (config.NODE_ENV === "dev") {
-    devLog(
-      exceptions.map((exception) => ({
-        exception: exception.message,
-        stack:
-          exception.stack ??
-          exception.parsedStack.map((frame) => frame.assembly),
-      }))
-    );
+    const [first, ...rest] = exceptions;
+    const simplify = (ex: ExceptionDetails) => ({
+      exception: ex.message,
+      stack: ex.stack ?? ex.parsedStack.map((frame) => frame.assembly),
+    });
+
+    devLog({
+      ...simplify(first),
+      innerExceptions: rest.map(simplify),
+    });
   }
 }
 
-function devLog(data: unknown) {
+function devLog(data: object) {
   if (config.NODE_ENV === "dev") {
-    console.dir(data, { depth: null });
+    console.dir(
+      {
+        timestamp: new Date().toISOString(),
+        ...data,
+      },
+      { depth: null }
+    );
   }
 }
 
