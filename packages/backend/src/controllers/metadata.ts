@@ -1,10 +1,16 @@
 import { db } from "../db/db";
 import type { ClientMetadata } from "../types/clientModels";
+import { AsyncExecutor } from "../utils/asyncExecutor";
 import { logProperty } from "../utils/telemetry";
 
 let cachedMetadata: ClientMetadata | undefined;
 
-export async function renewMetadata() {
+export const metadataExecutor = new AsyncExecutor(
+  "RefreshMetadata",
+  refreshMetadata
+);
+
+async function refreshMetadata() {
   const companies = await db.company.query<{ id: string; name: string }>(
     "SELECT c.id, c.name FROM c"
   );

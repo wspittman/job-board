@@ -3,9 +3,22 @@ import { db } from "../db/db";
 import { RefreshJobsOptions } from "../types/clientModels";
 import type { CompanyKey, CompanyKeys } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
-import { batchRun } from "../utils/async";
+import { asyncBatch } from "../utils/asyncBatch";
+import { AsyncQueue } from "../utils/asyncQueue";
+import { logProperty } from "../utils/telemetry";
 import { refreshJobsForCompany } from "./job";
-import { renewMetadata } from "./metadata";
+import { metadataExecutor } from "./metadata";
+
+const companyInfoQueue = new AsyncQueue(
+  "refreshCompanyInfo",
+  refreshCompanyInfo,
+  metadataExecutor
+);
+const companyJobQueue = new AsyncQueue(
+  "refreshJobsForCompany",
+  refreshJobsForCompany,
+  metadataExecutor
+);
 
 /**
  * Adds a single company to the database if it doesn't exist
@@ -22,7 +35,9 @@ export async function addCompany(key: CompanyKey) {
  * @returns Promise resolving when all companies are added
  */
 export async function addCompanies({ ids, ats }: CompanyKeys) {
-  return batchRun(ids, (id) => addCompanyInternal({ id, ats }), "AddCompanies");
+  return asyncBatch("AddCompanies", ids, (id) =>
+    addCompanyInternal({ id, ats })
+  );
 }
 
 /**
@@ -34,16 +49,14 @@ export async function removeCompany(key: CompanyKey) {
   const companyId = key.id;
   const jobIds = await db.job.getIds(companyId);
   await db.company.remove(key);
-  return batchRun(
-    jobIds,
-    (id) => db.job.remove({ id, companyId }),
-    "RemoveCompanyJobs"
+  return asyncBatch("RemoveCompanyJobs", jobIds, (id) =>
+    db.job.remove({ id, companyId })
   );
 }
 
 export async function refreshCompanies() {
-  // To be further implemented in the AsyncQueue vs AsyncBatch updates
-  throw new AppError("Not implemented");
+  const keys = await db.company.getKeys();
+  companyInfoQueue.addMany(keys);
 }
 
 /**
@@ -75,8 +88,7 @@ export async function refreshJobs({
     keys = keys.map((key) => ({ ...key, replaceJobsOlderThan }));
   }
 
-  await batchRun(keys, refreshJobsForCompany, "RefreshJobs");
-  return renewMetadata();
+  companyJobQueue.addMany(keys);
 }
 
 async function addCompanyInternal(key: CompanyKey) {
@@ -87,4 +99,11 @@ async function addCompanyInternal(key: CompanyKey) {
   if (!company) return;
 
   return db.company.upsert(company);
+}
+
+async function refreshCompanyInfo(key: CompanyKey) {
+  logProperty("Input", key);
+  const companyContext = await ats.getCompany(key);
+  // TBD after Data Model update
+  throw new Error("Not implemented");
 }
