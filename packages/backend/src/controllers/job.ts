@@ -1,91 +1,22 @@
-import { Resource, SqlParameter } from "@azure/cosmos";
+import type { Resource } from "@azure/cosmos";
 import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import type { ClientJob, Filters } from "../types/clientModels";
-import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
-import { AppError } from "../utils/AppError";
+import { QueryBuilder } from "../db/QueryBuilder";
+import type { Filters } from "../types/clientModels";
+import type { CompanyKey, Job, JobKey } from "../types/dbModels";
 import { batchLog, BatchOptions, batchRun } from "../utils/async";
 import { logProperty } from "../utils/telemetry";
-import { getCompanies, getCompany } from "./company";
-import { renewMetadata } from "./metadata";
-
-// #region Input Types and Validations
 
 interface EnhancedFilters extends Filters {
   normalizedLocation?: string;
 }
 
-interface CrawlOptions {
-  company?: CompanyKey;
-}
-
-interface DeleteOptions {
-  timestamp?: number;
-}
-
-function validateCrawlOptions(options: CrawlOptions): CrawlOptions {
-  let { company, ...rest } = options;
-
-  if (Object.keys(rest).length) {
-    throw new AppError("Unknown options");
-  }
-
-  if (company) {
-    // Ignore for now: incoming crawl overhaul
-    // company = validateCompanyKey("getJobs", company);
-  }
-
-  return { company };
-}
-
-function validateDeleteOptions({ timestamp }: DeleteOptions): DeleteOptions {
-  if (timestamp) {
-    const now = Date.now();
-    const minTimestamp = new Date("2024-01-01").getTime();
-
-    if (timestamp > now || timestamp < minTimestamp) {
-      throw new AppError("Invalid timestamp");
-    }
-  }
-
-  return { timestamp };
-}
-
-// #endregion
-
-export async function getClientJobs(filterInput: Filters) {
-  const dbResults = await getJobs(filterInput);
-
-  const toClientJob = ({
-    id,
-    companyId,
-    company,
-    title,
-    description,
-    postTS,
-    applyUrl,
-    isRemote,
-    location,
-    facets,
-  }: Job): ClientJob => {
-    return {
-      id,
-      companyId,
-      company,
-      title,
-      description,
-      postTS,
-      applyUrl,
-      isRemote,
-      location,
-      facets,
-    };
-  };
-
-  return dbResults.map(toClientJob);
-}
-
+/**
+ * Retrieves jobs matching the specified filters
+ * @param filterInput - Filter criteria for jobs search
+ * @returns Array of jobs matching the filters, empty if no filters provided
+ */
 export async function getJobs(filterInput: Filters) {
   if (!Object.keys(filterInput).length) {
     return [];
@@ -104,51 +35,40 @@ export async function getJobs(filterInput: Filters) {
   return result;
 }
 
-export async function addJobs(options: CrawlOptions) {
-  const { company: companyKey } = validateCrawlOptions(options);
-
-  if (companyKey) {
-    const company = await getCompany(companyKey);
-    if (!company) return;
-    await crawlCompany(company);
-  } else {
-    await batchRun(ats.getAtsList(), crawlAts, "CrawlAts");
-  }
-
-  await renewMetadata();
-}
-
+/**
+ * Removes a job from the database
+ * @param key - Job identifier containing id and companyId
+ * @returns Promise resolving when the job is deleted
+ */
 export async function removeJob(key: JobKey) {
   return deleteJob(key);
 }
 
-export async function removeJobs(options: DeleteOptions) {
-  const { timestamp } = validateDeleteOptions(options);
+/**
+ * Refreshes jobs for a specific company by synchronizing with ATS
+ * @param key - Company identifier and optional timestamp to replace older jobs
+ * @param logPath - Optional array of strings for logging path
+ * @returns Promise resolving when jobs are refreshed
+ */
+export async function refreshJobsForCompany(
+  key: CompanyKey & { replaceJobsOlderThan?: number },
+  logPath: string[] = []
+) {
+  const companyId = key.id;
+  const batchOpts = { batchId: companyId, logPath };
 
-  if (!timestamp) {
-    throw new AppError("No timestamp provided");
+  let currentIds: string[] = [];
+  if (key.replaceJobsOlderThan) {
+    // CosmosDB uses seconds, not milliseconds
+    const cutoff = key.replaceJobsOlderThan / 1000;
+    const pairs = await db.job.getIdsAndTimestamps(companyId);
+    // Pretend we don't have jobs added before the cutoff
+    currentIds = pairs.filter(({ _ts }) => _ts >= cutoff).map(({ id }) => id);
+  } else {
+    currentIds = await db.job.getIds(companyId);
   }
 
-  logProperty("RemoveJobs_Timestamp", timestamp);
-
-  const jobKeys = await readJobKeysByTimestamp(timestamp);
-  logProperty("RemoveJobs_Count", jobKeys.length);
-
-  await batchRun(jobKeys, deleteJob, "DeleteJob");
-}
-
-async function crawlAts(ats: ATS, logPath: string[]) {
-  const companies = await getCompanies(ats);
-  await batchRun(companies, crawlCompany, "CrawlCompany", {
-    batchId: ats,
-    logPath,
-  });
-}
-
-async function crawlCompany(company: Company, logPath: string[] = []) {
-  const batchOpts = { batchId: company.id, logPath };
-  const currentIds = await readJobIds(company.id);
-  const atsJobs = await ats.getJobs(company, true);
+  const atsJobs = await ats.getJobs(key, true);
 
   // Figure out which jobs are added/removed/ignored
   const jobIdSet = new Set(atsJobs.map((item) => item.id));
@@ -167,7 +87,7 @@ async function crawlCompany(company: Company, logPath: string[] = []) {
   if (removed.length) {
     await batchRun(
       removed,
-      (id) => deleteJob({ id, companyId: company.id }),
+      (id) => deleteJob({ id, companyId }),
       "DeleteJob",
       batchOpts
     );
@@ -175,9 +95,12 @@ async function crawlCompany(company: Company, logPath: string[] = []) {
 
   if (added.length) {
     // To keep things the same for the client until we update data model
-    added.forEach((job) => {
-      job.company = company.name;
-    });
+    const company = await db.company.get(key);
+    if (company?.name) {
+      added.forEach((job) => {
+        job.company = company.name;
+      });
+    }
 
     await fillJobs(added, batchOpts);
 
@@ -225,103 +148,81 @@ async function readJobsByFilters({
   2. Filter efficiency (equality > range > contains)
   */
 
-  const whereClauses: string[] = [];
-  const parameters: SqlParameter[] = [];
+  const query = new QueryBuilder();
 
   if (companyId) {
-    whereClauses.push("c.companyId = @companyId");
-    parameters.push({ name: "@companyId", value: companyId });
+    query.where("c.companyId = @companyId", { "@companyId": companyId });
   }
 
   if (isRemote !== undefined) {
-    whereClauses.push("c.isRemote = @isRemote");
-    parameters.push({ name: "@isRemote", value: isRemote });
+    query.where("c.isRemote = @isRemote", { "@isRemote": isRemote });
   }
 
   if (daysSince) {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
-    whereClauses.push("c.postTS >= @sinceTS");
-    parameters.push({ name: "@sinceTS", value: sinceTS });
+    query.where("c.postTS >= @sinceTS", { "@sinceTS": sinceTS });
   }
 
   if (maxExperience != null) {
     // If undefined: include, since we can't yet distinguish between entry level and absent
-    whereClauses.push(
-      "(NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience)"
+    query.where(
+      "NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience",
+      { "@maxExperience": maxExperience }
     );
-    parameters.push({ name: "@maxExperience", value: maxExperience });
   }
 
   if (minSalary) {
     // If undefined: exclude
-    whereClauses.push("c.facets.salary >= @minSalary");
-    parameters.push({ name: "@minSalary", value: minSalary });
+    query.where("c.facets.salary >= @minSalary", { "@minSalary": minSalary });
   }
 
   if (title) {
-    whereClauses.push("CONTAINS(LOWER(c.title), @title)");
-    parameters.push({ name: "@title", value: title.toLowerCase() });
+    query.where("CONTAINS(LOWER(c.title), @title)", {
+      "@title": title.toLowerCase(),
+    });
   }
 
   if (normalizedLocation) {
-    addLocationClause(whereClauses, parameters, normalizedLocation, isRemote);
+    addLocationClause(query, normalizedLocation, isRemote);
   } else if (location) {
     // Remote + empty location always matches
-    whereClauses.push(
-      '((c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location))'
+    query.where(
+      '(c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location)',
+      { "@location": location.toLowerCase() }
     );
-    parameters.push({ name: "@location", value: location.toLowerCase() });
   }
 
-  const where = whereClauses.join(" AND ");
-
-  return db.job.query<Job & Resource>({
-    query: `SELECT TOP 24 * FROM c WHERE ${where}`,
-    parameters,
-  });
+  return db.job.query<Job & Resource>(query.build());
 }
 
 function addLocationClause(
-  whereClauses: string[],
-  parameters: SqlParameter[],
+  query: QueryBuilder,
   location: string,
   isRemote?: boolean
 ) {
   location = location.toLowerCase();
   const country = location.split(",").at(-1)?.trim() ?? location;
-  const hybridParam = { name: "@location", value: location };
+  const hybridParam = { "@location": location };
   const hybridClause = "ENDSWITH(LOWER(c.location), @location)";
   // Remote + empty location always matches
-  const remoteParam = { name: "@country", value: country };
+  const remoteParam = { "@country": country };
   const remoteClause =
-    '(ENDSWITH(LOWER(c.location), @country) OR c.location = "")';
+    'ENDSWITH(LOWER(c.location), @country) OR c.location = ""';
 
   if (isRemote) {
-    whereClauses.push(remoteClause);
-    parameters.push(remoteParam);
+    query.where(remoteClause, remoteParam);
   } else if (isRemote === false) {
-    whereClauses.push(hybridClause);
-    parameters.push(hybridParam);
+    query.where(hybridClause, hybridParam);
   } else {
-    whereClauses.push(
-      `(${hybridClause} OR (c.isRemote = true AND ${remoteClause}))`
+    query.where(
+      `${hybridClause} OR (c.isRemote = true AND (${remoteClause}))`,
+      {
+        ...hybridParam,
+        ...remoteParam,
+      }
     );
-    parameters.push(hybridParam);
-    parameters.push(remoteParam);
   }
-}
-
-async function readJobIds(companyId: string) {
-  return db.job.getIdsByPartitionKey(companyId);
-}
-
-async function readJobKeysByTimestamp(timestamp: number) {
-  return db.job.query<JobKey>({
-    query: "SELECT TOP 100 c.id, c.companyId FROM c WHERE c._ts <= @timestamp",
-    // CosmosDB uses seconds, not milliseconds
-    parameters: [{ name: "@timestamp", value: timestamp / 1000 }],
-  });
 }
 
 async function updateJob(job: Job) {

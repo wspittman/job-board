@@ -83,7 +83,7 @@ class Container<Item extends ItemDefinition> {
     const response = await getContainer(this.name)
       .items.query<T>(query, options)
       .fetchAll();
-    logDBAction("QUERY", this.name, response, options?.partitionKey);
+    logDBAction("QUERY", this.name, response, options?.partitionKey, query);
     return response.resources;
   }
 
@@ -118,6 +118,10 @@ class CompanyContainer extends Container<Company> {
     return this.getItem(id, ats);
   }
 
+  async getIds(ats: string) {
+    return this.getIdsByPartitionKey(ats);
+  }
+
   async getAll(ats: string) {
     return this.getItemsByPartitionKey(ats);
   }
@@ -146,6 +150,13 @@ class JobContainer extends Container<Job> {
 
   async getIds(companyId: string) {
     return this.getIdsByPartitionKey(companyId);
+  }
+
+  async getIdsAndTimestamps(companyId: string) {
+    return this.query<{ id: string; _ts: number }>(
+      "SELECT c.id, c._ts FROM c",
+      { partitionKey: companyId }
+    );
   }
 
   async upsert(job: Job) {
@@ -177,6 +188,7 @@ interface DBLog {
   name: DBAction;
   in: ContainerName;
   pkey?: PartitionKey;
+  query?: string;
   ru: number;
   ms: number;
   bytes: number;
@@ -195,7 +207,8 @@ function logDBAction(
   action: DBAction,
   container: ContainerName,
   response: ItemResponse<ItemDefinition> | FeedResponse<unknown>,
-  pkey?: PartitionKey
+  pkey?: PartitionKey,
+  query?: string | SqlQuerySpec
 ) {
   try {
     const log: DBLog = {
@@ -210,6 +223,10 @@ function logDBAction(
 
     if (pkey) {
       log.pkey = pkey;
+    }
+
+    if (query) {
+      log.query = typeof query === "string" ? query : query.query;
     }
 
     if (response instanceof FeedResponse) {

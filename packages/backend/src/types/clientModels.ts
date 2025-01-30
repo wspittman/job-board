@@ -1,4 +1,4 @@
-import type { Job, Metadata } from "./dbModels";
+import type { CompanyKey, Job, Metadata } from "./dbModels";
 
 export interface Filters {
   // Exact Match
@@ -11,6 +11,14 @@ export interface Filters {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+}
+
+export interface RefreshJobsOptions {
+  // To narrow the refresh
+  ats?: CompanyKey["ats"];
+  companyId?: CompanyKey["id"];
+  // To do a full replace of existing jobs, matching the refresh, whose refresh timestamp is older than this
+  replaceJobsOlderThan?: number;
 }
 
 export type ClientJob = Job;

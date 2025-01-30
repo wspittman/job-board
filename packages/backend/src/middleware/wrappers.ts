@@ -7,19 +7,22 @@ const SUCCESS = { status: "success" };
  * Creates an Express route handler that processes JSON requests and responses
  * @param fn - Async function that processes the validated input and returns a result
  * @param inputValidator - Optional function to validate and transform the input
+ * @param outputFormatter - Optional function to format the output before sending
  * @returns Express middleware that handles the request
  * @throws Forwards any errors to Express error handler
  */
-export function jsonRoute<T>(
-  fn: (input: T) => Promise<unknown>,
-  inputValidator?: (input: any) => T
+export function jsonRoute<IN, OUT>(
+  fn: (input: IN) => Promise<OUT>,
+  inputValidator?: (input: unknown) => IN,
+  outputFormatter?: (output: OUT) => unknown
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const input = getInput(req, inputValidator);
       const result = await fn(input);
-      res.json(result ?? SUCCESS);
-    } catch (error: any) {
+      const output = outputFormatter ? outputFormatter(result) : result;
+      res.json(output ?? SUCCESS);
+    } catch (error) {
       next(error);
     }
   };
@@ -27,22 +30,22 @@ export function jsonRoute<T>(
 
 /**
  * Creates an Express route handler for long-running async operations
- * @param name - Name of the operation for telemetry
  * @param fn - Async function that processes the validated input
  * @param inputValidator - Optional function to validate and transform the input
  * @returns Express middleware that immediately responds with 202 Accepted
  */
 export function asyncRoute<T>(
-  name: string,
   fn: (input: T) => Promise<void>,
-  inputValidator?: (input: any) => T
+  inputValidator?: (input: unknown) => T
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const input = getInput(req, inputValidator);
       res.writeHead(202, { "Content-Type": "text/plain" });
       res.end("Accepted");
-      withAsyncContext(name, async () => fn(input));
+
+      const logName = pathToLogName(req.path);
+      withAsyncContext(logName, async () => fn(input));
     } catch (error) {
       if (!res.headersSent) {
         next(error);
@@ -53,10 +56,18 @@ export function asyncRoute<T>(
   };
 }
 
+function pathToLogName(path: string) {
+  return path
+    .split("/")
+    .filter(Boolean)
+    .map((x) => x[0].toUpperCase() + x.slice(1))
+    .join("");
+}
+
 /**
  * Get the input from the request, optionally validating it.
  */
-function getInput<T>(req: Request, validator?: (input: any) => T) {
+function getInput<T>(req: Request, validator?: (input: unknown) => T) {
   const rawInput = req.method === "GET" ? convertQuery(req) : req.body;
   return validator ? validator(rawInput) : rawInput;
 }
