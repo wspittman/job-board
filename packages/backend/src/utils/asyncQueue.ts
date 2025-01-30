@@ -75,7 +75,7 @@ export class AsyncQueue<T> {
     try {
       if (!item) return;
       this.active++;
-      withAsyncContext(this.name, async () => {
+      await withAsyncContext(this.name, async () => {
         await this.fn(item);
         this.onComplete?.call();
       });

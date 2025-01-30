@@ -20,11 +20,12 @@ const asyncLocalStorage = new AsyncLocalStorage<Record<string, unknown>>();
  * Executes an async function within a new telemetry context
  * @param name - Name of the operation for tracking
  * @param fn - Async function to execute
+ * @returns Promise that resolves when the function completes
  * @remarks Automatically tracks duration and errors
  */
 export function withAsyncContext(name: string, fn: () => Promise<void>) {
   const start = Date.now();
-  asyncLocalStorage.run({}, async () => {
+  return asyncLocalStorage.run({}, async () => {
     try {
       await fn();
     } catch (error) {

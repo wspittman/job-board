@@ -45,7 +45,7 @@ export function asyncRoute<T>(
       res.end("Accepted");
 
       const logName = pathToLogName(req.path);
-      withAsyncContext(logName, async () => fn(input));
+      await withAsyncContext(logName, async () => fn(input));
     } catch (error) {
       if (!res.headersSent) {
         next(error);
