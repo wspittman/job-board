@@ -5,12 +5,20 @@ import { db } from "../db/db";
 import { QueryBuilder } from "../db/QueryBuilder";
 import type { Filters } from "../types/clientModels";
 import type { CompanyKey, Job, JobKey } from "../types/dbModels";
-import { batchLog, BatchOptions, batchRun } from "../utils/async";
+import { asyncBatch } from "../utils/asyncBatch";
+import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
+import { metadataExecutor } from "./metadata";
 
 interface EnhancedFilters extends Filters {
   normalizedLocation?: string;
 }
+
+const jobInfoQueue = new AsyncQueue(
+  "RefreshJobInfo",
+  refreshJobInfo,
+  metadataExecutor
+);
 
 /**
  * Retrieves jobs matching the specified filters
@@ -47,16 +55,13 @@ export async function removeJob(key: JobKey) {
 /**
  * Refreshes jobs for a specific company by synchronizing with ATS
  * @param key - Company identifier and optional timestamp to replace older jobs
- * @param logPath - Optional array of strings for logging path
  * @returns Promise resolving when jobs are refreshed
  */
 export async function refreshJobsForCompany(
-  key: CompanyKey & { replaceJobsOlderThan?: number },
-  logPath: string[] = []
+  key: CompanyKey & { replaceJobsOlderThan?: number }
 ) {
+  logProperty("Input", key);
   const companyId = key.id;
-  const batchOpts = { batchId: companyId, logPath };
-
   let currentIds: string[] = [];
   if (key.replaceJobsOlderThan) {
     // CosmosDB uses seconds, not milliseconds
@@ -82,14 +87,11 @@ export async function refreshJobsForCompany(
 
   // If job is in both ATS and DB, do nothing but keep a count
   const existing = jobIdSet.size - added.length;
-  batchLog("Ignored", existing, batchOpts);
+  logProperty("Ignored", existing);
 
   if (removed.length) {
-    await batchRun(
-      removed,
-      (id) => deleteJob({ id, companyId }),
-      "DeleteJob",
-      batchOpts
+    await asyncBatch("DeleteJob", removed, (id) =>
+      db.job.remove({ id, companyId: key.id })
     );
   }
 
@@ -102,32 +104,22 @@ export async function refreshJobsForCompany(
       });
     }
 
-    await fillJobs(added, batchOpts);
-
-    // Remove any jobs that failed to extract facets
-    const filled = added.filter((job) => Object.keys(job.facets).length);
-
-    const failed = added.length - filled.length;
-    if (failed) {
-      batchLog("Failed", failed, batchOpts);
-    }
-
-    if (filled.length) {
-      await batchRun(filled, updateJob, "AddJob", batchOpts);
-    }
+    jobInfoQueue.add(added);
   }
 }
 
-async function fillJobs(jobs: Job[], batchOpts: BatchOptions) {
-  await batchRun(
-    jobs,
-    async (job) => {
-      await llm.extractLocations(job);
-      await llm.extractFacets(job);
-    },
-    "FillJob",
-    batchOpts
-  );
+async function refreshJobInfo(job: Job) {
+  logProperty("Input", { companyId: job.companyId, jobId: job.id });
+
+  await llm.extractLocations(job);
+  await llm.extractFacets(job);
+
+  // Do not add a job that failed to extract facets
+  if (!Object.keys(job.facets).length) {
+    return;
+  }
+
+  await db.job.upsert(job);
 }
 
 // #region DB Operations
