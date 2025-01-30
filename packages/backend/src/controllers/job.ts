@@ -104,7 +104,7 @@ export async function refreshJobsForCompany(
       });
     }
 
-    jobInfoQueue.addMany(added);
+    jobInfoQueue.add(added);
   }
 }
 

@@ -56,7 +56,7 @@ export async function removeCompany(key: CompanyKey) {
 
 export async function refreshCompanies() {
   const keys = await db.company.getKeys();
-  companyInfoQueue.addMany(keys);
+  companyInfoQueue.add(keys);
 }
 
 /**
@@ -88,7 +88,7 @@ export async function refreshJobs({
     keys = keys.map((key) => ({ ...key, replaceJobsOlderThan }));
   }
 
-  companyJobQueue.addMany(keys);
+  companyJobQueue.add(keys);
 }
 
 async function addCompanyInternal(key: CompanyKey) {

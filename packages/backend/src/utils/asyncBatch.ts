@@ -1,5 +1,15 @@
 import { logError, logProperty } from "./telemetry";
 
+/**
+ * Processes an array of values in batches using an async function.
+ * Handles errors gracefully and logs batch statistics.
+ *
+ * @param name - The name of the batch operation for logging
+ * @param values - Array of values to process
+ * @param fn - Async function to process each value
+ * @param size - Maximum batch size for concurrent processing (default: 5)
+ * @returns Promise that resolves when all batches are processed
+ */
 export async function asyncBatch<T>(
   name: string,
   values: T[],
