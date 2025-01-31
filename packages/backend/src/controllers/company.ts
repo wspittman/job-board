@@ -17,7 +17,8 @@ const companyInfoQueue = new AsyncQueue(
 const companyJobQueue = new AsyncQueue(
   "RefreshJobsForCompany",
   refreshJobsForCompany,
-  metadataExecutor
+  metadataExecutor,
+  3
 );
 
 /**

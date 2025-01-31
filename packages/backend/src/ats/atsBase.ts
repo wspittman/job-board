@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import https from "https";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
 import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
@@ -8,6 +9,8 @@ import { getSubContext, logError } from "../utils/telemetry";
  * providing common functionality and required interface
  */
 export abstract class ATSBase {
+  private agent = new https.Agent({ keepAlive: true });
+
   constructor(protected ats: ATS, protected baseUrl: string) {}
 
   /**
@@ -40,23 +43,40 @@ export abstract class ATSBase {
     url: string
   ): Promise<T> {
     const start = Date.now();
-    const result = await axios.get<T>(`${this.baseUrl}/${id}/${url}`, {
-      timeout: 5000,
-      validateStatus: () => true,
-    });
-    const duration = Date.now() - start;
+    let logStatus = { status: 500, statusText: "Request Exception" };
 
-    logAtsCall(`GET ${name}`, this.ats, id, duration, result);
-
-    if (result.status === 404) {
-      throw new AppError(`${this.ats} / ${id}: Not Found`, 404);
+    try {
+      const result = await axios.get<T>(`${this.baseUrl}/${id}/${url}`, {
+        httpsAgent: this.agent,
+        timeout: 10000,
+      });
+      logStatus = result;
+      return result.data;
+    } catch (error) {
+      logStatus = this.errorToStatus(error);
+      if (logStatus.status === 404) {
+        throw new AppError(`${this.ats} / ${id}: Not Found`, 404, error);
+      }
+      throw new AppError(`${this.ats} / ${id}: Request Failed`, 500, error);
+    } finally {
+      const duration = Date.now() - start;
+      logAtsCall(`GET ${name}`, this.ats, id, duration, logStatus);
     }
+  }
 
-    if (result.status !== 200) {
-      throw new AppError(`${this.ats} / ${id}: Request Failed`, 500);
+  private errorToStatus(error: unknown) {
+    if (axios.isAxiosError(error)) {
+      return (
+        error.response ?? {
+          status: 500,
+          statusText: error.message,
+        }
+      );
+    } else if (error instanceof Error) {
+      return { status: -1, statusText: error.message };
+    } else {
+      return { status: -1, statusText: String(error) };
     }
-
-    return result.data;
   }
 }
 
@@ -82,7 +102,7 @@ function logAtsCall(
   ats: ATS,
   id: string,
   ms: number,
-  { status, statusText }: AxiosResponse
+  { status, statusText }: Pick<AxiosResponse, "status" | "statusText">
 ) {
   try {
     const log: AtsLog = {

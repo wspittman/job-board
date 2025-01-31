@@ -9,6 +9,7 @@ import type {
 } from "applicationinsights/out/Declarations/Contracts";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config";
+import { AppError } from "./AppError";
 
 interface CustomContext extends CorrelationContext {
   requestContext?: Record<string, unknown>;
@@ -101,7 +102,9 @@ export function logCounter(name: string, value: number = 1) {
  */
 export function logError(error: unknown) {
   const exception = error instanceof Error ? error : new Error(String(error));
-  appInsights.defaultClient.trackException({ exception });
+  const properties =
+    error instanceof AppError ? error.toErrorList() : undefined;
+  appInsights.defaultClient.trackException({ exception, properties });
 }
 
 /**
@@ -173,7 +176,7 @@ function devLogEvent(eventData: EventData) {
   }
 }
 
-function devLogException({ exceptions }: ExceptionData) {
+function devLogException({ exceptions, properties }: ExceptionData) {
   if (config.NODE_ENV === "dev") {
     const [first, ...rest] = exceptions;
     const simplify = (ex: ExceptionDetails) => ({
@@ -183,6 +186,7 @@ function devLogException({ exceptions }: ExceptionData) {
 
     devLog({
       ...simplify(first),
+      properties,
       innerExceptions: rest.map(simplify),
     });
   }
