@@ -50,7 +50,7 @@ export async function getJobs(filterInput: Filters) {
  * @returns Promise resolving when the job is deleted
  */
 export async function removeJob(key: JobKey) {
-  return deleteJob(key);
+  return db.job.remove(key);
 }
 
 /**
@@ -233,14 +233,6 @@ function addLocationClause(
       }
     );
   }
-}
-
-async function updateJob(job: Job) {
-  return db.job.upsert(job);
-}
-
-async function deleteJob({ id, companyId }: JobKey) {
-  return db.job.deleteItem(id, companyId);
 }
 
 // #endregion
