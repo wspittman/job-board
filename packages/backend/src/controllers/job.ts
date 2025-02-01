@@ -118,17 +118,11 @@ export async function refreshJobsForCompany(
       });
     }
 
-    jobInfoQueue.add(added.map((add) => ({ companyKey: key, job: add })));
+    jobInfoQueue.add(added.map((add) => [key, add]));
   }
 }
 
-async function refreshJobInfo({
-  companyKey,
-  job,
-}: {
-  companyKey: CompanyKey;
-  job: Context<Job>;
-}) {
+async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   logProperty("Input", { ...companyKey, jobId: job.item.id });
 
   if (!job.context) {
