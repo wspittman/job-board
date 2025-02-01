@@ -1,5 +1,6 @@
 import { config } from "../config";
 import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { standardizeUntrustedHtml } from "../utils/html";
 import { ATSBase } from "./atsBase";
 
@@ -51,23 +52,43 @@ export class Greenhouse extends ATSBase {
     super("greenhouse", config.GREENHOUSE_URL);
   }
 
-  async getCompany({ id }: CompanyKey): Promise<Company> {
-    return this.fetchCompany(id);
+  async getCompany(
+    { id }: CompanyKey,
+    full?: boolean
+  ): Promise<Context<Company>> {
+    const companyResult = await this.fetchCompany(id);
+    const result = this.formatCompany(id, companyResult);
+
+    if (!full) {
+      return result;
+    }
+
+    const { jobs } = await this.fetchJobs(id, false);
+
+    if (jobs.length) {
+      result.context = {
+        exampleJob: await this.fetchJob(id, jobs[0].id.toString()),
+      };
+    }
+
+    return result;
   }
 
-  async getJobs(key: CompanyKey, full = false): Promise<Job[]> {
+  async getJobs(key: CompanyKey, full = false): Promise<Context<Job>[]> {
     const { jobs } = await this.fetchJobs(key.id, full);
     return jobs.map((job) => this.formatJob(key, job));
   }
 
-  async getJob(key: CompanyKey, { id, companyId }: JobKey): Promise<Job> {
+  async getJob(
+    key: CompanyKey,
+    { id, companyId }: JobKey
+  ): Promise<Context<Job>> {
     const response = await this.fetchJob(companyId, id);
     return this.formatJob(key, response);
   }
 
-  private async fetchCompany(id: string): Promise<Company> {
-    const response = await this.axiosCall<CompanyResult>("Company", id, "");
-    return this.formatCompany(id, response);
+  private async fetchCompany(id: string): Promise<CompanyResult> {
+    return this.axiosCall<CompanyResult>("Company", id, "");
   }
 
   private async fetchJob(id: string, jobId: string): Promise<JobResult> {
@@ -80,27 +101,58 @@ export class Greenhouse extends ATSBase {
     return this.axiosCall<JobsResult>(callName, id, url);
   }
 
-  private formatCompany(id: string, { name, content }: CompanyResult): Company {
-    return {
+  private formatCompany(
+    id: string,
+    { name, content }: CompanyResult
+  ): Context<Company> {
+    const company: Company = {
       id,
       ats: "greenhouse",
       name,
       description: standardizeUntrustedHtml(content),
     };
+
+    return { item: company };
   }
 
-  private formatJob({ id: companyId }: CompanyKey, job: JobResult): Job {
-    return {
-      id: job.id.toString(),
+  private formatJob(
+    { id: companyId }: CompanyKey,
+    {
+      id,
+      title,
+      updated_at,
+      location,
+      absolute_url,
+      metadata,
+      content,
+      departments,
+      offices,
+    }: JobResult
+  ): Context<Job> {
+    const job: Job = {
+      id: String(id),
       companyId: companyId,
       company: companyId,
-      title: job.title,
-      isRemote: job.location.name.toLowerCase().includes("remote"),
-      location: job.location.name,
-      description: standardizeUntrustedHtml(job.content),
-      postTS: new Date(job.updated_at).getTime(),
-      applyUrl: job.absolute_url,
+      title,
+      isRemote: location.name.toLowerCase().includes("remote"),
+      location: location.name,
+      description: standardizeUntrustedHtml(content),
+      postTS: new Date(updated_at).getTime(),
+      applyUrl: absolute_url,
       facets: {},
+    };
+
+    // Useful pieces that aren't redundant with the job object
+    const context = {
+      location,
+      metadata,
+      departments,
+      offices,
+    };
+
+    return {
+      item: job,
+      context,
     };
   }
 }

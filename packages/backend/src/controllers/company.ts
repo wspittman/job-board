@@ -96,7 +96,7 @@ async function addCompanyInternal(key: CompanyKey) {
   const exists = await db.company.get(key);
   if (exists) return;
 
-  const company = await ats.getCompany(key);
+  const { item: company } = await ats.getCompany(key);
   if (!company) return;
 
   return db.company.upsert(company);
@@ -104,7 +104,7 @@ async function addCompanyInternal(key: CompanyKey) {
 
 async function refreshCompanyInfo(key: CompanyKey) {
   logProperty("Input", key);
-  const companyContext = await ats.getCompany(key);
+  const companyContext = await ats.getCompany(key, true);
   // TBD after Data Model update
   throw new Error("Not implemented");
 }

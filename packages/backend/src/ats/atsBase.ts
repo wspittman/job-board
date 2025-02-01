@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import https from "https";
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
 
@@ -15,19 +16,23 @@ export abstract class ATSBase {
 
   /**
    * Retrieves company information from the ATS
+   * @param full - Whether to fetch full job details
    */
-  abstract getCompany(key: CompanyKey): Promise<Company>;
+  abstract getCompany(
+    key: CompanyKey,
+    full?: boolean
+  ): Promise<Context<Company>>;
 
   /**
    * Fetches jobs for a company from the ATS
    * @param full - Whether to fetch full job details
    */
-  abstract getJobs(key: CompanyKey, full?: boolean): Promise<Job[]>;
+  abstract getJobs(key: CompanyKey, full?: boolean): Promise<Context<Job>[]>;
 
   /**
    * Retrieves detailed information for a specific job
    */
-  abstract getJob(key: CompanyKey, jobKey: JobKey): Promise<Job>;
+  abstract getJob(key: CompanyKey, jobKey: JobKey): Promise<Context<Job>>;
 
   /**
    * Makes an HTTP GET request to the ATS API

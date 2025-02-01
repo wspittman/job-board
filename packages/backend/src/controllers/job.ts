@@ -5,6 +5,7 @@ import { db } from "../db/db";
 import { QueryBuilder } from "../db/QueryBuilder";
 import type { Filters } from "../types/clientModels";
 import type { CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { asyncBatch } from "../utils/asyncBatch";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
@@ -73,14 +74,16 @@ export async function refreshJobsForCompany(
     currentIds = await db.job.getIds(companyId);
   }
 
-  const atsJobs = await ats.getJobs(key, true);
+  // If no jobs are found, assume newly added company and get full job data for all jobs
+  const getFullJobInfo = !currentIds.length;
+  let atsJobs = await ats.getJobs(key, getFullJobInfo);
 
   // Figure out which jobs are added/removed/ignored
-  const jobIdSet = new Set(atsJobs.map((item) => item.id));
+  const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
   const currentIdSet = new Set(currentIds);
 
   // Any ATS job not in the current set needs to be added
-  const added = atsJobs.filter((item) => !currentIdSet.has(item.id));
+  let added = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
 
   // Any jobs in the current set but not in the ATS need to be deleted
   const removed = currentIds.filter((id) => !jobIdSet.has(id));
@@ -88,6 +91,17 @@ export async function refreshJobsForCompany(
   // If job is in both ATS and DB, do nothing but keep a count
   const existing = jobIdSet.size - added.length;
   logProperty("Ignored", existing);
+
+  // If more than 10% of jobs are new, get the full job data for all jobs
+  // Better to do one big API call with unnecessary data than many small API calls
+  if (
+    added.length &&
+    !atsJobs[0].context &&
+    9 * added.length > removed.length + existing
+  ) {
+    atsJobs = await ats.getJobs(key, true);
+    added = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
+  }
 
   if (removed.length) {
     await asyncBatch("DeleteJob", removed, (id) =>
@@ -100,26 +114,36 @@ export async function refreshJobsForCompany(
     const company = await db.company.get(key);
     if (company?.name) {
       added.forEach((job) => {
-        job.company = company.name;
+        job.item.company = company.name;
       });
     }
 
-    jobInfoQueue.add(added);
+    jobInfoQueue.add(added.map((add) => ({ companyKey: key, job: add })));
   }
 }
 
-async function refreshJobInfo(job: Job) {
-  logProperty("Input", { companyId: job.companyId, jobId: job.id });
+async function refreshJobInfo({
+  companyKey,
+  job,
+}: {
+  companyKey: CompanyKey;
+  job: Context<Job>;
+}) {
+  logProperty("Input", { ...companyKey, jobId: job.item.id });
+
+  if (!job.context) {
+    job = await ats.getJob(companyKey, job.item);
+  }
 
   await llm.extractLocations(job);
   await llm.extractFacets(job);
 
   // Do not add a job that failed to extract facets
-  if (!Object.keys(job.facets).length) {
+  if (!Object.keys(job.item.facets).length) {
     return;
   }
 
-  await db.job.upsert(job);
+  await db.job.upsert(job.item);
 }
 
 // #region DB Operations

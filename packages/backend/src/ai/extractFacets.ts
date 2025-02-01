@@ -1,10 +1,13 @@
 import { z } from "zod";
 import type { Job } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { zBoolean, zNumber, zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
 
 const prompt = `You are an experienced job seeker whose goal is to quickly find relevant information from job descriptions.
-First, read the job description that is provided. Then extract facets from the data. Then compose a one-line summary of the job description.
+First, read the provided data: An initial job object, including job description, and any additional context.
+Then extract facets from the data.
+Then compose a one-line summary of the job description.
 Provide the response JSON in the provided schema.`;
 
 const schema = z.object({
@@ -26,7 +29,7 @@ const schema = z.object({
  * Extracts facets from and update a job object.
  * @param job The job object
  */
-export async function extractFacets(job: Job): Promise<void> {
+export async function extractFacets(job: Context<Job>): Promise<void> {
   const result = await jsonCompletion("extractFacets", prompt, schema, job);
 
   if (!result) return;
@@ -39,5 +42,5 @@ export async function extractFacets(job: Job): Promise<void> {
     experience: result.experience,
   };
 
-  setExtractedData(job.facets, formattedResult);
+  setExtractedData(job.item.facets, formattedResult);
 }
