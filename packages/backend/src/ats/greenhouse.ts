@@ -9,14 +9,16 @@ interface CompanyResult {
   content: string;
 }
 
-interface JobsResult {
-  jobs: JobResult[];
+interface JobsResultGeneric<T> {
+  jobs: T[];
   meta: {
     total: number;
   };
 }
+type JobsResult = JobsResultGeneric<JobResult>;
+type JobsResultBasic = JobsResultGeneric<JobResultBasic>;
 
-interface JobResult {
+interface JobResultBasic {
   id: number;
   internal_job_id: number;
   title: string;
@@ -27,6 +29,9 @@ interface JobResult {
   };
   absolute_url: string;
   metadata?: unknown;
+}
+
+interface JobResult extends JobResultBasic {
   content: string;
   departments: {
     id: number;
@@ -63,7 +68,7 @@ export class Greenhouse extends ATSBase {
       return result;
     }
 
-    const { jobs } = await this.fetchJobs(id, false);
+    const { jobs } = await this.fetchJobsBasic(id);
 
     if (jobs.length) {
       result.context = {
@@ -75,8 +80,13 @@ export class Greenhouse extends ATSBase {
   }
 
   async getJobs(key: CompanyKey, full = false): Promise<Context<Job>[]> {
-    const { jobs } = await this.fetchJobs(key.id, full);
-    return jobs.map((job) => this.formatJob(key, job));
+    if (!full) {
+      const { jobs } = await this.fetchJobsBasic(key.id);
+      return jobs.map((job) => this.formatJobBasic(key, job));
+    } else {
+      const { jobs } = await this.fetchJobs(key.id);
+      return jobs.map((job) => this.formatJob(key, job));
+    }
   }
 
   async getJob(
@@ -95,10 +105,12 @@ export class Greenhouse extends ATSBase {
     return this.axiosCall<JobResult>("Job", id, `jobs/${jobId}`);
   }
 
-  private async fetchJobs(id: string, full: boolean): Promise<JobsResult> {
-    const callName = `Jobs${full ? " (full)" : ""}`;
-    const url = `/jobs${full ? "?content=true" : ""}`;
-    return this.axiosCall<JobsResult>(callName, id, url);
+  private async fetchJobs(id: string): Promise<JobsResult> {
+    return this.axiosCall<JobsResult>("Jobs", id, "/jobs?content=true");
+  }
+
+  private async fetchJobsBasic(id: string): Promise<JobsResultBasic> {
+    return this.axiosCall<JobsResultBasic>("JobsBasic", id, "/jobs");
   }
 
   private formatCompany(
@@ -115,19 +127,9 @@ export class Greenhouse extends ATSBase {
     return { item: company };
   }
 
-  private formatJob(
+  private formatJobBasic(
     { id: companyId }: CompanyKey,
-    {
-      id,
-      title,
-      updated_at,
-      location,
-      absolute_url,
-      metadata,
-      content,
-      departments,
-      offices,
-    }: JobResult
+    { id, title, updated_at, location, absolute_url }: JobResultBasic
   ): Context<Job> {
     const job: Job = {
       id: String(id),
@@ -136,23 +138,30 @@ export class Greenhouse extends ATSBase {
       title,
       isRemote: location.name.toLowerCase().includes("remote"),
       location: location.name,
-      description: standardizeUntrustedHtml(content),
+      description: "",
       postTS: new Date(updated_at).getTime(),
       applyUrl: absolute_url,
       facets: {},
     };
 
+    return { item: job };
+  }
+
+  private formatJob(key: CompanyKey, jobResult: JobResult): Context<Job> {
+    const result = this.formatJobBasic(key, jobResult);
+
+    const { location, metadata, content, departments, offices } = jobResult;
+
+    result.item.description = standardizeUntrustedHtml(content);
+
     // Useful pieces that aren't redundant with the job object
-    const context = {
+    result.context = {
       location,
       metadata,
       departments,
       offices,
     };
 
-    return {
-      item: job,
-      context,
-    };
+    return result;
   }
 }
