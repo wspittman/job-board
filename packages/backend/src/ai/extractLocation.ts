@@ -37,14 +37,23 @@ const schema = z.object({
  * @param job The job object
  */
 export async function extractLocations(job: Context<Job>): Promise<void> {
-  const location = await extractLocation(
-    JSON.stringify({
-      location: job.item.location,
-      context: job.context,
-    })
-  );
+  const result = await jsonCompletion("extractLocation", prompt, schema, {
+    location: normalize(job.item.location),
+    context: job.context,
+  });
+
+  if (!result) {
+    return undefined;
+  }
+
+  const location = formatLocation(result);
 
   if (!location) return;
+
+  if (location.isRemote === false && location.location === "") {
+    // This means the LLM call couldn't extract a location
+    return;
+  }
 
   setExtractedData(job.item, location);
 }
