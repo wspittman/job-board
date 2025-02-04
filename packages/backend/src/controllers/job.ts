@@ -9,7 +9,7 @@ import type { Context } from "../types/types";
 import { asyncBatch } from "../utils/asyncBatch";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
-import { metadataExecutor } from "./metadata";
+import { metadataJobExecutor } from "./metadata";
 
 interface EnhancedFilters extends Filters {
   normalizedLocation?: string;
@@ -18,7 +18,7 @@ interface EnhancedFilters extends Filters {
 const jobInfoQueue = new AsyncQueue(
   "RefreshJobInfo",
   refreshJobInfo,
-  metadataExecutor
+  metadataJobExecutor
 );
 
 /**
