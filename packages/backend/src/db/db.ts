@@ -15,6 +15,7 @@ import type {
   LocationCache,
   Metadata,
 } from "../types/dbModels";
+import { AppError } from "../utils/AppError";
 import { getSubContext, logError } from "../utils/telemetry";
 import { ContainerName, getContainer } from "./dbInit";
 
@@ -32,11 +33,15 @@ class Container<Item extends ItemDefinition> {
    * @returns The requested item or undefined if not found
    */
   async getItem(id: string, partitionKey: string) {
-    const response = await getContainer(this.name)
-      .item(id, partitionKey)
-      .read<Item>();
-    logDBAction("READ", this.name, response, partitionKey);
-    return response.resource;
+    try {
+      const response = await getContainer(this.name)
+        .item(id, partitionKey)
+        .read<Item>();
+      logDBAction("READ", this.name, response, partitionKey);
+      return response.resource;
+    } catch (error) {
+      throw new AppError("Error Fetching from Database", 500, error);
+    }
   }
 
   /**
@@ -45,11 +50,15 @@ class Container<Item extends ItemDefinition> {
    * @returns Array of items in the partition
    */
   async getItemsByPartitionKey(partitionKey: string) {
-    const response = await getContainer(this.name)
-      .items.readAll<Item & Resource>({ partitionKey })
-      .fetchAll();
-    logDBAction("READ_ALL", this.name, response, partitionKey);
-    return response.resources;
+    try {
+      const response = await getContainer(this.name)
+        .items.readAll<Item & Resource>({ partitionKey })
+        .fetchAll();
+      logDBAction("READ_ALL", this.name, response, partitionKey);
+      return response.resources;
+    } catch (error) {
+      throw new AppError("Error Fetching from Database", 500, error);
+    }
   }
 
   /**
@@ -80,11 +89,15 @@ class Container<Item extends ItemDefinition> {
    * @returns Query results
    */
   async query<T>(query: string | SqlQuerySpec, options?: FeedOptions) {
-    const response = await getContainer(this.name)
-      .items.query<T>(query, options)
-      .fetchAll();
-    logDBAction("QUERY", this.name, response, options?.partitionKey, query);
-    return response.resources;
+    try {
+      const response = await getContainer(this.name)
+        .items.query<T>(query, options)
+        .fetchAll();
+      logDBAction("QUERY", this.name, response, options?.partitionKey, query);
+      return response.resources;
+    } catch (error) {
+      throw new AppError("Error Querying from Database", 500, error);
+    }
   }
 
   /**
@@ -92,8 +105,12 @@ class Container<Item extends ItemDefinition> {
    * @param item The item to upsert
    */
   async upsertItem(item: Item) {
-    const response = await getContainer(this.name).items.upsert(item);
-    logDBAction("UPSERT", this.name, response);
+    try {
+      const response = await getContainer(this.name).items.upsert(item);
+      logDBAction("UPSERT", this.name, response);
+    } catch (error) {
+      throw new AppError("Error Inserting to Database", 500, error);
+    }
   }
 
   /**
@@ -102,10 +119,14 @@ class Container<Item extends ItemDefinition> {
    * @param partitionKey The partition key for the item
    */
   async deleteItem(id: string, partitionKey: string) {
-    const response = await getContainer(this.name)
-      .item(id, partitionKey)
-      .delete();
-    logDBAction("DELETE", this.name, response, partitionKey);
+    try {
+      const response = await getContainer(this.name)
+        .item(id, partitionKey)
+        .delete();
+      logDBAction("DELETE", this.name, response, partitionKey);
+    } catch (error) {
+      throw new AppError("Error Deleting from Database", 500, error);
+    }
   }
 }
 
