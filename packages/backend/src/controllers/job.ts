@@ -63,63 +63,68 @@ export async function refreshJobsForCompany(
 ) {
   logProperty("Input", key);
   const companyId = key.id;
-  let currentIds: string[] = [];
-  if (key.replaceJobsOlderThan) {
-    // CosmosDB uses seconds, not milliseconds
-    const cutoff = key.replaceJobsOlderThan / 1000;
-    const pairs = await db.job.getIdsAndTimestamps(companyId);
-    // Pretend we don't have jobs added before the cutoff
-    currentIds = pairs.filter(({ _ts }) => _ts >= cutoff).map(({ id }) => id);
-  } else {
-    currentIds = await db.job.getIds(companyId);
-  }
+  const currentIds = await getJobIds(companyId, key.replaceJobsOlderThan);
+  const [add, remove, ignore] = await getAtsJobs(key, currentIds);
 
-  // If no jobs are found, assume newly added company and get full job data for all jobs
-  const getFullJobInfo = !currentIds.length;
-  let atsJobs = await ats.getJobs(key, getFullJobInfo);
+  logProperty("Ignored", ignore);
 
-  // Figure out which jobs are added/removed/ignored
-  const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
-  const currentIdSet = new Set(currentIds);
-
-  // Any ATS job not in the current set needs to be added
-  let added = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
-
-  // Any jobs in the current set but not in the ATS need to be deleted
-  const removed = currentIds.filter((id) => !jobIdSet.has(id));
-
-  // If job is in both ATS and DB, do nothing but keep a count
-  const existing = jobIdSet.size - added.length;
-  logProperty("Ignored", existing);
-
-  // If more than 10% of jobs are new, get the full job data for all jobs
-  // Better to do one big API call with unnecessary data than many small API calls
-  if (
-    added.length &&
-    !atsJobs[0].context &&
-    9 * added.length > removed.length + existing
-  ) {
-    atsJobs = await ats.getJobs(key, true);
-    added = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
-  }
-
-  if (removed.length) {
-    await asyncBatch("DeleteJob", removed, (id) =>
+  if (remove.length) {
+    await asyncBatch("DeleteJob", remove, (id) =>
       db.job.remove({ id, companyId: key.id })
     );
   }
 
-  if (added.length) {
+  if (add.length) {
     // To keep things the same for the client until we update data model
     const company = await db.company.get(key);
     if (company?.name) {
-      added.forEach((job) => {
+      add.forEach((job) => {
         job.item.company = company.name;
       });
     }
 
-    jobInfoQueue.add(added.map((add) => [key, add]));
+    jobInfoQueue.add(add.map((job) => [key, job]));
   }
+}
+
+async function getJobIds(companyId: string, cutoffMS?: number) {
+  if (!cutoffMS) {
+    return await db.job.getIds(companyId);
+  }
+
+  // CosmosDB uses seconds, not milliseconds
+  const cutoff = cutoffMS / 1000;
+  const pairs = await db.job.getIdsAndTimestamps(companyId);
+  // Pretend we don't have jobs added before the cutoff
+  return pairs.filter(({ _ts }) => _ts >= cutoff).map(({ id }) => id);
+}
+
+async function getAtsJobs(key: CompanyKey, currentIds: string[]) {
+  // If there are no current jobs, assume newly added company and get full job data for all jobs
+  const getFullJobInfo = !currentIds.length;
+  let atsJobs = await ats.getJobs(key, getFullJobInfo);
+
+  // Create sets for faster comparisons
+  const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
+  const currentIdSet = new Set(currentIds);
+
+  // Any ATS job not in the current set needs to be added
+  let add = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
+
+  // Any jobs in the current set but not in the ATS need to be removed
+  const remove = currentIds.filter((id) => !jobIdSet.has(id));
+
+  // If job is in both ATS and DB should be ignored
+  const ignore = jobIdSet.size - add.length;
+
+  // If more than 10% of jobs are new, get the full job data for all jobs
+  // Better to do one big API call with unnecessary data than many small API calls
+  if (9 * add.length > remove.length + ignore && !atsJobs[0].context) {
+    atsJobs = await ats.getJobs(key, true);
+    add = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
+  }
+
+  return [add, remove, ignore] as const;
 }
 
 async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
