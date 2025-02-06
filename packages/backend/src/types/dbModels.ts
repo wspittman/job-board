@@ -44,15 +44,21 @@ export interface Job {
 export type JobKey = Pick<Job, "id" | "companyId">;
 
 /**
- * Metadata for the database. Refreshed after Crawl and cached in the backend service.
- * - id: "metadata"
+ * Aggregated metadata for other containers. Cached in the backend service.
+ * - id: The type of metadata
  * - pKey: id
+ * Only indexed for point reads.
  */
 export interface Metadata {
-  id: "metadata";
-  companyCount: number;
-  companyNames: [string, string][];
-  jobCount: number;
+  // Keys
+  id: "company" | "job" | "metadata";
+
+  // For company type
+  companyCount?: number;
+  companyNames?: [string, string][];
+
+  // For job type
+  jobCount?: number;
 }
 
 /**

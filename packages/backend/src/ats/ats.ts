@@ -1,4 +1,5 @@
 import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { ATSBase } from "./atsBase";
 import { Greenhouse } from "./greenhouse";
 import { Lever } from "./lever";
@@ -18,23 +19,24 @@ class ATSConnector {
 
   /**
    * Retrieves company information from the appropriate ATS
+   * @param full - Whether to fetch full company details
    */
-  async getCompany(key: CompanyKey): Promise<Company> {
-    return this.atsEndpoints[key.ats].getCompany(key);
+  async getCompany(key: CompanyKey, full?: boolean): Promise<Context<Company>> {
+    return this.atsEndpoints[key.ats].getCompany(key, full);
   }
 
   /**
    * Fetches jobs for a company from the appropriate ATS
    * @param full - Whether to fetch full job details
    */
-  async getJobs(key: CompanyKey, full?: boolean): Promise<Job[]> {
+  async getJobs(key: CompanyKey, full?: boolean): Promise<Context<Job>[]> {
     return this.atsEndpoints[key.ats].getJobs(key, full);
   }
 
   /**
    * Retrieves detailed information for a specific job
    */
-  async getJob(key: CompanyKey, jobKey: JobKey): Promise<Job> {
+  async getJob(key: CompanyKey, jobKey: JobKey): Promise<Context<Job>> {
     return this.atsEndpoints[key.ats].getJob(key, jobKey);
   }
 }

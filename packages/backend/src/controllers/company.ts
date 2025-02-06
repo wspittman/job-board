@@ -7,17 +7,17 @@ import { asyncBatch } from "../utils/asyncBatch";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
 import { refreshJobsForCompany } from "./job";
-import { metadataExecutor } from "./metadata";
+import { metadataCompanyExecutor, metadataJobExecutor } from "./metadata";
 
 const companyInfoQueue = new AsyncQueue(
   "RefreshCompanyInfo",
   refreshCompanyInfo,
-  metadataExecutor
+  metadataCompanyExecutor
 );
 const companyJobQueue = new AsyncQueue(
   "RefreshJobsForCompany",
   refreshJobsForCompany,
-  metadataExecutor,
+  metadataJobExecutor,
   3
 );
 
@@ -27,7 +27,8 @@ const companyJobQueue = new AsyncQueue(
  * @returns Promise resolving when company is added
  */
 export async function addCompany(key: CompanyKey) {
-  return addCompanyInternal(key);
+  await addCompanyInternal(key);
+  companyInfoQueue.add([key]);
 }
 
 /**
@@ -36,9 +37,9 @@ export async function addCompany(key: CompanyKey) {
  * @returns Promise resolving when all companies are added
  */
 export async function addCompanies({ ids, ats }: CompanyKeys) {
-  return asyncBatch("AddCompanies", ids, (id) =>
-    addCompanyInternal({ id, ats })
-  );
+  const keys = ids.map((id) => ({ id, ats }));
+  await asyncBatch("AddCompanies", keys, addCompanyInternal);
+  companyInfoQueue.add(keys);
 }
 
 /**
@@ -50,9 +51,13 @@ export async function removeCompany(key: CompanyKey) {
   const companyId = key.id;
   const jobIds = await db.job.getIds(companyId);
   await db.company.remove(key);
-  return asyncBatch("RemoveCompanyJobs", jobIds, (id) =>
-    db.job.remove({ id, companyId })
-  );
+  metadataCompanyExecutor.call();
+  if (jobIds.length) {
+    await asyncBatch("RemoveCompanyJobs", jobIds, (id) =>
+      db.job.remove({ id, companyId })
+    );
+    metadataJobExecutor.call();
+  }
 }
 
 export async function refreshCompanies() {
@@ -96,15 +101,14 @@ async function addCompanyInternal(key: CompanyKey) {
   const exists = await db.company.get(key);
   if (exists) return;
 
-  const company = await ats.getCompany(key);
+  const { item: company } = await ats.getCompany(key);
   if (!company) return;
 
-  return db.company.upsert(company);
+  await db.company.upsert(company);
 }
 
 async function refreshCompanyInfo(key: CompanyKey) {
   logProperty("Input", key);
-  const companyContext = await ats.getCompany(key);
   // TBD after Data Model update
-  throw new Error("Not implemented");
+  //const companyContext = await ats.getCompany(key, true);
 }

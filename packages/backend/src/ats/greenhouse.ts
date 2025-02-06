@@ -1,5 +1,6 @@
 import { config } from "../config";
 import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { standardizeUntrustedHtml } from "../utils/html";
 import { ATSBase } from "./atsBase";
 
@@ -8,14 +9,16 @@ interface CompanyResult {
   content: string;
 }
 
-interface JobsResult {
-  jobs: JobResult[];
+interface JobsResultGeneric<T> {
+  jobs: T[];
   meta: {
     total: number;
   };
 }
+type JobsResult = JobsResultGeneric<JobResult>;
+type JobsResultBasic = JobsResultGeneric<JobResultBasic>;
 
-interface JobResult {
+interface JobResultBasic {
   id: number;
   internal_job_id: number;
   title: string;
@@ -26,6 +29,9 @@ interface JobResult {
   };
   absolute_url: string;
   metadata?: unknown;
+}
+
+interface JobResult extends JobResultBasic {
   content: string;
   departments: {
     id: number;
@@ -51,56 +57,111 @@ export class Greenhouse extends ATSBase {
     super("greenhouse", config.GREENHOUSE_URL);
   }
 
-  async getCompany({ id }: CompanyKey): Promise<Company> {
-    return this.fetchCompany(id);
+  async getCompany(
+    { id }: CompanyKey,
+    full?: boolean
+  ): Promise<Context<Company>> {
+    const companyResult = await this.fetchCompany(id);
+    const result = this.formatCompany(id, companyResult);
+
+    if (!full) {
+      return result;
+    }
+
+    const { jobs } = await this.fetchJobsBasic(id);
+
+    if (jobs.length) {
+      result.context = {
+        exampleJob: await this.fetchJob(id, jobs[0].id.toString()),
+      };
+    }
+
+    return result;
   }
 
-  async getJobs(key: CompanyKey, full = false): Promise<Job[]> {
-    const { jobs } = await this.fetchJobs(key.id, full);
-    return jobs.map((job) => this.formatJob(key, job));
+  async getJobs(key: CompanyKey, full = false): Promise<Context<Job>[]> {
+    if (!full) {
+      const { jobs } = await this.fetchJobsBasic(key.id);
+      return jobs.map((job) => this.formatJobBasic(key, job));
+    } else {
+      const { jobs } = await this.fetchJobs(key.id);
+      return jobs.map((job) => this.formatJob(key, job));
+    }
   }
 
-  async getJob(key: CompanyKey, { id, companyId }: JobKey): Promise<Job> {
+  async getJob(
+    key: CompanyKey,
+    { id, companyId }: JobKey
+  ): Promise<Context<Job>> {
     const response = await this.fetchJob(companyId, id);
     return this.formatJob(key, response);
   }
 
-  private async fetchCompany(id: string): Promise<Company> {
-    const response = await this.axiosCall<CompanyResult>("Company", id, "");
-    return this.formatCompany(id, response);
+  private async fetchCompany(id: string): Promise<CompanyResult> {
+    return this.axiosCall<CompanyResult>("Company", id, "");
   }
 
   private async fetchJob(id: string, jobId: string): Promise<JobResult> {
     return this.axiosCall<JobResult>("Job", id, `jobs/${jobId}`);
   }
 
-  private async fetchJobs(id: string, full: boolean): Promise<JobsResult> {
-    const callName = `Jobs${full ? " (full)" : ""}`;
-    const url = `/jobs${full ? "?content=true" : ""}`;
-    return this.axiosCall<JobsResult>(callName, id, url);
+  private async fetchJobs(id: string): Promise<JobsResult> {
+    return this.axiosCall<JobsResult>("Jobs", id, "/jobs?content=true");
   }
 
-  private formatCompany(id: string, { name, content }: CompanyResult): Company {
-    return {
+  private async fetchJobsBasic(id: string): Promise<JobsResultBasic> {
+    return this.axiosCall<JobsResultBasic>("JobsBasic", id, "/jobs");
+  }
+
+  private formatCompany(
+    id: string,
+    { name, content }: CompanyResult
+  ): Context<Company> {
+    const company: Company = {
       id,
       ats: "greenhouse",
       name,
       description: standardizeUntrustedHtml(content),
     };
+
+    return { item: company };
   }
 
-  private formatJob({ id: companyId }: CompanyKey, job: JobResult): Job {
-    return {
-      id: job.id.toString(),
+  private formatJobBasic(
+    { id: companyId }: CompanyKey,
+    { id, title, updated_at, location, absolute_url }: JobResultBasic
+  ): Context<Job> {
+    const job: Job = {
+      id: String(id),
       companyId: companyId,
       company: companyId,
-      title: job.title,
-      isRemote: job.location.name.toLowerCase().includes("remote"),
-      location: job.location.name,
-      description: standardizeUntrustedHtml(job.content),
-      postTS: new Date(job.updated_at).getTime(),
-      applyUrl: job.absolute_url,
+      title,
+      isRemote: location.name.toLowerCase().includes("remote"),
+      location: location.name,
+      description: "",
+      postTS: new Date(updated_at).getTime(),
+      applyUrl: absolute_url,
       facets: {},
     };
+
+    return { item: job };
+  }
+
+  private formatJob(key: CompanyKey, jobResult: JobResult): Context<Job> {
+    const result = this.formatJobBasic(key, jobResult);
+
+    const { location, metadata, content, departments, offices } = jobResult;
+
+    result.item.description = standardizeUntrustedHtml(content);
+
+    // Useful pieces that aren't redundant with the job object
+    result.context = {
+      location,
+      metadata,
+      departments,
+      offices,
+    };
+
+    return result;
   }
 }

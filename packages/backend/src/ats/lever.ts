@@ -1,5 +1,6 @@
 import { config } from "../config";
 import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { AppError } from "../utils/AppError";
 import { standardizeUntrustedHtml } from "../utils/html";
 import { ATSBase } from "./atsBase";
@@ -51,17 +52,20 @@ export class Lever extends ATSBase {
     super("lever", config.LEVER_URL);
   }
 
-  async getCompany({ id }: CompanyKey): Promise<Company> {
+  async getCompany(
+    { id }: CompanyKey,
+    _full?: boolean
+  ): Promise<Context<Company>> {
     const [exampleJob] = await this.fetchJobs(id, true);
     return this.formatCompany(id, exampleJob);
   }
 
-  async getJobs(key: CompanyKey, _: boolean): Promise<Job[]> {
+  async getJobs(key: CompanyKey, _: boolean): Promise<Context<Job>[]> {
     const jobs = await this.fetchJobs(key.id);
     return jobs.map((job) => this.formatJob(key, job));
   }
 
-  async getJob(_1: CompanyKey, _2: JobKey): Promise<Job> {
+  async getJob(_1: CompanyKey, _2: JobKey): Promise<Context<Job>> {
     throw new AppError("This should never be called", 500);
   }
 
@@ -70,14 +74,17 @@ export class Lever extends ATSBase {
     return this.axiosCall<JobResult[]>("Jobs", id, query);
   }
 
-  private formatCompany(id: string, _toBeUsedLater: JobResult): Company {
+  private formatCompany(id: string, exampleJob: JobResult): Context<Company> {
     return {
-      id,
-      ats: "lever",
-      // No name field, just use token until we have a better solution
-      name: id[0].toUpperCase() + id.slice(1),
-      // No descriptions until we do better company info crawls
-      description: "",
+      item: {
+        id,
+        ats: "lever",
+        // No name field, just use token until we have a better solution
+        name: id[0].toUpperCase() + id.slice(1),
+        // No descriptions until we do better company info crawls
+        description: "",
+      },
+      context: { exampleJob },
     };
   }
 
@@ -93,16 +100,18 @@ export class Lever extends ATSBase {
       salaryDescription = "",
       lists = [],
       categories,
+      country,
       workplaceType,
+      salaryRange,
     }: JobResult
-  ): Job {
+  ): Context<Job> {
     const listHtml = lists
       .map(({ text, content }) => `<p>${text}</p><ul>${content}</ul>`)
       .join("");
 
     const jdHtml = `<div>${description}<div>${listHtml}</div>${salaryDescription}${additional}</div>`;
 
-    return {
+    const job: Job = {
       id,
       companyId: companyId,
       company: companyId,
@@ -115,6 +124,19 @@ export class Lever extends ATSBase {
       postTS: new Date(createdAt).getTime(),
       applyUrl,
       facets: {},
+    };
+
+    // Useful pieces that aren't redundant with the job object
+    const context = {
+      categories,
+      country,
+      workplaceType,
+      salaryRange,
+    };
+
+    return {
+      item: job,
+      context,
     };
   }
 }

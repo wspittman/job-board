@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { db } from "../db/db";
 import type { Job } from "../types/dbModels";
+import type { Context } from "../types/types";
 import { LRUCache } from "../utils/cache";
 import { logCounter } from "../utils/telemetry";
 import { zBoolean, zString } from "../utils/zod";
@@ -35,12 +36,26 @@ const schema = z.object({
  * Extracts location information from and update a job object.
  * @param job The job object
  */
-export async function extractLocations(job: Job): Promise<void> {
-  const location = await extractLocation(job.location);
+export async function extractLocations(job: Context<Job>): Promise<void> {
+  const result = await jsonCompletion("extractLocation", prompt, schema, {
+    location: normalize(job.item.location),
+    context: job.context,
+  });
+
+  if (!result) {
+    return undefined;
+  }
+
+  const location = formatLocation(result);
 
   if (!location) return;
 
-  setExtractedData(job, location);
+  if (location.isRemote === false && location.location === "") {
+    // This means the LLM call couldn't extract a location
+    return;
+  }
+
+  setExtractedData(job.item, location);
 }
 
 /**
