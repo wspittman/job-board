@@ -117,9 +117,16 @@ async function getAtsJobs(key: CompanyKey, currentIds: string[]) {
   // If job is in both ATS and DB should be ignored
   const ignore = jobIdSet.size - add.length;
 
-  // If more than 10% of jobs are new, get the full job data for all jobs
+  // Get the full job data for all jobs if
+  // - There is more than 1 added job
+  // - More than 10% of jobs are new
+  // - We don't already have full job data
   // Better to do one big API call with unnecessary data than many small API calls
-  if (9 * add.length > remove.length + ignore && !atsJobs[0].context) {
+  if (
+    add.length > 1 &&
+    9 * add.length > remove.length + ignore &&
+    !atsJobs[0].context
+  ) {
     atsJobs = await ats.getJobs(key, true);
     add = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
   }
