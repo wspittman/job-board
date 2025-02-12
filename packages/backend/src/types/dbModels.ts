@@ -1,3 +1,13 @@
+import type {
+  Education,
+  JobType,
+  Office,
+  OrgSize,
+  PayRate,
+  Stage,
+  Visa,
+} from "./enums";
+
 export type ATS = "greenhouse" | "lever";
 
 /**
@@ -5,10 +15,23 @@ export type ATS = "greenhouse" | "lever";
  * - pKey: ats
  */
 export interface Company {
+  // Keys
   id: string;
   ats: ATS;
+
+  // Basic
   name: string;
-  description: string;
+
+  // Extracted Details - Not Indexed
+  description?: string;
+  website?: string;
+
+  // Extracted Details
+  industry?: string;
+  foundingYear?: number;
+  size?: OrgSize;
+  stage?: Stage;
+  visa?: Visa;
 }
 
 export type CompanyKey = Pick<Company, "id" | "ats">;
@@ -23,21 +46,52 @@ export interface CompanyKeys {
  * - pKey: companyId
  */
 export interface Job {
+  // Keys
   id: string;
   companyId: string;
-  company: string;
+
+  // Basic
   title: string;
-  description: string;
   postTS: number;
+  rev: number;
+
+  // Basic - Not Indexed
   applyUrl: string;
-  // Extracted values with fallbacks
-  isRemote: boolean;
-  location: string;
-  // Facets extracted from the job description
-  facets: {
-    summary?: string;
-    salary?: number;
-    experience?: number;
+  description: string;
+
+  // Extracted Details Below
+
+  // Location - most only have one, but some have multiple
+  // Split into multiple fields for query efficiency
+  location?: Location;
+  locationList?: Location[];
+  locationHasMultiple?: boolean;
+
+  // History - most only have one, but some have multiple
+  // Split into multiple fields for query efficiency
+  history?: History;
+  historyList?: History[];
+  historyHasMultiple?: boolean;
+
+  role?: {
+    function?: string;
+    type?: JobType;
+    skills?: string[];
+    travelRequired?: boolean;
+    manager?: boolean;
+  };
+  compensation?: {
+    rate?: PayRate;
+    min?: number;
+    max?: number;
+    currency?: string;
+    hasEquity?: boolean;
+    pto?: number | "Unlimited";
+  };
+  summary?: {
+    role?: string;
+    impact?: string;
+    growth?: string;
   };
 }
 
@@ -66,9 +120,24 @@ export interface Metadata {
  * - id: The freehand location string
  * - pKey: The first character of the freehand location string
  */
-export interface LocationCache {
+export interface LocationCache extends Location {
   id: string;
   pKey: string;
-  isRemote: boolean;
-  location: string;
+}
+
+export interface Location {
+  // Normalized from the rest of the fields
+  location?: string;
+  remote?: Office;
+  city?: string;
+  state?: string;
+  stateCode?: string;
+  country?: string;
+  countryCode?: string;
+  timezone?: string;
+}
+
+interface History {
+  education?: Education;
+  experience?: number;
 }

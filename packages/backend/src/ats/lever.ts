@@ -77,12 +77,13 @@ export class Lever extends ATSBase {
   private formatCompany(id: string, exampleJob: JobResult): Context<Company> {
     return {
       item: {
+        // Keys
         id,
         ats: "lever",
+
+        // Basic
         // No name field, just use token until we have a better solution
         name: id[0].toUpperCase() + id.slice(1),
-        // No descriptions until we do better company info crawls
-        description: "",
       },
       context: { exampleJob },
     };
@@ -110,20 +111,21 @@ export class Lever extends ATSBase {
       .join("");
 
     const jdHtml = `<div>${description}<div>${listHtml}</div>${salaryDescription}${additional}</div>`;
+    const sanitizedDescription = standardizeUntrustedHtml(jdHtml);
+    // Easiest way to estimate if something has changed;
+    const rev = sanitizedDescription.length;
 
     const job: Job = {
+      // Keys
       id,
       companyId: companyId,
-      company: companyId,
+
+      // Basic
       title: text,
-      isRemote:
-        workplaceType === "remote" ||
-        categories.allLocations.some((x) => x.toLowerCase().includes("remote")),
-      location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
-      description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),
+      rev,
       applyUrl,
-      facets: {},
+      description: sanitizedDescription,
     };
 
     // Useful pieces that aren't redundant with the job object

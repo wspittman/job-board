@@ -52,8 +52,11 @@ export async function connectDB(): Promise<void> {
   containerMap = {} as Record<ContainerName, Container>;
 
   const containerPromises = [
-    createContainer(database, "company", "ats"),
-    createContainer(database, "job", "companyId"),
+    createContainer(database, "company", "ats", ["/description", "/website"]),
+    createContainer(database, "job", "companyId", [
+      "/applyUrl",
+      "/description",
+    ]),
     createContainer(database, "metadata", "id", "all"),
     createContainer(database, "locationCache", "pKey", "all"),
   ];

@@ -2,18 +2,19 @@ import type { Resource } from "@azure/cosmos";
 import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import { QueryBuilder } from "../db/QueryBuilder";
+import { Condition, Query } from "../db/Query";
 import type { Filters } from "../types/clientModels";
-import type { CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { CompanyKey, Job, JobKey, Location } from "../types/dbModels";
+import { Office, PayRate } from "../types/enums";
 import type { Context } from "../types/types";
 import { asyncBatch } from "../utils/asyncBatch";
 import { AsyncQueue } from "../utils/asyncQueue";
 import { logProperty } from "../utils/telemetry";
 import { metadataJobExecutor } from "./metadata";
 
-interface EnhancedFilters extends Filters {
-  normalizedLocation?: string;
-}
+type EnhancedFilters = Omit<Filters, "location" | "isRemote"> & {
+  location?: Location;
+};
 
 const jobInfoQueue = new AsyncQueue(
   "RefreshJobInfo",
@@ -31,13 +32,22 @@ export async function getJobs(filterInput: Filters) {
     return [];
   }
 
-  let filters: EnhancedFilters = { ...filterInput };
-  if (filters.location) {
-    const location = await llm.extractLocation(filters.location);
-    if (location) {
-      filters.normalizedLocation = location;
-    }
+  // Convert to filter inputs to Location object
+  let location: Location | undefined = undefined;
+  if (filterInput.location || filterInput.isRemote != undefined) {
+    location = {
+      location: filterInput.location,
+      remote: filterInput.isRemote ? Office.Remote : undefined,
+    };
   }
+  if (location?.location) {
+    await llm.extractLocation(location);
+  }
+
+  const filters: EnhancedFilters = {
+    ...filterInput,
+    location,
+  };
 
   const result = await readJobsByFilters(filters);
   logProperty("GetJobs_Count", result.length);
@@ -75,14 +85,6 @@ export async function refreshJobsForCompany(
   }
 
   if (add.length) {
-    // To keep things the same for the client until we update data model
-    const company = await db.company.get(key);
-    if (company?.name) {
-      add.forEach((job) => {
-        job.item.company = company.name;
-      });
-    }
-
     jobInfoQueue.add(add.map((job) => [key, job]));
   }
 }
@@ -141,110 +143,126 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
     job = await ats.getJob(companyKey, job.item);
   }
 
-  await llm.extractLocations(job);
-  await llm.extractFacets(job);
-
-  // Do not add a job that failed to extract facets
-  if (!Object.keys(job.item.facets).length) {
-    return;
+  if (await llm.fillJobInfo(job)) {
+    // Only add the job if it was successfully filled
+    await db.job.upsert(job.item);
   }
-
-  await db.job.upsert(job.item);
 }
 
 // #region DB Operations
 
 async function readJobsByFilters({
   companyId,
-  isRemote,
   title,
   location,
   daysSince,
   maxExperience,
   minSalary,
-  normalizedLocation,
 }: EnhancedFilters) {
-  /*
-  Where clauses should ideally be ordered by
-  1. The most selective filter first (ie. likely to filter out the most documents)
-  2. Filter efficiency (equality > range > contains)
-  */
-
-  const query = new QueryBuilder();
+  // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
+  // Look at the QueryBuilder class comment for ordering guidelines
+  const query = new Query();
 
   if (companyId) {
-    query.where("c.companyId = @companyId", { "@companyId": companyId });
-  }
-
-  if (isRemote !== undefined) {
-    query.where("c.isRemote = @isRemote", { "@isRemote": isRemote });
+    query.whereCondition("companyId", "=", companyId);
   }
 
   if (daysSince) {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
-    query.where("c.postTS >= @sinceTS", { "@sinceTS": sinceTS });
-  }
-
-  if (maxExperience != null) {
-    // If undefined: include, since we can't yet distinguish between entry level and absent
-    query.where(
-      "NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience",
-      { "@maxExperience": maxExperience }
-    );
+    query.whereCondition("postTS", ">=", sinceTS);
   }
 
   if (minSalary) {
-    // If undefined: exclude
-    query.where("c.facets.salary >= @minSalary", { "@minSalary": minSalary });
+    query
+      .whereCondition("compensation.rate", "=", PayRate.Salary)
+      .whereCondition("compensation.minSalary", ">=", minSalary);
   }
 
   if (title) {
-    query.where("CONTAINS(LOWER(c.title), @title)", {
-      "@title": title.toLowerCase(),
-    });
+    query.whereCondition("title", "CONTAINS", title);
   }
 
-  if (normalizedLocation) {
-    addLocationClause(query, normalizedLocation, isRemote);
-  } else if (location) {
-    // Remote + empty location always matches
-    query.where(
-      '(c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location)',
-      { "@location": location.toLowerCase() }
-    );
+  if (maxExperience != null) {
+    query.whereTwinCondition("history", [["experience", "<=", maxExperience]]);
+  }
+
+  if (location) {
+    addLocationClause(query, location);
   }
 
   return db.job.query<Job & Resource>(query.build());
 }
 
 function addLocationClause(
-  query: QueryBuilder,
-  location: string,
-  isRemote?: boolean
+  query: Query,
+  { location, remote, countryCode, stateCode, city }: Location
 ) {
-  location = location.toLowerCase();
-  const country = location.split(",").at(-1)?.trim() ?? location;
-  const hybridParam = { "@location": location };
-  const hybridClause = "ENDSWITH(LOWER(c.location), @location)";
-  // Remote + empty location always matches
-  const remoteParam = { "@country": country };
-  const remoteClause =
-    'ENDSWITH(LOWER(c.location), @country) OR c.location = ""';
+  // Nothing to filter on
+  if (remote === undefined && !location) return;
 
-  if (isRemote) {
-    query.where(remoteClause, remoteParam);
-  } else if (isRemote === false) {
-    query.where(hybridClause, hybridParam);
+  const isRemote = remote === Office.Remote;
+  let conditions: (Condition | undefined)[] = [];
+
+  if (!location) {
+    // Only searching based on remote status
+    conditions = [getRemoteCondition(remote)];
+  } else if (!countryCode) {
+    // Substring string - no inference available
+    conditions = [
+      getRemoteCondition(remote),
+      ["location", "CONTAINS", location],
+    ];
   } else {
-    query.where(
-      `${hybridClause} OR (c.isRemote = true AND (${remoteClause}))`,
-      {
-        ...hybridParam,
-        ...remoteParam,
-      }
-    );
+    // Searching based on inference matching
+    if (remote === undefined) {
+      // This is the complicated case, where we need to search both remote and non-remote
+      // It is the combination of the two cases below it
+      query.where(
+        Query.or(
+          Query.twinCondition(
+            "location",
+            getInferenceConditions(Office.Remote, countryCode)
+          ),
+          Query.twinCondition(
+            "location",
+            getInferenceConditions(Office.Onsite, countryCode, stateCode, city)
+          )
+        )
+      );
+      // We don't want the fallthrough, so explicitly return here
+      return;
+    } else if (isRemote) {
+      conditions = getInferenceConditions(remote, countryCode);
+    } else {
+      conditions = getInferenceConditions(remote, countryCode, stateCode, city);
+    }
   }
+
+  query.whereTwinCondition("location", filterConditions(conditions));
+}
+
+function filterConditions(conditions: (Condition | undefined)[]): Condition[] {
+  return conditions.filter(Boolean) as Condition[];
+}
+
+function getInferenceConditions(
+  remote?: Office,
+  countryCode?: string,
+  stateCode?: string,
+  city?: string
+): Condition[] {
+  return filterConditions([
+    getRemoteCondition(remote),
+    city ? ["city", "=", city] : undefined,
+    stateCode ? ["stateCode", "=", stateCode] : undefined,
+    countryCode ? ["countryCode", "=", countryCode] : undefined,
+  ]);
+}
+
+function getRemoteCondition(remote?: Office): Condition | undefined {
+  if (!remote) return undefined;
+  return ["remote", remote === Office.Remote ? "=" : "<", Office.Remote];
 }
 
 // #endregion

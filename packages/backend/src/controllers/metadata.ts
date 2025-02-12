@@ -53,9 +53,11 @@ export async function getMetadata() {
     const metadata = await db.metadata.getItem("metadata", "metadata");
 
     cachedMetadata = {
-      companyCount: companyMetadata?.companyCount ?? metadata?.companyCount,
-      companyNames: companyMetadata?.companyNames ?? metadata?.companyNames,
-      jobCount: jobMetadata?.jobCount ?? metadata?.jobCount,
+      companyCount:
+        companyMetadata?.companyCount ?? metadata?.companyCount ?? 0,
+      companyNames:
+        companyMetadata?.companyNames ?? metadata?.companyNames ?? [],
+      jobCount: jobMetadata?.jobCount ?? metadata?.jobCount ?? 0,
       // _ts is in seconds, but the client expects milliseconds
       timestamp:
         Math.max(

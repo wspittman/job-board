@@ -1,3 +1,4 @@
+import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
 import { RefreshJobsOptions } from "../types/clientModels";
@@ -105,10 +106,13 @@ async function addCompanyInternal(key: CompanyKey) {
   if (!company) return;
 
   await db.company.upsert(company);
+  companyInfoQueue.add([key]);
 }
 
 async function refreshCompanyInfo(key: CompanyKey) {
   logProperty("Input", key);
-  // TBD after Data Model update
-  //const companyContext = await ats.getCompany(key, true);
+  const company = await ats.getCompany(key, true);
+  if (await llm.fillCompanyInfo(company)) {
+    await db.company.upsert(company.item);
+  }
 }

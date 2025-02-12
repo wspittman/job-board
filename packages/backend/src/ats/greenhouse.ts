@@ -118,9 +118,14 @@ export class Greenhouse extends ATSBase {
     { name, content }: CompanyResult
   ): Context<Company> {
     const company: Company = {
+      // Keys
       id,
       ats: "greenhouse",
+
+      // Basic
       name,
+
+      // We might have this given to us, we might need to extract it
       description: standardizeUntrustedHtml(content),
     };
 
@@ -129,19 +134,22 @@ export class Greenhouse extends ATSBase {
 
   private formatJobBasic(
     { id: companyId }: CompanyKey,
-    { id, title, updated_at, location, absolute_url }: JobResultBasic
+    { id, title, updated_at, absolute_url }: JobResultBasic
   ): Context<Job> {
+    const ts = new Date(updated_at).getTime();
+
     const job: Job = {
+      // Keys
       id: String(id),
       companyId: companyId,
-      company: companyId,
+
+      // Basic
       title,
-      isRemote: location.name.toLowerCase().includes("remote"),
-      location: location.name,
-      description: "",
-      postTS: new Date(updated_at).getTime(),
+      // We don't have an actual post date, so we pretend it was posted when we first saw it
+      postTS: ts,
+      rev: ts,
       applyUrl: absolute_url,
-      facets: {},
+      description: "",
     };
 
     return { item: job };
