@@ -1,7 +1,9 @@
 import { z } from "zod";
-import type { Job } from "../types/dbModels";
+import type { Job, Location } from "../types/dbModels";
+import { Office } from "../types/enums";
 import type { Context } from "../types/types";
-import { zBoolean, zNumber, zString } from "../utils/zod";
+import { normalizedLocation } from "../utils/location";
+import { zBoolean, zEnum, zNumber, zObj, zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
 
 const prompt = `You are an experienced job seeker whose goal is to quickly find relevant information from job descriptions.
@@ -19,6 +21,25 @@ const schema = z.object({
   isHourly: zBoolean("True if the job is paid hourly, false otherwise."),
   experience: zNumber(
     "Minimum years of experience explicitly required for the role, or null if not specified."
+  ),
+  location: zObj(
+    "Location details, determined to the extent possible. Use null for any unspecified fields.",
+    {
+      remote: zEnum(Office, "The remote status of this location."),
+      city: zString("City name"),
+      state: zString(
+        "The full English name for the state, province, or subdivision."
+      ),
+      stateCode: zString(
+        "The ISO 3166-2 subdivision code for the subdivision. Examples: 'WA' for Washington, 'TX' for Texas, 'ON' for Ontario."
+      ),
+      country: zString(
+        "The ISO 3166 English short name of the country. Examples: 'United States of America', 'Canada', 'Mexico'."
+      ),
+      countryCode: zString(
+        "The ISO 3166-1 alpha-3 three-letter code for the country. Examples: 'USA' for the United States of America, 'CAN' for Canada, 'MEX' for Mexico."
+      ),
+    }
   ),
   summary: zString(
     "A resume-style one-line summary of the role's responsibilities. Be concise and focus on the most important aspects. Do not repeat the company or job title."
@@ -43,4 +64,10 @@ export async function extractFacets(job: Context<Job>): Promise<void> {
   };
 
   setExtractedData(job.item.facets, formattedResult);
+
+  // Also Temporary Reformatting Holdover
+  const location: Location = {};
+  setExtractedData(location, result.location);
+  job.item.isRemote = location.remote === Office.Remote;
+  job.item.location = normalizedLocation(location);
 }

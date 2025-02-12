@@ -118,9 +118,14 @@ export class Greenhouse extends ATSBase {
     { name, content }: CompanyResult
   ): Context<Company> {
     const company: Company = {
+      // Keys
       id,
       ats: "greenhouse",
+
+      // Basic
       name,
+
+      // We might have this given to us, we might need to extract it
       description: standardizeUntrustedHtml(content),
     };
 

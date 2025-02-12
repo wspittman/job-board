@@ -77,12 +77,13 @@ export class Lever extends ATSBase {
   private formatCompany(id: string, exampleJob: JobResult): Context<Company> {
     return {
       item: {
+        // Keys
         id,
         ats: "lever",
+
+        // Basic
         // No name field, just use token until we have a better solution
         name: id[0].toUpperCase() + id.slice(1),
-        // No descriptions until we do better company info crawls
-        description: "",
       },
       context: { exampleJob },
     };
