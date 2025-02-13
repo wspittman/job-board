@@ -1,8 +1,7 @@
-import { z } from "zod";
 import type { Company } from "../types/dbModels";
 import { OrgSize, Stage, Visa } from "../types/enums";
 import type { Context } from "../types/types";
-import { zEnum, zNumber, zString } from "../utils/zod";
+import { zEnum, zNumber, zObj, zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
 
 const prompt = `You are a detail-oriented job seeker who excels at understanding company profiles through job descriptions.
@@ -12,27 +11,33 @@ Then, identify and extract pertinent company details.
 Then, compose a concise, clear, and engaging company description paragraph.
 Format your response in JSON, adhering to the provided schema.`;
 
-const schema = z.object({
-  website: zString("The company's website URL, or null if not specified."),
+const schema = zObj(
+  "Company attributes. Use null for any property for which information is not available.",
+  {
+    website: zString(
+      "The company's website homepage URL. Do not use the ATS URL (eg. *.lever.co or *.greenhouse.io)."
+    ),
   industry: zString(
-    "The ISIC Revision 4 Section most representative of the company, or null if not specified."
+      "The ISIC Revision 4 Section most representative of the company. Only include the name (eg. 'Agriculture, Forestry and Fishing'), not the number (eg. 'A01')"
   ),
-  foundingYear: zNumber(
-    "The year the company was founded, or null if not specified."
-  ),
-  stage: zEnum(Stage, "The stage of the company, or null if not specified."),
+    foundingYear: zNumber("The year the company was founded."),
+    stage: zEnum(
+      Stage,
+      "The stage of the company. Only include if explicitly mentioned. Do not infer based on other attributes."
+    ),
   size: zEnum(
     OrgSize,
-    "The lower bound of the number of employees at the company, or null if not specified."
+      "The lower bound of the number of employees at the company. Only include if explicitly mentioned. Do not infer based on other attributes."
   ),
   visa: zEnum(
     Visa,
-    "The visa sponsorship status of the company, or null if not specified."
+      "The visa sponsorship status of the company. Only include if 'visa' is explicitly mentioned. Do not infer based on other attributes."
   ),
   description: zString(
-    "A concise, clear, and engaging company description paragraph. Be sure to highlight key company attributes and values. If no information is available, use null."
+      "A concise, clear, and engaging company description paragraph. Be sure to highlight key company attributes and values."
   ),
-});
+  }
+);
 
 /**
  * Fills in company information.

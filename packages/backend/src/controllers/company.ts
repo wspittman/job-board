@@ -112,7 +112,7 @@ async function addCompanyInternal(key: CompanyKey) {
 async function refreshCompanyInfo(key: CompanyKey) {
   logProperty("Input", key);
   const company = await ats.getCompany(key, true);
-  if (await llm.fillCompanyInfo(company)) {
+  if (company.context && (await llm.fillCompanyInfo(company))) {
     await db.company.upsert(company.item);
   }
 }

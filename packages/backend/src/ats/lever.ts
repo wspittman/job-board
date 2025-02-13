@@ -74,18 +74,24 @@ export class Lever extends ATSBase {
     return this.axiosCall<JobResult[]>("Jobs", id, query);
   }
 
-  private formatCompany(id: string, exampleJob: JobResult): Context<Company> {
-    return {
-      item: {
-        // Keys
-        id,
-        ats: "lever",
+  private formatCompany(id: string, exampleJob?: JobResult): Context<Company> {
+    const company: Company = {
+      // Keys
+      id,
+      ats: "lever",
 
-        // Basic
-        // No name field, just use token until we have a better solution
-        name: id[0].toUpperCase() + id.slice(1),
-      },
-      context: { exampleJob },
+      // Basic
+      // No name field, just use token until we have a better solution
+      name: id[0].toUpperCase() + id.slice(1),
+    };
+
+    if (!exampleJob) return { item: company };
+
+    const cleanJob = this.formatJob({ id, ats: "lever" }, exampleJob);
+
+    return {
+      item: company,
+      context: { exampleJob: { ...cleanJob.item, ...cleanJob.context } },
     };
   }
 
