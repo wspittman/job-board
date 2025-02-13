@@ -106,7 +106,7 @@ async function addCompanyInternal(key: CompanyKey) {
   if (!company) return;
 
   await db.company.upsert(company);
-  companyInfoQueue.add([key]);
+  // Don't add to companyInfoQueue here, we want the caller to do it so they can batch
 }
 
 async function refreshCompanyInfo(key: CompanyKey) {
