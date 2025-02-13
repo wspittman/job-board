@@ -213,8 +213,8 @@ async function readJobsByFilters({
     } else if (location.location) {
       // Remote + empty location always matches
       query.where([
-        '(c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location)',
-        { "@location": location.location.toLowerCase() },
+        '(c.isRemote = true AND c.location = "") OR CONTAINS(c.location, @location, true)',
+        { "@location": location.location },
       ]);
     }
   }
@@ -223,14 +223,13 @@ async function readJobsByFilters({
 }
 
 function addLocationClause(query: Query, location: string, isRemote?: boolean) {
-  location = location.toLowerCase();
   const country = location.split(",").at(-1)?.trim() ?? location;
   const hybridParam = { "@location": location };
-  const hybridClause = "ENDSWITH(LOWER(c.location), @location)";
+  const hybridClause = "ENDSWITH(c.location, @location, true)";
   // Remote + empty location always matches
   const remoteParam = { "@country": country };
   const remoteClause =
-    'ENDSWITH(LOWER(c.location), @country) OR c.location = ""';
+    'ENDSWITH(c.location, @country, true) OR c.location = ""';
 
   if (isRemote) {
     query.where([remoteClause, remoteParam]);

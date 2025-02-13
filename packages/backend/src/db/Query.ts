@@ -136,10 +136,7 @@ export class Query {
     const [prop, param] = toPair(field);
 
     if (op === "CONTAINS") {
-      return [
-        `CONTAINS(LOWER(${prop}), ${param})`,
-        { [param]: String(value).toLowerCase() },
-      ];
+      return [`CONTAINS(${prop}, ${param}, true)`, { [param]: value }];
     }
 
     return [`${prop} ${op} ${param}`, { [param]: value }];
