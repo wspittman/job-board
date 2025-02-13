@@ -1,5 +1,10 @@
 import type { Location } from "../types/dbModels";
 
+/**
+ * Normalizes the given location data into a string format.
+ * @param Location - The location data to normalize.
+ * @returns The normalized location string.
+ */
 export function normalizedLocation({
   city,
   state,

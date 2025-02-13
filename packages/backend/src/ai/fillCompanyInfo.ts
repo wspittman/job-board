@@ -34,6 +34,11 @@ const schema = z.object({
   ),
 });
 
+/**
+ * Fills in company information.
+ * @param company The company object to extract data into
+ * @returns True if extraction was successful, false otherwise
+ */
 export async function fillCompanyInfo(
   company: Context<Company>
 ): Promise<boolean> {

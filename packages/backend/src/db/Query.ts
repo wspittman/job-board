@@ -34,7 +34,7 @@ export type Where = [clause: string, parameters?: Record<string, JSONValue>];
  *     - More efficient than CONTAINS
  *     - Example: STARTSWITH(c.x, "prefix")
  *
- * 6. Text search
+ * 6. Text search (CONTAINS)
  *     - Expensive, full field scan
  *     - Example: CONTAINS(c.x, "word")
  *
@@ -50,7 +50,6 @@ export type Where = [clause: string, parameters?: Record<string, JSONValue>];
  * 9. OR conditions
  *     - Expands search space, reduces index efficiency
  *     - Example: c.x = 10 OR c.y = 20
- *     - Example: (c.x > 10 OR c.y < 5) AND c.z = "value"
  *
  * 10. JOIN on arrays
  *     - Worst performance, use only when necessary
@@ -64,7 +63,7 @@ export class Query {
    * Adds a WHERE clause to the query.
    * @param clause - The WHERE clause to add
    * @param parameters - Optional parameters for the clause
-   * @returns The QueryBuilder instance
+   * @returns The Query instance for method chaining
    */
   where([clause, parameters = {}]: Where): this {
     this.whereClauses.push(clause);
@@ -72,17 +71,32 @@ export class Query {
     return this;
   }
 
+  /**
+   * Adds a WHERE condition using field, operator, and value.
+   * Automatically handles parameter naming and value formatting.
+   * @param field - Document field path (e.g., "status" or "facets.experience")
+   * @param op - Comparison operator (<, <=, =, >, >=, CONTAINS)
+   * @param value - Value to compare against
+   * @returns The Query instance for method chaining
+   */
   whereCondition(...[field, op, value]: Condition): this {
     return this.where(Query.condition(field, op, value));
   }
 
+  /**
+   * Adds a WHERE condition that handles both single and array field variants.
+   * Used for fields that can be either a single value or an array of values.
+   * @param baseField - Base name of the field (actual fields will be baseField, baseFieldList, and baseFieldHasMultiple)
+   * @param conditions - Array of conditions to apply to the field
+   * @returns The Query instance for method chaining
+   */
   whereTwinCondition(baseField: string, conditions: Condition[]) {
     return this.where(Query.twinCondition(baseField, conditions));
   }
 
   /**
-   * Builds the SQL query
-   * @returns The SQL query and parameters
+   * Builds and returns the final SQL query specification.
+   * @returns Object containing the SQL query string and parameter definitions
    */
   build(): SqlQuerySpec {
     const where = this.whereClauses.length
@@ -97,6 +111,12 @@ export class Query {
     };
   }
 
+  /**
+   * Creates a WHERE clause that combines two conditions with OR.
+   * @param clause1 - First WHERE clause and its parameters
+   * @param clause2 - Second WHERE clause and its parameters
+   * @returns Combined WHERE clause and merged parameters
+   */
   static or(
     [clause1, parameters1]: Where,
     [clause2, parameters2]: Where
@@ -104,6 +124,14 @@ export class Query {
     return [`(${clause1}) OR (${clause2})`, { ...parameters1, ...parameters2 }];
   }
 
+  /**
+   * Creates a WHERE clause from field, operator, and value.
+   * Automatically handles parameter naming and value formatting.
+   * @param field - Document field path
+   * @param op - Comparison operator
+   * @param value - Value to compare against
+   * @returns WHERE clause and its parameters
+   */
   static condition(...[field, op, value]: Condition): Where {
     const [prop, param] = toPair(field);
 
@@ -117,6 +145,12 @@ export class Query {
     return [`${prop} ${op} ${param}`, { [param]: value }];
   }
 
+  /**
+   * Creates a WHERE clause that handles both single and array field variants.
+   * @param baseField - Base name of the field
+   * @param conditions - Array of conditions to apply
+   * @returns WHERE clause and its parameters
+   */
   static twinCondition(baseField: string, conditions: Condition[]): Where {
     const singleField = `c.${baseField}`;
     const listField = `c.${baseField}List`;
@@ -149,7 +183,7 @@ export class Query {
     const singleConditionString = singleConditions.join(" AND ");
     const singleClause = `${boolField} = false AND ${singleConditionString}`;
     const multiConditionString = multiConditions.join(" AND ");
-    const multiClause = `${boolField} = true AND EXISTS (SELECT VALUE l FROM l IN ${listField} WHERE ${multiConditionString}`;
+    const multiClause = `${boolField} = true AND EXISTS (SELECT VALUE l FROM l IN ${listField} WHERE ${multiConditionString})`;
     const multiConditionAllEqString = `{ ${multiConditionsAllEq.join(", ")} }`;
     const multiClauseAllEq = `${boolField} = true AND ARRAY_CONTAINS(${listField}, ${multiConditionAllEqString}, true)`;
 

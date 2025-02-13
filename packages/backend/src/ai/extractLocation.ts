@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { db } from "../db/db";
 import type { Location } from "../types/dbModels";
+import { AppError } from "../utils/AppError";
 import { LRUCache } from "../utils/cache";
-import { logCounter } from "../utils/telemetry";
+import { logCounter, logError } from "../utils/telemetry";
 import { zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
 
@@ -30,8 +31,8 @@ const schema = z.object({
 });
 
 /**
- * Extracts location information from a text string.
- * @param text The location text to analyze
+ * Extracts location information.
+ * @param location The location object to extract data into
  * @returns True if extraction was successful, false otherwise
  */
 export async function extractLocation(location: Location): Promise<boolean> {
@@ -81,32 +82,41 @@ function normalize(text: string) {
 }
 
 async function extractFromCache(text: string): Promise<Location | undefined> {
-  const cachedResult = locationCache.get(text);
+  try {
+    const cachedResult = locationCache.get(text);
 
-  if (cachedResult) {
-    logCounter("ExtractLocation_CacheHit");
-    return cachedResult;
-  }
+    if (cachedResult) {
+      logCounter("ExtractLocation_CacheHit");
+      return cachedResult;
+    }
 
-  const dbCachedResult = await db.locationCache.getItem(text, text[0]);
+    const dbCachedResult = await db.locationCache.getItem(text, text[0]);
 
-  if (dbCachedResult) {
-    logCounter("ExtractLocation_DBCacheHit");
-    const { city, state, stateCode, country, countryCode } = dbCachedResult;
-    const cleanedLocation = { city, state, stateCode, country, countryCode };
-    locationCache.set(text, cleanedLocation);
-    return cleanedLocation;
+    if (dbCachedResult) {
+      logCounter("ExtractLocation_DBCacheHit");
+      const { city, state, stateCode, country, countryCode } = dbCachedResult;
+      const cleanedLocation = { city, state, stateCode, country, countryCode };
+      locationCache.set(text, cleanedLocation);
+      return cleanedLocation;
+    }
+  } catch (e) {
+    logError(new AppError("Location cache: Failed to extract", undefined, e));
+    return undefined;
   }
 }
 
 function insertToCache(text: string, result: Location) {
-  if (!result) return;
+  try {
+    if (!result) return;
 
-  locationCache.set(text, result);
-  // Don't await on cache insertion
-  db.locationCache.upsertItem({
-    id: text,
-    pKey: text[0],
-    ...result,
-  });
+    locationCache.set(text, result);
+    // Don't await on cache insertion
+    db.locationCache.upsertItem({
+      id: text,
+      pKey: text[0],
+      ...result,
+    });
+  } catch (e) {
+    logError(new AppError("Location cache: Failed to insert", undefined, e));
+  }
 }

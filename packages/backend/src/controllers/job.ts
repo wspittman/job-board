@@ -35,11 +35,12 @@ export async function getJobs(filterInput: Filters) {
 
   // Convert filter inputs to Location object
   let location: Location | undefined = undefined;
-  if (filterInput.location || filterInput.isRemote != undefined) {
-    location = {
-      location: filterInput.location,
-      remote: filterInput.isRemote ? Office.Remote : undefined,
-    };
+  const { location: inputLocation, isRemote } = filterInput;
+  if (inputLocation || isRemote != undefined) {
+    location = { location: inputLocation };
+    if (isRemote != undefined) {
+      location.remote = isRemote ? Office.Remote : Office.Onsite;
+    }
   }
   if (location?.location) {
     await llm.extractLocation(location);
