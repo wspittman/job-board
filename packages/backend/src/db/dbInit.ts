@@ -52,7 +52,10 @@ export async function connectDB(): Promise<void> {
   containerMap = {} as Record<ContainerName, Container>;
 
   const containerPromises = [
-    createContainer(database, "company", "ats", ["/description", "/website"]),
+    createContainer(database, "company", "ats", [
+      "/description/?",
+      "/website/?",
+    ]),
     createContainer(database, "job", "companyId"),
     createContainer(database, "metadata", "id", "all"),
     createContainer(database, "locationCache", "pKey", "all"),
@@ -83,14 +86,8 @@ async function createContainer(
       },
     };
 
-    if (indexExclusions === "all") {
-      indexExclusions = ["/*"];
-    }
-
     if (indexExclusions !== "none") {
-      details.indexingPolicy = {
-        excludedPaths: indexExclusions.map((path) => ({ path })),
-      };
+      details.indexingPolicy = getIndexingPolicy(indexExclusions);
     }
 
     const { container } = await database.containers.createIfNotExists(details);
@@ -113,4 +110,17 @@ async function createContainer(
       `Failed to create container ${name} after ${attempt} attempts`
     );
   }
+}
+
+function getIndexingPolicy(exclusions: "all" | string[]) {
+  const all = [{ path: "/*" }];
+
+  if (exclusions === "all") {
+    return { excludedPaths: all };
+  }
+
+  return {
+    includedPaths: all,
+    excludedPaths: ['/"_etag"/?', ...exclusions].map((path) => ({ path })),
+  };
 }
