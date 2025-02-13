@@ -7,7 +7,11 @@ export const zBoolean = (desc: string) => z.boolean().nullable().describe(desc);
 
 /** Creates a nullable enum Zod schema with a description. */
 export const zEnum = <T extends z.EnumLike>(v: T, desc: string) =>
-  z.nativeEnum(v).nullable().describe(desc);
+  z
+    .nativeEnum(v)
+    .nullable()
+    // Pipe the full enum description since OpenAI only receives the enum values
+    .describe(`${desc}. ${describeEnum(v)}`);
 
 /** Creates a nullable number Zod schema with a description. */
 export const zNumber = (desc: string) => z.number().nullable().describe(desc);
@@ -22,3 +26,12 @@ export const zObj = <T extends ZObj>(desc: string, schema: T) =>
 /** Creates a Zod array schema containing objects, with a description. */
 export const zObjArray = <T extends ZObj>(desc: string, schema: T) =>
   z.array(z.object(schema)).describe(desc);
+
+function describeEnum<T extends z.EnumLike>(v: T) {
+  const entries = Object.entries(v)
+    // Filter out numeric keys, since TS maps both ways
+    .filter(([key]) => isNaN(Number(key)))
+    .map(([key, value]) => `${key}=${value}`)
+    .join(", ");
+  return `Possible values: [${entries}]`;
+}

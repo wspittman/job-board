@@ -25,7 +25,10 @@ const schema = z.object({
   location: zObj(
     "Location details, determined to the extent possible. Use null for any unspecified fields.",
     {
-      remote: zEnum(Office, "The remote status of this location."),
+      remote: zEnum(
+        Office,
+        "The remote status of this role. Assume 'remote' means fully remote. Assume no indicators means fully on-site. Hybrid should only be chosen if the word 'hybrid' is explicitly used."
+      ),
       city: zString("City name"),
       state: zString(
         "The full English name for the state, province, or subdivision."
