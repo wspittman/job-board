@@ -181,8 +181,11 @@ async function readJobsByFilters({
     query.whereCondition("companyId", "=", companyId);
   }
 
-  if (location?.remote !== undefined) {
-    query.whereCondition("isRemote", "=", location.remote);
+  const isRemote =
+    location?.remote == null ? undefined : location.remote === Office.Remote;
+
+  if (isRemote !== undefined) {
+    query.whereCondition("isRemote", "=", isRemote);
   }
 
   if (daysSince) {
@@ -206,11 +209,7 @@ async function readJobsByFilters({
   if (location) {
     const normalLocation = normalizedLocation(location);
     if (location?.countryCode) {
-      addLocationClause(
-        query,
-        normalLocation,
-        location.remote === Office.Remote
-      );
+      addLocationClause(query, normalLocation, isRemote);
     } else if (location.location) {
       // Remote + empty location always matches
       query.where([
