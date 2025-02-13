@@ -8,52 +8,51 @@ export type Where = [clause: string, parameters?: Record<string, JSONValue>];
 /**
  * Helper class for building SQL queries
  *
- * When adding WHERE clauses to the QueryBuilder, order them for the best performance.
- * CosmosDB processes WHERE conditions sequentially, so placing the most efficient and selective filters first
+ * When adding WHERE clauses to the QueryBuilder, prefer clauses that
+ * - Make the best use of the index
+ * - Reduce the number of documents scanned
+ *
+ * Preferring and ordering by the most efficient and selective filters
  * reduces the number of documents scanned, improving query speed and lowering RU costs.
+ * Treat ORs as if they are the worst of their parts.
  *
- * Add WHERE clauses in this order:
+ * Prefer WHERE clauses in this order:
  *
- * 1. Equality filters
- *     - Eliminates the most documents with a single indexed lookup.
+ * 1. Index Seek (=, IN)
+ *     - Read only required indexed values and load only matching items.
+ *     - RU (index): Constant per equality filter
+ *     - RU (load): Query result count
  *     - Example: c.x = 10
+ *     - Example: c.x IN ("value1", "value2", "value3")
+ *     - Example: ARRAY_CONTAINS(c.list, { x: 10 })
  *
- * 2. Range filters
- *     - Efficient but requires index scans
+ * 2. Precise Index Scan (>, >=, <, <=, STARTSWITH)
+ *     - Binary search of indexed values and load only matching items
+ *     - RU (index): Comparable to index seek, increases slightly based on the cardinality of indexed properties
+ *     - RI (load): Query result count
  *     - Example: c.x > 10
- *
- * 3. Array item equality checks
- *     - Uses index but scans arrays
- *     - Example: ARRAY_CONTAINS(c.list, { prop: 10 })
- *
- * 4. Array item range checks
- *     - Scans array elements, less efficient
- *     - Example: EXISTS (SELECT VALUE l FROM l IN c.list WHERE l.prop > 10)
- *
- * 5. Prefix search (STARTSWITH)
- *     - More efficient than CONTAINS
  *     - Example: STARTSWITH(c.x, "prefix")
+ *     - Example: EXISTS (SELECT VALUE l FROM l IN c.list WHERE l.x > 10)
  *
- * 6. Text search (CONTAINS)
- *     - Expensive, full field scan
- *     - Example: CONTAINS(c.x, "word")
+ * 3. Expanded Index Scan (case-insensitive STARTSWITH, StringEquals)
+ *    - Optimized search (but less efficient than a binary search) of indexed values and load only matching items
+ *    - RU (index): Increases slightly based on the cardinality of indexed properties
+ *    - RU (load): Query result count
  *
- * 7. Array item text search
- *     - Full array scan, very costly
- *     - Example: EXISTS (SELECT VALUE l FROM l IN c.list WHERE CONTAINS(l.prop, "word"))
+ * 4. Full Index Scan (CONTAINS, EndsWith, RegexMatch, LIKE)
+ *    - Read distinct set of indexed values and load only matching items
+ *    - RU (index): Increases linearly based on the cardinality of indexed properties
+ *    - RU (load): Query result count
+ *    - Example: CONTAINS(c.x, "word")
+ *    - Example: EXISTS (SELECT VALUE l FROM l IN c.list WHERE CONTAINS(l.x, "word"))
  *
- * 8. Negation
- *     - Forces a full scan, avoid when possible
- *     - Example: c.x != 10
- *     - Example: NOT ARRAY_CONTAINS(c.list, { prop: 10 })
- *
- * 9. OR conditions
- *     - Expands search space, reduces index efficiency
- *     - Example: c.x = 10 OR c.y = 20
- *
- * 10. JOIN on arrays
- *     - Worst performance, use only when necessary
- *     - Example: JOIN l IN c.list
+ * 5. Full Scan (Negation, UPPER, LOWER)
+ *    - Load all items
+ *    - RU (index): N/A
+ *    - RU (load): Increases based on number of items in container
+ *    - Example: c.x != 10
+ *    - Example: NOT ARRAY_CONTAINS(c.list, { x: 10 })
+ *    - Example: JOIN l IN c.list
  */
 export class Query {
   private whereClauses: string[] = [];
@@ -84,17 +83,6 @@ export class Query {
   }
 
   /**
-   * Adds a WHERE condition that handles both single and array field variants.
-   * Used for fields that can be either a single value or an array of values.
-   * @param baseField - Base name of the field (actual fields will be baseField, baseFieldList, and baseFieldHasMultiple)
-   * @param conditions - Array of conditions to apply to the field
-   * @returns The Query instance for method chaining
-   */
-  whereTwinCondition(baseField: string, conditions: Condition[]) {
-    return this.where(Query.twinCondition(baseField, conditions));
-  }
-
-  /**
    * Builds and returns the final SQL query specification.
    * @returns Object containing the SQL query string and parameter definitions
    */
@@ -109,19 +97,6 @@ export class Query {
         value,
       })),
     };
-  }
-
-  /**
-   * Creates a WHERE clause that combines two conditions with OR.
-   * @param clause1 - First WHERE clause and its parameters
-   * @param clause2 - Second WHERE clause and its parameters
-   * @returns Combined WHERE clause and merged parameters
-   */
-  static or(
-    [clause1, parameters1]: Where,
-    [clause2, parameters2]: Where
-  ): Where {
-    return [`(${clause1}) OR (${clause2})`, { ...parameters1, ...parameters2 }];
   }
 
   /**
@@ -140,55 +115,6 @@ export class Query {
     }
 
     return [`${prop} ${op} ${param}`, { [param]: value }];
-  }
-
-  /**
-   * Creates a WHERE clause that handles both single and array field variants.
-   * @param baseField - Base name of the field
-   * @param conditions - Array of conditions to apply
-   * @returns WHERE clause and its parameters
-   */
-  static twinCondition(baseField: string, conditions: Condition[]): Where {
-    const singleField = `c.${baseField}`;
-    const listField = `c.${baseField}List`;
-    const boolField = `c.${baseField}HasMultiple`;
-
-    const singleConditions: string[] = [];
-    const multiConditions: string[] = [];
-    const multiConditionsAllEq: string[] = [];
-    const params: Record<string, JSONValue> = {};
-
-    conditions.forEach(([field, op, value]) => {
-      const param = toParam(field);
-      if (op === "CONTAINS") {
-        singleConditions.push(
-          `CONTAINS(LOWER(${singleField}.${field}), ${param})`
-        );
-        multiConditions.push(`CONTAINS(LOWER(l.${field}), ${param})`);
-        params[param] = String(value).toLowerCase();
-      } else {
-        singleConditions.push(`${singleField}.${field} ${op} ${param}`);
-        multiConditions.push(`l.${field} ${op} ${param}`);
-        params[param] = value;
-
-        if (op === "=") {
-          multiConditionsAllEq.push(`${field}: ${param}`);
-        }
-      }
-    });
-
-    const singleConditionString = singleConditions.join(" AND ");
-    const singleClause = `${boolField} = false AND ${singleConditionString}`;
-    const multiConditionString = multiConditions.join(" AND ");
-    const multiClause = `${boolField} = true AND EXISTS (SELECT VALUE l FROM l IN ${listField} WHERE ${multiConditionString})`;
-    const multiConditionAllEqString = `{ ${multiConditionsAllEq.join(", ")} }`;
-    const multiClauseAllEq = `${boolField} = true AND ARRAY_CONTAINS(${listField}, ${multiConditionAllEqString}, true)`;
-
-    if (multiConditionsAllEq.length === multiConditions.length) {
-      return [`(${singleClause}) OR (${multiClauseAllEq})`, params];
-    }
-
-    return [`(${singleClause}) OR (${multiClause})`, params];
   }
 }
 
