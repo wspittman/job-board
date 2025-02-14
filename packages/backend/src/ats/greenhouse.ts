@@ -122,7 +122,6 @@ export class Greenhouse extends ATSBase {
       companyId: companyId,
       company: companyId,
       title,
-      isRemote: location.name.toLowerCase().includes("remote"),
       location: location.name,
       description: "",
       postTS: new Date(updated_at).getTime(),
@@ -142,7 +141,6 @@ export class Greenhouse extends ATSBase {
 
     // Useful pieces that aren't redundant with the job object
     result.context = {
-      location,
       metadata,
       departments,
       offices,

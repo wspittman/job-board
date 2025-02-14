@@ -118,9 +118,6 @@ export class Lever extends ATSBase {
       companyId: companyId,
       company: companyId,
       title: text,
-      isRemote:
-        workplaceType === "remote" ||
-        categories.allLocations.some((x) => x.toLowerCase().includes("remote")),
       location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
       description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),

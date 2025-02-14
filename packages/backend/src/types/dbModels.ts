@@ -46,7 +46,7 @@ export interface Job {
   postTS: number;
   applyUrl: string;
   // Extracted values with fallbacks
-  isRemote: boolean;
+  isRemote?: boolean;
   location: string;
   // Facets extracted from the job description
   facets: {

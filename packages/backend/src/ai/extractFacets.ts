@@ -7,12 +7,18 @@ import { zBoolean, zEnum, zNumber, zObj, zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
 
 const prompt = `You are an experienced job seeker whose goal is to quickly find relevant information from job descriptions.
-First, read the provided data: An initial job object, including job description, and any additional context.
-Then extract facets from the data.
-Then compose a one-line summary of the job description.
+First, read the provided data, which is formatted as an object with two properties.
+- The "item" property contains an object representing the job, including job description.
+- The "context" property contains any additional context provided, which may be about the job or about the company.
+Second, use the scratchpad space to write up your relevant findings.
+Third, extract specific facets from the data and scratchpad.
+Last, compose a one-line summary of the job description.
 Provide the response JSON in the provided schema.`;
 
 const schema = z.object({
+  scratchpad: zString(
+    "Write your relevant findings here. Use this space to think carefully about salary, experience, office/remote location"
+  ),
   minSalary: zNumber("Minimum salary for the job, or null if not specified."),
   maxSalary: zNumber("Maximum salary for the job, or null if not specified."),
   currency: zString(
@@ -20,14 +26,14 @@ const schema = z.object({
   ),
   isHourly: zBoolean("True if the job is paid hourly, false otherwise."),
   experience: zNumber(
-    "Minimum years of experience explicitly required for the role, or null if not specified."
+    "Minimum years of experience explicitly required for the job, or null if not specified."
   ),
   location: zObj(
     "Location details, determined to the extent possible. Use null for any unspecified fields.",
     {
       remote: zEnum(
         Office,
-        "The remote status of this role. Assume 'remote' means fully remote. Assume no indicators means fully on-site. Hybrid should only be chosen if the word 'hybrid' is explicitly used."
+        "Whether this job is performed remotely or on-site. A role is 'Remote' if only a region is mentioned (eg. 'USA' or 'Pacific Time Zone'). A role is 'Remote' if the location description includes the string 'remote'. A role is 'Hybrid' only if the word 'hybrid' is explicitly used."
       ),
       city: zString("City name"),
       state: zString(
@@ -45,7 +51,7 @@ const schema = z.object({
     }
   ),
   summary: zString(
-    "A resume-style one-line summary of the role's responsibilities. Be concise and focus on the most important aspects. Do not repeat the company or job title."
+    "A resume-style one-line summary of the job's responsibilities. Be concise and focus on the most important aspects. Do not repeat the company or job title."
   ),
 });
 
