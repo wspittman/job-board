@@ -54,14 +54,22 @@ export enum Education {
   PhD = 400,
 }
 
-/** Organization size */
-export enum OrgSize {
-  One = 100,
-  Ten = 200,
-  Fifty = 300,
-  TwoHundred = 400,
-  FiveHundred = 500,
-  Thousand = 600,
-  FiveThousand = 700,
-  TenThousand = 800,
+/** Company industry classifications */
+export enum Industry {
+  TechnologyAndSoftware = "Technology & Software",
+  HealthcareAndLifeSciences = "Healthcare & Life Sciences",
+  FinancialServicesAndInsurance = "Financial Services & Insurance",
+  ManufacturingAndEngineering = "Manufacturing & Engineering",
+  RetailAndConsumerGoods = "Retail & Consumer Goods",
+  ProfessionalServicesAndConsulting = "Professional Services & Consulting",
+  EducationAndTraining = "Education & Training",
+  GovernmentAndPublicSector = "Government & Public Sector",
+  TransportationAndLogistics = "Transportation & Logistics",
+  HospitalityTravelAndTourism = "Hospitality, Travel & Tourism",
+  EnergyAndUtilities = "Energy & Utilities",
+  MediaMarketingAndCommunications = "Media, Marketing & Communications",
+  ConstructionAndRealEstate = "Construction & Real Estate",
+  AgricultureAndFoodProduction = "Agriculture & Food Production",
+  NonProfitAndSocialServices = "Non-Profit & Social Services",
+  Other = "Other",
 }

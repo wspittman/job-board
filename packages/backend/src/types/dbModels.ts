@@ -1,4 +1,4 @@
-import type { Office, OrgSize, Stage, Visa } from "./enums";
+import type { Industry, Office, Stage, Visa } from "./enums";
 
 export type ATS = "greenhouse" | "lever";
 
@@ -19,9 +19,9 @@ export interface Company {
   website?: string;
 
   // Extracted Details
-  industry?: string;
+  industry?: Industry;
   foundingYear?: number;
-  size?: OrgSize;
+  size?: number;
   stage?: Stage;
   visa?: Visa;
 }

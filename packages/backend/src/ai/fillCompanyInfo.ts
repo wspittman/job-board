@@ -1,5 +1,5 @@
 import type { Company } from "../types/dbModels";
-import { OrgSize, Stage, Visa } from "../types/enums";
+import { Industry, Stage, Visa } from "../types/enums";
 import type { Context } from "../types/types";
 import { zEnum, zNumber, zObj, zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
@@ -17,24 +17,24 @@ const schema = zObj(
     website: zString(
       "The company's website homepage URL. Do not use the ATS URL (eg. *.lever.co or *.greenhouse.io)."
     ),
-  industry: zString(
-      "The ISIC Revision 4 Section most representative of the company. Only include the name (eg. 'Agriculture, Forestry and Fishing'), not the number (eg. 'A01')"
+    industry: zEnum(
+      Industry,
+      "The industry in which the company operates. Select 'Other' if no other option is a strong match. Select null if insufficient information to decide."
   ),
     foundingYear: zNumber("The year the company was founded."),
     stage: zEnum(
       Stage,
       "The stage of the company. Only include if explicitly mentioned. Do not infer based on other attributes."
     ),
-  size: zEnum(
-    OrgSize,
+    size: zNumber(
       "The lower bound of the number of employees at the company. Only include if explicitly mentioned. Do not infer based on other attributes."
   ),
   visa: zEnum(
     Visa,
-      "The visa sponsorship status of the company. Only include if 'visa' is explicitly mentioned. Do not infer based on other attributes."
+      "The visa sponsorship status of the company. Only include if the word 'visa' is explicitly mentioned. Do not infer based on other attributes."
   ),
   description: zString(
-      "A concise, clear, and engaging company description paragraph. Be sure to highlight key company attributes and values."
+      "A concise, clear, and engaging company description paragraph. Be sure to highlight key company attributes and values. Only include information that is specifically about the company. Avoid mentioning information that pertains only to the example role."
   ),
   }
 );
