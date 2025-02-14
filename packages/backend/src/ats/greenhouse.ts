@@ -62,62 +62,45 @@ export class Greenhouse extends ATSBase {
     full?: boolean
   ): Promise<Context<Company>> {
     const companyResult = await this.fetchCompany(id);
-    const result = this.formatCompany(id, companyResult);
+    const company = this.formatCompany(id, companyResult);
 
     if (!full) {
-      return result;
+      return { item: company };
     }
 
     const { jobs } = await this.fetchJobsBasic(id);
 
     if (jobs.length) {
-      result.context = {
-        exampleJob: await this.fetchJob(id, jobs[0].id.toString()),
+      const exampleJob = await this.getJob({
+        id: String(jobs[0].id),
+        companyId: id,
+      });
+      return {
+        item: company,
+        context: { exampleJob: { ...exampleJob.item, ...exampleJob.context } },
       };
     }
 
-    return result;
+    return { item: company };
   }
 
-  async getJobs(key: CompanyKey, full = false): Promise<Context<Job>[]> {
+  async getJobs({ id }: CompanyKey, full = false): Promise<Context<Job>[]> {
     if (!full) {
-      const { jobs } = await this.fetchJobsBasic(key.id);
-      return jobs.map((job) => this.formatJobBasic(key, job));
+      const { jobs } = await this.fetchJobsBasic(id);
+      return jobs.map((job) => this.formatJobBasic(id, job));
     } else {
-      const { jobs } = await this.fetchJobs(key.id);
-      return jobs.map((job) => this.formatJob(key, job));
+      const { jobs } = await this.fetchJobs(id);
+      return jobs.map((job) => this.formatJob(id, job));
     }
   }
 
-  async getJob(
-    key: CompanyKey,
-    { id, companyId }: JobKey
-  ): Promise<Context<Job>> {
+  async getJob({ id, companyId }: JobKey): Promise<Context<Job>> {
     const response = await this.fetchJob(companyId, id);
-    return this.formatJob(key, response);
+    return this.formatJob(companyId, response);
   }
 
-  private async fetchCompany(id: string): Promise<CompanyResult> {
-    return this.axiosCall<CompanyResult>("Company", id, "");
-  }
-
-  private async fetchJob(id: string, jobId: string): Promise<JobResult> {
-    return this.axiosCall<JobResult>("Job", id, `jobs/${jobId}`);
-  }
-
-  private async fetchJobs(id: string): Promise<JobsResult> {
-    return this.axiosCall<JobsResult>("Jobs", id, "/jobs?content=true");
-  }
-
-  private async fetchJobsBasic(id: string): Promise<JobsResultBasic> {
-    return this.axiosCall<JobsResultBasic>("JobsBasic", id, "/jobs");
-  }
-
-  private formatCompany(
-    id: string,
-    { name, content }: CompanyResult
-  ): Context<Company> {
-    const company: Company = {
+  private formatCompany(id: string, { name, content }: CompanyResult): Company {
+    return {
       // Keys
       id,
       ats: "greenhouse",
@@ -128,12 +111,10 @@ export class Greenhouse extends ATSBase {
       // We might have this given to us, we might need to extract it
       description: standardizeUntrustedHtml(content),
     };
-
-    return { item: company };
   }
 
   private formatJobBasic(
-    { id: companyId }: CompanyKey,
+    companyId: string,
     { id, title, updated_at, location, absolute_url }: JobResultBasic
   ): Context<Job> {
     const job: Job = {
@@ -152,8 +133,8 @@ export class Greenhouse extends ATSBase {
     return { item: job };
   }
 
-  private formatJob(key: CompanyKey, jobResult: JobResult): Context<Job> {
-    const result = this.formatJobBasic(key, jobResult);
+  private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
+    const result = this.formatJobBasic(companyId, jobResult);
 
     const { location, metadata, content, departments, offices } = jobResult;
 
@@ -168,5 +149,21 @@ export class Greenhouse extends ATSBase {
     };
 
     return result;
+  }
+
+  private async fetchCompany(id: string): Promise<CompanyResult> {
+    return this.axiosCall<CompanyResult>("Company", id, "");
+  }
+
+  private async fetchJob(id: string, jobId: string): Promise<JobResult> {
+    return this.axiosCall<JobResult>("Job", id, `jobs/${jobId}`);
+  }
+
+  private async fetchJobs(id: string): Promise<JobsResult> {
+    return this.axiosCall<JobsResult>("Jobs", id, "/jobs?content=true");
+  }
+
+  private async fetchJobsBasic(id: string): Promise<JobsResultBasic> {
+    return this.axiosCall<JobsResultBasic>("JobsBasic", id, "/jobs");
   }
 }

@@ -13,6 +13,7 @@ export enum Stage {
   SeriesC = 500,
   SeriesDPlus = 600,
   Public = 700,
+  NonProfit = 800,
 }
 
 /** Company's visa sponsorship policy */
@@ -56,20 +57,20 @@ export enum Education {
 
 /** Company industry classifications */
 export enum Industry {
-  TechnologyAndSoftware = "Technology & Software",
-  HealthcareAndLifeSciences = "Healthcare & Life Sciences",
-  FinancialServicesAndInsurance = "Financial Services & Insurance",
-  ManufacturingAndEngineering = "Manufacturing & Engineering",
-  RetailAndConsumerGoods = "Retail & Consumer Goods",
-  ProfessionalServicesAndConsulting = "Professional Services & Consulting",
-  EducationAndTraining = "Education & Training",
-  GovernmentAndPublicSector = "Government & Public Sector",
-  TransportationAndLogistics = "Transportation & Logistics",
-  HospitalityTravelAndTourism = "Hospitality, Travel & Tourism",
-  EnergyAndUtilities = "Energy & Utilities",
-  MediaMarketingAndCommunications = "Media, Marketing & Communications",
-  ConstructionAndRealEstate = "Construction & Real Estate",
   AgricultureAndFoodProduction = "Agriculture & Food Production",
+  ConstructionAndRealEstate = "Construction & Real Estate",
+  EducationAndTraining = "Education & Training",
+  EnergyAndUtilities = "Energy & Utilities",
+  FinancialServicesAndInsurance = "Financial Services & Insurance",
+  GovernmentAndPublicSector = "Government & Public Sector",
+  HealthcareAndLifeSciences = "Healthcare & Life Sciences",
+  HospitalityTravelAndTourism = "Hospitality, Travel & Tourism",
+  ManufacturingAndEngineering = "Manufacturing & Engineering",
+  MediaMarketingAndCommunications = "Media, Marketing & Communications",
   NonProfitAndSocialServices = "Non-Profit & Social Services",
+  ProfessionalServicesAndConsulting = "Professional Services & Consulting",
+  RetailAndConsumerGoods = "Retail & Consumer Goods",
+  TransportationAndLogistics = "Transportation & Logistics",
+  TechnologyAndSoftware = "Technology & Software",
   Other = "Other",
 }

@@ -30,7 +30,7 @@ class ATSConnector {
    * Retrieves detailed information for a specific job
    */
   async getJob(key: CompanyKey, jobKey: JobKey): Promise<Context<Job>> {
-    return this.atsEndpoints[key.ats].getJob(key, jobKey);
+    return this.atsEndpoints[key.ats].getJob(jobKey);
   }
 }
 

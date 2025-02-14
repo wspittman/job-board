@@ -19,12 +19,12 @@ const schema = zObj(
     ),
     industry: zEnum(
       Industry,
-      "The industry in which the company operates. Select 'Other' if no other option is a strong match. Select null if insufficient information to decide."
+      "The industry in which the company operates. Avoid using 'Technology & Software' if a different option is valid. Select 'Other' if no other option is a strong match. Select null if insufficient information to decide."
   ),
     foundingYear: zNumber("The year the company was founded."),
     stage: zEnum(
       Stage,
-      "The stage of the company. Only include if explicitly mentioned. Do not infer based on other attributes."
+      "The stage of the company. Only include if a stage marked is explicitly mentioned, such as 'Seed Stage', 'Series A', 'Bootstrapped', 'Public', or 'NonProfit'. Do not infer based on other attributes, including the word 'startup' or indications of how much investment money has been raised."
     ),
     size: zNumber(
       "The lower bound of the number of employees at the company. Only include if explicitly mentioned. Do not infer based on other attributes."
