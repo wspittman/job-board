@@ -149,7 +149,9 @@ export function useRefreshJobsOptions({
     throw new AppError("ats field is required when using companyId");
   }
 
-  if (replaceJobsOlderThan) {
+  if (replaceJobsOlderThan === "now") {
+    options.replaceJobsOlderThan = Date.now();
+  } else if (replaceJobsOlderThan) {
     options.replaceJobsOlderThan = validateTimestamp(
       "replaceJobsOlderThan",
       replaceJobsOlderThan,
