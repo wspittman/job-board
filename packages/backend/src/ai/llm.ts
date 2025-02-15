@@ -1,17 +1,18 @@
-import type { Job } from "../types/dbModels";
+import type { Company, Job, Location } from "../types/dbModels";
 import type { Context } from "../types/types";
 import { extractFacets } from "./extractFacets";
-import { extractLocation, extractLocations } from "./extractLocation";
+import { extractLocation } from "./extractLocation";
+import { fillCompanyInfo } from "./fillCompanyInfo";
 
 class LLMConnector {
   constructor() {}
 
-  async extractLocations(job: Context<Job>) {
-    return extractLocations(job);
+  async fillCompanyInfo(company: Context<Company>) {
+    return fillCompanyInfo(company);
   }
 
-  async extractLocation(text: string) {
-    return (await extractLocation(text))?.location;
+  async extractLocation(location: Location) {
+    return extractLocation(location);
   }
 
   async extractFacets(job: Context<Job>) {

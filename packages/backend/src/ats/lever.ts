@@ -57,39 +57,41 @@ export class Lever extends ATSBase {
     _full?: boolean
   ): Promise<Context<Company>> {
     const [exampleJob] = await this.fetchJobs(id, true);
-    return this.formatCompany(id, exampleJob);
+    const company = this.formatCompany(id);
+
+    if (!exampleJob) return { item: company };
+
+    const cleanJob = this.formatJob(id, exampleJob);
+
+    return {
+      item: company,
+      context: { exampleJob: { ...cleanJob.item, ...cleanJob.context } },
+    };
   }
 
-  async getJobs(key: CompanyKey, _: boolean): Promise<Context<Job>[]> {
-    const jobs = await this.fetchJobs(key.id);
-    return jobs.map((job) => this.formatJob(key, job));
+  async getJobs({ id }: CompanyKey, _: boolean): Promise<Context<Job>[]> {
+    const jobs = await this.fetchJobs(id);
+    return jobs.map((job) => this.formatJob(id, job));
   }
 
-  async getJob(_1: CompanyKey, _2: JobKey): Promise<Context<Job>> {
+  async getJob(_: JobKey): Promise<Context<Job>> {
     throw new AppError("This should never be called", 500);
   }
 
-  private async fetchJobs(id: string, single = false): Promise<JobResult[]> {
-    const query = single ? "?mode=json&limit=1" : "?mode=json";
-    return this.axiosCall<JobResult[]>("Jobs", id, query);
-  }
-
-  private formatCompany(id: string, exampleJob: JobResult): Context<Company> {
+  private formatCompany(id: string): Company {
     return {
-      item: {
-        id,
-        ats: "lever",
-        // No name field, just use token until we have a better solution
-        name: id[0].toUpperCase() + id.slice(1),
-        // No descriptions until we do better company info crawls
-        description: "",
-      },
-      context: { exampleJob },
+      // Keys
+      id,
+      ats: "lever",
+
+      // Basic
+      // No name field, just use token until we have a better solution
+      name: id[0].toUpperCase() + id.slice(1),
     };
   }
 
   private formatJob(
-    { id: companyId }: CompanyKey,
+    companyId: string,
     {
       id,
       createdAt,
@@ -116,9 +118,6 @@ export class Lever extends ATSBase {
       companyId: companyId,
       company: companyId,
       title: text,
-      isRemote:
-        workplaceType === "remote" ||
-        categories.allLocations.some((x) => x.toLowerCase().includes("remote")),
       location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
       description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),
@@ -138,5 +137,10 @@ export class Lever extends ATSBase {
       item: job,
       context,
     };
+  }
+
+  private async fetchJobs(id: string, single = false): Promise<JobResult[]> {
+    const query = single ? "?mode=json&limit=1" : "?mode=json";
+    return this.axiosCall<JobResult[]>("Jobs", id, query);
   }
 }

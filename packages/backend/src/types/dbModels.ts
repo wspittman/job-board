@@ -1,3 +1,5 @@
+import type { Industry, Office, Stage, Visa } from "./enums";
+
 export type ATS = "greenhouse" | "lever";
 
 /**
@@ -5,10 +7,23 @@ export type ATS = "greenhouse" | "lever";
  * - pKey: ats
  */
 export interface Company {
+  // Keys
   id: string;
   ats: ATS;
+
+  // Basic
   name: string;
-  description: string;
+
+  // Extracted Details - Not Indexed
+  description?: string;
+  website?: string;
+
+  // Extracted Details
+  industry?: Industry;
+  foundingYear?: number;
+  size?: number;
+  stage?: Stage;
+  visa?: Visa;
 }
 
 export type CompanyKey = Pick<Company, "id" | "ats">;
@@ -31,7 +46,7 @@ export interface Job {
   postTS: number;
   applyUrl: string;
   // Extracted values with fallbacks
-  isRemote: boolean;
+  isRemote?: boolean;
   location: string;
   // Facets extracted from the job description
   facets: {
@@ -66,9 +81,19 @@ export interface Metadata {
  * - id: The freehand location string
  * - pKey: The first character of the freehand location string
  */
-export interface LocationCache {
+export interface LocationCache extends Location {
   id: string;
   pKey: string;
-  isRemote: boolean;
-  location: string;
+}
+
+export interface Location {
+  // Normalized from the rest of the fields
+  location?: string;
+  remote?: Office;
+  city?: string;
+  state?: string;
+  stateCode?: string;
+  country?: string;
+  countryCode?: string;
+  timezone?: string;
 }

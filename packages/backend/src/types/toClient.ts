@@ -25,7 +25,7 @@ export const toClientJob = ({
     description,
     postTS,
     applyUrl,
-    isRemote,
+    isRemote: isRemote ?? false,
     location,
     facets,
   };

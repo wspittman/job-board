@@ -1,23 +1,21 @@
 import { z } from "zod";
 import { db } from "../db/db";
-import type { Job } from "../types/dbModels";
-import type { Context } from "../types/types";
+import type { Location } from "../types/dbModels";
+import { AppError } from "../utils/AppError";
 import { LRUCache } from "../utils/cache";
-import { logCounter } from "../utils/telemetry";
-import { zBoolean, zString } from "../utils/zod";
+import { logCounter, logError } from "../utils/telemetry";
+import { zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
-
-type Location = Pick<Job, "isRemote" | "location"> | undefined;
 
 const locationCache = new LRUCache<string, Location>(1000);
 
-const prompt = `You are an experienced job seeker whose goal is to quickly find relevant information from job descriptions.
-First, read the job location text that is provided. Then decide if the job is intended to be remote or hybrid/on-site. Then decide where the job is based to the extent possible, regardless of whether it is remote or hybrid/on-site.
-Provide the response JSON, using null for any unknown fields.`;
+const prompt = `You are a detail-oriented clerical worker who excels at identifying user intent.
+Your goal is to extract location information from a potentially partial human-written text.
+Carefully review the text to identify a likely intended location.
+Format your response in JSON, adhering to the provided schema. Use null for any fields that cannot be confidently determined.`;
 
 const schema = z.object({
-  remote: zBoolean("true for full remote jobs"),
-  city: zString("City name"),
+  city: zString("City name."),
   state: zString(
     "The full English name for the state, province, or subdivision."
   ),
@@ -33,65 +31,44 @@ const schema = z.object({
 });
 
 /**
- * Extracts location information from and update a job object.
- * @param job The job object
+ * Extracts location information.
+ * @param location The location object to extract data into
+ * @returns True if extraction was successful, false otherwise
  */
-export async function extractLocations(job: Context<Job>): Promise<void> {
-  const result = await jsonCompletion("extractLocation", prompt, schema, {
-    location: normalize(job.item.location),
-    context: job.context,
-  });
+export async function extractLocation(location: Location): Promise<boolean> {
+  if (!location.location) return false;
 
-  if (!result) {
-    return undefined;
-  }
+  const normalizedText = normalize(location.location);
 
-  const location = formatLocation(result);
-
-  if (!location) return;
-
-  if (location.isRemote === false && location.location === "") {
-    // This means the LLM call couldn't extract a location
-    return;
-  }
-
-  setExtractedData(job.item, location);
-}
-
-/**
- * Extracts location information from a text string.
- * @param text The location text to analyze
- * @returns Location object containing isRemote flag and formatted location string, or undefined if location cannot be determined
- */
-export async function extractLocation(text: string): Promise<Location> {
-  const normalizedText = normalize(text);
-
-  if (!normalizedText) {
-    return undefined;
-  }
+  if (!normalizedText) return false;
 
   const cachedResult = await extractFromCache(normalizedText);
 
   if (cachedResult) {
-    return cachedResult;
+    Object.assign(location, cachedResult);
+    return true;
   }
 
-  const result = await jsonCompletion("extractLocation", prompt, schema, text);
+  const result = await jsonCompletion(
+    "extractLocation",
+    prompt,
+    schema,
+    normalizedText
+  );
 
-  if (!result) {
-    return undefined;
-  }
+  if (!result) return false;
 
-  const location = formatLocation(result);
+  const extractedLocation: Location = {};
+  setExtractedData(extractedLocation, result);
+  insertToCache(normalizedText, extractedLocation);
 
-  insertToCache(normalizedText, location);
-
-  if (location?.isRemote === false && location.location === "") {
+  if (!Object.keys(extractedLocation).length) {
     // This means the LLM call couldn't extract a location
-    return undefined;
+    return false;
   }
 
-  return location;
+  Object.assign(location, extractedLocation);
+  return true;
 }
 
 function normalize(text: string) {
@@ -104,70 +81,42 @@ function normalize(text: string) {
   );
 }
 
-async function extractFromCache(text: string): Promise<Location> {
-  const cachedResult = locationCache.get(text);
+async function extractFromCache(text: string): Promise<Location | undefined> {
+  try {
+    const cachedResult = locationCache.get(text);
 
-  if (cachedResult) {
-    logCounter("ExtractLocation_CacheHit");
-    return cachedResult;
-  }
+    if (cachedResult) {
+      logCounter("ExtractLocation_CacheHit");
+      return cachedResult;
+    }
 
-  const dbCachedResult = await db.locationCache.getItem(text, text[0]);
+    const dbCachedResult = await db.locationCache.getItem(text, text[0]);
 
-  if (dbCachedResult) {
-    logCounter("ExtractLocation_DBCacheHit");
-    const { isRemote, location } = dbCachedResult;
-    locationCache.set(text, { isRemote, location });
-    return { isRemote, location };
+    if (dbCachedResult) {
+      logCounter("ExtractLocation_DBCacheHit");
+      const { city, state, stateCode, country, countryCode } = dbCachedResult;
+      const cleanedLocation = { city, state, stateCode, country, countryCode };
+      locationCache.set(text, cleanedLocation);
+      return cleanedLocation;
+    }
+  } catch (e) {
+    logError(new AppError("Location cache: Failed to extract", undefined, e));
+    return undefined;
   }
 }
 
 function insertToCache(text: string, result: Location) {
-  if (!result) return;
+  try {
+    if (!result) return;
 
-  locationCache.set(text, result);
-  // Don't await on cache insertion
-  db.locationCache.upsertItem({
-    id: text,
-    pKey: text[0],
-    ...result,
-  });
-}
-
-function formatLocation({
-  remote,
-  city,
-  state,
-  stateCode,
-  country,
-  countryCode,
-}: z.infer<typeof schema>): Location {
-  const parts: string[] = [];
-
-  if (city) {
-    parts.push(city);
+    locationCache.set(text, result);
+    // Don't await on cache insertion
+    db.locationCache.upsertItem({
+      id: text,
+      pKey: text[0],
+      ...result,
+    });
+  } catch (e) {
+    logError(new AppError("Location cache: Failed to insert", undefined, e));
   }
-
-  if (state || stateCode) {
-    if (state && stateCode) {
-      parts.push(`${state} (${stateCode})`);
-    } else {
-      parts.push(state || stateCode!);
-    }
-  }
-
-  if (country || countryCode) {
-    if (country && countryCode) {
-      parts.push(`${country} (${countryCode})`);
-    } else {
-      parts.push(country || countryCode!);
-    }
-  }
-
-  const location = parts.join(", ");
-
-  return {
-    isRemote: !!remote,
-    location,
-  };
 }

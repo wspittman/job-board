@@ -1,4 +1,6 @@
-import type { CompanyKey, Job, Metadata } from "./dbModels";
+import type { CompanyKey } from "./dbModels";
+
+// #region Input Models
 
 export interface Filters {
   // Exact Match
@@ -21,9 +23,38 @@ export interface RefreshJobsOptions {
   replaceJobsOlderThan?: number;
 }
 
-export type ClientJob = Job;
+// #endregion
 
-export type ClientMetadata = Pick<
-  Metadata,
-  "companyCount" | "companyNames" | "jobCount"
-> & { timestamp: number };
+// #region Output Models
+
+/**
+ * Prior to the DB model changes, these were equivalent to the DB models.
+ * Now, they are set to what the DB models _used to be_.
+ * This is to avoid changing the client models in the frontend for now.
+ */
+
+export interface ClientJob {
+  id: string;
+  companyId: string;
+  company: string;
+  title: string;
+  description: string;
+  postTS: number;
+  applyUrl: string;
+  isRemote: boolean;
+  location: string;
+  facets: {
+    summary?: string;
+    salary?: number;
+    experience?: number;
+  };
+}
+
+export interface ClientMetadata {
+  companyCount: number;
+  companyNames: [string, string][];
+  jobCount: number;
+  timestamp: number;
+}
+
+// #endregion

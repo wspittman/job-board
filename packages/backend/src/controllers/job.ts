@@ -2,18 +2,20 @@ import type { Resource } from "@azure/cosmos";
 import { llm } from "../ai/llm";
 import { ats } from "../ats/ats";
 import { db } from "../db/db";
-import { QueryBuilder } from "../db/QueryBuilder";
+import { Query } from "../db/Query";
 import type { Filters } from "../types/clientModels";
-import type { CompanyKey, Job, JobKey } from "../types/dbModels";
+import type { CompanyKey, Job, JobKey, Location } from "../types/dbModels";
+import { Office } from "../types/enums";
 import type { Context } from "../types/types";
 import { asyncBatch } from "../utils/asyncBatch";
 import { AsyncQueue } from "../utils/asyncQueue";
+import { normalizedLocation } from "../utils/location";
 import { logProperty } from "../utils/telemetry";
 import { metadataJobExecutor } from "./metadata";
 
-interface EnhancedFilters extends Filters {
-  normalizedLocation?: string;
-}
+type EnhancedFilters = Omit<Filters, "location" | "isRemote"> & {
+  location?: Location;
+};
 
 const jobInfoQueue = new AsyncQueue(
   "RefreshJobInfo",
@@ -31,13 +33,23 @@ export async function getJobs(filterInput: Filters) {
     return [];
   }
 
-  let filters: EnhancedFilters = { ...filterInput };
-  if (filters.location) {
-    const location = await llm.extractLocation(filters.location);
-    if (location) {
-      filters.normalizedLocation = location;
+  // Convert filter inputs to Location object
+  let location: Location | undefined = undefined;
+  const { location: inputLocation, isRemote } = filterInput;
+  if (inputLocation || isRemote != undefined) {
+    location = { location: inputLocation };
+    if (isRemote != undefined) {
+      location.remote = isRemote ? Office.Remote : Office.Onsite;
     }
   }
+  if (location?.location) {
+    await llm.extractLocation(location);
+  }
+
+  const filters: EnhancedFilters = {
+    ...filterInput,
+    location,
+  };
 
   const result = await readJobsByFilters(filters);
   logProperty("GetJobs_Count", result.length);
@@ -141,7 +153,6 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
     job = await ats.getJob(companyKey, job.item);
   }
 
-  await llm.extractLocations(job);
   await llm.extractFacets(job);
 
   // Do not add a job that failed to extract facets
@@ -156,94 +167,82 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
 
 async function readJobsByFilters({
   companyId,
-  isRemote,
   title,
   location,
   daysSince,
   maxExperience,
   minSalary,
-  normalizedLocation,
 }: EnhancedFilters) {
-  /*
-  Where clauses should ideally be ordered by
-  1. The most selective filter first (ie. likely to filter out the most documents)
-  2. Filter efficiency (equality > range > contains)
-  */
-
-  const query = new QueryBuilder();
+  // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
+  // Look at the QueryBuilder class comment for ordering guidelines
+  const query = new Query();
 
   if (companyId) {
-    query.where("c.companyId = @companyId", { "@companyId": companyId });
+    query.whereCondition("companyId", "=", companyId);
   }
 
+  const isRemote =
+    location?.remote == null ? undefined : location.remote === Office.Remote;
+
   if (isRemote !== undefined) {
-    query.where("c.isRemote = @isRemote", { "@isRemote": isRemote });
+    query.whereCondition("isRemote", "=", isRemote);
   }
 
   if (daysSince) {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
-    query.where("c.postTS >= @sinceTS", { "@sinceTS": sinceTS });
+    query.whereCondition("postTS", ">=", sinceTS);
   }
 
   if (maxExperience != null) {
-    // If undefined: include, since we can't yet distinguish between entry level and absent
-    query.where(
-      "NOT IS_DEFINED(c.facets.experience) OR c.facets.experience <= @maxExperience",
-      { "@maxExperience": maxExperience }
-    );
+    query.whereCondition("facets.experience", "<=", maxExperience);
   }
 
   if (minSalary) {
-    // If undefined: exclude
-    query.where("c.facets.salary >= @minSalary", { "@minSalary": minSalary });
+    query.whereCondition("facets.salary", ">=", minSalary);
   }
 
   if (title) {
-    query.where("CONTAINS(LOWER(c.title), @title)", {
-      "@title": title.toLowerCase(),
-    });
+    query.whereCondition("title", "CONTAINS", title);
   }
 
-  if (normalizedLocation) {
-    addLocationClause(query, normalizedLocation, isRemote);
-  } else if (location) {
-    // Remote + empty location always matches
-    query.where(
-      '(c.isRemote = true AND c.location = "") OR CONTAINS(LOWER(c.location), @location)',
-      { "@location": location.toLowerCase() }
-    );
+  if (location) {
+    const normalLocation = normalizedLocation(location);
+    if (location?.countryCode) {
+      addLocationClause(query, normalLocation, isRemote);
+    } else if (location.location) {
+      // Remote + empty location always matches
+      query.where([
+        '(c.isRemote = true AND c.location = "") OR CONTAINS(c.location, @location, true)',
+        { "@location": location.location },
+      ]);
+    }
   }
 
   return db.job.query<Job & Resource>(query.build());
 }
 
-function addLocationClause(
-  query: QueryBuilder,
-  location: string,
-  isRemote?: boolean
-) {
-  location = location.toLowerCase();
+function addLocationClause(query: Query, location: string, isRemote?: boolean) {
   const country = location.split(",").at(-1)?.trim() ?? location;
   const hybridParam = { "@location": location };
-  const hybridClause = "ENDSWITH(LOWER(c.location), @location)";
+  const hybridClause = "ENDSWITH(c.location, @location, true)";
   // Remote + empty location always matches
   const remoteParam = { "@country": country };
   const remoteClause =
-    'ENDSWITH(LOWER(c.location), @country) OR c.location = ""';
+    'ENDSWITH(c.location, @country, true) OR c.location = ""';
 
   if (isRemote) {
-    query.where(remoteClause, remoteParam);
+    query.where([remoteClause, remoteParam]);
   } else if (isRemote === false) {
-    query.where(hybridClause, hybridParam);
+    query.where([hybridClause, hybridParam]);
   } else {
-    query.where(
+    query.where([
       `${hybridClause} OR (c.isRemote = true AND (${remoteClause}))`,
       {
         ...hybridParam,
         ...remoteParam,
-      }
-    );
+      },
+    ]);
   }
 }
 

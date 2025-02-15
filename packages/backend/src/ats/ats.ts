@@ -11,13 +11,6 @@ class ATSConnector {
   };
 
   /**
-   * Returns a list of supported ATS systems
-   */
-  getAtsList(): ATS[] {
-    return Object.keys(this.atsEndpoints) as ATS[];
-  }
-
-  /**
    * Retrieves company information from the appropriate ATS
    * @param full - Whether to fetch full company details
    */
@@ -37,7 +30,7 @@ class ATSConnector {
    * Retrieves detailed information for a specific job
    */
   async getJob(key: CompanyKey, jobKey: JobKey): Promise<Context<Job>> {
-    return this.atsEndpoints[key.ats].getJob(key, jobKey);
+    return this.atsEndpoints[key.ats].getJob(jobKey);
   }
 }
 

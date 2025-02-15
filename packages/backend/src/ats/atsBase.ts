@@ -32,7 +32,7 @@ export abstract class ATSBase {
   /**
    * Retrieves detailed information for a specific job
    */
-  abstract getJob(key: CompanyKey, jobKey: JobKey): Promise<Context<Job>>;
+  abstract getJob(jobKey: JobKey): Promise<Context<Job>>;
 
   /**
    * Makes an HTTP GET request to the ATS API
