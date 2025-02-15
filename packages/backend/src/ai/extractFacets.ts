@@ -56,7 +56,7 @@ const schema = z.object({
     "true = hourly rate specified, false = annual salary or unspecified"
   ),
   experience: zNumber(
-    "Minimum years of experience. Example: 5 for '5-8 years'. Use null if not explicitly stated."
+    "Minimum years of required experience. Use the lower number when given a range. Example: 5 for '5-8 years'. Use null if not explicitly stated."
   ),
   location: zObj(
     "Extract location details based on explicit information. The 'location' section of the Job object takes precedence over the job description.",
