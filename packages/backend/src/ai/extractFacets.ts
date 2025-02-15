@@ -6,52 +6,84 @@ import { normalizedLocation } from "../utils/location";
 import { zBoolean, zEnum, zNumber, zObj, zString } from "../utils/zod";
 import { jsonCompletion, setExtractedData } from "./openai";
 
-const prompt = `You are an experienced job seeker whose goal is to quickly find relevant information from job descriptions.
-First, read the provided data, which is formatted as an object with two properties.
-- The "item" property contains an object representing the job, including job description.
-- The "context" property contains any additional context provided, which may be about the job or about the company.
-Second, use the scratchpad space to write up your relevant findings.
-Third, extract specific facets from the data and scratchpad.
-Last, compose a one-line summary of the job description.
-Provide the response JSON in the provided schema.`;
+const prompt = `You are an AI assistant specialized in analyzing job listings. Your task is to extract key information from job descriptions systematically.
+
+PROCESS:
+1. READ the provided JSON data:
+   - "item": Contains the job details and description
+   - "context": Contains additional company or job context
+
+2. ANALYZE the following aspects in order:
+   - Compensation details
+   - Location and work arrangement
+   - Experience requirements
+   - Key responsibilities
+
+3. WRITE your findings in the scratchpad
+   - Use bullet points for clarity
+   - Focus on explicit statements, avoid assumptions
+   - Note any ambiguous or conflicting information
+
+4. EXTRACT specific data points according to the schema
+   - Only include information explicitly stated
+   - Use null for uncertain or unspecified fields
+   - Follow the format guidelines strictly
+
+5. SUMMARIZE the role in one line
+   - Focus on key responsibilities
+   - Be specific but concise
+   - Avoid mentioning company name or job title
+
+Provide the response JSON in the provided schema.
+`;
 
 const schema = z.object({
-  scratchpad: zString(
-    "Write your relevant findings here. Use this space to think carefully about salary, experience, office/remote location"
+  scratchpad: zObj(
+    "Document your analysis of compensation and location details here. Use this space to think carefully.",
+    {
+      compensation: zString("List all monetary compensation details."),
+      location: zString(
+        "List work location details including office location, remote policy, and time zone requirements. The 'location' section of the Job object takes precedence over the job description."
+      ),
+    }
   ),
-  minSalary: zNumber("Minimum salary for the job, or null if not specified."),
-  maxSalary: zNumber("Maximum salary for the job, or null if not specified."),
+  minSalary: zNumber("Minimum annual salary. Use null if not specified."),
+  maxSalary: zNumber("Maximum annual salary. Use null if not specified."),
   currency: zString(
-    "Currency of the salary in ISO currency codes, or null if not specified."
+    "Three-letter ISO currency code. Example: 'USD', 'EUR', 'GBP'. Use null if not specified."
   ),
-  isHourly: zBoolean("True if the job is paid hourly, false otherwise."),
+  isHourly: zBoolean(
+    "true = hourly rate specified, false = annual salary or unspecified"
+  ),
   experience: zNumber(
-    "Minimum years of experience explicitly required for the job, or null if not specified."
+    "Minimum years of experience. Example: 5 for '5-8 years'. Use null if not explicitly stated."
   ),
   location: zObj(
-    "Location details, determined to the extent possible. Use null for any unspecified fields.",
+    "Extract location details based on explicit information. The 'location' section of the Job object takes precedence over the job description.",
     {
       remote: zEnum(
         Office,
-        "Whether this job is performed remotely or on-site. A role is 'Remote' if only a region is mentioned (eg. 'USA' or 'Pacific Time Zone'). A role is 'Remote' if the location description includes the string 'remote'. A role is 'Hybrid' only if the word 'hybrid' is explicitly used."
+        "Categorize as: 'Remote' for fully remote roles, 'Hybrid' for partial office attendance, 'OnSite' for full office attendance. A role is 'Remote' if only a region is mentioned (eg. 'USA' or 'Pacific Time Zone'). A role is 'Remote' if the location description includes the string 'remote'. A role is 'Hybrid' only if the word 'hybrid' is explicitly used. Never use null, always make a selection."
       ),
-      city: zString("City name"),
+      city: zString(
+        "City name in English. Use null if only country/region is specified."
+      ),
       state: zString(
-        "The full English name for the state, province, or subdivision."
+        "Full state/province name in English. Use null if not applicable."
       ),
       stateCode: zString(
-        "The ISO 3166-2 subdivision code for the subdivision. Examples: 'WA' for Washington, 'TX' for Texas, 'ON' for Ontario."
+        "ISO 3166-2 subdivision code. Examples: 'WA' for Washington, 'TX' for Texas, 'ON' for Ontario. Use null if not applicable."
       ),
       country: zString(
-        "The ISO 3166 English short name of the country. Examples: 'United States of America', 'Canada', 'Mexico'."
+        "ISO 3166 English short name of the country. Examples: 'United States of America', 'Canada', 'Mexico'. Use 'Worldwide' for global remote roles."
       ),
       countryCode: zString(
-        "The ISO 3166-1 alpha-3 three-letter code for the country. Examples: 'USA' for the United States of America, 'CAN' for Canada, 'MEX' for Mexico."
+        "ISO 3166-1 alpha-3 country code. Examples: 'USA' for the United States of America, 'CAN' for Canada, 'MEX' for Mexico. Use null for worldwide remote roles."
       ),
     }
   ),
   summary: zString(
-    "A resume-style one-line summary of the job's responsibilities. Be concise and focus on the most important aspects. Do not repeat the company or job title."
+    "Single sentence focusing on key responsibilities. Use active voice and specific technologies/skills. Do not repeat the company or job title."
   ),
 });
 
