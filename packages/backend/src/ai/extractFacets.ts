@@ -75,10 +75,10 @@ const schema = z.object({
         "ISO 3166-2 subdivision code. Examples: 'WA' for Washington, 'TX' for Texas, 'ON' for Ontario. Use null if not applicable."
       ),
       country: zString(
-        "ISO 3166 English short name of the country. Examples: 'United States of America', 'Canada', 'Mexico'. Use 'Worldwide' for global remote roles."
+        "ISO 3166 English short name of the country. Examples: 'United States of America', 'Canada', 'Mexico'. Use null for global remote roles."
       ),
       countryCode: zString(
-        "ISO 3166-1 alpha-3 country code. Examples: 'USA' for the United States of America, 'CAN' for Canada, 'MEX' for Mexico. Use null for worldwide remote roles."
+        "ISO 3166-1 alpha-3 country code. Examples: 'USA' for the United States of America, 'CAN' for Canada, 'MEX' for Mexico. Use null for global remote roles."
       ),
     }
   ),
