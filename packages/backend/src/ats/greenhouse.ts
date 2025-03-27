@@ -1,8 +1,8 @@
-import { config } from "../config";
-import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels";
-import type { Context } from "../types/types";
-import { standardizeUntrustedHtml } from "../utils/html";
-import { ATSBase } from "./atsBase";
+import { config } from "../config.ts";
+import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels.ts";
+import type { Context } from "../types/types.ts";
+import { standardizeUntrustedHtml } from "../utils/html.ts";
+import { ATSBase } from "./atsBase.ts";
 
 interface CompanyResult {
   name: string;
@@ -72,7 +72,7 @@ export class Greenhouse extends ATSBase {
 
     if (jobs.length) {
       const exampleJob = await this.getJob({
-        id: String(jobs[0].id),
+        id: String(jobs[0]?.id),
         companyId: id,
       });
       return {
@@ -135,7 +135,7 @@ export class Greenhouse extends ATSBase {
   private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
     const result = this.formatJobBasic(companyId, jobResult);
 
-    const { location, metadata, content, departments, offices } = jobResult;
+    const { metadata, content, departments, offices } = jobResult;
 
     result.item.description = standardizeUntrustedHtml(content);
 

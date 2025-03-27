@@ -1,9 +1,15 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { type AxiosResponse } from "axios";
 import https from "https";
-import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
-import type { Context } from "../types/types";
-import { AppError } from "../utils/AppError";
-import { getSubContext, logError } from "../utils/telemetry";
+import type {
+  ATS,
+  Company,
+  CompanyKey,
+  Job,
+  JobKey,
+} from "../types/dbModels.ts";
+import type { Context } from "../types/types.ts";
+import { AppError } from "../utils/AppError.ts";
+import { getSubContext, logError } from "../utils/telemetry.ts";
 
 /**
  * Base class for ATS (Applicant Tracking System) implementations

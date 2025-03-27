@@ -1,9 +1,9 @@
-import { config } from "../config";
-import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels";
-import type { Context } from "../types/types";
-import { AppError } from "../utils/AppError";
-import { standardizeUntrustedHtml } from "../utils/html";
-import { ATSBase } from "./atsBase";
+import { config } from "../config.ts";
+import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels.ts";
+import type { Context } from "../types/types.ts";
+import { AppError } from "../utils/AppError.ts";
+import { standardizeUntrustedHtml } from "../utils/html.ts";
+import { ATSBase } from "./atsBase.ts";
 
 interface JobResult {
   id: string;
@@ -86,7 +86,7 @@ export class Lever extends ATSBase {
 
       // Basic
       // No name field, just use token until we have a better solution
-      name: id[0].toUpperCase() + id.slice(1),
+      name: id[0]?.toUpperCase() + id.slice(1),
     };
   }
 

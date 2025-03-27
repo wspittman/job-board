@@ -1,14 +1,15 @@
 export class AppError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number = 400,
-    public innerError?: unknown
-  ) {
+  public statusCode: number;
+  public innerError?: unknown;
+
+  constructor(message: string, statusCode: number = 400, innerError?: unknown) {
     super(message);
+    this.statusCode = statusCode;
+    this.innerError = innerError;
     Error.captureStackTrace(this, this.constructor);
   }
 
-  toErrorList() {
+  toErrorList(): string[] {
     const errors: string[] = [];
     let cur: unknown = this;
 

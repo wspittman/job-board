@@ -1,10 +1,10 @@
 import { z } from "zod";
-import type { Job, Location } from "../types/dbModels";
-import { Office } from "../types/enums";
-import type { Context } from "../types/types";
-import { normalizedLocation } from "../utils/location";
-import { zBoolean, zEnum, zNumber, zObj, zString } from "../utils/zod";
-import { jsonCompletion, setExtractedData } from "./openai";
+import type { Job, Location } from "../types/dbModels.ts";
+import { Office } from "../types/enums.ts";
+import type { Context } from "../types/types.ts";
+import { normalizedLocation } from "../utils/location.ts";
+import { zBoolean, zEnum, zNumber, zObj, zString } from "../utils/zod.ts";
+import { jsonCompletion, setExtractedData } from "./openai.ts";
 
 const prompt = `You are an AI assistant specialized in analyzing job listings. Your task is to extract key information from job descriptions systematically.
 

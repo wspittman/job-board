@@ -1,5 +1,5 @@
-import type { ClientJob } from "./clientModels";
-import type { Job } from "./dbModels";
+import type { ClientJob } from "./clientModels.ts";
+import type { Job } from "./dbModels.ts";
 
 // This file is going to get a lot more interesting later on
 

@@ -1,4 +1,4 @@
-import {
+import type {
   FeedOptions,
   FeedResponse,
   ItemDefinition,
@@ -14,10 +14,10 @@ import type {
   JobKey,
   LocationCache,
   Metadata,
-} from "../types/dbModels";
-import { AppError } from "../utils/AppError";
-import { getSubContext, logError } from "../utils/telemetry";
-import { ContainerName, getContainer } from "./dbInit";
+} from "../types/dbModels.ts";
+import { AppError } from "../utils/AppError.ts";
+import { getSubContext, logError } from "../utils/telemetry.ts";
+import { type ContainerName, getContainer } from "./dbInit.ts";
 
 /**
  * Generic container class for database operations
@@ -250,7 +250,7 @@ function logDBAction(
       log.query = typeof query === "string" ? query : query.query;
     }
 
-    if (response instanceof FeedResponse) {
+    if ("resources" in response) {
       log.count = response.resources.length;
     }
 

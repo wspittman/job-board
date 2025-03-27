@@ -1,7 +1,12 @@
-import type { Filters, RefreshJobsOptions } from "../types/clientModels";
-import type { ATS, CompanyKey, CompanyKeys, JobKey } from "../types/dbModels";
-import { AppError } from "../utils/AppError";
-import { logProperty } from "../utils/telemetry";
+import type { Filters, RefreshJobsOptions } from "../types/clientModels.ts";
+import type {
+  ATS,
+  CompanyKey,
+  CompanyKeys,
+  JobKey,
+} from "../types/dbModels.ts";
+import { AppError } from "../utils/AppError.ts";
+import { logProperty } from "../utils/telemetry.ts";
 
 const MAX_ID_LENGTH = 100;
 const MAX_ARRAY_LENGTH = 50;

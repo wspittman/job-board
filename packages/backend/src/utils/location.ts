@@ -1,4 +1,4 @@
-import type { Location } from "../types/dbModels";
+import type { Location } from "../types/dbModels.ts";
 
 /**
  * Normalizes the given location data into a string format.

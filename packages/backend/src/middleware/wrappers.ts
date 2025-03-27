@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { logError, withAsyncContext } from "../utils/telemetry";
+import type { NextFunction, Request, Response } from "express";
+import { logError, withAsyncContext } from "../utils/telemetry.ts";
 
 const SUCCESS = { status: "success" };
 
@@ -60,7 +60,7 @@ function pathToLogName(path: string) {
   return path
     .split("/")
     .filter(Boolean)
-    .map((x) => x[0].toUpperCase() + x.slice(1))
+    .map((x) => x[0]?.toUpperCase() + x.slice(1))
     .join("");
 }
 
