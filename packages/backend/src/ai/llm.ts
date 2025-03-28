@@ -1,8 +1,8 @@
-import type { Company, Job, Location } from "../types/dbModels";
-import type { Context } from "../types/types";
-import { extractFacets } from "./extractFacets";
-import { extractLocation } from "./extractLocation";
-import { fillCompanyInfo } from "./fillCompanyInfo";
+import type { Company, Job, Location } from "../types/dbModels.ts";
+import type { Context } from "../types/types.ts";
+import { extractFacets } from "./extractFacets.ts";
+import { extractLocation } from "./extractLocation.ts";
+import { fillCompanyInfo } from "./fillCompanyInfo.ts";
 
 class LLMConnector {
   constructor() {}

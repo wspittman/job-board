@@ -1,8 +1,14 @@
-import type { ATS, Company, CompanyKey, Job, JobKey } from "../types/dbModels";
-import type { Context } from "../types/types";
-import { ATSBase } from "./atsBase";
-import { Greenhouse } from "./greenhouse";
-import { Lever } from "./lever";
+import type {
+  ATS,
+  Company,
+  CompanyKey,
+  Job,
+  JobKey,
+} from "../types/dbModels.ts";
+import type { Context } from "../types/types.ts";
+import { ATSBase } from "./atsBase.ts";
+import { Greenhouse } from "./greenhouse.ts";
+import { Lever } from "./lever.ts";
 
 class ATSConnector {
   private readonly atsEndpoints: Record<ATS, ATSBase> = {

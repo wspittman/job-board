@@ -58,7 +58,7 @@ export class LRUCache<K, V> {
     this.addToFront(node);
   }
 
-  set(key: K, value: V) {
+  set(key: K, value: V): void {
     const node = this.cache.get(key);
 
     if (node) {
@@ -99,7 +99,7 @@ export class LRUCache<K, V> {
     return false;
   }
 
-  clear() {
+  clear(): void {
     this.cache.clear();
     this.head = undefined;
     this.tail = undefined;

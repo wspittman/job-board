@@ -1,13 +1,9 @@
-import {
-  Container,
-  ContainerRequest,
-  CosmosClient,
-  Database,
-} from "@azure/cosmos";
+import type { Container, ContainerRequest, Database } from "@azure/cosmos";
+import { CosmosClient } from "@azure/cosmos";
 import fs from "fs";
 import https from "https";
-import { config } from "../config";
-import { logError } from "../utils/telemetry";
+import { config } from "../config.ts";
+import { logError } from "../utils/telemetry.ts";
 
 export type ContainerName = "company" | "job" | "metadata" | "locationCache";
 

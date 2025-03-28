@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { db } from "../db/db";
-import type { Location } from "../types/dbModels";
-import { AppError } from "../utils/AppError";
-import { LRUCache } from "../utils/cache";
-import { logCounter, logError } from "../utils/telemetry";
-import { zString } from "../utils/zod";
-import { jsonCompletion, setExtractedData } from "./openai";
+import { db } from "../db/db.ts";
+import type { Location } from "../types/dbModels.ts";
+import { AppError } from "../utils/AppError.ts";
+import { LRUCache } from "../utils/cache.ts";
+import { logCounter, logError } from "../utils/telemetry.ts";
+import { zString } from "../utils/zod.ts";
+import { jsonCompletion, setExtractedData } from "./openai.ts";
 
 const locationCache = new LRUCache<string, Location>(1000);
 
@@ -90,7 +90,7 @@ async function extractFromCache(text: string): Promise<Location | undefined> {
       return cachedResult;
     }
 
-    const dbCachedResult = await db.locationCache.getItem(text, text[0]);
+    const dbCachedResult = await db.locationCache.getItem(text, text[0]!);
 
     if (dbCachedResult) {
       logCounter("ExtractLocation_DBCacheHit");
@@ -101,8 +101,9 @@ async function extractFromCache(text: string): Promise<Location | undefined> {
     }
   } catch (e) {
     logError(new AppError("Location cache: Failed to extract", undefined, e));
-    return undefined;
   }
+
+  return undefined;
 }
 
 function insertToCache(text: string, result: Location) {
@@ -113,7 +114,7 @@ function insertToCache(text: string, result: Location) {
     // Don't await on cache insertion
     db.locationCache.upsertItem({
       id: text,
-      pKey: text[0],
+      pKey: text[0]!,
       ...result,
     });
   } catch (e) {

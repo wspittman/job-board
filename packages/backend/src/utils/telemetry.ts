@@ -1,15 +1,30 @@
-import * as appInsights from "applicationinsights";
-import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager";
+import {
+  getCorrelationContext,
+  setup as setupAppInsights,
+} from "applicationinsights";
+import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager.js";
 import type {
   EnvelopeTelemetry,
   EventData,
   ExceptionData,
   ExceptionDetails,
   RequestData,
-} from "applicationinsights/out/Declarations/Contracts";
+} from "applicationinsights/out/Declarations/Contracts/index.js";
+import NodeClient from "applicationinsights/out/Library/NodeClient.js";
 import { AsyncLocalStorage } from "node:async_hooks";
-import { config } from "../config";
-import { AppError } from "./AppError";
+import { config } from "../config.ts";
+import { AppError } from "./AppError.ts";
+
+let _client: NodeClient;
+
+export async function startTelemetry(): Promise<void> {
+  setupAppInsights(config.APPLICATIONINSIGHTS_CONNECTION_STRING).start();
+  // For some reason, the defaultClient does not refresh after setup if it is pulled from the top import
+  const { defaultClient } = await import("applicationinsights");
+  defaultClient.addTelemetryProcessor(telemetryProcessor);
+  defaultClient.config.disableAppInsights = config.NODE_ENV === "dev";
+  _client = defaultClient;
+}
 
 interface CustomContext extends CorrelationContext {
   requestContext?: Record<string, unknown>;
@@ -24,7 +39,10 @@ const asyncLocalStorage = new AsyncLocalStorage<Record<string, unknown>>();
  * @returns Promise that resolves when the function completes
  * @remarks Automatically tracks duration and errors
  */
-export function withAsyncContext(name: string, fn: () => Promise<void>) {
+export function withAsyncContext(
+  name: string,
+  fn: () => Promise<void>
+): Promise<void> {
   const start = Date.now();
   return asyncLocalStorage.run({}, async () => {
     try {
@@ -33,7 +51,7 @@ export function withAsyncContext(name: string, fn: () => Promise<void>) {
       logError(error);
     } finally {
       const duration = Date.now() - start;
-      appInsights.defaultClient.trackEvent({ name, properties: { duration } });
+      _client.trackEvent({ name, properties: { duration } });
     }
   });
 }
@@ -47,7 +65,7 @@ function getContext(): Record<string, unknown> {
   if (asyncContext) return asyncContext;
 
   // Otherwise, use the request-level context
-  const context = <CustomContext>appInsights.getCorrelationContext();
+  const context = <CustomContext>getCorrelationContext();
   context.requestContext ??= {};
   return context.requestContext;
 }
@@ -70,7 +88,7 @@ export function getSubContext<T>(name: string, init: () => T): T {
  * @param value - Value to log
  * @remarks If property already exists, converts to array of values
  */
-export function logProperty(name: string, value: unknown) {
+export function logProperty(name: string, value: unknown): void {
   const context = getSubContext<Record<string, unknown>>("prop", () => ({}));
 
   if (name in context) {
@@ -91,7 +109,7 @@ export function logProperty(name: string, value: unknown) {
  * @param name - Name of the counter
  * @param value - Amount to increment by (default: 1)
  */
-export function logCounter(name: string, value: number = 1) {
+export function logCounter(name: string, value: number = 1): void {
   const context = getContext();
   context[name] = ((context[name] as number) ?? 0) + value;
 }
@@ -100,11 +118,11 @@ export function logCounter(name: string, value: number = 1) {
  * Logs an error to Application Insights
  * @param error - Error to log
  */
-export function logError(error: unknown) {
+export function logError(error: unknown): void {
   const exception = error instanceof Error ? error : new Error(String(error));
   const properties =
     error instanceof AppError ? error.toErrorList() : undefined;
-  appInsights.defaultClient.trackException({ exception, properties });
+  _client.trackException({ exception, properties });
 }
 
 /**
@@ -112,7 +130,7 @@ export function logError(error: unknown) {
  * @param envelope - Telemetry envelope to process
  * @returns true to allow the event to be sent
  */
-export function telemetryProcessor({ data }: EnvelopeTelemetry) {
+export function telemetryProcessor({ data }: EnvelopeTelemetry): boolean {
   try {
     if (!data.baseData) return true;
 
@@ -184,11 +202,13 @@ function devLogException({ exceptions, properties }: ExceptionData) {
       stack: ex.stack ?? ex.parsedStack.map((frame) => frame.assembly),
     });
 
-    devLog({
-      ...simplify(first),
-      properties,
-      innerExceptions: rest.map(simplify),
-    });
+    if (first) {
+      devLog({
+        ...simplify(first),
+        properties,
+        innerExceptions: rest.map(simplify),
+      });
+    }
   }
 }
 

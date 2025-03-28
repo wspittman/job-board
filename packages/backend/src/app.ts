@@ -1,15 +1,15 @@
-import * as appInsights from "applicationinsights";
-import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
-import helmet from "helmet";
-import { config } from "./config";
-import { connectDB } from "./db/dbInit";
-import { router } from "./routes/routes";
-import { logError, telemetryProcessor } from "./utils/telemetry";
+import { logError, startTelemetry } from "./utils/telemetry.ts";
 
-appInsights.setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING).start();
-appInsights.defaultClient.addTelemetryProcessor(telemetryProcessor);
-appInsights.defaultClient.config.disableAppInsights = config.NODE_ENV === "dev";
+// We need this as early as possible, for reasons
+await startTelemetry();
+
+import cors from "cors";
+import type { NextFunction, Request, Response } from "express";
+import express from "express";
+import helmet from "helmet";
+import { config } from "./config.ts";
+import { connectDB } from "./db/dbInit.ts";
+import { router } from "./routes/routes.ts";
 
 const app = express();
 
@@ -25,7 +25,7 @@ app.use((_: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   logError(err);
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";

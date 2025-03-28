@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { config } from "../config";
+import type { NextFunction, Request, Response } from "express";
+import { config } from "../config.ts";
 
 /**
  * Simple token-match auth for only-me endpoints

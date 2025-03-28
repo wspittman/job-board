@@ -1,7 +1,7 @@
-import { db } from "../db/db";
-import type { ClientMetadata } from "../types/clientModels";
-import { AsyncExecutor } from "../utils/asyncExecutor";
-import { logProperty } from "../utils/telemetry";
+import { db } from "../db/db.ts";
+import type { ClientMetadata } from "../types/clientModels.ts";
+import { AsyncExecutor } from "../utils/asyncExecutor.ts";
+import { logProperty } from "../utils/telemetry.ts";
 
 let cachedMetadata: ClientMetadata | undefined;
 

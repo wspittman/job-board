@@ -1,17 +1,17 @@
 import type { Resource } from "@azure/cosmos";
-import { llm } from "../ai/llm";
-import { ats } from "../ats/ats";
-import { db } from "../db/db";
-import { Query } from "../db/Query";
-import type { Filters } from "../types/clientModels";
-import type { CompanyKey, Job, JobKey, Location } from "../types/dbModels";
-import { Office } from "../types/enums";
-import type { Context } from "../types/types";
-import { asyncBatch } from "../utils/asyncBatch";
-import { AsyncQueue } from "../utils/asyncQueue";
-import { normalizedLocation } from "../utils/location";
-import { logProperty } from "../utils/telemetry";
-import { metadataJobExecutor } from "./metadata";
+import { llm } from "../ai/llm.ts";
+import { ats } from "../ats/ats.ts";
+import { db } from "../db/db.ts";
+import { Query } from "../db/Query.ts";
+import type { Filters } from "../types/clientModels.ts";
+import type { CompanyKey, Job, JobKey, Location } from "../types/dbModels.ts";
+import { Office } from "../types/enums.ts";
+import type { Context } from "../types/types.ts";
+import { asyncBatch } from "../utils/asyncBatch.ts";
+import { AsyncQueue } from "../utils/asyncQueue.ts";
+import { normalizedLocation } from "../utils/location.ts";
+import { logProperty } from "../utils/telemetry.ts";
+import { metadataJobExecutor } from "./metadata.ts";
 
 type EnhancedFilters = Omit<Filters, "location" | "isRemote"> & {
   location?: Location;
@@ -137,7 +137,7 @@ async function getAtsJobs(key: CompanyKey, currentIds: string[]) {
   if (
     add.length > 1 &&
     9 * add.length > remove.length + ignore &&
-    !atsJobs[0].context
+    !atsJobs[0]?.context
   ) {
     atsJobs = await ats.getJobs(key, true);
     add = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));

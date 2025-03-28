@@ -1,8 +1,13 @@
-import { AsyncExecutor } from "./asyncExecutor";
-import { logError, logProperty, withAsyncContext } from "./telemetry";
+import { AsyncExecutor } from "./asyncExecutor.ts";
+import { logError, logProperty, withAsyncContext } from "./telemetry.ts";
 
 class Node<T> {
-  constructor(public value: T, public next?: Node<T>) {}
+  public value: T;
+  public next?: Node<T>;
+  constructor(value: T, next?: Node<T>) {
+    this.value = value;
+    this.next = next;
+  }
 }
 
 /**
@@ -14,6 +19,11 @@ export class AsyncQueue<T> {
   private tail: Node<T> | undefined;
   private active = 0;
 
+  protected name: string;
+  protected fn: (task: T) => Promise<void>;
+  protected onComplete?: AsyncExecutor;
+  protected batchSize: number;
+
   /**
    * Creates a new AsyncQueue instance.
    * @param name - The name of the queue for context tracking
@@ -22,17 +32,22 @@ export class AsyncQueue<T> {
    * @param batchSize - Maximum number of concurrent tasks (default: 5)
    */
   constructor(
-    protected name: string,
-    protected fn: (task: T) => Promise<void>,
-    protected onComplete?: AsyncExecutor,
-    protected batchSize = 5
-  ) {}
+    name: string,
+    fn: (task: T) => Promise<void>,
+    onComplete?: AsyncExecutor,
+    batchSize = 5
+  ) {
+    this.name = name;
+    this.fn = fn;
+    this.onComplete = onComplete;
+    this.batchSize = batchSize;
+  }
 
   /**
    * Adds multiple tasks to the queue and begins processing if possible.
    * @param tasks - Array of tasks to be added to the queue
    */
-  add(tasks: T[]) {
+  add(tasks: T[]): void {
     logProperty(`Queue_${this.name}_Add`, tasks.length);
     tasks.forEach((task) => this.enqueue(task));
     this.begin();

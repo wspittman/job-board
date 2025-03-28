@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import type { ParsedChatCompletion } from "openai/resources/beta/chat/completions";
 import { z, ZodType } from "zod";
-import { getSubContext, logCounter, logError } from "../utils/telemetry";
+import { getSubContext, logCounter, logError } from "../utils/telemetry.ts";
 
 const client = new OpenAI();
 const MAX_RETRIES = 3;
@@ -24,6 +24,8 @@ async function backoff(action: string, attempt: number, error: unknown) {
     logCounter(`OpenAI_Backoff_${action}`);
     return await setTimeout(getBackoffDelay(attempt), true);
   }
+
+  return undefined;
 }
 
 /**
@@ -88,8 +90,10 @@ function extractMessage<T>(completion: ParsedChatCompletion<T>) {
   const { finish_reason, message } = completion.choices[0] ?? {};
 
   if (finish_reason === "stop" && message && !message.refusal) {
-    return message.parsed;
+    return message.parsed ?? undefined;
   }
+
+  return undefined;
 }
 
 // #region setExtractedData

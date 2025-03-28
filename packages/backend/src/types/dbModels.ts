@@ -1,4 +1,4 @@
-import type { Industry, Office, Stage, Visa } from "./enums";
+import type { Industry, Office, Stage, Visa } from "./enums.ts";
 
 export type ATS = "greenhouse" | "lever";
 

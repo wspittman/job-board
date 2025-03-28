@@ -5,19 +5,19 @@ import {
   refreshCompanies,
   refreshJobs,
   removeCompany,
-} from "../controllers/company";
-import { getJobs, removeJob } from "../controllers/job";
-import { getMetadata } from "../controllers/metadata";
-import { adminOnly } from "../middleware/auth";
+} from "../controllers/company.ts";
+import { getJobs, removeJob } from "../controllers/job.ts";
+import { getMetadata } from "../controllers/metadata.ts";
+import { adminOnly } from "../middleware/auth.ts";
 import {
   useCompanyKey,
   useCompanyKeys,
   useFilters,
   useJobKey,
   useRefreshJobsOptions,
-} from "../middleware/inputValidators";
-import { asyncRoute, jsonRoute } from "../middleware/wrappers";
-import { toClientJobs } from "../types/toClient";
+} from "../middleware/inputValidators.ts";
+import { asyncRoute, jsonRoute } from "../middleware/wrappers.ts";
+import { toClientJobs } from "../types/toClient.ts";
 
 export const router = express.Router();
 
