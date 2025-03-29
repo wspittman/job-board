@@ -1,7 +1,3 @@
-import {
-  getCorrelationContext,
-  setup as setupAppInsights,
-} from "applicationinsights";
 import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager.js";
 import type {
   EnvelopeTelemetry,
@@ -10,20 +6,28 @@ import type {
   ExceptionDetails,
   RequestData,
 } from "applicationinsights/out/Declarations/Contracts/index.js";
-import NodeClient from "applicationinsights/out/Library/NodeClient.js";
+import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
 import { AppError } from "./AppError.ts";
+/*
+A workaround for Application Insights defaultClient issue with requires CommonJS-style lazy loading.
+In ESM environments, the module loader enumerates all exported properties during initialization.
+This means that the getter for defaultClient is executed before the client is initialized by setup().
+Consequently, defaultClient remains undefined even after setup() is called.
+https://github.com/microsoft/ApplicationInsights-node.js/issues/1354
+*/
+import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
 let _client: NodeClient;
 
 export async function startTelemetry(): Promise<void> {
-  setupAppInsights(config.APPLICATIONINSIGHTS_CONNECTION_STRING).start();
-  // For some reason, the defaultClient does not refresh after setup if it is pulled from the top import
-  const { defaultClient } = await import("applicationinsights");
-  defaultClient.addTelemetryProcessor(telemetryProcessor);
-  defaultClient.config.disableAppInsights = config.NODE_ENV === "dev";
-  _client = defaultClient;
+  telemetryWorkaround
+    .setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
+    .start();
+  _client = telemetryWorkaround.getClient();
+  _client.addTelemetryProcessor(telemetryProcessor);
+  _client.config.disableAppInsights = config.NODE_ENV === "dev";
 }
 
 interface CustomContext extends CorrelationContext {
@@ -65,7 +69,7 @@ function getContext(): Record<string, unknown> {
   if (asyncContext) return asyncContext;
 
   // Otherwise, use the request-level context
-  const context = <CustomContext>getCorrelationContext();
+  const context = <CustomContext>telemetryWorkaround.getCorrelationContext();
   context.requestContext ??= {};
   return context.requestContext;
 }
