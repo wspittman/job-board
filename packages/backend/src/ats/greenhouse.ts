@@ -1,7 +1,7 @@
+import { standardizeUntrustedHtml } from "dry-utils/htmldown";
 import { config } from "../config.ts";
 import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
-import { standardizeUntrustedHtml } from "../utils/html.ts";
 import { ATSBase } from "./atsBase.ts";
 
 interface CompanyResult {
