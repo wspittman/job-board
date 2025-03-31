@@ -7,6 +7,7 @@ import type {
   RequestData,
 } from "applicationinsights/out/Declarations/Contracts/index.js";
 import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
+import { setAsyncLogging } from "dry-utils/async";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
 import { AppError } from "./AppError.ts";
@@ -28,6 +29,11 @@ export async function startTelemetry(): Promise<void> {
   _client = telemetryWorkaround.getClient();
   _client.addTelemetryProcessor(telemetryProcessor);
   _client.config.disableAppInsights = config.NODE_ENV === "dev";
+
+  setAsyncLogging({
+    logFn: logProperty,
+    errorFn: (msg, val) => logError(new Error(msg, { cause: val })),
+  });
 }
 
 interface CustomContext extends CorrelationContext {

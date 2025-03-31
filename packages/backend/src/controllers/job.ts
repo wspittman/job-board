@@ -1,4 +1,5 @@
 import type { Resource } from "@azure/cosmos";
+import { batch } from "dry-utils/async";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
@@ -7,7 +8,6 @@ import type { Filters } from "../types/clientModels.ts";
 import type { CompanyKey, Job, JobKey, Location } from "../types/dbModels.ts";
 import { Office } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";
-import { asyncBatch } from "../utils/asyncBatch.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { normalizedLocation } from "../utils/location.ts";
 import { logProperty } from "../utils/telemetry.ts";
@@ -81,7 +81,7 @@ export async function refreshJobsForCompany(
   logProperty("Ignored", ignore);
 
   if (remove.length) {
-    await asyncBatch("DeleteJob", remove, (id) =>
+    await batch("DeleteJob", remove, (id) =>
       db.job.remove({ id, companyId: key.id })
     );
   }
