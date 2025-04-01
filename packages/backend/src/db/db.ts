@@ -1,12 +1,5 @@
-import type {
-  FeedOptions,
-  FeedResponse,
-  ItemDefinition,
-  ItemResponse,
-  PartitionKey,
-  Resource,
-  SqlQuerySpec,
-} from "@azure/cosmos";
+import { Container, dbConnect, setDBLogging } from "dry-utils/db";
+import { config } from "../config.ts";
 import type {
   Company,
   CompanyKey,
@@ -15,124 +8,26 @@ import type {
   LocationCache,
   Metadata,
 } from "../types/dbModels.ts";
-import { AppError } from "../utils/AppError.ts";
-import { getSubContext, logError } from "../utils/telemetry.ts";
-import { type ContainerName, getContainer } from "./dbInit.ts";
+import { getSubContext, logError, logProperty } from "../utils/telemetry.ts";
 
-/**
- * Generic container class for database operations
- * @template Item The type of items stored in the container
- */
-class Container<Item extends ItemDefinition> {
-  constructor(protected name: ContainerName) {}
+const initialContext = () => ({
+  count: 0,
+  counts: {},
+  ru: 0,
+  ms: 0,
+  bytes: 0,
+});
 
-  /**
-   * Retrieves a single item from the container
-   * @param id The unique identifier of the item
-   * @param partitionKey The partition key for the item
-   * @returns The requested item or undefined if not found
-   */
-  async getItem(id: string, partitionKey: string) {
-    try {
-      const response = await getContainer(this.name)
-        .item(id, partitionKey)
-        .read<Item>();
-      logDBAction("READ", this.name, response, partitionKey);
-      return response.resource;
-    } catch (error) {
-      throw new AppError("Error Fetching from Database", 500, error);
-    }
-  }
-
-  /**
-   * Retrieves all items from a partition
-   * @param partitionKey The partition key to query
-   * @returns Array of items in the partition
-   */
-  async getItemsByPartitionKey(partitionKey: string) {
-    try {
-      const response = await getContainer(this.name)
-        .items.readAll<Item & Resource>({ partitionKey })
-        .fetchAll();
-      logDBAction("READ_ALL", this.name, response, partitionKey);
-      return response.resources;
-    } catch (error) {
-      throw new AppError("Error Fetching from Database", 500, error);
-    }
-  }
-
-  /**
-   * Retrieves all item IDs from a partition
-   * @param partitionKey The partition key to query
-   * @returns Array of item IDs in the partition
-   */
-  async getIdsByPartitionKey(partitionKey: string) {
-    const result = await this.query<{ id: string }>("SELECT c.id FROM c", {
-      partitionKey,
-    });
-    return result.map((entry) => entry.id);
-  }
-
-  /**
-   * Gets the total count of items in the container
-   * @returns The total number of items
-   */
-  async getCount() {
-    const response = await this.query<number>("SELECT VALUE COUNT(1) FROM c");
-    return response[0];
-  }
-
-  /**
-   * Executes a query against the container
-   * @param query SQL query string or query spec
-   * @param options Optional feed options including partition key
-   * @returns Query results
-   */
-  async query<T>(query: string | SqlQuerySpec, options?: FeedOptions) {
-    try {
-      const response = await getContainer(this.name)
-        .items.query<T>(query, options)
-        .fetchAll();
-      logDBAction("QUERY", this.name, response, options?.partitionKey, query);
-      return response.resources;
-    } catch (error) {
-      throw new AppError("Error Querying from Database", 500, error);
-    }
-  }
-
-  /**
-   * Creates or updates an item in the container
-   * @param item The item to upsert
-   */
-  async upsertItem(item: Item) {
-    try {
-      const response = await getContainer(this.name).items.upsert(item);
-      logDBAction("UPSERT", this.name, response);
-    } catch (error) {
-      throw new AppError("Error Inserting to Database", 500, error);
-    }
-  }
-
-  /**
-   * Deletes an item from the container
-   * @param id The unique identifier of the item
-   * @param partitionKey The partition key for the item
-   */
-  async deleteItem(id: string, partitionKey: string) {
-    try {
-      const response = await getContainer(this.name)
-        .item(id, partitionKey)
-        .delete();
-      logDBAction("DELETE", this.name, response, partitionKey);
-    } catch (error) {
-      throw new AppError("Error Deleting from Database", 500, error);
-    }
-  }
-}
+setDBLogging({
+  logFn: logProperty,
+  errorFn: (msg, val) => logError(new Error(msg, { cause: val })),
+  aggregatorFn: () => getSubContext("db", initialContext),
+  storeCalls: true,
+});
 
 class CompanyContainer extends Container<Company> {
-  constructor() {
-    super("company");
+  constructor(container: Container<Company>) {
+    super("company", container.container);
   }
 
   async get({ id, ats }: CompanyKey) {
@@ -161,8 +56,8 @@ class CompanyContainer extends Container<Company> {
 }
 
 class JobContainer extends Container<Job> {
-  constructor() {
-    super("job");
+  constructor(container: Container<Job>) {
+    super("job", container.container);
   }
 
   async get({ id, companyId }: JobKey) {
@@ -190,87 +85,85 @@ class JobContainer extends Container<Job> {
 }
 
 class DB {
-  readonly job = new JobContainer();
-  readonly company = new CompanyContainer();
-  readonly metadata = new Container<Metadata>("metadata");
-  readonly locationCache = new Container<LocationCache>("locationCache");
+  private _company: CompanyContainer | undefined;
+  private _job: JobContainer | undefined;
+  private _metadata: Container<Metadata> | undefined;
+  private _locationCache: Container<LocationCache> | undefined;
 
-  constructor() {}
+  get company() {
+    if (!this._company) {
+      throw new Error("DB not connected yet. Call connect() first.");
+    }
+    return this._company;
+  }
+
+  get job() {
+    if (!this._job) {
+      throw new Error("DB not connected yet. Call connect() first.");
+    }
+    return this._job;
+  }
+
+  get metadata() {
+    if (!this._metadata) {
+      throw new Error("DB not connected yet. Call connect() first.");
+    }
+    return this._metadata;
+  }
+
+  get locationCache() {
+    if (!this._locationCache) {
+      throw new Error("DB not connected yet. Call connect() first.");
+    }
+    return this._locationCache;
+  }
+
+  /**
+   * Establishes connection to Cosmos DB and initializes containers
+   * Creates database and containers if they don't exist
+   * @throws {Error} If database connection fails
+   * @returns Promise that resolves when all containers are initialized
+   */
+  async connect(): Promise<void> {
+    const containers = await dbConnect({
+      endpoint: config.DATABASE_URL,
+      key: config.DATABASE_KEY,
+      name: "jobboard",
+      localCertPath:
+        config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
+      containers: [
+        {
+          name: "company",
+          partitionKey: "ats",
+          indexExclusions: ["/description/?", "/website/?"],
+        },
+        {
+          name: "job",
+          partitionKey: "companyId",
+        },
+        {
+          name: "metadata",
+          partitionKey: "id",
+          indexExclusions: "all",
+        },
+        {
+          name: "locationCache",
+          partitionKey: "pKey",
+          indexExclusions: "all",
+        },
+      ],
+    });
+
+    this._company = new CompanyContainer(
+      containers["company"] as Container<Company>
+    );
+    this._job = new JobContainer(containers["job"] as Container<Job>);
+    this._metadata = containers["metadata"] as Container<Metadata>;
+    this._locationCache = containers[
+      "locationCache"
+    ] as Container<LocationCache>;
+  }
 }
 
 // Export the singleton instance
 export const db = new DB();
-
-// #region Telemetry
-
-type DBAction = "READ" | "READ_ALL" | "UPSERT" | "DELETE" | "QUERY";
-
-interface DBLog {
-  name: DBAction;
-  in: ContainerName;
-  pkey?: PartitionKey;
-  query?: string;
-  ru: number;
-  ms: number;
-  bytes: number;
-  count?: number;
-}
-
-const initialContext = () => ({
-  calls: [] as DBLog[],
-  count: 0,
-  ru: 0,
-  ms: 0,
-  bytes: 0,
-});
-
-function logDBAction(
-  action: DBAction,
-  container: ContainerName,
-  response: ItemResponse<ItemDefinition> | FeedResponse<unknown>,
-  pkey?: PartitionKey,
-  query?: string | SqlQuerySpec
-) {
-  try {
-    const log: DBLog = {
-      name: action,
-      in: container,
-      ru: response.requestCharge,
-      ms: response.diagnostics.clientSideRequestStatistics.requestDurationInMs,
-      bytes:
-        response.diagnostics.clientSideRequestStatistics
-          .totalResponsePayloadLengthInBytes,
-    };
-
-    if (pkey) {
-      log.pkey = pkey;
-    }
-
-    if (query) {
-      log.query = typeof query === "string" ? query : query.query;
-    }
-
-    if ("resources" in response) {
-      log.count = response.resources.length;
-    }
-
-    addDBLog(log);
-  } catch (error) {
-    logError(error);
-  }
-}
-
-function addDBLog(log: DBLog) {
-  const context = getSubContext("db", initialContext);
-
-  if (context.calls.length < 10) {
-    context.calls.push(log);
-  }
-
-  context.count++;
-  context.ru += log.ru;
-  context.ms += log.ms;
-  context.bytes += log.bytes;
-}
-
-// #endregion

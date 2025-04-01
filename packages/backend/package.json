@@ -8,26 +8,17 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.1.1",
     "applicationinsights": "^2.9.5",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "express": "^4.21.0",
     "helmet": "^8.0.0",
-    "html-entities": "^2.5.2",
-    "openai": "^4.67.1",
-    "sanitize-html": "^2.13.1",
-    "showdown": "^2.1.0",
-    "turndown": "^7.2.0",
-    "zod": "^3.24.1"
+    "dry-utils": "^0.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.5",
-    "@types/sanitize-html": "^2.13.0",
-    "@types/showdown": "^2.0.6",
-    "@types/turndown": "^5.0.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2",
     "tsx": "^4.7.1"

@@ -1,7 +1,7 @@
+import { standardizeUntrustedHtml } from "dry-utils/htmldown";
 import { config } from "../config.ts";
 import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
-import { standardizeUntrustedHtml } from "../utils/html.ts";
 import { ATSBase } from "./atsBase.ts";
 
 interface CompanyResult {
@@ -75,9 +75,18 @@ export class Greenhouse extends ATSBase {
         id: String(jobs[0]?.id),
         companyId: id,
       });
+
+      const context = {
+        description: "Example job from the company",
+        content: {
+          ...exampleJob.item,
+          ...(exampleJob.context?.[0]?.content ?? {}),
+        },
+      };
+
       return {
         item: company,
-        context: { exampleJob: { ...exampleJob.item, ...exampleJob.context } },
+        context: [context],
       };
     }
 
@@ -135,16 +144,20 @@ export class Greenhouse extends ATSBase {
   private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
     const result = this.formatJobBasic(companyId, jobResult);
 
-    const { metadata, content, departments, offices } = jobResult;
+    const { id, metadata, content, departments, offices } = jobResult;
 
     result.item.description = standardizeUntrustedHtml(content);
 
     // Useful pieces that aren't redundant with the job object
-    result.context = {
-      metadata,
-      departments,
-      offices,
+    const context = {
+      description: `Additional information about the job ${id}`,
+      content: {
+        metadata,
+        departments,
+        offices,
+      },
     };
+    result.context = [context];
 
     return result;
   }

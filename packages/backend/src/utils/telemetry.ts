@@ -7,6 +7,7 @@ import type {
   RequestData,
 } from "applicationinsights/out/Declarations/Contracts/index.js";
 import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
+import { setAsyncLogging } from "dry-utils/async";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
 import { AppError } from "./AppError.ts";
@@ -28,6 +29,11 @@ export async function startTelemetry(): Promise<void> {
   _client = telemetryWorkaround.getClient();
   _client.addTelemetryProcessor(telemetryProcessor);
   _client.config.disableAppInsights = config.NODE_ENV === "dev";
+
+  setAsyncLogging({
+    logFn: logProperty,
+    errorFn: (msg, val) => logError(new Error(msg, { cause: val })),
+  });
 }
 
 interface CustomContext extends CorrelationContext {
@@ -70,8 +76,13 @@ function getContext(): Record<string, unknown> {
 
   // Otherwise, use the request-level context
   const context = <CustomContext>telemetryWorkaround.getCorrelationContext();
-  context.requestContext ??= {};
-  return context.requestContext;
+  if (context) {
+    context.requestContext ??= {};
+    return context.requestContext;
+  }
+
+  // If no context (eg. on startup), return an empty object
+  return {};
 }
 
 /**
@@ -124,8 +135,15 @@ export function logCounter(name: string, value: number = 1): void {
  */
 export function logError(error: unknown): void {
   const exception = error instanceof Error ? error : new Error(String(error));
-  const properties =
-    error instanceof AppError ? error.toErrorList() : undefined;
+
+  let properties = undefined;
+
+  if (error instanceof AppError) {
+    properties = error.toErrorList();
+  } else if (error instanceof Error) {
+    properties = { cause: error.cause };
+  }
+
   _client.trackException({ exception, properties });
 }
 

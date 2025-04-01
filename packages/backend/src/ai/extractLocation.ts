@@ -1,11 +1,10 @@
-import { z } from "zod";
+import { jsonCompletion, z, zString } from "dry-utils/ai";
 import { db } from "../db/db.ts";
 import type { Location } from "../types/dbModels.ts";
 import { AppError } from "../utils/AppError.ts";
 import { LRUCache } from "../utils/cache.ts";
 import { logCounter, logError } from "../utils/telemetry.ts";
-import { zString } from "../utils/zod.ts";
-import { jsonCompletion, setExtractedData } from "./openai.ts";
+import { setExtractedData } from "./setExtractedData.ts";
 
 const locationCache = new LRUCache<string, Location>(1000);
 
@@ -49,17 +48,17 @@ export async function extractLocation(location: Location): Promise<boolean> {
     return true;
   }
 
-  const result = await jsonCompletion(
+  const { content } = await jsonCompletion(
     "extractLocation",
     prompt,
-    schema,
-    normalizedText
+    normalizedText,
+    schema
   );
 
-  if (!result) return false;
+  if (!content) return false;
 
   const extractedLocation: Location = {};
-  setExtractedData(extractedLocation, result);
+  setExtractedData(extractedLocation, content);
   insertToCache(normalizedText, extractedLocation);
 
   if (!Object.keys(extractedLocation).length) {

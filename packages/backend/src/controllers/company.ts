@@ -1,10 +1,10 @@
+import { batch } from "dry-utils/async";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../types/clientModels.ts";
 import type { CompanyKey, CompanyKeys } from "../types/dbModels.ts";
 import { AppError } from "../utils/AppError.ts";
-import { asyncBatch } from "../utils/asyncBatch.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { refreshJobsForCompany } from "./job.ts";
@@ -39,7 +39,7 @@ export async function addCompany(key: CompanyKey) {
  */
 export async function addCompanies({ ids, ats }: CompanyKeys) {
   const keys = ids.map((id) => ({ id, ats }));
-  await asyncBatch("AddCompanies", keys, addCompanyInternal);
+  await batch("AddCompanies", keys, addCompanyInternal);
   companyInfoQueue.add(keys);
 }
 
@@ -54,7 +54,7 @@ export async function removeCompany(key: CompanyKey) {
   await db.company.remove(key);
   metadataCompanyExecutor.call();
   if (jobIds.length) {
-    await asyncBatch("RemoveCompanyJobs", jobIds, (id) =>
+    await batch("RemoveCompanyJobs", jobIds, (id) =>
       db.job.remove({ id, companyId })
     );
     metadataJobExecutor.call();

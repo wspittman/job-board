@@ -1,10 +1,17 @@
-import { z } from "zod";
+import {
+  jsonCompletion,
+  z,
+  zBoolean,
+  zEnum,
+  zNumber,
+  zObj,
+  zString,
+} from "dry-utils/ai";
 import type { Job, Location } from "../types/dbModels.ts";
 import { Office } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";
 import { normalizedLocation } from "../utils/location.ts";
-import { zBoolean, zEnum, zNumber, zObj, zString } from "../utils/zod.ts";
-import { jsonCompletion, setExtractedData } from "./openai.ts";
+import { setExtractedData } from "./setExtractedData.ts";
 
 const prompt = `You are an AI assistant specialized in analyzing job listings. Your task is to extract key information from job descriptions systematically.
 
@@ -92,23 +99,29 @@ const schema = z.object({
  * @param job The job object
  */
 export async function extractFacets(job: Context<Job>): Promise<void> {
-  const result = await jsonCompletion("extractFacets", prompt, schema, job);
+  const { content } = await jsonCompletion(
+    "extractFacets",
+    prompt,
+    job.item,
+    schema,
+    { context: job.context }
+  );
 
-  if (!result) return;
+  if (!content) return;
 
   // Temporary Reformatting Holdover
-  const includeSalary = result.currency === "USD" && !result.isHourly;
+  const includeSalary = content.currency === "USD" && !content.isHourly;
   const formattedResult = {
-    summary: result.summary,
-    salary: includeSalary ? result.minSalary : undefined,
-    experience: result.experience,
+    summary: content.summary,
+    salary: includeSalary ? content.minSalary : undefined,
+    experience: content.experience,
   };
 
   setExtractedData(job.item.facets, formattedResult);
 
   // Also Temporary Reformatting Holdover
   const location: Location = {};
-  setExtractedData(location, result.location);
+  setExtractedData(location, content.location);
   job.item.isRemote = location.remote === Office.Remote;
   job.item.location = normalizedLocation(location);
 }

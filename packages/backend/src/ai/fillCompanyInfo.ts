@@ -1,8 +1,8 @@
+import { jsonCompletion, zEnum, zNumber, zObj, zString } from "dry-utils/ai";
 import type { Company } from "../types/dbModels.ts";
 import { Industry, Stage, Visa } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";
-import { zEnum, zNumber, zObj, zString } from "../utils/zod.ts";
-import { jsonCompletion, setExtractedData } from "./openai.ts";
+import { setExtractedData } from "./setExtractedData.ts";
 
 const prompt = `You are a detail-oriented job seeker who excels at understanding company profiles through job descriptions.
 Your goal is to extract key company insights from available context.
@@ -47,16 +47,17 @@ const schema = zObj(
 export async function fillCompanyInfo(
   company: Context<Company>
 ): Promise<boolean> {
-  const result = await jsonCompletion(
+  const { content } = await jsonCompletion(
     "extractCompanyInfo",
     prompt,
+    company.item,
     schema,
-    company
+    { context: company.context }
   );
 
-  if (result) {
-    setExtractedData(company.item, result);
+  if (content) {
+    setExtractedData(company.item, content);
   }
 
-  return !!result;
+  return !!content;
 }
