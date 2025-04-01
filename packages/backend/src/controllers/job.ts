@@ -1,9 +1,9 @@
 import type { Resource } from "@azure/cosmos";
 import { batch } from "dry-utils/async";
+import { Query } from "dry-utils/db";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
-import { Query } from "../db/Query.ts";
 import type { Filters } from "../types/clientModels.ts";
 import type { CompanyKey, Job, JobKey, Location } from "../types/dbModels.ts";
 import { Office } from "../types/enums.ts";
@@ -219,7 +219,8 @@ async function readJobsByFilters({
     }
   }
 
-  return db.job.query<Job & Resource>(query.build());
+  // The limit of 24 items is intentional to prevent excessive data retrieval.
+  return db.job.query<Job & Resource>(query.build(24));
 }
 
 function addLocationClause(query: Query, location: string, isRemote?: boolean) {

@@ -8,7 +8,7 @@ import type { NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
 import { config } from "./config.ts";
-import { connectDB } from "./db/dbInit.ts";
+import { db } from "./db/db.ts";
 import { router } from "./routes/routes.ts";
 
 const app = express();
@@ -42,7 +42,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
  */
 async function startServer() {
   try {
-    await connectDB();
+    await db.connect();
 
     app.listen(config.PORT, () => {
       console.log(`Server running on port ${config.PORT}`);

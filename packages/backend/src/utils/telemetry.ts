@@ -76,8 +76,13 @@ function getContext(): Record<string, unknown> {
 
   // Otherwise, use the request-level context
   const context = <CustomContext>telemetryWorkaround.getCorrelationContext();
-  context.requestContext ??= {};
-  return context.requestContext;
+  if (context) {
+    context.requestContext ??= {};
+    return context.requestContext;
+  }
+
+  // If no context (eg. on startup), return an empty object
+  return {};
 }
 
 /**
