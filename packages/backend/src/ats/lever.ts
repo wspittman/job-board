@@ -63,9 +63,17 @@ export class Lever extends ATSBase {
 
     const cleanJob = this.formatJob(id, exampleJob);
 
+    const context = {
+      description: "Example job from the company",
+      content: {
+        ...cleanJob.item,
+        ...(cleanJob.context?.[0]?.content ?? {}),
+      },
+    };
+
     return {
       item: company,
-      context: { exampleJob: { ...cleanJob.item, ...cleanJob.context } },
+      context: [context],
     };
   }
 
@@ -127,15 +135,18 @@ export class Lever extends ATSBase {
 
     // Useful pieces that aren't redundant with the job object
     const context = {
-      categories,
-      country,
-      workplaceType,
-      salaryRange,
+      description: `Additional information about the job ${id}`,
+      content: {
+        categories,
+        country,
+        workplaceType,
+        salaryRange,
+      },
     };
 
     return {
       item: job,
-      context,
+      context: [context],
     };
   }
 

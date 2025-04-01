@@ -1,4 +1,7 @@
 export interface Context<T> {
   item: T;
-  context?: Record<string, unknown>;
+  context?: {
+    description: string;
+    content: Record<string, unknown>;
+  }[];
 }
