@@ -1,4 +1,4 @@
-import { setAILogging } from "@dry-utils/openai";
+import { setAILogging } from "dry-utils-openai";
 import type { Company, Job, Location } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
 import { getSubContext, logError, logProperty } from "../utils/telemetry.ts";

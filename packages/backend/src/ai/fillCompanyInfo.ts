@@ -4,7 +4,7 @@ import {
   zNumber,
   zObj,
   zString,
-} from "@dry-utils/openai";
+} from "dry-utils-openai";
 import type { Company } from "../types/dbModels.ts";
 import { Industry, Stage, Visa } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";

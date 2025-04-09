@@ -6,7 +6,7 @@ import {
   zNumber,
   zObj,
   zString,
-} from "@dry-utils/openai";
+} from "dry-utils-openai";
 import type { Job, Location } from "../types/dbModels.ts";
 import { Office } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";

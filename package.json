@@ -4,8 +4,8 @@
   "scripts": {
     "start:backend": "npm run dev --workspace=backend",
     "start:frontend": "npm run dev --workspace=frontend",
-    "link-dry-utils": "npm link @dry-utils/async @dry-utils/text @dry-utils/openai @dry-utils/cosmosdb",
-    "unlink-dry-utils": "npm unlink @dry-utils/async @dry-utils/text @dry-utils/openai @dry-utils/cosmosdb"
+    "link-dry-utils": "npm link dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
+    "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb"
   },
   "private": true,
   "workspaces": [

@@ -1,5 +1,5 @@
-import { batch } from "@dry-utils/async";
-import { Query } from "@dry-utils/cosmosdb";
+import { batch } from "dry-utils-async";
+import { Query } from "dry-utils-cosmosdb";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";

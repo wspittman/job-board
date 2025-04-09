@@ -1,4 +1,4 @@
-import type { z } from "@dry-utils/openai";
+import type { z } from "dry-utils-openai";
 
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object

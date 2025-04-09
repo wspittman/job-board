@@ -1,4 +1,4 @@
-import { batch } from "@dry-utils/async";
+import { batch } from "dry-utils-async";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
