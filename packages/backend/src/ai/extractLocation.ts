@@ -1,4 +1,4 @@
-import { jsonCompletion, z, zString } from "dry-utils/ai";
+import { jsonCompletion, z, zString } from "@dry-utils/openai";
 import { db } from "../db/db.ts";
 import type { Location } from "../types/dbModels.ts";
 import { AppError } from "../utils/AppError.ts";

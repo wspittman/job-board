@@ -1,4 +1,4 @@
-import { Container, dbConnect, setDBLogging } from "dry-utils/db";
+import { Container, dbConnect, setDBLogging } from "@dry-utils/cosmosdb";
 import { config } from "../config.ts";
 import type {
   Company,
