@@ -11,6 +11,10 @@
     "applicationinsights": "^2.9.5",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
+    "dry-utils-async": "^0.1.0",
+    "dry-utils-cosmosdb": "^0.1.0",
+    "dry-utils-openai": "^0.1.0",
+    "dry-utils-text": "^0.1.0",
     "express": "^4.21.0",
     "helmet": "^8.0.0"
   },
