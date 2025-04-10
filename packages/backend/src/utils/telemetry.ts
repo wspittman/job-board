@@ -7,7 +7,7 @@ import type {
   RequestData,
 } from "applicationinsights/out/Declarations/Contracts/index.js";
 import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
-import { setAsyncLogging } from "dry-utils/async";
+import { setAsyncLogging } from "dry-utils-async";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
 import { AppError } from "./AppError.ts";
