@@ -20,7 +20,7 @@ setAILogging({
   logFn: logProperty,
   errorFn: (msg, val) => logError(new Error(msg, { cause: val })),
   aggregatorFn: () => getSubContext("llm", initialContext),
-  storeCalls: true,
+  storeCalls: 10,
 });
 
 class LLMConnector {
