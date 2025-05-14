@@ -1,23 +1,16 @@
 # yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
-description: 'Getting started'
+description: "Getting started"
 prompts:
-  - 'Convert this English to {{language}}: {{input}}'
-  - 'Translate to {{language}}: {{input}}'
+  - "Return the ISO 3166-1 alpha-3 three-letter code for the country containing this location"
 
 providers:
-  - openai:gpt-4o-mini
-  - openai:gpt-4o
+  - id: file://./evalProvider.ts
+    label: "Eval Provider"
+    # This is where you do different models / model options
 
 tests:
   - vars:
-      language: French
-      input: Hello world
+      location: "Seattle"
     assert:
       - type: contains
-        value: 'Bonjour le monde'
-  - vars:
-      language: Spanish
-      input: Where is the library?
-    assert:
-      - type: icontains
-        value: 'Dónde está la biblioteca'
+        value: "USA"
