@@ -6,7 +6,7 @@
     "start:frontend": "npm run dev --workspace=frontend",
     "link-dry-utils": "npm link dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
-    "eval": "promptfoo eval -c ./evals/eval.yaml --env-file ./packages/backend/.env",
+    "eval-fill-company": "promptfoo eval -c ./evals/yamls/fillCompany.yaml --env-file ./packages/backend/.env",
     "fetch-input": "tsx evals/fetchInput.ts"
   },
   "private": true,

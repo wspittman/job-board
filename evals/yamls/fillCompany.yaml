@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+prompts:
+  - "fillCompany"
+
+providers:
+  - file://providers.yaml
+
+tests:
+  - file://testGenerator.ts:fillCompanyTests

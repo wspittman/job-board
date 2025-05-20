@@ -54,7 +54,7 @@ export default class EvalProvider {
     { vars }: CallApiContextParams
   ): Promise<ProviderResponse> {
     const { inputFile } = vars;
-    const inputFilePath = `./evals/companyInputs/${inputFile}.json`;
+    const inputFilePath = `./evals/fillCompanyInputs/${inputFile}`;
     const fileContent = await readFile(inputFilePath, "utf-8");
     const input = JSON.parse(fileContent) as Context<Company>;
 
@@ -66,7 +66,7 @@ export default class EvalProvider {
 
     await writeFile(
       // TBD other options go in the file name to differentiate
-      `./evals/companyOutputs/${inputFile}_${Date.now()}.json`,
+      `./evals/fillCompanyOutputs/${inputFile}_${Date.now()}.json`,
       JSON.stringify(ret, null, 2)
     );
 

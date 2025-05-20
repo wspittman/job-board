@@ -28,7 +28,7 @@ if (action === "company") {
     );
 
     await writeFile(
-      `./evals/companyInputs/${atsId}_${companyId}.json`,
+      `./evals/fillCompanyInputs/${atsId}_${companyId}.json`,
       JSON.stringify(result, null, 2)
     );
   }
