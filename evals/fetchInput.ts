@@ -1,37 +1,38 @@
-import { writeFile } from "fs/promises";
 import { ats } from "../packages/backend/src/ats/ats.ts";
 import type { ATS } from "../packages/backend/src/types/dbModels.ts";
+import { writeInputObj } from "./fileUtils.ts";
 
 const args = process.argv.slice(2);
 const [action, atsId, companyId, jobId] = args;
+const actionTypes = ["company", "job"];
+const atsTypes = ["greenhouse", "lever"];
 
 function usageReminder() {
   console.error(
-    "Usage: node fetchInput.js 'company'|'job' 'greenhouse'|'lever' <companyId> [jobId]"
+    "Usage: npm fetch-input -- actionType atsType <companyId> [jobId]\n" +
+      `  actionType: ${actionTypes.join("|")}\n` +
+      `  atsType: ${atsTypes.join("|")}\n`
   );
   process.exit(1);
 }
 
-if (
-  !["company", "job"].includes(action) ||
-  !["greenhouse", "lever"].includes(atsId) ||
-  !companyId
-) {
+if (!actionTypes.includes(action) || !atsTypes.includes(atsId) || !companyId) {
   usageReminder();
 }
 
-if (action === "company") {
-  async function getCompanyInput(): Promise<void> {
-    const result = await ats.getCompany(
-      { ats: atsId as ATS, id: companyId },
-      true
-    );
+async function getCompanyInput(): Promise<void> {
+  const result = await ats.getCompany(
+    { ats: atsId as ATS, id: companyId },
+    true
+  );
 
-    await writeFile(
-      `./evals/fillCompanyInputs/${atsId}_${companyId}.json`,
-      JSON.stringify(result, null, 2)
-    );
-  }
+  await writeInputObj("fillCompany", `${atsId}_${companyId}`, result);
+}
 
-  getCompanyInput();
+switch (action) {
+  case "company":
+    getCompanyInput();
+    break;
+  default:
+    console.error("Unknown action");
 }

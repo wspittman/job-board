@@ -6,4 +6,4 @@ providers:
   - file://providers.yaml
 
 tests:
-  - file://testGenerator.ts:fillCompanyTests
+  - file://../testGenerator.ts:fillCompanyTests

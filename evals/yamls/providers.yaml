@@ -2,7 +2,3 @@
   label: "openai:gpt-4o-mini"
   config:
     model: "openai:gpt-4o-mini"
-- id: file://../evalProvider.ts
-  label: "openai:gpt-4o"
-  config:
-    model: "openai:gpt-4o"

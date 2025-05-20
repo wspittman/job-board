@@ -1,7 +1,6 @@
-import { readFile, writeFile } from "fs/promises";
 import { llm } from "../packages/backend/src/ai/llm.ts";
-import type { Company } from "../packages/backend/src/types/dbModels.ts";
 import type { Context } from "../packages/backend/src/types/types.ts";
+import { readInputObj, writeOutputObj } from "./fileUtils.ts";
 
 // #region promptfoo partial types
 
@@ -50,25 +49,28 @@ export default class EvalProvider {
   }
 
   async callApi(
-    _prompt: string,
+    prompt: string,
     { vars }: CallApiContextParams
   ): Promise<ProviderResponse> {
-    const { inputFile } = vars;
-    const inputFilePath = `./evals/fillCompanyInputs/${inputFile}`;
-    const fileContent = await readFile(inputFilePath, "utf-8");
-    const input = JSON.parse(fileContent) as Context<Company>;
+    const inputFile = vars.inputFile as string;
 
-    await llm.fillCompanyInfo(input);
+    return await this.runAction("fillCompany", inputFile, llm.fillCompanyInfo);
+  }
+
+  private async runAction<T extends Context<object>>(
+    action: string,
+    file: string,
+    func: (input: T) => Promise<boolean>
+  ) {
+    const input = await readInputObj<T>(action, file);
+
+    await func(input);
 
     const ret: ProviderResponse = {
       output: input.item,
     };
 
-    await writeFile(
-      // TBD other options go in the file name to differentiate
-      `./evals/fillCompanyOutputs/${inputFile}_${Date.now()}.json`,
-      JSON.stringify(ret, null, 2)
-    );
+    await writeOutputObj(action, file, ret);
 
     return ret;
   }
