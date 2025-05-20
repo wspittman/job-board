@@ -1,6 +1,7 @@
 cosmosdbcert.cer
 .env
 *.tsbuildinfo
+/evals/companyOutputs/
 
 # Logs
 logs

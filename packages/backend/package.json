@@ -5,8 +5,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "tsx watch --env-file=./.env ./src/app.ts",
-    "build": "tsc",
-    "eval": "promptfoo eval -c ./evals/eval.yaml --env-file ./.env"
+    "build": "tsc"
   },
   "dependencies": {
     "applicationinsights": "^2.9.5",

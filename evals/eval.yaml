@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+prompts:
+  - "fillCompanyInfo"
+
+providers:
+  - id: file://./evalProvider.ts
+    label: "openai:gpt-4o-mini"
+    config:
+      model: "openai:gpt-4o-mini"
+  - id: file://./evalProvider.ts
+    label: "openai:gpt-4o"
+    config:
+      model: "openai:gpt-4o"
+
+tests:
+  - vars:
+      type: "fillCompanyInfo"
+      inputFile:
+        - "greenhouse_redcellpartners"
+    assert:
+      - type: contains
+        transform: output.industry
+        value: "Professional"

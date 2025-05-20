@@ -1,4 +1,7 @@
-import { proseCompletion } from "dry-utils-openai";
+import { readFile, writeFile } from "fs/promises";
+import { llm } from "../packages/backend/src/ai/llm.ts";
+import type { Company } from "../packages/backend/src/types/dbModels.ts";
+import type { Context } from "../packages/backend/src/types/types.ts";
 
 // #region promptfoo partial types
 
@@ -47,15 +50,26 @@ export default class EvalProvider {
   }
 
   async callApi(
-    prompt: string,
+    _prompt: string,
     { vars }: CallApiContextParams
   ): Promise<ProviderResponse> {
-    const { content, error } = await proseCompletion("evalTest", prompt, vars);
+    const { inputFile } = vars;
+    const inputFilePath = `./evals/companyInputs/${inputFile}.json`;
+    const fileContent = await readFile(inputFilePath, "utf-8");
+    const input = JSON.parse(fileContent) as Context<Company>;
+
+    await llm.fillCompanyInfo(input);
 
     const ret: ProviderResponse = {
-      error,
-      output: content,
+      output: input.item,
     };
+
+    await writeFile(
+      // TBD other options go in the file name to differentiate
+      `./evals/companyOutputs/${inputFile}_${Date.now()}.json`,
+      JSON.stringify(ret, null, 2)
+    );
+
     return ret;
   }
 }
