@@ -1,0 +1,42 @@
+{
+  "item": {
+    "id": "quantum-delta-mesh",
+    "ats": "greenhouse",
+    "name": "QuantumDeltaMesh",
+    "description": ""
+  },
+  "context": [
+    {
+      "description": "Example job from the company",
+      "content": {
+        "id": "4683804008",
+        "companyId": "quantum-delta-mesh",
+        "company": "quantum-delta-mesh",
+        "title": "Customer Marketing Manager",
+        "location": "Seattle",
+        "description": "<p><strong>About Us</strong>  </p>\n<p>QuantumDeltaMesh is a trusted AI platform purpose-built for law firms, reshaping how data drives impactful outcomes. Our innovative approach blends technology with deep legal expertise, making us a leader in our field. We go beyond surface-level AI to deeply understand our customers’ daily needs, empowering law firms with unparalleled data insights. QuantumDeltaMesh delivers human-level, accurate analysis of complex data and legal records, quickly and efficiently bringing critical insights when they matter most. Trusted by top litigation lawyers, our platform has supported over $1 billion in settlements, even in courtrooms.  </p>\n<h3><strong>Who Are We Looking to Add to Our Team?</strong></h3>\n<p>We are seeking a highly motivated and experienced <strong>Customer Marketing Manager</strong> to join our dynamic team. In this role, you will be responsible for developing and executing marketing strategies that drive customer engagement and growth. You will work closely with our Customer Success and Sales teams, and your expertise will play a crucial role in shaping the perception and utilization of our products, directly impacting our growth and success.</p>\n<h3><strong>Key Responsibilities</strong></h3>\n<ul>\n<li>Partner with the Customer Success team to refine the Customer Onboarding Strategy and Documentation</li>\n<li>Conduct market research to understand customer needs, identify new market opportunities, and stay ahead of industry trends.</li>\n<li>Develop and implement comprehensive marketing strategies that enhance customer engagement, drive product adoption, and support firm expansion of QuantumDeltaMesh usage.</li>\n<li>Create compelling marketing content, including kickoff and onboarding decks, foundation training, advanced training, and adoption check-in content to articulate the benefits of our products.</li>\n<li>Serve as the Voice of the Customer Hub by creating and administering customer feedback surveys, including a post-onboarding survey and potentially a mid-journey value survey</li>\n<li>Conduct interviews with select customers and obtain further insights about their QuantumDeltaMesh experience</li>\n<li>Partner with Product and Customer Success teams to make product betas a defining, and high-end experience for participants.</li>\n<li>Foster strong relationships with key customers to facilitate feedback and develop customer advocacy programs.</li>\n<li>Build a strategy and plan for our customer advisory boards, including recruiting members and facilitating meetings to gather valuable customer insights and strengthen relationships.</li>\n<li>Create and execute a QuantumDeltaMesh AI Certification program</li>\n<li>Create and execute a QuantumDeltaMesh online community and referral program</li>\n<li>Represent the company at industry events, conferences, and seminars to enhance brand visibility and expand professional network.</li>\n<li>Monitor and analyze marketing campaign performance and optimize based on insights gathered.</li>\n</ul>\n<h3><strong>Qualifications</strong></h3>\n<ul>\n<li>Bachelor's degree in marketing, Business Administration, or related field</li>\n<li>Minimum of 5 years’ experience in marketing, with a strong focus on customer marketing.</li>\n<li>Proven track record of developing and executing successful customer marketing strategies and campaigns.</li>\n<li>Strong analytical skills and experience with marketing metrics and reporting tools.</li>\n<li>Excellent communication and interpersonal skills, with the ability to engage and influence stakeholders at all levels.</li>\n<li>Creative thinker with a problem-solving mindset and a strong attention to detail.</li>\n<li>Strong attention to detail with good communication and organizational skills.</li>\n<li>Ability to work in a fast-paced environment and manage multiple projects simultaneously.</li>\n</ul>\n<p><strong>Compensation</strong> </p>\n<p>The base salary range for this position in Seattle range of $133,000 – $163,000. This role is also eligible for stock options. Compensation may vary inside of this range depending on a number of factors, including a candidate’s qualifications, skills, competencies, and experience.  </p>\n<p><strong>Why Join Us?</strong> </p>\n<p>As a Series-B startup, joining QuantumDeltaMesh means becoming a vital contributor to our success, where your ideas and efforts will directly shape our products, company culture, and long-term vision. We're in an exciting phase of scaling, presenting opportunities for both company and career growth as we expand our market presence and develop new features and services. </p>\n<p><strong>Benefits &amp; Perks</strong> </p>\n<p>QuantumDeltaMesh offers an extensive benefits package and perks which include: </p>\n<ul>\n<li>Health insurance: medical, dental, and vision </li>\n<li>401k</li>\n<li>Flexible paid time off (PTO) and company-paid holidays </li>\n<li>Monthly commuter subsidies</li>\n<li>DoorDash subsidies for breakfast and dinner</li>\n</ul>\n<p><strong>E-Verify Participation Notice</strong>  </p>\n<p><em>QuantumDeltaMesh participates in E-Verify, an employment authorization program through the U.S. Department of Homeland Security and the Social Security Administration.</em> </p>\n<p><strong>Equal Employment Opportunity (EEO) Statement</strong> </p>\n<p><em>QuantumDeltaMesh is committed to creating a diverse environment and is proud to be an equal opportunity employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, gender, gender identity or expression, sexual orientation, national origin, genetics, disability, age, or veteran status.</em></p>",
+        "postTS": 1747164451000,
+        "applyUrl": "https://job-boards.greenhouse.io/quantum-delta-mesh/jobs/4683804008",
+        "facets": {},
+        "metadata": null,
+        "departments": [
+          {
+            "id": 4041621008,
+            "name": "Marketing",
+            "child_ids": [],
+            "parent_id": null
+          }
+        ],
+        "offices": [
+          {
+            "id": 4027600008,
+            "name": "Seattle",
+            "location": "Seattle, Washington, United States",
+            "child_ids": [],
+            "parent_id": null
+          }
+        ]
+      }
+    }
+  ]
+}

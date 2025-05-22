@@ -1,0 +1,38 @@
+{
+  "item": {
+    "id": "EmeraldCanopyRoot",
+    "ats": "lever",
+    "name": "EmeraldCanopyRoot"
+  },
+  "context": [
+    {
+      "description": "Example job from the company",
+      "content": {
+        "id": "2c5df400-df42-4a2b-9ac3-d8dd4a75a882",
+        "companyId": "EmeraldCanopyRoot",
+        "company": "EmeraldCanopyRoot",
+        "title": "Regional Seed Project Manager (California)",
+        "location": "hybrid: [Etna, CA]",
+        "description": "<p><strong>About Emerald Canopy Root (Root):</strong> </p>\n<p>As the leading end-to-end reforestation company in the U.S., Root is on a mission to make reforestation scalable. As bigger and hotter fires destroy more forestland every year, Root provides fast, resilient forest restoration for landowners impacted by devastating wildfires. As the only vertically-integrated reforestation company in the industry, Root has removed the financial, procedural, and seed supply barriers that typically stand in the way of getting reforestation done.  Root collects native, diverse seed species and manages site preparation, planting, and ongoing monitoring, delivering high quality projects.  By assembling first-of-its-kind third party capital, Root delivers these projects at no-cost to landowners.  With trusted forestry companies <a href=\"https://silvaseed.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Silvaseed</a> and <a href=\"https://www.calforest.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Cal Forest</a> in its portfolio, Root is the largest seed bank and reforestation container stock producer in the Western U.S. Root is also an innovation center for the non-timber forestry supply chain, developing various biological and technical products for achieving land management goals more efficiently. To learn more, visit <a href=\"http://www.emeraldroot.com\" target=\"_blank\" rel=\"noopener noreferrer\">www.emeraldroot.com</a> and watch this <a href=\"https://www.emeraldroot.com/reforestation\" target=\"_blank\" rel=\"noopener noreferrer\">video of our recent Montana project</a> (hyperlink: <a href=\"https://www.emeraldroot.com/reforestation\" target=\"_blank\" rel=\"noopener noreferrer\">https://www.emeraldroot.com/reforestation</a>)</p>\n<p><strong>If you’re inspired by our work, we’d encourage you to apply!</strong></p>\n<p><strong>Job Summary:</strong></p>\n<p>The Regional Seed Project Manager (the incumbent) will organize and manage collection opportunities to increase and diversify the seed inventory stored at Cal Forest’s Ft. Jones facility. The incumbent will facilitate seed sales transactions from Cal Forest holdings as well as brokerage opportunities from other seed banks or customer holdings. The incumbent will also oversee and organize cone scouting and cone collection within California. This role will interface directly with private landholders across the state to acquire access for us to collect, and when possible, initiate sow orders for those landowners. The incumbent will work with the State of California on permitting, seed certification, and seed purchasing from Cal Fire’s LA Moran Reforestation Center. The incumbent will complete all required reporting associated with Cal Forest’s active Cal Fire Workforce and Business Development grant and will author additional grant applications to further scale seed operations in California.</p>\n<p>Key Responsibilities</p>\n<ul>\n<li>Grant receipt reporting and administration</li>\n<li>Grant writing for expansion of seed program operations</li>\n<li>Seed transactions and brokerage </li>\n<li>Cone scouting and collection coordinationInterface with contractors and vendors </li>\n<li>Build and document processes for record keeping, regional team organization, and site specific operations</li>\n<li>Support in the scaling of a recalcitrant seed supply chain for California</li>\n<li>Support and expand on relationships with California state and federal agencies</li>\n<li>Respond to and advocate for the needs of teams involved with seed processing </li>\n</ul>\n<p>Desired Skills and Experience</p>\n<ul>\n<li>Familiarity with California conifer identification</li>\n<li>Excellent communication, organization, record keeping </li>\n<li>Knowledge of seed biology including conifer reproduction</li>\n<li>Grant writing experience </li>\n</ul>\n<p>Bonus Skills and Experience</p>\n<ul>\n<li>Detailed knowledge of conifer reproduction</li>\n<li>Ability to speak or willing to learn Spanish</li>\n<li>Familiarity working with state and federal entities</li>\n</ul>\n<p><strong>Emerald Canopy Root, Silvaseed &amp; Cal Forest offer:</strong></p>\n<p>- Competitive salary</p>\n<p>- Location-based compensation</p>\n<p>- 80% health insurance coverage for Full-Time non-seasonal employees, including Medical, Dental &amp; Vision insurance plans</p>\n<p>- Voluntary insurance plans with competitive premium rates: Pet insurance, Life insurance, Accidents.  </p>\n<p>- Company paid Short Term Disability insurance and Group Term Life insurance</p>\n<p>- Company’s incentive stock options (ISO) for eligible employee groups</p>\n<p>- Sustainable Retirement saving plan: 401k matching, including 401(k) and Roth 401(k), with climate-focused investment options.</p>\n<p>- Commuter Benefits in eligible cities</p>\n<p>- 6 paid holidays.  Two company-wide closing weeks per year. </p>\n<p>- Flexible PTO for Salaried employees.  Generous PTO accrual for Hourly employees.</p>\n<p>- Allowances for out-of-state employees</p>\n<p>- Relocation support for out-of-state employees</p>\n<p>- Our Seattle office is dog friendly!</p>",
+        "postTS": 1746547851298,
+        "applyUrl": "https://jobs.lever.co/EmeraldCanopyRoot/2c5df400-df42-4a2b-9ac3-d8dd4a75a882/apply",
+        "facets": {},
+        "categories": {
+          "commitment": "Full-time",
+          "department": "Nurseries",
+          "location": "Etna, CA",
+          "team": "Cal Forest",
+          "allLocations": ["Etna, CA"]
+        },
+        "country": "US",
+        "workplaceType": "hybrid",
+        "salaryRange": {
+          "currency": "USD",
+          "min": 50000,
+          "max": 60000,
+          "interval": "per-year-salary"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "item": {
+    "id": "silver-zephyr-gate",
+    "ats": "lever",
+    "name": "SilverZephyrGate"
+  },
+  "context": [
+    {
+      "description": "Example job from the company",
+      "content": {
+        "id": "3c9bdb68-429d-44f6-9fb2-95c52a33be45",
+        "companyId": "silver-zephyr-gate",
+        "company": "silver-zephyr-gate",
+        "title": "[ Freelance ] Technical Program Manager, Engineering",
+        "location": "onsite: [Paris]",
+        "description": "<p><strong>About SilverZephyrGate</strong></p>\n<p>At SilverZephyrGate AI, we believe in the power of AI to simplify tasks, save time, and enhance learning and creativity. Our technology is designed to integrate seamlessly into daily working life.</p>\n<p>We democratize AI through high-performance, optimized, open-source and cutting-edge models, products and solutions. Our comprehensive AI platform is designed to meet enterprise needs, whether on-premises or in cloud environments. Our offerings include le Chat, the AI assistant for life and work.</p>\n<p>We are a dynamic, collaborative team passionate about AI and its potential to transform society.</p>\n<p>Our diverse workforce thrives in competitive environments and is committed to driving innovation. Our teams are distributed between France, USA, UK, Germany and Singapore. We are creative, low-ego and team-spirited.</p>\n<p>Join us to be part of a pioneering company shaping the future of AI. Together, we can make a meaningful impact. See more about our culture on <a href=\"https://silver-zephyr-gate.ai/careers\" target=\"_blank\" rel=\"noopener noreferrer\">https://silver-zephyr-gate.ai/careers</a>.</p>\n<p><strong>Job Summary:</strong></p>\n<p>- We are seeking a highly skilled and experienced Technical Program Manager (TPM) to support our Head of Engineering in delivering high-impact technical projects.</p>\n<p>- The TPM will be responsible for planning, executing, and overseeing technical programs that align with our strategic goals. This role requires a blend of technical acumen, project management expertise, and strong leadership skills to ensure projects are delivered on time, within budget, and to the highest quality standards.</p>\n<p>- This is a part time position: 3 months /5 days a week </p>\n<p><strong>Role:</strong></p>\n<p>- Program Management: Oversee and manage our model training and deployment processes, ensuring efficiency, effectiveness, and alignment with product timelines.</p>\n<p>- Cross-Functional Collaboration: Work closely with cross-functional teams, including the science; product ; marketing/Coms teams, to ensure alignment of engineering operations with overall product and business objectives. Track project progress, timelines, and resources.</p>\n<p>- Process Improvement: Continuously identify and implement process improvements to enhance the efficiency and productivity of the engineering team.</p>\n<p>- Stakeholder Management: Regularly communicate with stakeholders to provide updates on program status, risks, and issues, and to manage expectations.</p>\n<p>- Risk Management: Identify potential risks and issues in the program lifecycle, and develop contingency plans to mitigate them.</p>\n<p><strong>Profile:</strong></p>\n<p>- You hold a degree in a relevant scientific field (e.g., Computer Science, Data Science, Engineering, etc.).</p>\n<p>- You have proven experience in managing technical programs, preferably within an engineering team.</p>\n<p>- You have a strong understanding of model training and deployment processes, as well as science operations.</p>\n<p>- You have excellent project management skills, with the ability to manage multiple projects simultaneously.</p>\n<p>- You have high communication and stakeholder management skills.</p>\n<p>- You are highly organized, detail-oriented, and able to work well under pressure.</p>\n<p>- You are a proactive problem-solver with a continuous improvement mindset.</p>",
+        "postTS": 1740040976790,
+        "applyUrl": "https://jobs.lever.co/silver-zephyr-gate/3c9bdb68-429d-44f6-9fb2-95c52a33be45/apply",
+        "facets": {},
+        "categories": {
+          "commitment": "Fixed term",
+          "location": "Paris",
+          "team": "Engineering & Infra",
+          "allLocations": ["Paris"]
+        },
+        "country": "FR",
+        "workplaceType": "onsite"
+      }
+    }
+  ]
+}
