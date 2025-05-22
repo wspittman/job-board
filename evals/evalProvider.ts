@@ -1,48 +1,13 @@
 import { specificLLM } from "../packages/backend/src/ai/llm.ts";
 import type { Context } from "../packages/backend/src/types/types.ts";
 import { startTelemetry } from "../packages/backend/src/utils/telemetry.ts";
-import { readInputObj, writeOutputObj } from "./fileUtils.ts";
+import { readObj, writeObj } from "./fileUtils.ts";
 
 startTelemetry();
 
 const actions = {
   fillCompany: "fillCompanyInfo",
 };
-
-// #region promptfoo partial types
-
-/*
-Reluctant to require the promptfoo package as a dev dependency, since we are treating it more as an external tool.
-Some simple partial types help us out here
-*/
-
-interface ProviderOptions {
-  id?: string;
-  config?: {
-    model?: string;
-  };
-}
-
-interface CallApiContextParams {
-  vars: Record<string, string | object>;
-}
-
-interface TokenUsage {
-  total: number;
-  prompt: number;
-  completion: number;
-  numRequests: number;
-  cached: number;
-}
-
-interface ProviderResponse {
-  cached?: boolean;
-  error?: string;
-  output?: string | any;
-  tokenUsage?: TokenUsage;
-}
-
-// #endregion
 
 export default class EvalProvider {
   protected providerId: string;
@@ -81,7 +46,21 @@ export default class EvalProvider {
     action: string,
     file: string
   ) {
-    const input = await readInputObj<T>(action, file);
+    const outputFile = `${this.model}_${file}`;
+    const savedOutput = await readObj<ProviderResponse>(
+      action,
+      "Outputs",
+      outputFile
+    );
+
+    if (savedOutput) {
+      return savedOutput;
+    }
+
+    const input = await readObj<T>(action, "Inputs", file);
+    if (!input) {
+      throw new Error(`Input file not found: ${file}`);
+    }
 
     await specificLLM(this.model)[actions[action]](input);
 
@@ -89,7 +68,7 @@ export default class EvalProvider {
       output: input.item,
     };
 
-    await writeOutputObj(action, file, ret);
+    await writeObj(action, "Outputs", outputFile, ret);
 
     return ret;
   }

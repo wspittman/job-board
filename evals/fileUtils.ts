@@ -1,45 +1,49 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 
+type Phase = "Inputs" | "Outputs" | "Ground" | "OutputBaselines";
+
 const basePath = path.join(process.cwd(), "evals");
-const inputDir = (action: string) => path.join(basePath, `${action}Inputs`);
-const outputDir = (action: string) => path.join(basePath, `${action}Outputs`);
+const getDir = (action: string, phase: Phase) =>
+  path.join(basePath, `${action}${phase}`);
+const cache: Record<string, unknown> = {};
 
 export async function readInputNames(action: string): Promise<string[]> {
-  return await readdir(inputDir(action));
+  return await readdir(getDir(action, "Inputs"));
 }
 
-export async function readInputObj<T>(
+export async function readObj<T>(
   action: string,
-  filename: string
-): Promise<T> {
-  const dir = inputDir(action);
-  const filePath = path.join(dir, filename);
-  const fileContent = await readFile(filePath, "utf-8");
-  return JSON.parse(fileContent) as T;
+  phase: Phase,
+  name: string
+): Promise<T | undefined> {
+  const key = `${action}${phase}${name}`;
+  if (cache[key]) {
+    return cache[key] as T;
+  }
+
+  const dir = getDir(action, phase);
+  const filePath = path.join(dir, name);
+
+  let fileContent: string;
+  try {
+    fileContent = await readFile(filePath, "utf-8");
+  } catch (error) {
+    return undefined;
+  }
+
+  const result = JSON.parse(fileContent) as T;
+  cache[key] = result;
+  return result;
 }
 
-export async function writeInputObj(
+export async function writeObj(
   action: string,
+  phase: Phase,
   name: string,
   obj: unknown
 ): Promise<void> {
-  await writeObject(inputDir(action), name + ".json", obj);
-}
-
-export async function writeOutputObj(
-  action: string,
-  name: string,
-  obj: unknown
-): Promise<void> {
-  await writeObject(outputDir(action), `${name}_${Date.now()}.json`, obj);
-}
-
-async function writeObject(
-  dir: string,
-  filename: string,
-  obj: unknown
-): Promise<void> {
+  const dir = getDir(action, phase);
   await mkdir(dir, { recursive: true });
-  await writeFile(path.join(dir, filename), JSON.stringify(obj, null, 2));
+  await writeFile(path.join(dir, name), JSON.stringify(obj, null, 2));
 }

@@ -1,6 +1,6 @@
 import { ats } from "../packages/backend/src/ats/ats.ts";
 import type { ATS } from "../packages/backend/src/types/dbModels.ts";
-import { writeInputObj } from "./fileUtils.ts";
+import { writeObj } from "./fileUtils.ts";
 
 const args = process.argv.slice(2);
 const [action, atsId, companyId, jobId] = args;
@@ -26,7 +26,7 @@ async function getCompanyInput(): Promise<void> {
     true
   );
 
-  await writeInputObj("fillCompany", `${atsId}_${companyId}`, result);
+  await writeObj("fillCompany", "Inputs", `${atsId}_${companyId}`, result);
 }
 
 switch (action) {
