@@ -225,6 +225,12 @@ function devLogException({ exceptions, properties }: ExceptionData) {
     });
 
     if (first) {
+      if (typeof properties?.cause === "string") {
+        try {
+          properties.cause = JSON.parse(properties.cause);
+        } catch {}
+      }
+
       devLog({
         ...simplify(first),
         properties,

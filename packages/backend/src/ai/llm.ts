@@ -24,19 +24,23 @@ setAILogging({
 });
 
 class LLMConnector {
-  constructor() {}
+  constructor(private model?: string) {}
 
   async fillCompanyInfo(company: Context<Company>) {
-    return fillCompanyInfo(company);
+    return fillCompanyInfo(company, this.model);
   }
 
   async extractLocation(location: Location) {
-    return extractLocation(location);
+    return extractLocation(location, this.model);
   }
 
   async extractFacets(job: Context<Job>) {
-    return extractFacets(job);
+    return extractFacets(job, this.model);
   }
 }
 
 export const llm = new LLMConnector();
+
+export function specificLLM(model: string) {
+  return new LLMConnector(model);
+}

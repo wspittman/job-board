@@ -34,7 +34,10 @@ const schema = z.object({
  * @param location The location object to extract data into
  * @returns True if extraction was successful, false otherwise
  */
-export async function extractLocation(location: Location): Promise<boolean> {
+export async function extractLocation(
+  location: Location,
+  model?: string
+): Promise<boolean> {
   if (!location.location) return false;
 
   const normalizedText = normalize(location.location);
@@ -52,7 +55,8 @@ export async function extractLocation(location: Location): Promise<boolean> {
     "extractLocation",
     prompt,
     normalizedText,
-    schema
+    schema,
+    { model }
   );
 
   if (!content) return false;

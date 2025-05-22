@@ -1,6 +1,13 @@
-import { llm } from "../packages/backend/src/ai/llm.ts";
+import { specificLLM } from "../packages/backend/src/ai/llm.ts";
 import type { Context } from "../packages/backend/src/types/types.ts";
+import { startTelemetry } from "../packages/backend/src/utils/telemetry.ts";
 import { readInputObj, writeOutputObj } from "./fileUtils.ts";
+
+startTelemetry();
+
+const actions = {
+  fillCompany: "fillCompanyInfo",
+};
 
 // #region promptfoo partial types
 
@@ -11,7 +18,9 @@ Some simple partial types help us out here
 
 interface ProviderOptions {
   id?: string;
-  config?: unknown;
+  config?: {
+    model?: string;
+  };
 }
 
 interface CallApiContextParams {
@@ -38,10 +47,13 @@ interface ProviderResponse {
 export default class EvalProvider {
   protected providerId: string;
   public config: unknown;
+  private provider: string;
+  private model: string;
 
   constructor(options: ProviderOptions) {
     this.providerId = options.id || "eval-provider";
     this.config = options.config;
+    [this.provider, this.model] = options.config?.model?.split(":") ?? [];
   }
 
   id(): string {
@@ -52,19 +64,26 @@ export default class EvalProvider {
     prompt: string,
     { vars }: CallApiContextParams
   ): Promise<ProviderResponse> {
-    const inputFile = vars.inputFile as string;
+    const { inputFile } = vars;
 
-    return await this.runAction("fillCompany", inputFile, llm.fillCompanyInfo);
+    if (typeof inputFile !== "string" || !inputFile) {
+      throw new Error("Missing input file");
+    }
+
+    if (!actions[prompt]) {
+      throw new Error(`Unknown action: ${prompt}`);
+    }
+
+    return await this.runAction(prompt, inputFile);
   }
 
   private async runAction<T extends Context<object>>(
     action: string,
-    file: string,
-    func: (input: T) => Promise<boolean>
+    file: string
   ) {
     const input = await readInputObj<T>(action, file);
 
-    await func(input);
+    await specificLLM(this.model)[actions[action]](input);
 
     const ret: ProviderResponse = {
       output: input.item,
