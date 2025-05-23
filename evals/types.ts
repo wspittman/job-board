@@ -37,5 +37,6 @@ type AssertionValueFunctionContext = {
   prompt: string;
   vars: VARS;
 };
+type AssertContext = AssertionValueFunctionContext;
 
 // #endregion

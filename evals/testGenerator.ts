@@ -2,8 +2,13 @@ import { readInputNames, readObj } from "./fileUtils";
 
 export async function fillCompanyTests() {
   return fillTests("fillCompany", [
+    // Note: equals doesn't currently support values from script
     {
-      // equals doesn't currently support values from script
+      type: "contains",
+      transform: "output.website",
+      value: "file://../testGenerator.ts:assertWebsite",
+    },
+    {
       type: "contains",
       transform: "output.industry",
       value: "file://../testGenerator.ts:assertIndustry",
@@ -22,10 +27,16 @@ async function fillTests(action: string, asserts: Record<string, unknown>[]) {
   ];
 }
 
-export async function assertIndustry(
-  _,
-  { prompt, vars }: AssertionValueFunctionContext
-) {
+export const assertWebsite = (_, context: AssertContext) =>
+  getGroundTruth(context, "website");
+
+export const assertIndustry = (_, context: AssertContext) =>
+  getGroundTruth(context, "industry");
+
+async function getGroundTruth(
+  { prompt, vars }: AssertContext,
+  key: string
+): Promise<string> {
   const inputFile = vars.inputFile as string;
 
   const groundTruth = await readObj<ProviderResponse>(
@@ -38,5 +49,5 @@ export async function assertIndustry(
     throw new Error(`Ground truth not found for ${inputFile}`);
   }
 
-  return groundTruth.output.industry;
+  return groundTruth.output[key];
 }
