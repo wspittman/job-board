@@ -1,16 +1,25 @@
 import { readObj } from "./fileUtils";
 
-// Note: equals doesn't currently support values from script
-export const assertEquals = assertContains;
+// #region Assertions
 
-export function assertContains(key: string) {
+// Note: equals doesn't currently support values from script
+export const assertEquals = (key: string) => assert("contains", key);
+export const assertContains = (key: string) => assert("contains", key);
+export const assertSimilar = (key: string) => assert("similar", key);
+
+function assert(type: string, key: string) {
   return {
-    type: "contains",
+    type,
     transform: `output.${key} ?? "UNDEFINED"`,
     value: `file://../assert.ts:${key}`,
   };
 }
 
+// #endregion
+
+// #region Accessing ground truth
+
+export const description = createFunction("description");
 export const website = createFunction("website");
 export const industry = createFunction("industry");
 export const foundingYear = createFunction("foundingYear");
@@ -40,3 +49,5 @@ async function getGround(
 
   return groundTruth.output[key] ?? "UNDEFINED";
 }
+
+// #endregion

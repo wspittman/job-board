@@ -1,4 +1,4 @@
-import { assertEquals } from "./assert";
+import { assertEquals, assertSimilar } from "./assert";
 import { readInputNames } from "./fileUtils";
 
 export async function fillCompanyTests() {
@@ -9,6 +9,7 @@ export async function fillCompanyTests() {
     assertEquals("size"),
     assertEquals("stage"),
     assertEquals("visa"),
+    assertSimilar("description"),
   ]);
 }
 
