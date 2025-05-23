@@ -6,7 +6,7 @@ export const assertEquals = assertContains;
 export function assertContains(key: string) {
   return {
     type: "contains",
-    transform: `output.${key}`,
+    transform: `output.${key} ?? "UNDEFINED"`,
     value: `file://../assert.ts:${key}`,
   };
 }
@@ -38,5 +38,5 @@ async function getGround(
     throw new Error(`Ground truth not found for ${inputFile}`);
   }
 
-  return groundTruth.output[key];
+  return groundTruth.output[key] ?? "UNDEFINED";
 }
