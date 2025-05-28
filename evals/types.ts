@@ -22,8 +22,9 @@ interface TokenUsage {
   total: number;
   prompt: number;
   completion: number;
-  numRequests: number;
-  cached: number;
+  numRequests?: number;
+  cached?: number;
+  duration?: number; // Added
 }
 
 interface ProviderResponse {
