@@ -26,7 +26,7 @@ async function getCompanyInput(): Promise<void> {
     true
   );
 
-  await writeObj("fillCompany", "Inputs", `${atsId}_${companyId}`, result);
+  await writeObj("fillCompanyInfo", "Input", `${atsId}_${companyId}`, result);
 }
 
 switch (action) {

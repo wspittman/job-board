@@ -1,43 +1,55 @@
-// #region promptfoo partial types
+import type { Company as InnerCompany } from "../packages/backend/src/types/dbModels";
+import type { Context as InnerContext } from "../packages/backend/src/types/types";
 
-/*
-Reluctant to require the promptfoo package as a dev dependency, since we are treating it more as an external tool.
-Some simple partial types help us out here
-*/
+export type Context<T> = InnerContext<T>;
+export type Company = InnerCompany;
 
-type VARS = Record<string, string | object>;
-
-interface ProviderOptions {
-  id?: string;
-  config?: {
-    model?: string;
-  };
+export interface Model {
+  name: string;
+  input: number;
+  output: number;
 }
 
-interface CallApiContextParams {
-  vars: VARS;
+export interface Source<T> {
+  name: string;
+  input: Context<T>;
+  ground: T;
+  baseline?: Outcome<T>;
 }
 
-interface TokenUsage {
-  total: number;
-  prompt: number;
-  completion: number;
-  numRequests?: number;
-  cached?: number;
-  duration?: number; // Added
+export interface Scenario<T> {
+  action: string;
+  model: Model;
+  source: Source<T>;
 }
 
-interface ProviderResponse {
-  cached?: boolean;
-  error?: string;
-  output?: string | any;
-  tokenUsage?: TokenUsage;
+export interface Score {
+  name: string;
+  timestamp: string;
+  baseline: string;
+  cost: number;
+  relativeCost: number;
+  duration: number;
+  relativeDuration: number;
+  accuracy: number;
+  relativeAccuracy: number;
+  score: number;
 }
 
-type AssertionValueFunctionContext = {
-  prompt: string;
-  vars: VARS;
-};
-type AssertContext = AssertionValueFunctionContext;
+export interface Outcome<T> extends Score {
+  output: T;
+  suboptimal?: {
+    assert: string;
+    property: string;
+    result: number;
+    actual: unknown;
+    ground: unknown;
+  }[];
+}
 
-// #endregion
+export interface Log {
+  in: string;
+  inTokens: number;
+  outTokens: number;
+  ms: number;
+}

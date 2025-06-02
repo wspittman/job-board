@@ -1,49 +1,71 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "path";
+import type { Context } from "../packages/backend/src/types/types";
+import type { Outcome, Source } from "./types";
 
-type Phase = "Inputs" | "Outputs" | "Ground" | "OutputBaselines";
+type Role = "Input" | "Outcome" | "Ground" | "Report";
 
 const basePath = path.join(process.cwd(), "evals");
-const getDir = (action: string, phase: Phase) =>
-  path.join(basePath, `${action}${phase}`);
-const cache: Record<string, unknown> = {};
+const getPath = (action: string, role: Role, name = "") =>
+  path.join(basePath, `${action}${role}`, name);
 
-export async function readInputNames(action: string): Promise<string[]> {
-  return await readdir(getDir(action, "Inputs"));
+export async function readSources<T>(
+  action: string,
+  baseline: string
+): Promise<Source<T>[]> {
+  const names = await readdir(getPath(action, "Input"));
+  return (
+    await Promise.all(
+      names.map((name) => readSource<T>(action, name, baseline))
+    )
+  ).filter((x) => !!x);
+}
+
+async function readSource<T>(
+  action: string,
+  name: string,
+  baselineModel: string
+): Promise<Source<T> | undefined> {
+  const input = await readObj<Context<T>>(action, "Input", name);
+  const ground = await readObj<T>(action, "Ground", name);
+
+  let baseline: Outcome<T> | undefined;
+
+  if (baselineModel) {
+    const baselineName = `${baselineModel}_${name}`;
+    baseline = await readObj<Outcome<T>>(action, "Outcome", baselineName);
+  }
+
+  if (!input || !ground || (baselineModel && !baseline)) {
+    console.warn(`Missing a file for source: ${name}`);
+    return undefined;
+  }
+
+  return { name, input, ground, baseline };
 }
 
 export async function readObj<T>(
   action: string,
-  phase: Phase,
+  role: Role,
   name: string
 ): Promise<T | undefined> {
-  const key = `${action}${phase}${name}`;
-  if (cache[key]) {
-    return cache[key] as T;
-  }
+  const filePath = getPath(action, role, name);
 
-  const dir = getDir(action, phase);
-  const filePath = path.join(dir, name);
-
-  let fileContent: string;
   try {
-    fileContent = await readFile(filePath, "utf-8");
+    const file = await readFile(filePath, "utf-8");
+    return JSON.parse(file);
   } catch (error) {
     return undefined;
   }
-
-  const result = JSON.parse(fileContent) as T;
-  cache[key] = result;
-  return result;
 }
 
 export async function writeObj(
   action: string,
-  phase: Phase,
+  role: Role,
   name: string,
   obj: unknown
 ): Promise<void> {
-  const dir = getDir(action, phase);
+  const dir = getPath(action, role);
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, name), JSON.stringify(obj, null, 2));
 }
