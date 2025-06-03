@@ -1,0 +1,46 @@
+{
+  "name": "o4-mini_lever_silver_zephyr_gate.json",
+  "timestamp": "2025-06-03T18:16:12.205Z",
+  "baseline": "gpt-4o-mini_lever_silver_zephyr_gate.json",
+  "cost": 0.004756400000000001,
+  "relativeCost": 14.565610166896343,
+  "duration": 6018,
+  "relativeDuration": 2.4246575342465753,
+  "accuracy": 0.6600529983844359,
+  "relativeAccuracy": 1.1639891643571207,
+  "score": 0.8316751763124903,
+  "output": {
+    "v": "3ea29ac9f62a7c7d9ea5ea1326ff8834",
+    "id": "silver-zephyr-gate",
+    "ats": "lever",
+    "name": "SilverZephyrGate",
+    "website": "https://silver-zephyr-gate.ai",
+    "industry": "Technology & Software",
+    "foundingYear": 0,
+    "size": 0,
+    "description": "SilverZephyrGate AI empowers organizations to leverage AI in everyday workflows with high-performance, optimized open-source models and an enterprise-grade platform that runs on-premises or in the cloud. From its life and work assistant “le Chat” to cutting-edge solutions for model training and deployment, the company simplifies tasks, accelerates learning, and sparks creativity. Its dynamic, low-ego team is distributed across Europe, North America, and Asia, fostering collaborative innovation as it democratizes AI and shapes the future of work."
+  },
+  "suboptimal": [
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.6203709886910511,
+      "actual": "SilverZephyrGate AI empowers organizations to leverage AI in everyday workflows with high-performance, optimized open-source models and an enterprise-grade platform that runs on-premises or in the cloud. From its life and work assistant “le Chat” to cutting-edge solutions for model training and deployment, the company simplifies tasks, accelerates learning, and sparks creativity. Its dynamic, low-ego team is distributed across Europe, North America, and Asia, fostering collaborative innovation as it democratizes AI and shapes the future of work.",
+      "ground": "We democratize AI through high-performance, optimized, open-source and cutting-edge models, products and solutions. Our comprehensive AI platform is designed to meet enterprise needs, whether on-premises or in cloud environments, We are a dynamic, collaborative team passionate about AI and its potential to transform society."
+    }
+  ]
+}

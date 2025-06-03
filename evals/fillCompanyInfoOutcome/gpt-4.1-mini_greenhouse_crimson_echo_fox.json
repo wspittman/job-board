@@ -1,0 +1,39 @@
+{
+  "name": "gpt-4.1-mini_greenhouse_crimson_echo_fox.json",
+  "timestamp": "2025-06-03T18:05:49.840Z",
+  "baseline": "gpt-4o-mini_greenhouse_crimson_echo_fox.json",
+  "cost": 0.0011372,
+  "relativeCost": 2.610651974288338,
+  "duration": 3177,
+  "relativeDuration": 1.0526838966202783,
+  "accuracy": 0.8018890480240863,
+  "relativeAccuracy": 1.0058916805709943,
+  "score": 0.8155346829276084,
+  "output": {
+    "v": "57f738858269739f0eb68d422c19e301",
+    "id": "crimson-echo-fox",
+    "ats": "greenhouse",
+    "name": "CrimsonEchoFox",
+    "description": "CrimsonEchoFox, founded in 2015, is a leading communication platform tailored for the gaming community, enabling friends to connect via voice, video, and text. Serving over 200 million monthly users, the platform facilitates seamless multiplayer experiences, making it feel like players are in the same room. CrimsonEchoFox emphasizes private, small friend groups and aims to enhance social interactions before, during, and after gaming sessions, positioning itself as a pivotal player in the future of gaming entertainment.",
+    "website": "https://crimson-echo-fox.com/",
+    "industry": "Technology & Software",
+    "foundingYear": 2015,
+    "size": 200
+  },
+  "suboptimal": [
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 200,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.6132233361686044,
+      "actual": "CrimsonEchoFox, founded in 2015, is a leading communication platform tailored for the gaming community, enabling friends to connect via voice, video, and text. Serving over 200 million monthly users, the platform facilitates seamless multiplayer experiences, making it feel like players are in the same room. CrimsonEchoFox emphasizes private, small friend groups and aims to enhance social interactions before, during, and after gaming sessions, positioning itself as a pivotal player in the future of gaming entertainment.",
+      "ground": "A voice, video, and text platform that helps friends come together to hang out, play games, and have fun. High quality streaming and a seamless experience across devices lets people play and interact together as if they were in person. Over 200 millions people use the platform every month."
+    }
+  ]
+}

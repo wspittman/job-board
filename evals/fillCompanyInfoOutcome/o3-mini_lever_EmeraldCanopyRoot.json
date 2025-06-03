@@ -1,0 +1,53 @@
+{
+  "name": "o3-mini_lever_EmeraldCanopyRoot.json",
+  "timestamp": "2025-06-03T18:13:55.821Z",
+  "baseline": "gpt-4o-mini_lever_EmeraldCanopyRoot.json",
+  "cost": 0.005601200000000001,
+  "relativeCost": 14.428645028335911,
+  "duration": 10960,
+  "relativeDuration": 4.840989399293286,
+  "accuracy": 0.5315020111683783,
+  "relativeAccuracy": 1.4212747632829685,
+  "score": 1.0013750143394202,
+  "output": {
+    "v": "8d34fe49e995e06c70fa0dec1ee29974",
+    "id": "EmeraldCanopyRoot",
+    "ats": "lever",
+    "name": "EmeraldCanopyRoot",
+    "website": "http://www.emeraldroot.com",
+    "industry": "Agriculture & Food Production",
+    "foundingYear": 2000,
+    "size": 100,
+    "description": "Emerald Canopy Root is a pioneering, end-to-end reforestation company dedicated to making reforestation scalable across the United States. Focused on delivering fast, resilient forest restoration after devastating wildfires, the company removes traditional financial, procedural, and seed supply barriers by managing everything from native seed collection to ongoing monitoring. Supported by strategic partnerships with well-respected forestry companies like Silvaseed and Cal Forest, Emerald Canopy Root leads the way in environmental restoration, innovation, and sustainability in the non-timber forestry supply chain."
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "http://www.emeraldroot.com",
+      "ground": "https://www.emeraldroot.com"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2000,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 100,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.7205140781786479,
+      "actual": "Emerald Canopy Root is a pioneering, end-to-end reforestation company dedicated to making reforestation scalable across the United States. Focused on delivering fast, resilient forest restoration after devastating wildfires, the company removes traditional financial, procedural, and seed supply barriers by managing everything from native seed collection to ongoing monitoring. Supported by strategic partnerships with well-respected forestry companies like Silvaseed and Cal Forest, Emerald Canopy Root leads the way in environmental restoration, innovation, and sustainability in the non-timber forestry supply chain.",
+      "ground": "The leading end-to-end reforestation company in the USA, on a mission to make reforestation scalable. We are the only vertically-integrated reforestation company in the industry and are the largest seed bank and reforestation container stock producer in the Western USA. We are also an innovation center for the non-timber forestry supply chain, developing various biological and technical products for achieving land management goals more efficiently"
+    }
+  ]
+}

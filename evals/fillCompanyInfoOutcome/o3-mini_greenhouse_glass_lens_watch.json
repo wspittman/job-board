@@ -1,0 +1,54 @@
+{
+  "name": "o3-mini_greenhouse_glass_lens_watch.json",
+  "timestamp": "2025-06-03T18:13:44.440Z",
+  "baseline": "gpt-4o-mini_greenhouse_glass_lens_watch.json",
+  "cost": 0.0074833,
+  "relativeCost": 16.546821448313988,
+  "duration": 14160,
+  "relativeDuration": 6.474622770919067,
+  "accuracy": 0.5038864177442682,
+  "relativeAccuracy": 0.7187962459857109,
+  "score": 0.5073067711130895,
+  "output": {
+    "v": "61f17930caee954b9f3c22152d464f7a",
+    "id": "glass-lens-watch",
+    "ats": "greenhouse",
+    "name": "GlassLensWatch",
+    "description": "GlassLensWatch is an independent, nonprofit newsroom dedicated to producing investigative journalism in the public interest. With a team of over 100 dedicated journalists, the organization focuses on uncovering impactful stories that hold power to account and drive real-world change. By blending rigorous data analysis with compelling narrative, GlassLensWatch champions transparency, inclusivity, and accountability in media, all while fostering a diverse and innovative newsroom environment.",
+    "website": "https://www.glass-lens-watch.org",
+    "industry": "Non-Profit & Social Services",
+    "foundingYear": 2023,
+    "stage": 800,
+    "size": 100
+  },
+  "suboptimal": [
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Non-Profit & Social Services",
+      "ground": "Media, Marketing & Communications"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2023,
+      "ground": "undefined"
+    },
+    {
+      "property": "visa",
+      "assert": "equals",
+      "result": 0,
+      "actual": "undefined",
+      "ground": 100
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.5272049242098779,
+      "actual": "GlassLensWatch is an independent, nonprofit newsroom dedicated to producing investigative journalism in the public interest. With a team of over 100 dedicated journalists, the organization focuses on uncovering impactful stories that hold power to account and drive real-world change. By blending rigorous data analysis with compelling narrative, GlassLensWatch champions transparency, inclusivity, and accountability in media, all while fostering a diverse and innovative newsroom environment.",
+      "ground": "An independent, nonprofit newsroom that produces investigative journalism in the public interest. We cover a range of topics, focusing on stories with the potential to spur real-world impact."
+    }
+  ]
+}

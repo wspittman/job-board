@@ -1,0 +1,46 @@
+{
+  "name": "gpt-4.1-nano_greenhouse_crimson_echo_fox.json",
+  "timestamp": "2025-06-03T18:02:15.216Z",
+  "baseline": "gpt-4o-mini_greenhouse_crimson_echo_fox.json",
+  "cost": 0.0002876,
+  "relativeCost": 0.660238751147842,
+  "duration": 4876,
+  "relativeDuration": 1.615639496355202,
+  "accuracy": 0.6493374997155504,
+  "relativeAccuracy": 0.8533401322624582,
+  "score": 0.9732466667714312,
+  "output": {
+    "v": "75152f8b21fb273f5067adcae9709840",
+    "id": "crimson-echo-fox",
+    "ats": "greenhouse",
+    "name": "CrimsonEchoFox",
+    "description": "CrimsonEchoFox is a leading communications platform for gamers, providing voice, video, and text chat services that enhance social interaction before, during, and after gaming. Founded in 2015 by industry pioneers Jason Citron and Stanislav Vishnevskiy, the company has positioned itself at the forefront of the rapidly growing gaming entertainment industry. With a focus on private, high-quality social spaces, CrimsonEchoFox aims to make gaming social and fun, serving a global user base largest than movies and music combined.",
+    "website": "https://crimson-echo-fox.com/",
+    "industry": "Media, Marketing & Communications",
+    "foundingYear": 2015,
+    "size": 500
+  },
+  "suboptimal": [
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Media, Marketing & Communications",
+      "ground": "Technology & Software"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 500,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.5453624980088528,
+      "actual": "CrimsonEchoFox is a leading communications platform for gamers, providing voice, video, and text chat services that enhance social interaction before, during, and after gaming. Founded in 2015 by industry pioneers Jason Citron and Stanislav Vishnevskiy, the company has positioned itself at the forefront of the rapidly growing gaming entertainment industry. With a focus on private, high-quality social spaces, CrimsonEchoFox aims to make gaming social and fun, serving a global user base largest than movies and music combined.",
+      "ground": "A voice, video, and text platform that helps friends come together to hang out, play games, and have fun. High quality streaming and a seamless experience across devices lets people play and interact together as if they were in person. Over 200 millions people use the platform every month."
+    }
+  ]
+}

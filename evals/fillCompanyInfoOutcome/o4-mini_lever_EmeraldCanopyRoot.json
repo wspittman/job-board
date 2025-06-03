@@ -1,0 +1,46 @@
+{
+  "name": "o4-mini_lever_EmeraldCanopyRoot.json",
+  "timestamp": "2025-06-03T18:16:14.404Z",
+  "baseline": "gpt-4o-mini_lever_EmeraldCanopyRoot.json",
+  "cost": 0.0056265,
+  "relativeCost": 14.493817619783618,
+  "duration": 8220,
+  "relativeDuration": 3.6307420494699647,
+  "accuracy": 0.6788864018534534,
+  "relativeAccuracy": 1.5686591539680437,
+  "score": 1.1074813302779116,
+  "output": {
+    "v": "0efefe775d65e1a76e91aa3845e135ee",
+    "id": "EmeraldCanopyRoot",
+    "ats": "lever",
+    "name": "EmeraldCanopyRoot",
+    "website": "https://www.emeraldroot.com",
+    "industry": "Agriculture & Food Production",
+    "foundingYear": 0,
+    "size": 0,
+    "description": "Emerald Canopy Root (Root) is the leading end-to-end reforestation company in the U.S., dedicated to making scalable, resilient forest restoration accessible for landowners impacted by wildfires. As the only vertically integrated reforestation firm, Root oversees native seed collection, site preparation, planting, and monitoring, removing financial and logistical barriers to deliver high-quality, no-cost projects. With its portfolio companies Silvaseed and Cal Forest, Root operates the largest seed bank and reforestation container stock production in the Western U.S., while also innovating biological and technical solutions for the non-timber forestry supply chain."
+  },
+  "suboptimal": [
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.752204812974174,
+      "actual": "Emerald Canopy Root (Root) is the leading end-to-end reforestation company in the U.S., dedicated to making scalable, resilient forest restoration accessible for landowners impacted by wildfires. As the only vertically integrated reforestation firm, Root oversees native seed collection, site preparation, planting, and monitoring, removing financial and logistical barriers to deliver high-quality, no-cost projects. With its portfolio companies Silvaseed and Cal Forest, Root operates the largest seed bank and reforestation container stock production in the Western U.S., while also innovating biological and technical solutions for the non-timber forestry supply chain.",
+      "ground": "The leading end-to-end reforestation company in the USA, on a mission to make reforestation scalable. We are the only vertically-integrated reforestation company in the industry and are the largest seed bank and reforestation container stock producer in the Western USA. We are also an innovation center for the non-timber forestry supply chain, developing various biological and technical products for achieving land management goals more efficiently"
+    }
+  ]
+}

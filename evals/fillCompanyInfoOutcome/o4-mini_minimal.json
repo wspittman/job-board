@@ -1,0 +1,60 @@
+{
+  "name": "o4-mini_minimal.json",
+  "timestamp": "2025-06-03T18:19:31.649Z",
+  "baseline": "gpt-4o-mini_minimal.json",
+  "cost": 0.0038478,
+  "relativeCost": 16.809960681520316,
+  "duration": 6490,
+  "relativeDuration": 3.228855721393035,
+  "accuracy": 0.31782175099664733,
+  "relativeAccuracy": 1.2914392786282272,
+  "score": 0.9145230434880045,
+  "output": {
+    "v": "0cbfc56e70dc264129aae7c67ef5d4c9",
+    "id": "minimal",
+    "ats": "greenhouse",
+    "name": "Minimal",
+    "description": "Minimal is a remote-first software company specializing in full-lifecycle application development. By fostering cross-functional collaboration, rigorous engineering best practices, and continuous knowledge sharing, Minimal delivers maintainable, efficient, and high-quality software solutions.",
+    "website": "",
+    "industry": "Technology & Software",
+    "foundingYear": 0,
+    "size": 0
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "",
+      "ground": "undefined"
+    },
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Technology & Software",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.224752256976531,
+      "actual": "Minimal is a remote-first software company specializing in full-lifecycle application development. By fostering cross-functional collaboration, rigorous engineering best practices, and continuous knowledge sharing, Minimal delivers maintainable, efficient, and high-quality software solutions.",
+      "ground": "undefined"
+    }
+  ]
+}
