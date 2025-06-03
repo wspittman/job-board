@@ -1,0 +1,76 @@
+{
+  "name": "gpt-4o-mini_minimal.json",
+  "timestamp": "2025-06-02T23:34:08.977Z",
+  "baseline": "none",
+  "cost": 0.00022889999999999998,
+  "relativeCost": 0,
+  "duration": 2010,
+  "relativeDuration": 0,
+  "accuracy": 0.026382472368420375,
+  "relativeAccuracy": 0,
+  "score": 0,
+  "output": {
+    "v": "aa7f805a8b0cc2c6dc694ea769ebbc6e",
+    "id": "minimal",
+    "ats": "greenhouse",
+    "name": "Minimal",
+    "description": "Minimal is a forward-thinking technology company, established in 2023, that specializes in developing robust software applications. With a focus on innovation and collaboration, Minimal brings together engineers, product managers, and designers to create high-quality solutions that streamline processes and enhance user experiences. As a Series A startup, Minimal is committed to fostering a dynamic work environment that encourages problem-solving and continuous improvement, all while supporting visa sponsorship for qualified talent.",
+    "website": "/",
+    "industry": "Technology & Software",
+    "foundingYear": 2023,
+    "stage": 300,
+    "size": 10,
+    "visa": 300
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "/",
+      "ground": "undefined"
+    },
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Technology & Software",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2023,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 10,
+      "ground": "undefined"
+    },
+    {
+      "property": "stage",
+      "assert": "equals",
+      "result": 0,
+      "actual": 300,
+      "ground": "undefined"
+    },
+    {
+      "property": "visa",
+      "assert": "equals",
+      "result": 0,
+      "actual": 300,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.18467730657894263,
+      "actual": "Minimal is a forward-thinking technology company, established in 2023, that specializes in developing robust software applications. With a focus on innovation and collaboration, Minimal brings together engineers, product managers, and designers to create high-quality solutions that streamline processes and enhance user experiences. As a Series A startup, Minimal is committed to fostering a dynamic work environment that encourages problem-solving and continuous improvement, all while supporting visa sponsorship for qualified talent.",
+      "ground": "undefined"
+    }
+  ]
+}

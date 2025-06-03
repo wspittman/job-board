@@ -1,0 +1,39 @@
+{
+  "name": "gpt-4o-mini_greenhouse_crimson_echo_fox.json",
+  "timestamp": "2025-06-02T23:34:01.661Z",
+  "baseline": "none",
+  "cost": 0.0004356,
+  "relativeCost": 0,
+  "duration": 3018,
+  "relativeDuration": 0,
+  "accuracy": 0.7959973674530921,
+  "relativeAccuracy": 0,
+  "score": 0,
+  "output": {
+    "v": "a3fab1b8be59c7e3016314c3c3f1bbbb",
+    "id": "crimson-echo-fox",
+    "ats": "greenhouse",
+    "name": "CrimsonEchoFox",
+    "description": "CrimsonEchoFox is an innovative communication platform that enables friends to connect through voice, video, and text while playing games together. Founded in 2015 by Jason Citron and Stanislav Vishnevskiy, CrimsonEchoFox has established itself as a critical player in the gaming sector, facilitating social interactions among users in small, private spaces. With an emphasis on enhancing the gaming experience, CrimsonEchoFox prioritizes seamless connectivity, making gaming more enjoyable and interactive. Join their mission to revolutionize how people engage with each other and their favorite games.",
+    "website": "https://crimson-echo-fox.com/",
+    "industry": "Technology & Software",
+    "foundingYear": 2015,
+    "size": 200
+  },
+  "suboptimal": [
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 200,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.5719815721716449,
+      "actual": "CrimsonEchoFox is an innovative communication platform that enables friends to connect through voice, video, and text while playing games together. Founded in 2015 by Jason Citron and Stanislav Vishnevskiy, CrimsonEchoFox has established itself as a critical player in the gaming sector, facilitating social interactions among users in small, private spaces. With an emphasis on enhancing the gaming experience, CrimsonEchoFox prioritizes seamless connectivity, making gaming more enjoyable and interactive. Join their mission to revolutionize how people engage with each other and their favorite games.",
+      "ground": "A voice, video, and text platform that helps friends come together to hang out, play games, and have fun. High quality streaming and a seamless experience across devices lets people play and interact together as if they were in person. Over 200 millions people use the platform every month."
+    }
+  ]
+}

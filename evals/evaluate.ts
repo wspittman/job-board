@@ -90,19 +90,26 @@ async function compareBaseline<T>(
   const baseline = source.baseline;
   const { accuracy, cost, duration } = outcome;
 
+  // These are ratios of [0, ∞], with 1 = same as baseline
+  // We want this on the object because it is easy to reason about
   outcome.relativeCost = cost / baseline.cost;
   outcome.relativeDuration = duration / baseline.duration;
-  outcome.relativeAccuracy = accuracy / baseline.accuracy;
+
+  // Normalize the relative cost and duration to [-1, 1] using tanh for scoring
+  const normalizedCost = Math.tanh(Math.log(outcome.relativeCost));
+  const normalizedDuration = Math.tanh(Math.log(outcome.relativeDuration));
+
+  // Accuracy is already normalized to [0, 1], so we can directly compare as [-1, 1]
+  // This is both on the object and in the score
+  outcome.relativeAccuracy = accuracy - baseline.accuracy;
 
   // These should sum to 1
   const weightCost = 0.2;
   const weightDuration = 0.05;
   const weightAccuracy = 0.75;
 
-  const score =
-    outcome.relativeCost ** -weightCost *
-    outcome.relativeDuration ** -weightDuration *
+  outcome.score =
+    normalizedCost ** -weightCost *
+    normalizedDuration ** -weightDuration *
     outcome.relativeAccuracy ** weightAccuracy;
-
-  outcome.score = score;
 }
