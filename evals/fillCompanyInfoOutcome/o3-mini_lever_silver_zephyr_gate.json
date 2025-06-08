@@ -1,0 +1,46 @@
+{
+  "name": "o3-mini_lever_silver_zephyr_gate.json",
+  "timestamp": "2025-06-03T18:13:52.148Z",
+  "baseline": "gpt-4o-mini_lever_silver_zephyr_gate.json",
+  "cost": 0.004545200000000001,
+  "relativeCost": 13.918848568366256,
+  "duration": 7289,
+  "relativeDuration": 2.936744560838034,
+  "accuracy": 0.6536936638020354,
+  "relativeAccuracy": 1.1576298297747203,
+  "score": 0.8232986653468234,
+  "output": {
+    "v": "12f1d33e29671dec5ee9b813a91f35c4",
+    "id": "silver-zephyr-gate",
+    "ats": "lever",
+    "name": "SilverZephyrGate",
+    "website": "https://silver-zephyr-gate.ai",
+    "industry": "Technology & Software",
+    "foundingYear": 2023,
+    "size": 50,
+    "description": "SilverZephyrGate AI is a pioneering company committed to democratizing artificial intelligence through high-performance, optimized, and open-source solutions. Offering cutting-edge AI models both on-premises and in cloud environments, the company’s portfolio includes innovative products like ‘le Chat’, an AI assistant designed to enhance daily work and life. With a vibrant, low-ego, and collaborative culture, SilverZephyrGate AI’s diverse team spans globally across France, the USA, the UK, Germany, and Singapore, driving transformation and pushing the boundaries of what AI can achieve."
+  },
+  "suboptimal": [
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2023,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 50,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.5758556466142483,
+      "actual": "SilverZephyrGate AI is a pioneering company committed to democratizing artificial intelligence through high-performance, optimized, and open-source solutions. Offering cutting-edge AI models both on-premises and in cloud environments, the company’s portfolio includes innovative products like ‘le Chat’, an AI assistant designed to enhance daily work and life. With a vibrant, low-ego, and collaborative culture, SilverZephyrGate AI’s diverse team spans globally across France, the USA, the UK, Germany, and Singapore, driving transformation and pushing the boundaries of what AI can achieve.",
+      "ground": "We democratize AI through high-performance, optimized, open-source and cutting-edge models, products and solutions. Our comprehensive AI platform is designed to meet enterprise needs, whether on-premises or in cloud environments, We are a dynamic, collaborative team passionate about AI and its potential to transform society."
+    }
+  ]
+}

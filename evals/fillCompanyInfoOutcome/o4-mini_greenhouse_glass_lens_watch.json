@@ -1,0 +1,47 @@
+{
+  "name": "o4-mini_greenhouse_glass_lens_watch.json",
+  "timestamp": "2025-06-03T18:16:03.251Z",
+  "baseline": "gpt-4o-mini_greenhouse_glass_lens_watch.json",
+  "cost": 0.0057244,
+  "relativeCost": 12.657600884466557,
+  "duration": 9250,
+  "relativeDuration": 4.229538180155464,
+  "accuracy": 0.6437278399639331,
+  "relativeAccuracy": 0.858637668205376,
+  "score": 0.6094419072169374,
+  "output": {
+    "v": "a9dbb3f07aa0c2b3970e62024da656a2",
+    "id": "glass-lens-watch",
+    "ats": "greenhouse",
+    "name": "GlassLensWatch",
+    "description": "GlassLensWatch is an independent, nonprofit newsroom dedicated to investigative journalism in the public interest. With a team of over 100 journalists, it specializes in data-driven, accountability reporting that uncovers wrongdoing across government and society to spur real-world change. Committed to diversity, equity and inclusion, GlassLensWatch offers comprehensive benefits and an environment that empowers journalists to produce deep investigative work and drive impact.",
+    "website": "https://www.glass-lens-watch.org",
+    "industry": "Media, Marketing & Communications",
+    "foundingYear": 0,
+    "stage": 800,
+    "size": 100
+  },
+  "suboptimal": [
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "visa",
+      "assert": "equals",
+      "result": 0,
+      "actual": "undefined",
+      "ground": 100
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.506094879747532,
+      "actual": "GlassLensWatch is an independent, nonprofit newsroom dedicated to investigative journalism in the public interest. With a team of over 100 journalists, it specializes in data-driven, accountability reporting that uncovers wrongdoing across government and society to spur real-world change. Committed to diversity, equity and inclusion, GlassLensWatch offers comprehensive benefits and an environment that empowers journalists to produce deep investigative work and drive impact.",
+      "ground": "An independent, nonprofit newsroom that produces investigative journalism in the public interest. We cover a range of topics, focusing on stories with the potential to spur real-world impact."
+    }
+  ]
+}

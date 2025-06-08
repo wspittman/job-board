@@ -1,0 +1,52 @@
+{
+  "name": "gpt-4.1-nano_empty.json",
+  "timestamp": "2025-06-03T18:02:14.424Z",
+  "baseline": "gpt-4o-mini_empty.json",
+  "cost": 0.00009199999999999999,
+  "relativeCost": 0.5242165242165242,
+  "duration": 4121,
+  "relativeDuration": 1.757356076759062,
+  "accuracy": 0.4676973352800338,
+  "relativeAccuracy": 1.2896885801917606,
+  "score": 1.319459523559043,
+  "output": {
+    "v": "e103dc679c8db0906f881bfe5aa17c92",
+    "id": "empty",
+    "ats": "lever",
+    "name": "Empty",
+    "website": ":null",
+    "foundingYear": 0,
+    "size": 0,
+    "description": "This company profile lacks specific details and appears to be a placeholder or incomplete entry. No substantial information is available to generate a descriptive overview."
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": ":null",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.27388134696023697,
+      "actual": "This company profile lacks specific details and appears to be a placeholder or incomplete entry. No substantial information is available to generate a descriptive overview.",
+      "ground": "undefined"
+    }
+  ]
+}

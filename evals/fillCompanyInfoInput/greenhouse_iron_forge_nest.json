@@ -1,0 +1,49 @@
+{
+  "item": {
+    "id": "iron-forge-nest",
+    "ats": "greenhouse",
+    "name": "Iron Forge Nest",
+    "description": ""
+  },
+  "context": [
+    {
+      "description": "Example job from the company",
+      "content": {
+        "id": "7571992002",
+        "companyId": "iron-forge-nest",
+        "company": "iron-forge-nest",
+        "title": "“ScatterShotAI”- Future CEO ",
+        "location": "Seattle",
+        "description": "<p>Imagine a world where a small group of visionary individuals can leverage the power of AI to achieve what traditionally required a corporation of thousands. ScatterShotAI is making this possible by creating an AI agent that acts as an autonomous project manager, providing unparalleled leverage to bring ideas to life. As the central coordinating intelligence within the growing ecosystem of AI Agents, ScatterShotAI ensures cohesive collaboration and optimized project execution, enabling complex projects to be led effortlessly. </p>\n<p>But with great power comes great responsibility. Our platform emphasizes AI safety by fostering a collaborative environment where humans and AI work together seamlessly, enhancing transparency, ensuring that all AI-driven activities are aligned with higher purposes and strategic goals, all while enabling teams to accelerate their vision.</p>\n<p>We are seeking a resilient, adaptable, and experienced founder or early-stage startup leader to join us as the Future CEO of ScatterShotAI. This role offers a unique opportunity to lead a company at the forefront of AI and project management innovation, ensuring that our technology remains aligned with human values and strategic goals.</p>\n<p>Your role will involve building and scaling ScatterShotAI, leveraging your past experiences, market insights, our team’s pilot programs, and in-house expertise. You’ll be responsible for developing and launching a groundbreaking product, navigating the challenges and opportunities of a dynamic and evolving industry.</p>\n<p>This position is ideal for candidates with a strong background in high-growth SaaS startups, GTM strategy, fundraising, and a passion for leveraging AI to enhance human potential. If you're excited about leading a groundbreaking revolution and making a tangible impact on the future, we invite you to join our journey.</p>\n<h2>Roles &amp; Responsibilities:</h2>\n<ul>\n<li>Define a clear and compelling vision for the business</li>\n<li>Develop an actionable strategy for product launch and market penetration based on market research and user insights.</li>\n<li>Advocate for end-users to ensure a seamless and exceptional product experience.</li>\n<li>Build relationships with key industry stakeholders (e.g., customers, partners, helping them understand and meet their project management and execution needs.</li>\n<li>Collaborate with product development teams to create an ideal product experience, leveraging user feedback and AI insights.</li>\n<li>Utilize financial models and projections to support the product development and go-to-market strategies.</li>\n<li>Oversee core business operations including product and team development, growth strategies, and ensuring optimal product-market fit.</li>\n<li>Optimize business operations through accurate forecasting and implementation of cutting-edge tools and technology.</li>\n<li>Cultivate a world-class team environment and culture, assisting with hiring, training, and general management.</li>\n</ul>\n<h2>Preferred Qualifications &amp; Prior Experience:</h2>\n<ul>\n<li>Proven track record as a founder or leader in an early-stage company, preferably within the project management, workflow automation, or AI industry.</li>\n<li>Experience leading fundraising, either as a founder or early employee.</li>\n<li>Experience leading GTM execution including B2B marketing, sales, and operations, especially in a tech-focused environment.</li>\n<li>Demonstrated success in building operational processes and high-performing teams.</li>\n<li>Relevant understanding of AI, LLMs, or machine learning applications highlighting the ability to communicate about these technologies in the development of groundbreaking products.</li>\n<li>Demonstrable familiarity with product development or project management, with a special focus on software development in the context of the tech sector.</li>\n</ul>\n<h2>To Apply:</h2>\n<p>If you're an entrepreneurial leader poised to redefine the landscape of project management and execution through AI, we encourage you to apply. Please submit your resume along with a cover letter that outlines your qualifications and your interest in the role. We're excited about the prospect of collaborating with you to propel ScatterShotAI towards success.</p>",
+        "postTS": 1743525161000,
+        "applyUrl": "https://ifn.com/jobs/job?gh_jid=7571992002",
+        "facets": {},
+        "metadata": [
+          {
+            "id": 11433127002,
+            "name": "GHBGCheck",
+            "value": "GHCST21748",
+            "value_type": "single_select"
+          }
+        ],
+        "departments": [
+          {
+            "id": 4066079002,
+            "name": "All",
+            "child_ids": [],
+            "parent_id": null
+          }
+        ],
+        "offices": [
+          {
+            "id": 4012402002,
+            "name": "Iron Forge Nest",
+            "location": "Seattle, Washington, United States",
+            "child_ids": [],
+            "parent_id": null
+          }
+        ]
+      }
+    }
+  ]
+}

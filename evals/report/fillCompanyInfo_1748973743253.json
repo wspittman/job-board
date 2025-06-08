@@ -1,0 +1,14 @@
+{
+  "gpt-4.1-nano": {
+    "name": "gpt-4.1-nano",
+    "timestamp": "2025-06-03T18:02:23.251Z",
+    "baseline": "gpt-4o-mini",
+    "cost": 0.0002644181818181818,
+    "relativeCost": 0.6497187571128233,
+    "duration": 3340,
+    "relativeDuration": 1.3551962174114556,
+    "accuracy": 0.457565346770895,
+    "relativeAccuracy": 1.1167945367112553,
+    "score": 1.1727742424420389
+  }
+}

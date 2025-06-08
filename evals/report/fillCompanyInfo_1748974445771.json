@@ -1,0 +1,14 @@
+{
+  "o3-mini": {
+    "name": "o3-mini",
+    "timestamp": "2025-06-03T18:14:05.770Z",
+    "baseline": "gpt-4o-mini",
+    "cost": 0.0055017,
+    "relativeCost": 14.40103544377813,
+    "duration": 9229.363636363636,
+    "relativeDuration": 3.758552338440006,
+    "accuracy": 0.5384492105040395,
+    "relativeAccuracy": 1.1976784004444,
+    "score": 0.8487277245552572
+  }
+}

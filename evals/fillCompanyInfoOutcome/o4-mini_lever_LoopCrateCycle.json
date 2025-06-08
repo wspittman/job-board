@@ -1,0 +1,53 @@
+{
+  "name": "o4-mini_lever_LoopCrateCycle.json",
+  "timestamp": "2025-06-03T18:16:11.016Z",
+  "baseline": "gpt-4o-mini_lever_LoopCrateCycle.json",
+  "cost": 0.0050061,
+  "relativeCost": 11.66923076923077,
+  "duration": 4831,
+  "relativeDuration": 1.9247011952191235,
+  "accuracy": 0.5102321583371916,
+  "relativeAccuracy": 1.296749953643904,
+  "score": 0.9326264126733006,
+  "output": {
+    "v": "091136736f11bd535aa00305a522ce38",
+    "id": "LoopCrateCycle",
+    "ats": "lever",
+    "name": "LoopCrateCycle",
+    "website": "https://www.loopcratecycle.com/",
+    "industry": "Other",
+    "foundingYear": 0,
+    "size": 0,
+    "description": "LoopCrateCycle is a B Corps–certified environmental services company on a mission to create a future without waste. By identifying recyclable and reusable items that cities don’t collect, picking them up directly from customers’ doorsteps, and matching them with local partners, they have already diverted over 29 million pounds of waste from landfills. Built on values of purpose, continuous improvement, and collaboration, LoopCrateCycle empowers communities to waste less while offering flexible work, strong benefits, and opportunities for personal growth."
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "https://www.loopcratecycle.com/",
+      "ground": "https://www.loopcratecycle.com"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.571625108360341,
+      "actual": "LoopCrateCycle is a B Corps–certified environmental services company on a mission to create a future without waste. By identifying recyclable and reusable items that cities don’t collect, picking them up directly from customers’ doorsteps, and matching them with local partners, they have already diverted over 29 million pounds of waste from landfills. Built on values of purpose, continuous improvement, and collaboration, LoopCrateCycle empowers communities to waste less while offering flexible work, strong benefits, and opportunities for personal growth.",
+      "ground": "A service that make it easy to reuse and recycle more by identifying recyclable and reusable items that the city doesn't collect, picking them up from our customers' doorsteps, and matching them with local partners that can use them sustainably. Our mission is to empower communities to waste less, and every success our team celebrates means more waste saved from the landfill and more valuable donations in the hands of local non-profits"
+    }
+  ]
+}

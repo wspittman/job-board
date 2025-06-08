@@ -1,0 +1,69 @@
+{
+  "name": "gpt-4.1-mini_greenhouse_iron_forge_nest.json",
+  "timestamp": "2025-06-03T18:05:49.688Z",
+  "baseline": "gpt-4o-mini_greenhouse_iron_forge_nest.json",
+  "cost": 0.0009072,
+  "relativeCost": 2.682039911308204,
+  "duration": 3022,
+  "relativeDuration": 1.1259314456035767,
+  "accuracy": 0.16835924836626168,
+  "relativeAccuracy": 1.1428623336911883,
+  "score": 0.905125945291386,
+  "output": {
+    "v": "b773af67bb9119d00f8c7e65e5933d90",
+    "id": "iron-forge-nest",
+    "ats": "greenhouse",
+    "name": "Iron Forge Nest",
+    "description": "Iron Forge Nest is a technology company focused on pioneering AI-driven project management solutions. Founded in 1999 and based in Seattle, Iron Forge Nest's innovative product ScatterShotAI functions as an autonomous AI project manager that streamlines complex project execution by facilitating cohesive collaboration among AI agents and human teams. The company emphasizes AI safety and alignment with human values, fostering transparency and strategic goal integration in its offerings. Iron Forge Nest is a Series A stage startup with a strong commitment to leveraging AI to enhance productivity and operational excellence.",
+    "website": "https://ifn.com",
+    "industry": "Technology & Software",
+    "foundingYear": 1999,
+    "stage": 300,
+    "size": 50,
+    "visa": 200
+  },
+  "suboptimal": [
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Technology & Software",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 1999,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 50,
+      "ground": "undefined"
+    },
+    {
+      "property": "stage",
+      "assert": "equals",
+      "result": 0,
+      "actual": 300,
+      "ground": "undefined"
+    },
+    {
+      "property": "visa",
+      "assert": "equals",
+      "result": 0,
+      "actual": 200,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.1785147385638317,
+      "actual": "Iron Forge Nest is a technology company focused on pioneering AI-driven project management solutions. Founded in 1999 and based in Seattle, Iron Forge Nest's innovative product ScatterShotAI functions as an autonomous AI project manager that streamlines complex project execution by facilitating cohesive collaboration among AI agents and human teams. The company emphasizes AI safety and alignment with human values, fostering transparency and strategic goal integration in its offerings. Iron Forge Nest is a Series A stage startup with a strong commitment to leveraging AI to enhance productivity and operational excellence.",
+      "ground": "undefined"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "gpt-4.1-mini_greenhouse_glass_lens_watch.json",
+  "timestamp": "2025-06-03T18:05:49.435Z",
+  "baseline": "gpt-4o-mini_greenhouse_glass_lens_watch.json",
+  "cost": 0.0012268000000000001,
+  "relativeCost": 2.712658927584301,
+  "duration": 2770,
+  "relativeDuration": 1.266575217192501,
+  "accuracy": 0.7852690515726796,
+  "relativeAccuracy": 1.0001788798141222,
+  "score": 0.7983437493836747,
+  "output": {
+    "v": "6b782ac04aa6c755d908cbbded52c010",
+    "id": "glass-lens-watch",
+    "ats": "greenhouse",
+    "name": "GlassLensWatch",
+    "description": "GlassLensWatch is an independent, nonprofit newsroom specializing in investigative journalism that serves the public interest. With a dedicated team of over 100 journalists, the organization produces in-depth reporting aimed at exposing wrongdoing and fostering real-world change. GlassLensWatch is committed to building a diverse and inclusive newsroom and offers comprehensive benefits to its employees. The organization focuses on accountability journalism, particularly involving government data and federal policies.",
+    "website": "https://www.glass-lens-watch.org",
+    "industry": "Media, Marketing & Communications",
+    "foundingYear": 0,
+    "stage": 800,
+    "size": 100,
+    "visa": 100
+  },
+  "suboptimal": [
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.4968833610087565,
+      "actual": "GlassLensWatch is an independent, nonprofit newsroom specializing in investigative journalism that serves the public interest. With a dedicated team of over 100 journalists, the organization produces in-depth reporting aimed at exposing wrongdoing and fostering real-world change. GlassLensWatch is committed to building a diverse and inclusive newsroom and offers comprehensive benefits to its employees. The organization focuses on accountability journalism, particularly involving government data and federal policies.",
+      "ground": "An independent, nonprofit newsroom that produces investigative journalism in the public interest. We cover a range of topics, focusing on stories with the potential to spur real-world impact."
+    }
+  ]
+}

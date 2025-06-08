@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { Job } from "../services/api";
 import { JobCard } from "./JobCard";
 

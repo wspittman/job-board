@@ -5,7 +5,9 @@
     "start:backend": "npm run dev --workspace=backend",
     "start:frontend": "npm run dev --workspace=frontend",
     "link-dry-utils": "npm link dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
-    "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb"
+    "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
+    "eval": "tsx --env-file ./packages/backend/.env ./evals/index.ts",
+    "fetch-input": "tsx ./evals/fetchInput.ts"
   },
   "private": true,
   "workspaces": [

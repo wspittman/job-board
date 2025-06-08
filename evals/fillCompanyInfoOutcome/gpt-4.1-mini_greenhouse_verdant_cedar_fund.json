@@ -1,0 +1,47 @@
+{
+  "name": "gpt-4.1-mini_greenhouse_verdant_cedar_fund.json",
+  "timestamp": "2025-06-03T18:05:55.149Z",
+  "baseline": "gpt-4o-mini_greenhouse_verdant_cedar_fund.json",
+  "cost": 0.0024364000000000005,
+  "relativeCost": 2.6776568853720195,
+  "duration": 4685,
+  "relativeDuration": 1.5606262491672218,
+  "accuracy": 0.6502505883872746,
+  "relativeAccuracy": 0.9918684539385713,
+  "score": 0.7846159633887272,
+  "output": {
+    "v": "41eba05dc69f18da2ea844f8607ba8ed",
+    "id": "verdant-cedar-fund",
+    "ats": "greenhouse",
+    "name": "VerdantCedarFund",
+    "description": "VerdantCedarFund is a mission-driven non-profit organization founded in 2007 that directs funding to cost-effective programs aimed at global health and poverty alleviation. Renowned as one of the world's largest private funders in global development, it has granted over $2.4 billion to impactful interventions and estimates that these efforts have saved more than 270,000 lives. The organization emphasizes transparency, rigorous research, and continuous improvement to maximize its impact. VerdantCedarFund supports a remote and flexible work environment, offers visa sponsorship for U.S. work visas, and prioritizes diversity and equity within its workforce.",
+    "website": "https://www.verdant-cedar-fund.org",
+    "industry": "Non-Profit & Social Services",
+    "foundingYear": 2007,
+    "size": 240,
+    "visa": 300
+  },
+  "suboptimal": [
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 240,
+      "ground": "undefined"
+    },
+    {
+      "property": "stage",
+      "assert": "equals",
+      "result": 0,
+      "actual": "undefined",
+      "ground": 800
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.5517541187109217,
+      "actual": "VerdantCedarFund is a mission-driven non-profit organization founded in 2007 that directs funding to cost-effective programs aimed at global health and poverty alleviation. Renowned as one of the world's largest private funders in global development, it has granted over $2.4 billion to impactful interventions and estimates that these efforts have saved more than 270,000 lives. The organization emphasizes transparency, rigorous research, and continuous improvement to maximize its impact. VerdantCedarFund supports a remote and flexible work environment, offers visa sponsorship for U.S. work visas, and prioritizes diversity and equity within its workforce.",
+      "ground": "A research organization that identifies and funds cost-effective giving opportunities, focusing on global health and well-being. Since 2007, we've directed over $2.4 billion to cost-effective programs and interventions."
+    }
+  ]
+}

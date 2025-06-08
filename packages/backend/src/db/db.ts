@@ -22,7 +22,7 @@ setDBLogging({
   logFn: logProperty,
   errorFn: (msg, val) => logError(new Error(msg, { cause: val })),
   aggregatorFn: () => getSubContext("db", initialContext),
-  storeCalls: true,
+  storeCalls: 10,
 });
 
 class CompanyContainer extends Container<Company> {

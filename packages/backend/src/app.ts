@@ -37,6 +37,12 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
+function serverStartErrorHandler(error: unknown) {
+  console.error("Failed to start server:", error);
+  logError(error);
+  process.exit(1);
+}
+
 /**
  * Starts the server after establishing database connection
  */
@@ -44,13 +50,15 @@ async function startServer() {
   try {
     await db.connect();
 
-    app.listen(config.PORT, () => {
+    app.listen(config.PORT, (error) => {
+      if (error) {
+        serverStartErrorHandler(error);
+        return;
+      }
       console.log(`Server running on port ${config.PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
-    logError(error);
-    process.exit(1);
+    serverStartErrorHandler(error);
   }
 }
 

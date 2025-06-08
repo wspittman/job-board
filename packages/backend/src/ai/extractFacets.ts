@@ -98,13 +98,16 @@ const schema = z.object({
  * Extracts facets from and update a job object.
  * @param job The job object
  */
-export async function extractFacets(job: Context<Job>): Promise<void> {
+export async function extractFacets(
+  job: Context<Job>,
+  model?: string
+): Promise<void> {
   const { content } = await jsonCompletion(
     "extractFacets",
     prompt,
     job.item,
     schema,
-    { context: job.context }
+    { context: job.context, model }
   );
 
   if (!content) return;

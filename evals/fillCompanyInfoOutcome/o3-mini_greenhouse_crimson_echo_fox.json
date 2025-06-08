@@ -1,0 +1,39 @@
+{
+  "name": "o3-mini_greenhouse_crimson_echo_fox.json",
+  "timestamp": "2025-06-03T18:13:42.494Z",
+  "baseline": "gpt-4o-mini_greenhouse_crimson_echo_fox.json",
+  "cost": 0.0058729,
+  "relativeCost": 13.482323232323232,
+  "duration": 12217,
+  "relativeDuration": 4.0480450629556,
+  "accuracy": 0.7978546064149371,
+  "relativeAccuracy": 1.0018572389618448,
+  "score": 0.7097872335236034,
+  "output": {
+    "v": "06e152e9e57bd9b486d11c52726aae98",
+    "id": "crimson-echo-fox",
+    "ats": "greenhouse",
+    "name": "CrimsonEchoFox",
+    "description": "CrimsonEchoFox is a dynamic voice, video, and text platform revolutionizing the way friends connect and game together. Founded in 2015 by Jason Citron and Stanislav Vishnevskiy, the company has become a cornerstone in the future of multiplayer gaming. With its seamless cross-device experience and focus on empowering intimate, real-time communication, CrimsonEchoFox plays a uniquely important role in deepening friendships and enhancing gaming engagement. Through continuous innovation, the company remains dedicated to making the gaming experience more interactive and fun for its millions of users worldwide.",
+    "website": "https://crimson-echo-fox.com/",
+    "industry": "Technology & Software",
+    "foundingYear": 2015,
+    "size": 0
+  },
+  "suboptimal": [
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.5849822449045599,
+      "actual": "CrimsonEchoFox is a dynamic voice, video, and text platform revolutionizing the way friends connect and game together. Founded in 2015 by Jason Citron and Stanislav Vishnevskiy, the company has become a cornerstone in the future of multiplayer gaming. With its seamless cross-device experience and focus on empowering intimate, real-time communication, CrimsonEchoFox plays a uniquely important role in deepening friendships and enhancing gaming engagement. Through continuous innovation, the company remains dedicated to making the gaming experience more interactive and fun for its millions of users worldwide.",
+      "ground": "A voice, video, and text platform that helps friends come together to hang out, play games, and have fun. High quality streaming and a seamless experience across devices lets people play and interact together as if they were in person. Over 200 millions people use the platform every month."
+    }
+  ]
+}

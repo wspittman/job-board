@@ -1,0 +1,53 @@
+{
+  "name": "gpt-4.1-nano_greenhouse_obsidian_crew_signal.json",
+  "timestamp": "2025-06-03T18:02:14.528Z",
+  "baseline": "gpt-4o-mini_greenhouse_obsidian_crew_signal.json",
+  "cost": 0.0002218,
+  "relativeCost": 0.6666666666666666,
+  "duration": 4177,
+  "relativeDuration": 1.8043196544276459,
+  "accuracy": 0.5031349487718895,
+  "relativeAccuracy": 1.2798948621727693,
+  "score": 1.2655788676597726,
+  "output": {
+    "v": "af5ad46ed354f915798ab7c81aa09f90",
+    "id": "obsidian-crew-signal",
+    "ats": "greenhouse",
+    "name": "Obsidian Crew Signal",
+    "description": "Obsidian Crew Signal is a dynamic media company dedicated to fostering an inclusive media ecosystem that amplifies underrepresented voices and resonates with multicultural audiences. It specializes in culturally relevant strategies and experiential activations that connect brands with diverse communities, emphasizing innovation, creativity, and cultural insight.",
+    "website": "https://www.obsidiancs.com",
+    "industry": "Media, Marketing & Communications",
+    "foundingYear": 0,
+    "size": 0
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "https://www.obsidiancs.com",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.5219446414032258,
+      "actual": "Obsidian Crew Signal is a dynamic media company dedicated to fostering an inclusive media ecosystem that amplifies underrepresented voices and resonates with multicultural audiences. It specializes in culturally relevant strategies and experiential activations that connect brands with diverse communities, emphasizing innovation, creativity, and cultural insight.",
+      "ground": "A media company that drives growth for brands targeting diverse audiences.We amplify underrepresented voices and craft strategies that resonate with today's multicultural generation. We are a place where employees can be authentic, creative, and energized by the people and work they touch each day."
+    }
+  ]
+}

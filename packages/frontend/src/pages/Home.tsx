@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { Briefcase, Building2 } from "lucide-react";

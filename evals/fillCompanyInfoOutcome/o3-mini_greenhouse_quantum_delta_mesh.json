@@ -1,0 +1,54 @@
+{
+  "name": "o3-mini_greenhouse_quantum_delta_mesh.json",
+  "timestamp": "2025-06-03T18:13:51.806Z",
+  "baseline": "gpt-4o-mini_greenhouse_quantum_delta_mesh.json",
+  "cost": 0.0051942,
+  "relativeCost": 13.35956790123457,
+  "duration": 6950,
+  "relativeDuration": 2.944915254237288,
+  "accuracy": 0.5182362432502965,
+  "relativeAccuracy": 1.2821285215915137,
+  "score": 0.9106143821779873,
+  "output": {
+    "v": "30a1aa985b3349c9bb74f0a0ffea4d17",
+    "id": "quantum-delta-mesh",
+    "ats": "greenhouse",
+    "name": "QuantumDeltaMesh",
+    "description": "QuantumDeltaMesh is a pioneering AI platform dedicated to empowering law firms through cutting‐edge data analysis and deep legal expertise. Leveraging advanced AI technology, the company delivers human-level, accurate analysis of complex legal records, contributing to over $1 billion in settlements and earning the trust of top litigation professionals. Currently in a dynamic Series-B growth phase, QuantumDeltaMesh is focused on fueling innovation, advancing customer-centric solutions, and creating a diverse and supportive work environment.",
+    "website": "",
+    "industry": "Technology & Software",
+    "foundingYear": 2023,
+    "stage": 400,
+    "size": 0
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2023,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.6276537027520759,
+      "actual": "QuantumDeltaMesh is a pioneering AI platform dedicated to empowering law firms through cutting‐edge data analysis and deep legal expertise. Leveraging advanced AI technology, the company delivers human-level, accurate analysis of complex legal records, contributing to over $1 billion in settlements and earning the trust of top litigation professionals. Currently in a dynamic Series-B growth phase, QuantumDeltaMesh is focused on fueling innovation, advancing customer-centric solutions, and creating a diverse and supportive work environment.",
+      "ground": "A trusted AI platform purpose-built for law firms. Our innovative approach blends technology with deep legal expertise, empowering law firms with unparalleled data insights.  We're in an exciting phase of scaling, presenting opportunities for both company and career growth as we expand our market presence and develop new features and services."
+    }
+  ]
+}

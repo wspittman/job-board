@@ -1,0 +1,53 @@
+{
+  "name": "gpt-4.1-nano_greenhouse_iron_forge_nest.json",
+  "timestamp": "2025-06-03T18:02:14.785Z",
+  "baseline": "gpt-4o-mini_greenhouse_iron_forge_nest.json",
+  "cost": 0.00021340000000000004,
+  "relativeCost": 0.6308943089430895,
+  "duration": 4436,
+  "relativeDuration": 1.652757078986587,
+  "accuracy": 0.4543474996457678,
+  "relativeAccuracy": 1.4288505849706943,
+  "score": 1.3846402458098943,
+  "output": {
+    "v": "0d5d194c502866f9107cdbe443fe12b9",
+    "id": "iron-forge-nest",
+    "ats": "greenhouse",
+    "name": "Iron Forge Nest",
+    "description": "Iron Forge Nest is a pioneering company actively involved in innovative AI projects and startup development. Located in Seattle, it fosters a cutting-edge environment where visionary leaders and startup founders can develop transformative AI-driven solutions. The company emphasizes innovation, collaboration, and strategic growth, positioning itself at the forefront of emerging technology sectors.",
+    "website": "https://ifn.com",
+    "industry": "Other",
+    "foundingYear": 2023,
+    "size": 1
+  },
+  "suboptimal": [
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Other",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2023,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 1,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.18043249752037488,
+      "actual": "Iron Forge Nest is a pioneering company actively involved in innovative AI projects and startup development. Located in Seattle, it fosters a cutting-edge environment where visionary leaders and startup founders can develop transformative AI-driven solutions. The company emphasizes innovation, collaboration, and strategic growth, positioning itself at the forefront of emerging technology sectors.",
+      "ground": "undefined"
+    }
+  ]
+}

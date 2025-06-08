@@ -1,0 +1,60 @@
+{
+  "name": "o3-mini_minimal.json",
+  "timestamp": "2025-06-03T18:14:05.371Z",
+  "baseline": "gpt-4o-mini_minimal.json",
+  "cost": 0.003980900000000001,
+  "relativeCost": 17.391437308868507,
+  "duration": 8036,
+  "relativeDuration": 3.9980099502487563,
+  "accuracy": 0.3169258447660398,
+  "relativeAccuracy": 1.2905433723976194,
+  "score": 0.9109158784547886,
+  "output": {
+    "v": "cc2e2e26d785adc86e3ef44a1ddb583e",
+    "id": "minimal",
+    "ats": "greenhouse",
+    "name": "Minimal",
+    "description": "Minimal is a forward-thinking company focused on developing innovative software solutions. With a strong emphasis on engineering excellence and collaboration, the company creates high-quality digital experiences and streamlined applications that drive modern technology forward. Minimal values teamwork, best practices, and a commitment to delivering efficient, reliable software across the development lifecycle.",
+    "website": "https://minimal.com",
+    "industry": "Technology & Software",
+    "foundingYear": 2020,
+    "size": 50
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "https://minimal.com",
+      "ground": "undefined"
+    },
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Technology & Software",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2020,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 50,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.2184809133622787,
+      "actual": "Minimal is a forward-thinking company focused on developing innovative software solutions. With a strong emphasis on engineering excellence and collaboration, the company creates high-quality digital experiences and streamlined applications that drive modern technology forward. Minimal values teamwork, best practices, and a commitment to delivering efficient, reliable software across the development lifecycle.",
+      "ground": "undefined"
+    }
+  ]
+}

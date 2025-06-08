@@ -1,0 +1,60 @@
+{
+  "name": "gpt-4.1-nano_minimal.json",
+  "timestamp": "2025-06-03T18:02:22.481Z",
+  "baseline": "gpt-4o-mini_minimal.json",
+  "cost": 0.0001417,
+  "relativeCost": 0.6190476190476191,
+  "duration": 1685,
+  "relativeDuration": 0.8383084577114428,
+  "accuracy": 0.3150355454830426,
+  "relativeAccuracy": 1.2886530731146224,
+  "score": 1.3222607065829084,
+  "output": {
+    "v": "f1be85c29e9efea86e787e63bae02df5",
+    "id": "minimal",
+    "ats": "greenhouse",
+    "name": "Minimal",
+    "description": "Minimal is a forward-thinking company dedicated to innovative software solutions, committed to quality and collaboration in remote work environments. With a history of over a decade, it fosters a dynamic team focused on building impactful applications and delivering high-quality software.",
+    "website": "https://minimal.com",
+    "industry": "Other",
+    "foundingYear": 2010,
+    "size": 50
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "https://minimal.com",
+      "ground": "undefined"
+    },
+    {
+      "property": "industry",
+      "assert": "equals",
+      "result": 0,
+      "actual": "Other",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 2010,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 50,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.20524881838129774,
+      "actual": "Minimal is a forward-thinking company dedicated to innovative software solutions, committed to quality and collaboration in remote work environments. With a history of over a decade, it fosters a dynamic team focused on building impactful applications and delivering high-quality software.",
+      "ground": "undefined"
+    }
+  ]
+}

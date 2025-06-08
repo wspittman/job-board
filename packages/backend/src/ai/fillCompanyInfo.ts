@@ -51,14 +51,15 @@ const schema = zObj(
  * @returns True if extraction was successful, false otherwise
  */
 export async function fillCompanyInfo(
-  company: Context<Company>
+  company: Context<Company>,
+  model?: string
 ): Promise<boolean> {
   const { content } = await jsonCompletion(
     "extractCompanyInfo",
     prompt,
     company.item,
     schema,
-    { context: company.context }
+    { context: company.context, model }
   );
 
   if (content) {

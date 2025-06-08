@@ -1,5 +1,5 @@
 import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";

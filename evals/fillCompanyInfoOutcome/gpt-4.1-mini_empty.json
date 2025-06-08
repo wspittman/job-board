@@ -1,0 +1,52 @@
+{
+  "name": "gpt-4.1-mini_empty.json",
+  "timestamp": "2025-06-03T18:05:48.074Z",
+  "baseline": "gpt-4o-mini_empty.json",
+  "cost": 0.0003248,
+  "relativeCost": 1.8507122507122509,
+  "duration": 1448,
+  "relativeDuration": 0.6174840085287846,
+  "accuracy": 0.48010048452267373,
+  "relativeAccuracy": 1.3020917294344005,
+  "score": 1.0968513692950228,
+  "output": {
+    "v": "bfc29d10e2a345bb927ba2715312ce9e",
+    "id": "empty",
+    "ats": "lever",
+    "name": "Empty",
+    "website": "",
+    "foundingYear": 0,
+    "size": 0,
+    "description": ""
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.36070339165871595,
+      "actual": "",
+      "ground": "undefined"
+    }
+  ]
+}

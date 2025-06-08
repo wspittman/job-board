@@ -1,0 +1,53 @@
+{
+  "name": "o3-mini_greenhouse_obsidian_crew_signal.json",
+  "timestamp": "2025-06-03T18:13:36.337Z",
+  "baseline": "gpt-4o-mini_greenhouse_obsidian_crew_signal.json",
+  "cost": 0.0043626,
+  "relativeCost": 13.112714156898107,
+  "duration": 6053,
+  "relativeDuration": 2.6146868250539956,
+  "accuracy": 0.5155167871559155,
+  "relativeAccuracy": 1.2922767005567952,
+  "score": 0.9202454686553132,
+  "output": {
+    "v": "3c51f8b8d41ca8085fa6946de6657176",
+    "id": "obsidian-crew-signal",
+    "ats": "greenhouse",
+    "name": "Obsidian Crew Signal",
+    "description": "Obsidian Crew Signal is a dynamic media company dedicated to driving growth for brands targeting the New Majority – the fastest-growing demographic of diverse, culturally influential consumers. The company is committed to fostering an inclusive media ecosystem, amplifying underrepresented voices, and developing contextually relevant strategies that resonate with today’s multicultural generation. With creativity, authenticity, and innovative storytelling at its core, Obsidian Crew Signal is where culture comes home and groundbreaking brand experiences are born.",
+    "website": "null",
+    "industry": "Media, Marketing & Communications",
+    "foundingYear": 0,
+    "size": 0
+  },
+  "suboptimal": [
+    {
+      "property": "website",
+      "assert": "equals",
+      "result": 0,
+      "actual": "null",
+      "ground": "undefined"
+    },
+    {
+      "property": "foundingYear",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "size",
+      "assert": "equals",
+      "result": 0,
+      "actual": 0,
+      "ground": "undefined"
+    },
+    {
+      "property": "description",
+      "assert": "similar",
+      "result": 0.6086175100914087,
+      "actual": "Obsidian Crew Signal is a dynamic media company dedicated to driving growth for brands targeting the New Majority – the fastest-growing demographic of diverse, culturally influential consumers. The company is committed to fostering an inclusive media ecosystem, amplifying underrepresented voices, and developing contextually relevant strategies that resonate with today’s multicultural generation. With creativity, authenticity, and innovative storytelling at its core, Obsidian Crew Signal is where culture comes home and groundbreaking brand experiences are born.",
+      "ground": "A media company that drives growth for brands targeting diverse audiences.We amplify underrepresented voices and craft strategies that resonate with today's multicultural generation. We are a place where employees can be authentic, creative, and energized by the people and work they touch each day."
+    }
+  ]
+}
