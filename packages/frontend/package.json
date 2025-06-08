@@ -19,7 +19,7 @@
     "axios": "^1.7.7",
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.3",
-    "lucide-react": "^0.510.0",
+    "lucide-react": "^0.513.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.1.1"
