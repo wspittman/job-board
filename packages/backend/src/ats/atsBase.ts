@@ -9,7 +9,7 @@ import type {
 } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
-import { getSubContext, logError } from "../utils/telemetry.ts";
+import { createSubscribeAggregator, logError } from "../utils/telemetry.ts";
 
 /**
  * Base class for ATS (Applicant Tracking System) implementations
@@ -17,8 +17,13 @@ import { getSubContext, logError } from "../utils/telemetry.ts";
  */
 export abstract class ATSBase {
   private agent = new https.Agent({ keepAlive: true });
+  protected ats: ATS;
+  protected baseUrl: string;
 
-  constructor(protected ats: ATS, protected baseUrl: string) {}
+  constructor(ats: ATS, baseUrl: string) {
+    this.ats = ats;
+    this.baseUrl = baseUrl;
+  }
 
   /**
    * Retrieves company information from the ATS
@@ -93,20 +98,7 @@ export abstract class ATSBase {
 
 // #region Telemetry
 
-interface AtsLog {
-  name: string;
-  ats: string;
-  id: string;
-  ms: number;
-  status?: number;
-  statusText?: string;
-}
-
-const initialContext = () => ({
-  calls: [] as AtsLog[],
-  count: 0,
-  ms: 0,
-});
+const subscribeAggregator = createSubscribeAggregator("ats", 100);
 
 function logAtsCall(
   name: string,
@@ -116,33 +108,21 @@ function logAtsCall(
   { status, statusText }: Pick<AxiosResponse, "status" | "statusText">
 ) {
   try {
-    const log: AtsLog = {
-      name,
-      ats,
-      id,
-      ms,
-    };
+    const log: Record<string, unknown> = { name, ats, id, ms };
 
     if (status !== 200) {
-      log.status = status;
-      log.statusText = statusText;
+      log["status"] = status;
+      log["statusText"] = statusText;
     }
 
-    addAtsLog(log);
+    subscribeAggregator({
+      tag: `${ats} ${name}`,
+      dense: log,
+      metrics: { ms },
+    });
   } catch (error) {
     logError(error);
   }
-}
-
-function addAtsLog(log: AtsLog) {
-  const context = getSubContext("ats", initialContext);
-
-  if (context.calls.length < 100) {
-    context.calls.push(log);
-  }
-
-  context.count++;
-  context.ms += log.ms;
 }
 
 // #endregion

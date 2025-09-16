@@ -7,7 +7,7 @@ import type {
   RequestData,
 } from "applicationinsights/out/Declarations/Contracts/index.js";
 import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
-import { setAsyncLogging } from "dry-utils-async";
+import { subscribeAsyncLogging } from "dry-utils-async";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
 import { AppError } from "./AppError.ts";
@@ -30,17 +30,35 @@ export async function startTelemetry(): Promise<void> {
   _client.addTelemetryProcessor(telemetryProcessor);
   _client.config.disableAppInsights = config.NODE_ENV === "dev";
 
-  setAsyncLogging({
-    logFn: logProperty,
-    errorFn: (msg, val) => logError(new Error(msg, { cause: val })),
+  subscribeAsyncLogging({
+    log: ({ tag, val }) => logProperty(tag, val),
+    error: ({ tag, val }) => logError(new Error(tag, { cause: val })),
   });
 }
 
-interface CustomContext extends CorrelationContext {
-  requestContext?: Record<string, unknown>;
+type Bag = Record<string, unknown>;
+type NumBag = Record<string, number>;
+interface AgBag {
+  count: number;
+  counts: NumBag;
+  calls: Bag[];
+  metrics: NumBag;
+}
+interface LogSub {
+  tag: string;
+  val: unknown;
+}
+interface AgSub {
+  tag: string;
+  dense: Record<string, unknown>;
+  metrics: Record<string, number>;
 }
 
-const asyncLocalStorage = new AsyncLocalStorage<Record<string, unknown>>();
+interface CustomContext extends CorrelationContext {
+  requestContext?: Bag;
+}
+
+const asyncLocalStorage = new AsyncLocalStorage<Bag>();
 
 /**
  * Executes an async function within a new telemetry context
@@ -69,7 +87,7 @@ export function withAsyncContext(
 /**
  * Get the current logging context, initializing it if necessary
  */
-function getContext(): Record<string, unknown> {
+function getContext(): Bag {
   // If an async context is already set, use it
   const asyncContext = asyncLocalStorage.getStore();
   if (asyncContext) return asyncContext;
@@ -88,12 +106,12 @@ function getContext(): Record<string, unknown> {
 /**
  * Gets a named sub-section of the telemetry context
  * @param name - Name of the sub-context
- * @param init - Function to initialize the sub-context if it doesn't exist
+ * @param base - Initial value if sub-context does not exist
  * @returns The requested sub-context
  */
-export function getSubContext<T>(name: string, init: () => T): T {
+function getSubContext<T>(name: string, base: T): T {
   const context = getContext();
-  context[name] ??= init();
+  context[name] ??= base;
   return <T>context[name];
 }
 
@@ -104,7 +122,7 @@ export function getSubContext<T>(name: string, init: () => T): T {
  * @remarks If property already exists, converts to array of values
  */
 export function logProperty(name: string, value: unknown): void {
-  const context = getSubContext<Record<string, unknown>>("prop", () => ({}));
+  const context = getSubContext<Bag>("prop", {});
 
   if (name in context) {
     const current = context[name];
@@ -117,6 +135,13 @@ export function logProperty(name: string, value: unknown): void {
   } else {
     context[name] = value;
   }
+}
+
+/**
+ * Helper to translate dry-utils subscribers to logProperty calls
+ */
+export function subscribeLog({ tag, val }: LogSub): void {
+  logProperty(tag, val);
 }
 
 /**
@@ -145,6 +170,46 @@ export function logError(error: unknown): void {
   }
 
   _client.trackException({ exception, properties });
+}
+
+/**
+ * Helper to translate dry-utils subscribers to logError calls
+ */
+export function subscribeError({ tag, val }: LogSub): void {
+  logError(new Error(tag, { cause: val }));
+}
+
+/**
+ * Creates a subscriber aggregator for telemetry events
+ * @param source - Name of the sub-context to use
+ * @param callLimit - Maximum number of calls to include verbatim
+ * @returns A function that accepts telemetry events
+ */
+export function createSubscribeAggregator(
+  source: string,
+  callLimit: number
+): (sub: AgSub) => void {
+  return ({ tag, dense, metrics }: AgSub) => {
+    const ag = getSubContext<AgBag>(source, {
+      count: 0,
+      counts: {},
+      calls: [],
+      metrics: {},
+    });
+
+    if (!ag) return;
+
+    ag.count++;
+    ag.counts[tag] = (ag.counts[tag] ?? 0) + 1;
+
+    if (ag.calls.length < callLimit) {
+      ag.calls.push(dense);
+    }
+
+    Object.entries(metrics).forEach(([key, val]) => {
+      ag.metrics[key] = (ag.metrics[key] ?? 0) + val;
+    });
+  };
 }
 
 /**
