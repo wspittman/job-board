@@ -7,7 +7,8 @@
     "link-dry-utils": "npm link dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "eval": "tsx --env-file ./packages/backend/.env ./evals/index.ts",
-    "fetch-input": "tsx ./evals/fetchInput.ts"
+    "fetch-input": "tsx ./evals/fetchInput.ts",
+    "clean": "git clean -fdx node_modules && git clean -fdx **/dist/ **/tsconfig.tsbuildinfo"
   },
   "private": true,
   "workspaces": [
