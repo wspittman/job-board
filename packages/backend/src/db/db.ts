@@ -1,4 +1,8 @@
-import { Container, dbConnect, setDBLogging } from "dry-utils-cosmosdb";
+import {
+  Container,
+  dbConnect,
+  subscribeCosmosDBLogging,
+} from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
 import type {
   Company,
@@ -8,21 +12,16 @@ import type {
   LocationCache,
   Metadata,
 } from "../types/dbModels.ts";
-import { getSubContext, logError, logProperty } from "../utils/telemetry.ts";
+import {
+  createSubscribeAggregator,
+  subscribeError,
+  subscribeLog,
+} from "../utils/telemetry.ts";
 
-const initialContext = () => ({
-  count: 0,
-  counts: {},
-  ru: 0,
-  ms: 0,
-  bytes: 0,
-});
-
-setDBLogging({
-  logFn: logProperty,
-  errorFn: (msg, val) => logError(new Error(msg, { cause: val })),
-  aggregatorFn: () => getSubContext("db", initialContext),
-  storeCalls: 10,
+subscribeCosmosDBLogging({
+  log: subscribeLog,
+  error: subscribeError,
+  aggregate: createSubscribeAggregator("db", 10),
 });
 
 class CompanyContainer extends Container<Company> {

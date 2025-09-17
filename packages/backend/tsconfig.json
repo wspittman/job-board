@@ -15,7 +15,7 @@
     "moduleResolution": "NodeNext",
 
     // [Node Only] Don't allow non-JS constructs, including JSX
-    //"erasableSyntaxOnly": true, // We have enums that we want to keep
+    "erasableSyntaxOnly": true,
     "verbatimModuleSyntax": true,
 
     // Perf improvements
