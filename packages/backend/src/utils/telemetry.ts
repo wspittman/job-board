@@ -93,7 +93,7 @@ function getContext(): Bag {
   if (asyncContext) return asyncContext;
 
   // Otherwise, use the request-level context
-  const context = <CustomContext>telemetryWorkaround.getCorrelationContext();
+  const context = telemetryWorkaround.getCorrelationContext() as CustomContext;
   if (context) {
     context.requestContext ??= {};
     return context.requestContext;
@@ -112,7 +112,7 @@ function getContext(): Bag {
 function getSubContext<T>(name: string, base: T): T {
   const context = getContext();
   context[name] ??= base;
-  return <T>context[name];
+  return context[name] as T;
 }
 
 /**

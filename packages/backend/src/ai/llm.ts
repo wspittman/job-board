@@ -17,7 +17,11 @@ subscribeOpenAILogging({
 });
 
 class LLMConnector {
-  constructor(private model?: string) {}
+  private model?: string;
+
+  constructor(model?: string) {
+    this.model = model;
+  }
 
   async fillCompanyInfo(company: Context<Company>) {
     return fillCompanyInfo(company, this.model);
