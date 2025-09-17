@@ -1,5 +1,9 @@
 cosmosdbcert.cer
 .env
+agent_notes/
+agent_scripts/
+
+# TypeScript cache
 *.tsbuildinfo
 
 # Logs
