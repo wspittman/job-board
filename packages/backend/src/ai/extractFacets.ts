@@ -8,7 +8,7 @@ import {
   zString,
 } from "dry-utils-openai";
 import type { Job, Location } from "../types/dbModels.ts";
-import { Office } from "../types/enums.ts";
+import { OfficeEnum } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";
 import { normalizedLocation } from "../utils/location.ts";
 import { setExtractedData } from "./setExtractedData.ts";
@@ -69,8 +69,8 @@ const schema = z.object({
     "Extract location details based on explicit information. The 'location' section of the Job object takes precedence over the job description.",
     {
       remote: zEnum(
-        Office,
-        "Categorize as: 'Remote' for fully remote roles, 'Hybrid' for partial office attendance, 'OnSite' for full office attendance. A role is 'Remote' if only a region is mentioned (eg. 'USA' or 'Pacific Time Zone'). A role is 'Remote' if the location description includes the string 'remote'. A role is 'Hybrid' only if the word 'hybrid' is explicitly used. Never use null, always make a selection."
+        "Categorize as: 'Remote' for fully remote roles, 'Hybrid' for partial office attendance, 'OnSite' for full office attendance. A role is 'Remote' if only a region is mentioned (eg. 'USA' or 'Pacific Time Zone'). A role is 'Remote' if the location description includes the string 'remote'. A role is 'Hybrid' only if the word 'hybrid' is explicitly used. Never use null, always make a selection.",
+        OfficeEnum
       ),
       city: zString(
         "City name in English. Use null if only country/region is specified."
@@ -125,6 +125,6 @@ export async function extractFacets(
   // Also Temporary Reformatting Holdover
   const location: Location = {};
   setExtractedData(location, content.location);
-  job.item.isRemote = location.remote === Office.Remote;
+  job.item.isRemote = location.remote === "Remote";
   job.item.location = normalizedLocation(location);
 }

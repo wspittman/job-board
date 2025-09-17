@@ -5,7 +5,6 @@ import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { Filters } from "../types/clientModels.ts";
 import type { CompanyKey, Job, JobKey, Location } from "../types/dbModels.ts";
-import { Office } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { normalizedLocation } from "../utils/location.ts";
@@ -38,7 +37,7 @@ export async function getJobs(filterInput: Filters) {
   if (inputLocation || isRemote != undefined) {
     location = { location: inputLocation };
     if (isRemote != undefined) {
-      location.remote = isRemote ? Office.Remote : Office.Onsite;
+      location.remote = isRemote ? "Remote" : "Onsite";
     }
   }
   if (location?.location) {
@@ -181,7 +180,7 @@ async function readJobsByFilters({
   }
 
   const isRemote =
-    location?.remote == null ? undefined : location.remote === Office.Remote;
+    location?.remote == null ? undefined : location.remote === "Remote";
 
   if (isRemote !== undefined) {
     query.whereCondition("isRemote", "=", isRemote);

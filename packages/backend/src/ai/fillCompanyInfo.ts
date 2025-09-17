@@ -6,7 +6,7 @@ import {
   zString,
 } from "dry-utils-openai";
 import type { Company } from "../types/dbModels.ts";
-import { Industry, Stage, Visa } from "../types/enums.ts";
+import { IndustryEnum, StageEnum, VisaEnum } from "../types/enums.ts";
 import type { Context } from "../types/types.ts";
 import { setExtractedData } from "./setExtractedData.ts";
 
@@ -24,20 +24,20 @@ const schema = zObj(
       "The company's website homepage URL. Do not use the ATS URL (eg. *.lever.co or *.greenhouse.io)."
     ),
     industry: zEnum(
-      Industry,
-      "The industry in which the company operates. Avoid using 'Technology & Software' if a different option is valid. Select 'Other' if no other option is a strong match. Select null if insufficient information to decide."
+      "The industry in which the company operates. Avoid using 'Technology & Software' if a different option is valid. Select 'Other' if no other option is a strong match. Select null if insufficient information to decide.",
+      IndustryEnum
     ),
     foundingYear: zNumber("The year the company was founded."),
     stage: zEnum(
-      Stage,
-      "The stage of the company. Only include if a stage marked is explicitly mentioned, such as 'Seed Stage', 'Series A', 'Bootstrapped', 'Public', or 'NonProfit'. Do not infer based on other attributes, including the word 'startup' or indications of how much investment money has been raised."
+      "The stage of the company. Only include if a stage marked is explicitly mentioned, such as 'Seed Stage', 'Series A', 'Bootstrapped', 'Public', or 'NonProfit'. Do not infer based on other attributes, including the word 'startup' or indications of how much investment money has been raised.",
+      StageEnum
     ),
     size: zNumber(
       "The lower bound of the number of employees at the company. Only include if explicitly mentioned. Do not infer based on other attributes."
     ),
     visa: zEnum(
-      Visa,
-      "The visa sponsorship status of the company. Only include if the word 'visa' is explicitly mentioned. Do not infer based on other attributes."
+      "The visa sponsorship status of the company. Only include if the word 'visa' is explicitly mentioned. Do not infer based on other attributes.",
+      VisaEnum
     ),
     description: zString(
       "A concise, clear, and engaging company description paragraph. Be sure to highlight key company attributes and values. Only include information that is specifically about the company. Avoid mentioning information that pertains only to the example role."
