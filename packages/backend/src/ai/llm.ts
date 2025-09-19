@@ -1,5 +1,6 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
-import type { Company, Job, Location } from "../types/dbModels.ts";
+import type { Company } from "../models/models.ts";
+import type { Job, Location } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
 import {
   createSubscribeAggregator,

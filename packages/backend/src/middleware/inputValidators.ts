@@ -1,10 +1,6 @@
+import type { CompanyKey, CompanyKeys } from "../models/models.ts";
 import type { Filters, RefreshJobsOptions } from "../types/clientModels.ts";
-import type {
-  ATS,
-  CompanyKey,
-  CompanyKeys,
-  JobKey,
-} from "../types/dbModels.ts";
+import type { ATS, JobKey } from "../types/dbModels.ts";
 import { AppError } from "../utils/AppError.ts";
 import { logProperty } from "../utils/telemetry.ts";
 

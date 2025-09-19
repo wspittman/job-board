@@ -1,37 +1,6 @@
-import type { Industry, Office, Stage, Visa } from "./enums.ts";
+import type { Office } from "./enums.ts";
 
 export type ATS = "greenhouse" | "lever";
-
-/**
- * - id: The ATS company name
- * - pKey: ats
- */
-export interface Company {
-  // Keys
-  id: string;
-  ats: ATS;
-
-  // Basic
-  name: string;
-
-  // Extracted Details - Not Indexed
-  description?: string;
-  website?: string;
-
-  // Extracted Details
-  industry?: Industry;
-  foundingYear?: number;
-  size?: number;
-  stage?: Stage;
-  visa?: Visa;
-}
-
-export type CompanyKey = Pick<Company, "id" | "ats">;
-
-export interface CompanyKeys {
-  ids: Company["id"][];
-  ats: Company["ats"];
-}
 
 /**
  * - id: The ATS-granted job id

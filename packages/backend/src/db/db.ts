@@ -4,9 +4,8 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
+import type { Company, CompanyKey } from "../models/models.ts";
 import type {
-  Company,
-  CompanyKey,
   Job,
   JobKey,
   LocationCache,

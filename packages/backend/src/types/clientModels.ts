@@ -1,4 +1,4 @@
-import type { CompanyKey } from "./dbModels.ts";
+import type { CompanyKey } from "../models/models.ts";
 
 // #region Input Models
 

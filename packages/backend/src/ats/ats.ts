@@ -1,10 +1,5 @@
-import type {
-  ATS,
-  Company,
-  CompanyKey,
-  Job,
-  JobKey,
-} from "../types/dbModels.ts";
+import type { ATS, Company, CompanyKey } from "../models/models.ts";
+import type { Job, JobKey } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
 import { ATSBase } from "./atsBase.ts";
 import { Greenhouse } from "./greenhouse.ts";

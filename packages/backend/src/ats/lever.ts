@@ -1,6 +1,7 @@
 import { standardizeUntrustedHtml } from "dry-utils-text";
 import { config } from "../config.ts";
-import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels.ts";
+import type { Company, CompanyKey } from "../models/models.ts";
+import type { Job, JobKey } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { ATSBase } from "./atsBase.ts";
