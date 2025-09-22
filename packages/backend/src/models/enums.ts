@@ -1,5 +1,7 @@
 import { z } from "dry-utils-openai";
 
+// #region Company
+
 export const CompanySizeBand = z
   .enum([
     "1-10",
@@ -50,3 +52,77 @@ export const CompanyStage = z
     ].join(" ")
   );
 export type CompanyStage = z.infer<typeof CompanyStage>;
+
+// #endregion
+
+// #region Job
+
+export const WorkModel = z
+  .enum(["onsite", "remote", "hybrid"] as const)
+  .describe(
+    [
+      "The work model for the job.",
+      "Return only if explicitly stated.",
+      "Map general phrases to specific values.",
+      "Example: 'This is a remote position' → 'remote'",
+      "Example: 'We offer flexible work arrangements including hybrid options' → 'hybrid'",
+      "Example: 'Candidates must be willing to work at our headquarters' → 'onsite'",
+    ].join(" ")
+  );
+export type WorkModel = z.infer<typeof WorkModel>;
+
+export const SeniorityLevel = z
+  .enum([
+    "intern",
+    "entry",
+    "mid",
+    "senior",
+    "staff+",
+    "manager",
+    "director",
+    "executive",
+  ] as const)
+  .describe(
+    [
+      "The seniority level of the job.",
+      "Map common synonyms to specific values.",
+      "If unclear, make an educated guess based on years of experience and job responsibilities.",
+      "Example: 'We are looking for a senior software engineer' → 'senior'",
+      "Example: 'This is an entry-level position' → 'entry'",
+      "Example: 'We are hiring a Principal Data Scientist' → 'staff+'",
+      "Example: 'We need a director of marketing' → 'director'",
+    ].join(" ")
+  );
+export type SeniorityLevel = z.infer<typeof SeniorityLevel>;
+
+export const JobFamily = z
+  .enum([
+    "engineering",
+    "design",
+    "product",
+    "data",
+    "it",
+    "security",
+    "marketing",
+    "sales",
+    "customer_success",
+    "ops",
+    "finance",
+    "hr",
+    "legal",
+    "other",
+  ] as const)
+  .describe(
+    [
+      "The job family/category.",
+      "Map common roles to specific families.",
+      "Example: 'We are hiring a UX designer' → 'design'",
+      "Example: 'As a Customer Support Specialist, you will assist clients' → 'customer_success'",
+      "Example: 'This role is for a Recruiting Coordinator' → 'hr'",
+      "Example: 'We need a cybersecurity analyst' → 'security'",
+      "Example: 'Join our sales team as an Account Executive' → 'sales'",
+    ].join(" ")
+  );
+export type JobFamily = z.infer<typeof JobFamily>;
+
+// #endregion

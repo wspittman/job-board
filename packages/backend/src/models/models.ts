@@ -20,3 +20,25 @@ export type Company = CompanyKey &
   Partial<InferredCompany> & {
     name: string;
   };
+
+/**
+ * - id: The ATS-granted job id
+ * - pKey: companyId
+ */
+export interface JobKey {
+  id: string;
+  companyId: string;
+}
+
+export type Job = JobKey &
+  Partial<InferredCompany> & {
+    title: string;
+    description: string;
+    postTS: number;
+    applyUrl: string;
+
+    // Denormalized from Company to reduce joins
+    companyName: string;
+    companyStage?: Company["stage"];
+    companySize?: Company["size"];
+  };
