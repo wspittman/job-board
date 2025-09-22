@@ -1,6 +1,6 @@
-import type { Job } from "../models/models.ts";
 import { normalizedLocation } from "../utils/location.ts";
 import type { ClientJob } from "./clientModels.ts";
+import type { Job } from "./models.ts";
 
 // This file is going to get a lot more interesting later on
 

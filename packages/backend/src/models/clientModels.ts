@@ -1,4 +1,4 @@
-import type { CompanyKey } from "../models/models.ts";
+import type { CompanyKey } from "./models.ts";
 
 // #region Input Models
 

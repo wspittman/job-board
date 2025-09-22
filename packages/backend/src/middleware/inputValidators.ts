@@ -1,5 +1,5 @@
+import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
 import type { ATS, CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
-import type { Filters, RefreshJobsOptions } from "../types/clientModels.ts";
 import { AppError } from "../utils/AppError.ts";
 import { logProperty } from "../utils/telemetry.ts";
 

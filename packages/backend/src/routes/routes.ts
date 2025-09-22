@@ -17,7 +17,7 @@ import {
   useRefreshJobsOptions,
 } from "../middleware/inputValidators.ts";
 import { asyncRoute, jsonRoute } from "../middleware/wrappers.ts";
-import { toClientJobs } from "../types/toClient.ts";
+import { toClientJobs } from "../models/toClient.ts";
 
 export const router = express.Router();
 

@@ -1,5 +1,5 @@
 import { db } from "../db/db.ts";
-import type { ClientMetadata } from "../types/clientModels.ts";
+import type { ClientMetadata } from "../models/clientModels.ts";
 import { AsyncExecutor } from "../utils/asyncExecutor.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
