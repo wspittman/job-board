@@ -9,9 +9,9 @@ import type {
   CompanyKey,
   Job,
   JobKey,
+  LocationCache,
   Metadata,
 } from "../models/models.ts";
-import type { LocationCache } from "../types/dbModels.ts";
 import {
   createSubscribeAggregator,
   subscribeError,

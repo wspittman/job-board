@@ -27,15 +27,6 @@ export const toClientJob = ({
   requiredExperience,
   summary,
 }: Job): ClientJob => {
-  let location = "";
-  if (primaryLocation) {
-    location = normalizedLocation({
-      city: primaryLocation.city ?? "",
-      stateCode: primaryLocation.regionCode ?? "",
-      countryCode: primaryLocation.countryCode ?? "",
-    });
-  }
-
   return {
     id,
     companyId,
@@ -45,7 +36,7 @@ export const toClientJob = ({
     postTS,
     applyUrl,
     isRemote: presence === "remote",
-    location,
+    location: primaryLocation ? normalizedLocation(primaryLocation) : "",
     facets: {
       summary: summary ?? undefined,
       salary: salaryRange?.min ?? undefined,

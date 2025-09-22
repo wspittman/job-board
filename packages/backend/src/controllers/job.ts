@@ -4,15 +4,14 @@ import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { Filters } from "../models/clientModels.ts";
-import type { CompanyKey, Job, JobKey } from "../models/models.ts";
-import type { Location } from "../types/dbModels.ts";
+import type { CompanyKey, Job, JobKey, Location } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { normalizedLocation } from "../utils/location.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { metadataJobExecutor } from "./metadata.ts";
 
-type EnhancedFilters = Omit<Filters, "location" | "isRemote"> & {
+type EnhancedFilters = Omit<Filters, "location"> & {
   location?: Location;
 };
 
@@ -32,22 +31,9 @@ export async function getJobs(filterInput: Filters) {
     return [];
   }
 
-  // Convert filter inputs to Location object
-  let location: Location | undefined = undefined;
-  const { location: inputLocation, isRemote } = filterInput;
-  if (inputLocation || isRemote != undefined) {
-    location = { location: inputLocation };
-    if (isRemote != undefined) {
-      location.remote = isRemote ? "Remote" : "Onsite";
-    }
-  }
-  if (location?.location) {
-    await llm.extractLocation(location);
-  }
-
   const filters: EnhancedFilters = {
     ...filterInput,
-    location,
+    location: await llm.extractLocation(filterInput.location ?? ""),
   };
 
   const result = await readJobsByFilters(filters);
@@ -171,6 +157,7 @@ async function readJobsByFilters({
   daysSince,
   maxExperience,
   minSalary,
+  isRemote,
 }: EnhancedFilters) {
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
@@ -179,9 +166,6 @@ async function readJobsByFilters({
   if (companyId) {
     query.whereCondition("companyId", "=", companyId);
   }
-
-  const isRemote =
-    location?.remote == null ? undefined : location.remote === "Remote";
 
   if (isRemote !== undefined) {
     query.whereCondition("isRemote", "=", isRemote);
@@ -209,11 +193,13 @@ async function readJobsByFilters({
     const normalLocation = normalizedLocation(location);
     if (location?.countryCode) {
       addLocationClause(query, normalLocation, isRemote);
-    } else if (location.location) {
+    } else {
       // Remote + empty location always matches
       query.where([
-        '(c.isRemote = true AND c.location = "") OR CONTAINS(c.location, @location, true)',
-        { "@location": location.location },
+        '(c.isRemote = true AND c.location = "")',
+        // TBD revisit
+        //'(c.isRemote = true AND c.location = "") OR CONTAINS(c.location, @location, true)',
+        //{ "@location": location.location },
       ]);
     }
   }

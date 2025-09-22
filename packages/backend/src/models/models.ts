@@ -1,4 +1,8 @@
-import type { InferredCompany, InferredJob } from "./inferredModels.ts";
+import type {
+  InferredCompany,
+  InferredJob,
+  InferredLocation,
+} from "./inferredModels.ts";
 
 export type ATS = "greenhouse" | "lever";
 
@@ -61,3 +65,15 @@ export interface Metadata {
   // For job type
   jobCount?: number;
 }
+
+/**
+ * A cache of freehand location string -> normalized location
+ * - id: The freehand location string
+ * - pKey: The first character of the freehand location string
+ */
+export interface LocationCache extends Partial<InferredLocation> {
+  id: string;
+  pKey: string;
+}
+
+export type Location = Partial<InferredLocation>;

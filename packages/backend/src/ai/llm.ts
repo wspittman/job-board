@@ -1,6 +1,5 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import type { Company, Job } from "../models/models.ts";
-import type { Location } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
 import {
   createSubscribeAggregator,
@@ -28,7 +27,7 @@ class LLMConnector {
     return fillCompanyInfo(company, this.model);
   }
 
-  async extractLocation(location: Location) {
+  async extractLocation(location: string) {
     return extractLocation(location, this.model);
   }
 
