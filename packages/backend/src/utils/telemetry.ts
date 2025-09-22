@@ -18,6 +18,7 @@ This means that the getter for defaultClient is executed before the client is in
 Consequently, defaultClient remains undefined even after setup() is called.
 https://github.com/microsoft/ApplicationInsights-node.js/issues/1354
 */
+import type { Bag } from "../types/types.ts";
 import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
 let _client: NodeClient;
@@ -36,7 +37,6 @@ export async function startTelemetry(): Promise<void> {
   });
 }
 
-type Bag = Record<string, unknown>;
 type NumBag = Record<string, number>;
 interface AgBag {
   count: number;
@@ -50,8 +50,8 @@ interface LogSub {
 }
 interface AgSub {
   tag: string;
-  dense: Record<string, unknown>;
-  metrics: Record<string, number>;
+  dense: Bag;
+  metrics: NumBag;
 }
 
 interface CustomContext extends CorrelationContext {
