@@ -2,9 +2,12 @@ import { z } from "dry-utils-openai";
 import {
   CompanySizeBand,
   CompanyStage,
+  EducationLevel,
   JobFamily,
+  JobType,
+  PayCadence,
+  Presence,
   SeniorityLevel,
-  WorkModel,
 } from "./enums.ts";
 
 /*
@@ -107,6 +110,7 @@ export const InferredRemoteEligibility = z
         [
           "Array of ISO 3166-1 alpha-2 country codes (uppercase).",
           "Use null if no country restrictions are explicitly stated.",
+          "Example: 'Remote (US and Canada only)' → ['US', 'CA']",
         ].join(" ")
       ),
     regions: z
@@ -136,12 +140,7 @@ export type InferredRemoteEligibility = z.infer<
 export const InferredSalaryRange = z
   .object({
     currency: zString("ISO 4217 currency code (uppercase), e.g. 'USD'."),
-    isHourly: z
-      .boolean()
-      .nullable()
-      .describe(
-        "'true' if compensation is quoted hourly; 'false' if annual or not stated."
-      ),
+    cadence: PayCadence.nullable(),
     min: zPosNum("Minimum salary in the stated currency and cadence."),
     max: zPosNum("Maximum salary in the stated currency and cadence."),
   })
@@ -216,15 +215,17 @@ export type InferredBenefitHighlights = z.infer<
 
 export const InferredJob = z
   .object({
-    workModel: WorkModel.nullable(),
-    seniorityLevel: SeniorityLevel.nullable(),
+    presence: Presence.nullable(),
+    jobType: JobType.nullable(),
     jobFamily: JobFamily.nullable(),
-    primaryLocation: InferredLocation,
-    remoteEligibility: InferredRemoteEligibility,
-    salaryRange: InferredSalaryRange,
-    variableComp: InferredVariableComp,
-    benefitHighlights: InferredBenefitHighlights,
-    experienceYears: zPosNum(
+    seniorityLevel: SeniorityLevel.nullable(),
+    primaryLocation: InferredLocation.nullable(),
+    remoteEligibility: InferredRemoteEligibility.nullable(),
+    salaryRange: InferredSalaryRange.nullable(),
+    variableComp: InferredVariableComp.nullable(),
+    benefitHighlights: InferredBenefitHighlights.nullable(),
+    requiredEducation: EducationLevel.nullable(),
+    requiredExperience: zPosNum(
       "Minimum years of experience explicitly required.",
       "For ranges, use the lower bound.",
       "For 'X+ years', use X.",
@@ -235,7 +236,8 @@ export const InferredJob = z
       "1-2 sentence factual summary of the role's key responsibilities.",
       "Third person, present tense.",
       "Use active voice and specific technologies/skills.",
-      "Do not repeat the company or job title."
+      "Do not repeat the company or job title.",
+      "No marketing fluff. No internal reasoning."
     ),
   })
   .describe(
@@ -246,3 +248,46 @@ export const InferredJob = z
     ].join(" ")
   );
 export type InferredJob = z.infer<typeof InferredJob>;
+
+export const InferredJobWithScratchpad = z.object({
+  scratchpad: z
+    .object({
+      jobType: zString(
+        "Role identity in ≤2 bullets. Format each bullet: '<facet>: <value>'.",
+        "Facets: family (e.g., 'Data Eng'), seniority (e.g., 'Senior'), target profile (e.g., 'Python + Airflow').",
+        "Only state if explicit or near-explicit; otherwise write 'unknown'.",
+        "Include ≤1 short quote if available"
+      ),
+      requirements: zString(
+        "Key requirements in 3-7 bullets. Each bullet: '[must|nice]: <skill or credential> [evidence: 'quoted phrase']'.",
+        "Prefer copy-exact phrases for evidence; paraphrase the label only.",
+        "No speculation, no unstated stacks. Merge duplicates."
+      ),
+      compensation: zString(
+        "Verbatim comp facts in normalized lines. One per line:",
+        "- base: <number + currency + period if given>",
+        "- bonus/variable: <percent or amount>",
+        "- equity: <units or range + vesting if given>",
+        "- range-statement: <exact quote if a legal range is present>",
+        "If absent, write 'none stated'. Never infer."
+      ),
+      location: zString(
+        "Modality + constraints, 2-5 lines. Use keys:",
+        "- modality: <remote|hybrid|onsite>",
+        "- geo: <cities/regions/timezones>",
+        "- cadence: <days onsite / travel %> (if present)",
+        "- visa/relocation: <stated terms>",
+        "Add one short evidence quote if ambiguous."
+      ),
+      other: zString("Other notable facts in 2-5 bullets."),
+    })
+    .describe(
+      [
+        "Working notes to stabilize extraction. Stay concise and evidence-anchored.",
+        "Use this space to think carefully.",
+        "Rules: keep to bullets/keys; prefer quotes for claims; mark unknowns explicitly; no speculation.",
+        "Hard caps: each field ≤120 words (summary ≤40).",
+      ].join(" ")
+    ),
+  job: InferredJob,
+});

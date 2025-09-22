@@ -1,4 +1,4 @@
-import type { InferredCompany } from "./inferredModels.ts";
+import type { InferredCompany, InferredJob } from "./inferredModels.ts";
 
 export type ATS = "greenhouse" | "lever";
 
@@ -31,14 +31,15 @@ export interface JobKey {
 }
 
 export type Job = JobKey &
-  Partial<InferredCompany> & {
+  Partial<InferredJob> & {
     title: string;
     description: string;
     postTS: number;
     applyUrl: string;
 
     // Denormalized from Company to reduce joins
-    companyName: string;
-    companyStage?: Company["stage"];
-    companySize?: Company["size"];
+    companyName: Company["name"];
+    // TBD
+    //companyStage?: Company["stage"];
+    //companySize?: Company["size"];
   };

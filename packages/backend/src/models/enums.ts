@@ -57,19 +57,53 @@ export type CompanyStage = z.infer<typeof CompanyStage>;
 
 // #region Job
 
-export const WorkModel = z
+export const Presence = z
   .enum(["onsite", "remote", "hybrid"] as const)
   .describe(
     [
-      "The work model for the job.",
+      "The presence mode for the job.",
       "Return only if explicitly stated.",
       "Map general phrases to specific values.",
-      "Example: 'This is a remote position' → 'remote'",
+      "Example: 'Remote (US only)' → 'remote'",
       "Example: 'We offer flexible work arrangements including hybrid options' → 'hybrid'",
       "Example: 'Candidates must be willing to work at our headquarters' → 'onsite'",
     ].join(" ")
   );
-export type WorkModel = z.infer<typeof WorkModel>;
+export type Presence = z.infer<typeof Presence>;
+
+export const JobType = z
+  .enum([
+    "full_time",
+    "part_time",
+    "contract",
+    "temporary",
+    "internship",
+  ] as const)
+  .describe(
+    [
+      "The job type/category.",
+      "Map common roles to specific types.",
+      "Example: 'We are hiring a full-time software engineer' → 'full_time'",
+      "Example: 'This is a part-time position' → 'part_time'",
+      "Example: 'We need a contract designer' → 'contract'",
+      "Example: 'Join us for a temporary project' → 'temporary'",
+      "Example: 'This is an internship opportunity' → 'internship'",
+    ].join(" ")
+  );
+export type JobType = z.infer<typeof JobType>;
+
+export const PayCadence = z
+  .enum(["salary", "hourly", "stipend"] as const)
+  .describe(
+    [
+      "The pay cadence for the job.",
+      "Map common phrases to specific values.",
+      "Example: 'The pay range is $100,000 to $120,000' → 'salary'",
+      "Example: 'Pay rate is $20/hour' → 'hourly'",
+      "Example: 'This is a paid internship with a stipend' → 'stipend'",
+    ].join(" ")
+  );
+export type PayCadence = z.infer<typeof PayCadence>;
 
 export const SeniorityLevel = z
   .enum([
@@ -94,6 +128,25 @@ export const SeniorityLevel = z
     ].join(" ")
   );
 export type SeniorityLevel = z.infer<typeof SeniorityLevel>;
+
+export const EducationLevel = z
+  .enum([
+    "high_school",
+    "associate",
+    "bachelor",
+    "master",
+    "doctorate",
+  ] as const)
+  .describe(
+    [
+      "The minimum education level explicitly required.",
+      "Map common phrases to specific values.",
+      "Example: 'Bachelor's degree in Computer Science required' → 'bachelor'",
+      "Example: 'Master's degree preferred, but Bachelor's is considered' → 'bachelor'",
+      "Example: 'PhD in relevant field required' → 'doctorate'",
+    ].join(" ")
+  );
+export type EducationLevel = z.infer<typeof EducationLevel>;
 
 export const JobFamily = z
   .enum([

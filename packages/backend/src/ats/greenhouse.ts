@@ -1,7 +1,6 @@
 import { standardizeUntrustedHtml } from "dry-utils-text";
 import { config } from "../config.ts";
-import type { Company, CompanyKey } from "../models/models.ts";
-import type { Job, JobKey } from "../types/dbModels.ts";
+import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { ATSBase } from "./atsBase.ts";
 
@@ -128,18 +127,26 @@ export class Greenhouse extends ATSBase {
     { id, title, updated_at, location, absolute_url }: JobResultBasic
   ): Context<Job> {
     const job: Job = {
+      // Keys
       id: String(id),
       companyId: companyId,
-      company: companyId,
+
+      // Basic
       title,
-      location: location.name,
       description: "",
       postTS: new Date(updated_at).getTime(),
       applyUrl: absolute_url,
-      facets: {},
+      companyName: companyId,
     };
 
-    return { item: job };
+    const context = {
+      description: `Additional information about the job ${id}`,
+      content: {
+        location: location.name,
+      },
+    };
+
+    return { item: job, context: [context] };
   }
 
   private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
@@ -150,9 +157,11 @@ export class Greenhouse extends ATSBase {
     result.item.description = standardizeUntrustedHtml(content);
 
     // Useful pieces that aren't redundant with the job object
+    const existingContext = result.context?.[0]?.content ?? {};
     const context = {
       description: `Additional information about the job ${id}`,
       content: {
+        ...existingContext,
         metadata,
         departments,
         offices,

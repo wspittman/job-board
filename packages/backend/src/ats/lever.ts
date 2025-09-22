@@ -1,7 +1,6 @@
 import { standardizeUntrustedHtml } from "dry-utils-text";
 import { config } from "../config.ts";
-import type { Company, CompanyKey } from "../models/models.ts";
-import type { Job, JobKey } from "../types/dbModels.ts";
+import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { ATSBase } from "./atsBase.ts";
@@ -123,15 +122,16 @@ export class Lever extends ATSBase {
     const jdHtml = `<div>${description}<div>${listHtml}</div>${salaryDescription}${additional}</div>`;
 
     const job: Job = {
+      // Keys
       id,
       companyId: companyId,
-      company: companyId,
+
+      // Basic
       title: text,
-      location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
       description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),
       applyUrl,
-      facets: {},
+      companyName: companyId,
     };
 
     // Useful pieces that aren't redundant with the job object
@@ -142,6 +142,7 @@ export class Lever extends ATSBase {
         country,
         workplaceType,
         salaryRange,
+        location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
       },
     };
 

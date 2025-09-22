@@ -3,9 +3,9 @@ import { Query } from "dry-utils-cosmosdb";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
-import type { CompanyKey } from "../models/models.ts";
+import type { CompanyKey, Job, JobKey } from "../models/models.ts";
 import type { Filters } from "../types/clientModels.ts";
-import type { Job, JobKey, Location } from "../types/dbModels.ts";
+import type { Location } from "../types/dbModels.ts";
 import type { Context } from "../types/types.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { normalizedLocation } from "../utils/location.ts";
@@ -90,7 +90,7 @@ export async function refreshJobsForCompany(
     const company = await db.company.get(key);
     if (company?.name) {
       add.forEach((job) => {
-        job.item.company = company.name;
+        job.item.companyName = company.name;
       });
     }
 
@@ -152,10 +152,10 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
     job = await ats.getJob(companyKey, job.item);
   }
 
-  await llm.extractFacets(job);
+  const success = await llm.fillJobInfo(job);
 
   // Do not add a job that failed to extract facets
-  if (!Object.keys(job.item.facets).length) {
+  if (!success) {
     return;
   }
 

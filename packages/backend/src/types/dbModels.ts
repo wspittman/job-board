@@ -1,31 +1,4 @@
-import type { Office } from "./enums.ts";
-
 export type ATS = "greenhouse" | "lever";
-
-/**
- * - id: The ATS-granted job id
- * - pKey: companyId
- */
-export interface Job {
-  id: string;
-  companyId: string;
-  company: string;
-  title: string;
-  description: string;
-  postTS: number;
-  applyUrl: string;
-  // Extracted values with fallbacks
-  isRemote?: boolean;
-  location: string;
-  // Facets extracted from the job description
-  facets: {
-    summary?: string;
-    salary?: number;
-    experience?: number;
-  };
-}
-
-export type JobKey = Pick<Job, "id" | "companyId">;
 
 /**
  * Aggregated metadata for other containers. Cached in the backend service.
@@ -58,7 +31,7 @@ export interface LocationCache extends Location {
 export interface Location {
   // Normalized from the rest of the fields
   location?: string;
-  remote?: Office;
+  remote?: string;
   city?: string;
   state?: string;
   stateCode?: string;
