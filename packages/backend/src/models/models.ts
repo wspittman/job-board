@@ -43,3 +43,21 @@ export type Job = JobKey &
     //companyStage?: Company["stage"];
     //companySize?: Company["size"];
   };
+
+/**
+ * Aggregated metadata for other containers. Cached in the backend service.
+ * - id: The type of metadata
+ * - pKey: id
+ * Only indexed for point reads.
+ */
+export interface Metadata {
+  // Keys
+  id: "company" | "job" | "metadata";
+
+  // For company type
+  companyCount?: number;
+  companyNames?: [string, string][];
+
+  // For job type
+  jobCount?: number;
+}

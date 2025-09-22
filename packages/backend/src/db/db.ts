@@ -4,8 +4,14 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
-import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
-import type { LocationCache, Metadata } from "../types/dbModels.ts";
+import type {
+  Company,
+  CompanyKey,
+  Job,
+  JobKey,
+  Metadata,
+} from "../models/models.ts";
+import type { LocationCache } from "../types/dbModels.ts";
 import {
   createSubscribeAggregator,
   subscribeError,

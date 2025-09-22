@@ -1,23 +1,3 @@
-export type ATS = "greenhouse" | "lever";
-
-/**
- * Aggregated metadata for other containers. Cached in the backend service.
- * - id: The type of metadata
- * - pKey: id
- * Only indexed for point reads.
- */
-export interface Metadata {
-  // Keys
-  id: "company" | "job" | "metadata";
-
-  // For company type
-  companyCount?: number;
-  companyNames?: [string, string][];
-
-  // For job type
-  jobCount?: number;
-}
-
 /**
  * A cache of freehand location string -> normalized location
  * - id: The freehand location string
