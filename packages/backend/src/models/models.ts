@@ -20,10 +20,9 @@ export interface CompanyKeys {
   ats: CompanyKey["ats"];
 }
 
-export type Company = CompanyKey &
-  Partial<InferredCompany> & {
-    name: string;
-  };
+export interface Company extends CompanyKey, Partial<InferredCompany> {
+  name: string;
+}
 
 /**
  * - id: The ATS-granted job id
@@ -34,19 +33,18 @@ export interface JobKey {
   companyId: string;
 }
 
-export type Job = JobKey &
-  Partial<InferredJob> & {
-    title: string;
-    description: string;
-    postTS: number;
-    applyUrl: string;
+export interface Job extends JobKey, Partial<InferredJob> {
+  title: string;
+  description: string;
+  postTS: number;
+  applyUrl: string;
 
-    // Denormalized from Company to reduce joins
-    companyName: Company["name"];
-    // TBD
-    //companyStage?: Company["stage"];
-    //companySize?: Company["size"];
-  };
+  // Denormalized from Company to reduce joins
+  companyName: Company["name"];
+  // TBD
+  //companyStage?: Company["stage"];
+  //companySize?: Company["size"];
+}
 
 /**
  * Aggregated metadata for other containers. Cached in the backend service.
@@ -71,9 +69,7 @@ export interface Metadata {
  * - id: The freehand location string
  * - pKey: The first character of the freehand location string
  */
-export interface LocationCache extends Partial<InferredLocation> {
-  id: string;
-  pKey: string;
+export interface Location extends Partial<InferredLocation> {
+  id?: string;
+  pKey?: string;
 }
-
-export type Location = Partial<InferredLocation>;

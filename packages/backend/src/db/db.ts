@@ -9,7 +9,7 @@ import type {
   CompanyKey,
   Job,
   JobKey,
-  LocationCache,
+  Location,
   Metadata,
 } from "../models/models.ts";
 import {
@@ -87,7 +87,7 @@ class DB {
   private _company: CompanyContainer | undefined;
   private _job: JobContainer | undefined;
   private _metadata: Container<Metadata> | undefined;
-  private _locationCache: Container<LocationCache> | undefined;
+  private _locationCache: Container<Location> | undefined;
 
   get company() {
     if (!this._company) {
@@ -158,9 +158,7 @@ class DB {
     );
     this._job = new JobContainer(containers["job"] as Container<Job>);
     this._metadata = containers["metadata"] as Container<Metadata>;
-    this._locationCache = containers[
-      "locationCache"
-    ] as Container<LocationCache>;
+    this._locationCache = containers["locationCache"] as Container<Location>;
   }
 }
 
