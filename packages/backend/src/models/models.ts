@@ -54,7 +54,7 @@ export interface Job extends JobKey, Partial<InferredJob> {
  */
 export interface Metadata {
   // Keys
-  id: "company" | "job" | "metadata";
+  id: "company" | "job";
 
   // For company type
   companyCount?: number;
