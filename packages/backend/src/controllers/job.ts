@@ -7,7 +7,6 @@ import type { Filters } from "../models/clientModels.ts";
 import type { CompanyKey, Job, JobKey, Location } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
-import { normalizedLocation } from "../utils/location.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { metadataJobExecutor } from "./metadata.ts";
 
@@ -72,13 +71,16 @@ export async function refreshJobsForCompany(
   }
 
   if (add.length) {
-    // To keep things the same for the client until we update data model
     const company = await db.company.get(key);
-    if (company?.name) {
-      add.forEach((job) => {
-        job.item.companyName = company.name;
-      });
-    }
+
+    if (!company) return;
+
+    add.forEach(({ item }) => {
+      item.companyName = company.name;
+
+      if (company.stage) item.companyStage = company.stage;
+      if (company.size) item.companySize = company.size;
+    });
 
     jobInfoQueue.add(add.map((job) => [key, job]));
   }
@@ -167,8 +169,12 @@ async function readJobsByFilters({
     query.whereCondition("companyId", "=", companyId);
   }
 
-  if (isRemote !== undefined) {
-    query.whereCondition("isRemote", "=", isRemote);
+  if (isRemote != undefined) {
+    if (isRemote) {
+      query.whereCondition("presence", "=", "remote");
+    } else {
+      query.where(['(c.presence = "onsite" OR c.presence = "hybrid")']);
+    }
   }
 
   if (daysSince) {
@@ -178,11 +184,11 @@ async function readJobsByFilters({
   }
 
   if (maxExperience != null) {
-    query.whereCondition("facets.experience", "<=", maxExperience);
+    query.whereCondition("requiredExperience", "<=", maxExperience);
   }
 
   if (minSalary) {
-    query.whereCondition("facets.salary", ">=", minSalary);
+    query.whereCondition("salaryRange.min", ">=", minSalary);
   }
 
   if (title) {
@@ -190,46 +196,46 @@ async function readJobsByFilters({
   }
 
   if (location) {
-    const normalLocation = normalizedLocation(location);
-    if (location?.countryCode) {
-      addLocationClause(query, normalLocation, isRemote);
-    } else {
-      // Remote + empty location always matches
+    const countryEndsWith = "|@countryCode|";
+    const regionEndsWith = "|@regionCode|@countryCode|";
+    const cityExact = "|@city|@regionCode|@countryCode|";
+    const remoteMatch = "c.presence = 'remote'";
+    const noLocationMatch = "c.locationSearchKey = '||||'";
+    const countryMatch = `c.locationSearchKey = '||${countryEndsWith}'`;
+    const regionMatch = `c.locationSearchKey = '|${regionEndsWith}'`;
+
+    let locClause = "";
+    let remoteMatches: string[] = [];
+
+    if (location.city) {
+      locClause = `c.locationSearchKey = '${cityExact}'`;
+      remoteMatches = [regionMatch, countryMatch, noLocationMatch];
+    } else if (location.regionCode) {
+      locClause = `ENDSWITH(c.locationSearchKey, '${regionEndsWith}'`;
+      remoteMatches = [countryMatch, noLocationMatch];
+    } else if (location.countryCode) {
+      locClause = `ENDSWITH(c.locationSearchKey, '${countryEndsWith}'`;
+      remoteMatches = [noLocationMatch];
+    }
+
+    if (isRemote !== false && remoteMatches.length) {
+      locClause += ` OR (${remoteMatch} AND (${remoteMatches.join(" OR ")})`;
+    }
+
+    if (locClause) {
       query.where([
-        '(c.isRemote = true AND c.location = "")',
-        // TBD revisit
-        //'(c.isRemote = true AND c.location = "") OR CONTAINS(c.location, @location, true)',
-        //{ "@location": location.location },
+        locClause,
+        {
+          "@city": location.city ?? "",
+          "@regionCode": location.regionCode ?? "",
+          "@countryCode": location.countryCode ?? "",
+        },
       ]);
     }
   }
 
   // The limit of 24 items is intentional to prevent excessive data retrieval.
   return db.job.query<Job>(query.build(24));
-}
-
-function addLocationClause(query: Query, location: string, isRemote?: boolean) {
-  const country = location.split(",").at(-1)?.trim() ?? location;
-  const hybridParam = { "@location": location };
-  const hybridClause = "ENDSWITH(c.location, @location, true)";
-  // Remote + empty location always matches
-  const remoteParam = { "@country": country };
-  const remoteClause =
-    'ENDSWITH(c.location, @country, true) OR c.location = ""';
-
-  if (isRemote) {
-    query.where([remoteClause, remoteParam]);
-  } else if (isRemote === false) {
-    query.where([hybridClause, hybridParam]);
-  } else {
-    query.where([
-      `${hybridClause} OR (c.isRemote = true AND (${remoteClause}))`,
-      {
-        ...hybridParam,
-        ...remoteParam,
-      },
-    ]);
-  }
 }
 
 // #endregion

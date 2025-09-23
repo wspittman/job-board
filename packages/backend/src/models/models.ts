@@ -1,3 +1,4 @@
+import type { DeepPartialNullToUndef } from "../types/types.ts";
 import type {
   InferredCompany,
   InferredJob,
@@ -20,7 +21,9 @@ export interface CompanyKeys {
   ats: CompanyKey["ats"];
 }
 
-export interface Company extends CompanyKey, Partial<InferredCompany> {
+export interface Company
+  extends CompanyKey,
+    DeepPartialNullToUndef<InferredCompany> {
   name: string;
 }
 
@@ -33,7 +36,7 @@ export interface JobKey {
   companyId: string;
 }
 
-export interface Job extends JobKey, Partial<InferredJob> {
+export interface Job extends JobKey, DeepPartialNullToUndef<InferredJob> {
   title: string;
   description: string;
   postTS: number;
@@ -41,9 +44,11 @@ export interface Job extends JobKey, Partial<InferredJob> {
 
   // Denormalized from Company to reduce joins
   companyName: Company["name"];
-  // TBD
-  //companyStage?: Company["stage"];
-  //companySize?: Company["size"];
+  companyStage?: Company["stage"];
+  companySize?: Company["size"];
+
+  // For simplified location searches
+  locationSearchKey?: string;
 }
 
 /**
@@ -69,7 +74,7 @@ export interface Metadata {
  * - id: The freehand location string
  * - pKey: The first character of the freehand location string
  */
-export interface Location extends Partial<InferredLocation> {
+export interface Location extends DeepPartialNullToUndef<InferredLocation> {
   id?: string;
   pKey?: string;
 }

@@ -1,10 +1,4 @@
-import type { z } from "dry-utils-openai";
-
-type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object
-    ? DeepPartial<T[P]>
-    : Exclude<T[P], null>;
-};
+import type { DeepPartialNullToUndef } from "../types/types.ts";
 
 /**
  * Fill a parent item with extracted data from matching keys in the LLM completion.
@@ -13,26 +7,27 @@ type DeepPartial<T> = {
  * @param item The parent object to update with extracted data
  * @param completion The LLM completion object containing the extracted data
  */
-export function setExtractedData<
-  Item extends object,
-  Schema extends z.ZodType,
-  Key extends keyof Item & keyof z.infer<Schema>
->(item: Item, completion: Pick<z.infer<Schema>, Key>) {
+export function setExtractedData(item: object, completion: object) {
   // Note: Assign isn't recursive, so top-level objects will be replaced
   Object.assign(item, removeNulls(completion));
 }
 
-function removeNulls<T extends object>(val: T): DeepPartial<T> | undefined {
-  if (typeof val !== "object" || val == null) return val;
+function removeNulls<T extends object>(
+  v: T
+): DeepPartialNullToUndef<T> | undefined {
+  if (v == null) return undefined;
+  if (typeof v !== "object") return v;
 
-  if (Array.isArray(val)) {
-    const cleanArray = val.map(removeNulls).filter(Boolean);
-    return cleanArray.length ? (cleanArray as DeepPartial<T>) : undefined;
+  if (Array.isArray(v)) {
+    const cleanArray = v.map(removeNulls).filter(Boolean);
+    return cleanArray.length
+      ? (cleanArray as DeepPartialNullToUndef<T>)
+      : undefined;
   }
 
-  const entries = Object.entries(val)
+  const entries = Object.entries(v)
     .map(([key, value]) => [key, removeNulls(value)])
-    .filter(([_, value]) => value != null);
+    .filter(([_, value]) => value != undefined);
 
   return entries.length ? Object.fromEntries(entries) : undefined;
 }

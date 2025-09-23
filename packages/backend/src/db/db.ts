@@ -75,6 +75,14 @@ class JobContainer extends Container<Job> {
   }
 
   async upsert(job: Job) {
+    job.locationSearchKey = [
+      "",
+      job.primaryLocation?.city ?? "",
+      job.primaryLocation?.regionCode ?? "",
+      job.primaryLocation?.countryCode ?? "",
+      "",
+    ].join("|");
+
     return this.upsertItem(job);
   }
 
