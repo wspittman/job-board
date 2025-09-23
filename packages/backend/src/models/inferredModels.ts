@@ -192,11 +192,18 @@ export const InferredBenefitHighlights = z
       .describe(
         "Employer-paid share of employee health insurance premium, 0-100."
       ),
-    ptoDays: zPosNum(
-      "Paid time off days per year (business days, excluding company holidays and sick leave).",
-      "Example: '15 days PTO' → '15'",
-      "Example: '3 weeks vacation' → '15'"
-    ),
+    ptoDays: z
+      .union([
+        zPosNum(
+          "Paid time off days per year (business days, excluding company holidays and sick leave).",
+          "Example: '15 days PTO' → '15'",
+          "Example: '3 weeks vacation' → '15'"
+        ),
+        z.literal("Unlimited"),
+      ])
+      .describe(
+        "The number of paid time off days, or 'Unlimited' if role provides an unlimited PTO benefit."
+      ),
     parentalLeaveWeeks: zPosNum(
       "Fully paid parental leave weeks (total weeks of pay available to a new parent).",
       "Example: '12 weeks paid parental leave' → '12'"
