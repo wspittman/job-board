@@ -119,6 +119,7 @@ function logAtsCall(
       tag: `${ats} ${name}`,
       dense: log,
       metrics: { ms },
+      blob: {},
     });
   } catch (error) {
     logError(error);

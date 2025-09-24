@@ -80,7 +80,7 @@ export function withAsyncContext(
       logError(error);
     } finally {
       const duration = Date.now() - start;
-      _client.trackEvent({ name, properties: { duration } });
+      _client?.trackEvent({ name, properties: { duration } });
     }
   });
 }
@@ -170,7 +170,7 @@ export function logError(error: unknown): void {
     properties = { cause: error.cause };
   }
 
-  _client.trackException({ exception, properties });
+  _client?.trackException({ exception, properties });
 }
 
 /**

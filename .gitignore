@@ -1,7 +1,13 @@
 cosmosdbcert.cer
 .env
+
+# Agent Folders
 agent_notes/
 agent_scripts/
+
+# Eval Folders
+evals/input/
+evals/output/
 
 # TypeScript cache
 *.tsbuildinfo
