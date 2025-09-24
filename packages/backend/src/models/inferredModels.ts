@@ -169,7 +169,8 @@ export const InferredVariableComp = z
       "Example: '10-25% bonus target' → '25'"
     ),
     notes: zString(
-      "Freeform clarifications (e.g., sales commission plan, equity not included, conditions)."
+      "Freeform clarifications (e.g., sales commission plan, equity not included, conditions).",
+      "Set to null if you have no notes. Do NOT write 'not specified' or similar."
     ),
   })
   .describe(
@@ -251,6 +252,7 @@ export const InferredJob = z
     [
       "Job-level facts explicitly stated for the role.",
       "Set fields to null when not explicitly stated.",
+      "For numeric fields, use null instead of 0 when not stated.",
       "Prefer the most recent explicit fact when multiple conflict.",
     ].join(" ")
   );

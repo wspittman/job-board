@@ -14,6 +14,7 @@ interface Config {
   ADMIN_TOKEN: string;
 
   APPLICATIONINSIGHTS_CONNECTION_STRING: string;
+  ENABLE_VERBOSE_BLOB_LOGGING: boolean;
 }
 
 export const config: Config = {
@@ -46,4 +47,6 @@ export const config: Config = {
   // In theory App Insights SDK should pick up this env var automatically, but it doesn't
   APPLICATIONINSIGHTS_CONNECTION_STRING:
     process.env["APPLICATIONINSIGHTS_CONNECTION_STRING"] || "",
+  ENABLE_VERBOSE_BLOB_LOGGING:
+    (process.env["VERBOSE_BLOB_LOGGING"] || "false").toLowerCase() === "true",
 };

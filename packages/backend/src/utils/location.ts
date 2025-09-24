@@ -18,11 +18,19 @@ export function normalizedLocation({
   }
 
   if (regionCode) {
-    parts.push(`${intlNames.of(regionCode)} (${regionCode})`);
+    try {
+      parts.push(`${intlNames.of(regionCode)} (${regionCode})`);
+    } catch {
+      parts.push(regionCode);
+    }
   }
 
   if (countryCode) {
-    parts.push(`${intlNames.of(countryCode)} (${countryCode})`);
+    try {
+      parts.push(`${intlNames.of(countryCode)} (${countryCode})`);
+    } catch {
+      parts.push(countryCode);
+    }
   }
 
   return parts.join(", ");

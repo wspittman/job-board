@@ -52,6 +52,7 @@ interface AgSub {
   tag: string;
   dense: Bag;
   metrics: NumBag;
+  blob: Bag;
 }
 
 interface CustomContext extends CorrelationContext {
@@ -189,7 +190,7 @@ export function createSubscribeAggregator(
   source: string,
   callLimit: number
 ): (sub: AgSub) => void {
-  return ({ tag, dense, metrics }: AgSub) => {
+  return ({ tag, dense, metrics, blob }: AgSub) => {
     const ag = getSubContext<AgBag>(source, {
       count: 0,
       counts: {},
@@ -209,6 +210,11 @@ export function createSubscribeAggregator(
     Object.entries(metrics).forEach(([key, val]) => {
       ag.metrics[key] = (ag.metrics[key] ?? 0) + val;
     });
+
+    if (config.ENABLE_VERBOSE_BLOB_LOGGING) {
+      // TBD: Sent to a blob storage DB
+      console.dir(blob, { depth: null });
+    }
   };
 }
 

@@ -12,16 +12,22 @@ export function setExtractedData(item: object, completion: object) {
   Object.assign(item, removeNulls(completion));
 }
 
-function removeNulls<T extends object>(
-  v: T
-): DeepPartialNullToUndef<T> | undefined {
+function removeNulls(v: unknown): DeepPartialNullToUndef<unknown> | undefined {
   if (v == null) return undefined;
+
+  if (typeof v === "string") {
+    if (["", "null", "undefined"].includes(v.trim().toLowerCase())) {
+      return undefined;
+    }
+    return v.trim();
+  }
+
   if (typeof v !== "object") return v;
 
   if (Array.isArray(v)) {
     const cleanArray = v.map(removeNulls).filter(Boolean);
     return cleanArray.length
-      ? (cleanArray as DeepPartialNullToUndef<T>)
+      ? (cleanArray as DeepPartialNullToUndef<unknown>)
       : undefined;
   }
 
