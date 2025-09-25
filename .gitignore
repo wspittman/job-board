@@ -7,7 +7,9 @@ agent_scripts/
 
 # Eval Folders
 evals/input/
+evals/ground/
 evals/output/
+evals/report/
 
 # TypeScript cache
 *.tsbuildinfo

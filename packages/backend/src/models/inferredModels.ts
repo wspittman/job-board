@@ -43,7 +43,7 @@ export const InferredCompany = z
       "Primary company homepage URL. Use https if available.",
       "Prefer the corporate root domain (e.g., https://example.com). Strip tracking params/fragments.",
       "Exclude ATS/careers and vendor subdomains (e.g., *.lever.co, *.greenhouse.io, careers.example.com).",
-      "Example: 'Visit us at example.com' → 'https://example.com'"
+      "Example: 'Visit us at example.com' → 'https://example.com'."
     ),
     foundingYear: z
       .number()
@@ -55,7 +55,7 @@ export const InferredCompany = z
           "Four-digit legal founding year (YYYY).",
           "Valid range 1800-current year.",
           "If both founding and launch years are present, return the founding year.",
-          "Example: 'Founded in 2014; launched 2016' → 2014",
+          "Example: 'Founded in 2014; launched 2016' → 2014.",
         ].join(" ")
       ),
     stage: CompanyStage.nullable(),
@@ -80,16 +80,16 @@ export const InferredLocation = z
     city: zString(
       "City name in English.",
       "Exclude country/region names.",
-      "Example: 'Seattle, WA' → 'Seattle'"
+      "Example: 'Seattle, WA' → 'Seattle'."
     ),
     regionCode: zString(
       "ISO 3166-2 subdivision code (uppercase) excluding country prefix.",
-      "Examples: 'Located in downtown Seattle' → 'WA'"
+      "Examples: 'Located in downtown Seattle' → 'WA'."
     ),
     countryCode: zString(
       "ISO 3166-1 alpha-2 country code (uppercase).",
       "Use null only when the role is explicitly global-remote with no country restriction.",
-      "Example: 'Located in downtown Seattle' → 'US'"
+      "Example: 'Located in downtown Seattle' → 'US'."
     ),
   })
   .describe(
@@ -110,7 +110,7 @@ export const InferredRemoteEligibility = z
         [
           "Array of ISO 3166-1 alpha-2 country codes (uppercase).",
           "Use null if no country restrictions are explicitly stated.",
-          "Example: 'Remote (US and Canada only)' → ['US', 'CA']",
+          "Example: 'Remote (US and Canada only)' → ['US', 'CA'].",
         ].join(" ")
       ),
     regions: z
@@ -118,8 +118,9 @@ export const InferredRemoteEligibility = z
       .nullable()
       .describe(
         [
-          "List of ISO 3166-2 subdivision codes (uppercase).",
+          "List of complete ISO 3166-2 subdivision codes (uppercase) (including country prefix).",
           "Use null if no region restrictions are explicitly stated.",
+          "Example: 'Remote (NY, CA, TX)' → ['US-NY', 'US-CA', 'US-TX'].",
         ].join(" ")
       ),
     notes: zString().describe(
@@ -143,6 +144,14 @@ export const InferredSalaryRange = z
     cadence: PayCadence.nullable(),
     min: zPosNum("Minimum salary in the stated currency and cadence."),
     max: zPosNum("Maximum salary in the stated currency and cadence."),
+    minOTE: zPosNum(
+      "Minimum on-target earnings (base + target variable comp) in the stated currency and cadence.",
+      "Set to null if variable comp is not explicitly stated."
+    ),
+    maxOTE: zPosNum(
+      "Maximum on-target earnings (base + target variable comp) in the stated currency and cadence.",
+      "Set to null if variable comp is not explicitly stated."
+    ),
   })
   .describe(
     [
@@ -153,35 +162,6 @@ export const InferredSalaryRange = z
     ].join(" ")
   );
 export type InferredSalaryRange = z.infer<typeof InferredSalaryRange>;
-
-export const InferredVariableComp = z
-  .object({
-    targetPercent: zPosNum(
-      "Target variable compensation, percent of base.",
-      "Example: '20% bonus target' → '20'"
-    ),
-    minPercent: zPosNum(
-      "Minimum variable compensation, percent of base.",
-      "Example: '10-25% bonus target' → '10'"
-    ),
-    maxPercent: zPosNum(
-      "Maximum variable compensation, percent of base.",
-      "Example: '10-25% bonus target' → '25'"
-    ),
-    notes: zString(
-      "Freeform clarifications (e.g., sales commission plan, equity not included, conditions).",
-      "Set to null if you have no notes. Do NOT write 'not specified' or similar."
-    ),
-  })
-  .describe(
-    [
-      "Variable compensation as explicitly stated.",
-      "Percentages are of base salary.",
-      "Ensure minPercent ≤ maxPercent",
-      "Set fields to null when not explicitly stated.",
-    ].join(" ")
-  );
-export type InferredVariableComp = z.infer<typeof InferredVariableComp>;
 
 export const InferredBenefitHighlights = z
   .object({
@@ -197,8 +177,8 @@ export const InferredBenefitHighlights = z
       .union([
         zPosNum(
           "Paid time off days per year (business days, excluding company holidays and sick leave).",
-          "Example: '15 days PTO' → '15'",
-          "Example: '3 weeks vacation' → '15'"
+          "Example: '15 days PTO' → '15'.",
+          "Example: '3 weeks vacation' → '15'."
         ),
         z.literal("Unlimited"),
       ])
@@ -207,7 +187,7 @@ export const InferredBenefitHighlights = z
       ),
     parentalLeaveWeeks: zPosNum(
       "Fully paid parental leave weeks (total weeks of pay available to a new parent).",
-      "Example: '12 weeks paid parental leave' → '12'"
+      "Example: '12 weeks paid parental leave' → '12'."
     ),
   })
   .describe(
@@ -230,7 +210,6 @@ export const InferredJob = z
     primaryLocation: InferredLocation.nullable(),
     remoteEligibility: InferredRemoteEligibility.nullable(),
     salaryRange: InferredSalaryRange.nullable(),
-    variableComp: InferredVariableComp.nullable(),
     benefitHighlights: InferredBenefitHighlights.nullable(),
     requiredEducation: EducationLevel.nullable(),
     requiredExperience: zPosNum(
@@ -265,7 +244,7 @@ export const InferredJobWithScratchpad = z.object({
         "Role identity in ≤2 bullets. Format each bullet: '<facet>: <value>'.",
         "Facets: family (e.g., 'Data Eng'), seniority (e.g., 'Senior'), target profile (e.g., 'Python + Airflow').",
         "Only state if explicit or near-explicit; otherwise write 'unknown'.",
-        "Include ≤1 short quote if available"
+        "Include ≤1 short quote if available."
       ),
       requirements: zString(
         "Key requirements in 3-7 bullets. Each bullet: '[must|nice]: <skill or credential> [evidence: 'quoted phrase']'.",
@@ -274,18 +253,18 @@ export const InferredJobWithScratchpad = z.object({
       ),
       compensation: zString(
         "Verbatim comp facts in normalized lines. One per line:",
-        "- base: <number + currency + period if given>",
-        "- bonus/variable: <percent or amount>",
-        "- equity: <units or range + vesting if given>",
-        "- range-statement: <exact quote if a legal range is present>",
+        "- base: <number + currency + period if given>.",
+        "- bonus/variable: <percent or amount>.",
+        "- equity: <units or range + vesting if given>.",
+        "- range-statement: <exact quote if a legal range is present>.",
         "If absent, write 'none stated'. Never infer."
       ),
       location: zString(
         "Modality + constraints, 2-5 lines. Use keys:",
-        "- modality: <remote|hybrid|onsite>",
-        "- geo: <cities/regions/timezones>",
-        "- cadence: <days onsite / travel %> (if present)",
-        "- visa/relocation: <stated terms>",
+        "- modality: <remote|hybrid|onsite>.",
+        "- geo: <cities/regions/timezones>.",
+        "- cadence: <days onsite / travel %> (if present).",
+        "- visa/relocation: <stated terms>.",
         "Add one short evidence quote if ambiguous."
       ),
       other: zString("Other notable facts in 2-5 bullets."),

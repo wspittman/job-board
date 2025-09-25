@@ -19,7 +19,7 @@ export const CompanySizeBand = z
       "Return only if a numeric headcount or explicit range is stated.",
       "Do not infer from adjectives or team sizes.",
       "Inclusive bounds; map open-ended phrases like '10k+' to 10000+.",
-      "Example: 'We are a small team of 15 passionate individuals' → '11-50'",
+      "Example: 'We are a small team of 15 passionate individuals' → '11-50'.",
     ].join(" ")
   );
 export type CompanySizeBand = z.infer<typeof CompanySizeBand>;
@@ -44,11 +44,11 @@ export const CompanyStage = z
       "Map D/E/F/late-stage growth to series_d_plus.",
       "If explicitly public (listed/IPO/SPAC), return public.",
       "Return nonprofit only if legal status is stated.",
-      "Example: 'We are self-funded and profitable' → 'bootstrapped'",
-      "Example: 'We raised a $30M Series C round last year' → 'series_c'",
-      "Example: 'We recently closed our Series E funding round' → 'series_d_plus'",
-      "Example: 'We are a publicly traded company' → 'public'",
-      "Example: 'We are a 501(c)(3) nonprofit organization' → 'nonprofit'",
+      "Example: 'We are self-funded and profitable' → 'bootstrapped'.",
+      "Example: 'We raised a $30M Series C round last year' → 'series_c'.",
+      "Example: 'We recently closed our Series E funding round' → 'series_d_plus'.",
+      "Example: 'We are a publicly traded company' → 'public'.",
+      "Example: 'We are a 501(c)(3) nonprofit organization' → 'nonprofit'.",
     ].join(" ")
   );
 export type CompanyStage = z.infer<typeof CompanyStage>;
@@ -64,9 +64,9 @@ export const Presence = z
       "The presence mode for the job.",
       "Return only if explicitly stated.",
       "Map general phrases to specific values.",
-      "Example: 'Remote (US only)' → 'remote'",
-      "Example: 'We offer flexible work arrangements including hybrid options' → 'hybrid'",
-      "Example: 'Candidates must be willing to work at our headquarters' → 'onsite'",
+      "Example: 'Remote (US only)' → 'remote'.",
+      "Example: 'We offer flexible work arrangements including hybrid options' → 'hybrid'.",
+      "Example: 'Candidates must be willing to work at our headquarters' → 'onsite'.",
     ].join(" ")
   );
 export type Presence = z.infer<typeof Presence>;
@@ -82,12 +82,13 @@ export const JobType = z
   .describe(
     [
       "The job type/category.",
-      "Map common roles to specific types.",
-      "Example: 'We are hiring a full-time software engineer' → 'full_time'",
-      "Example: 'This is a part-time position' → 'part_time'",
-      "Example: 'We need a contract designer' → 'contract'",
-      "Example: 'Join us for a temporary project' → 'temporary'",
-      "Example: 'This is an internship opportunity' → 'internship'",
+      "If not explicitly stated in the title or description but likely full-time, return 'full_time'.",
+      "Example: 'We are hiring a full-time software engineer' → 'full_time'.",
+      "Example: 'This is a part-time position' → 'part_time'.",
+      "Example: 'We need a contract designer' → 'contract'.",
+      "Example: 'Join us for a temporary project' → 'temporary'.",
+      "Example: 'This is an internship opportunity' → 'internship'.",
+      "Example: 'This hire will report to the CTO' → 'full_time'.",
     ].join(" ")
   );
 export type JobType = z.infer<typeof JobType>;
@@ -98,9 +99,9 @@ export const PayCadence = z
     [
       "The pay cadence for the job.",
       "Map common phrases to specific values.",
-      "Example: 'The pay range is $100,000 to $120,000' → 'salary'",
-      "Example: 'Pay rate is $20/hour' → 'hourly'",
-      "Example: 'This is a paid internship with a stipend' → 'stipend'",
+      "Example: 'The pay range is $100,000 to $120,000' → 'salary'.",
+      "Example: 'Pay rate is $20/hour' → 'hourly'.",
+      "Example: 'This is a paid internship with a stipend' → 'stipend'.",
     ].join(" ")
   );
 export type PayCadence = z.infer<typeof PayCadence>;
@@ -121,10 +122,10 @@ export const SeniorityLevel = z
       "The seniority level of the job.",
       "Map common synonyms to specific values.",
       "If unclear, make an educated guess based on years of experience and job responsibilities.",
-      "Example: 'We are looking for a senior software engineer' → 'senior'",
-      "Example: 'This is an entry-level position' → 'entry'",
-      "Example: 'We are hiring a Principal Data Scientist' → 'staff+'",
-      "Example: 'We need a director of marketing' → 'director'",
+      "Example: 'We are looking for a senior software engineer' → 'senior'.",
+      "Example: 'This is an entry-level position' → 'entry'.",
+      "Example: 'We are hiring a Principal Data Scientist' → 'staff+'.",
+      "Example: 'We need a director of marketing' → 'director'.",
     ].join(" ")
   );
 export type SeniorityLevel = z.infer<typeof SeniorityLevel>;
@@ -141,9 +142,9 @@ export const EducationLevel = z
     [
       "The minimum education level explicitly required.",
       "Map common phrases to specific values.",
-      "Example: 'Bachelor's degree in Computer Science required' → 'bachelor'",
-      "Example: 'Master's degree preferred, but Bachelor's is considered' → 'bachelor'",
-      "Example: 'PhD in relevant field required' → 'doctorate'",
+      "Example: 'Bachelor's degree in Computer Science required' → 'bachelor'.",
+      "Example: 'Master's degree preferred, but Bachelor's is considered' → 'bachelor'.",
+      "Example: 'PhD in relevant field required' → 'doctorate'.",
     ].join(" ")
   );
 export type EducationLevel = z.infer<typeof EducationLevel>;
@@ -169,11 +170,11 @@ export const JobFamily = z
     [
       "The job family/category.",
       "Map common roles to specific families.",
-      "Example: 'We are hiring a UX designer' → 'design'",
-      "Example: 'As a Customer Support Specialist, you will assist clients' → 'customer_success'",
-      "Example: 'This role is for a Recruiting Coordinator' → 'hr'",
-      "Example: 'We need a cybersecurity analyst' → 'security'",
-      "Example: 'Join our sales team as an Account Executive' → 'sales'",
+      "Example: 'We are hiring a UX designer' → 'design'.",
+      "Example: 'As a Customer Support Specialist, you will assist clients' → 'customer_success'.",
+      "Example: 'This role is for a Recruiting Coordinator' → 'hr'.",
+      "Example: 'We need a cybersecurity analyst' → 'security'.",
+      "Example: 'Join our sales team as an Account Executive' → 'sales'.",
     ].join(" ")
   );
 export type JobFamily = z.infer<typeof JobFamily>;
