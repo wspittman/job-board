@@ -3,11 +3,12 @@ import {
   CompanySizeBand,
   CompanyStage,
   EducationLevel,
+  EngagementType,
   JobFamily,
-  JobType,
   PayCadence,
   Presence,
   SeniorityLevel,
+  WorkTimeBasis,
 } from "./enums.ts";
 
 /*
@@ -177,8 +178,9 @@ export const InferredBenefitHighlights = z
       .union([
         zPosNum(
           "Paid time off days per year (business days, excluding company holidays and sick leave).",
-          "Example: '15 days PTO' → '15'.",
-          "Example: '3 weeks vacation' → '15'."
+          "Examples:",
+          "'15 days PTO' → 15;",
+          "'3 weeks vacation' → 15;"
         ),
         z.literal("Unlimited"),
       ])
@@ -204,7 +206,8 @@ export type InferredBenefitHighlights = z.infer<
 export const InferredJob = z
   .object({
     presence: Presence.nullable(),
-    jobType: JobType.nullable(),
+    workTimeBasis: WorkTimeBasis.nullable(),
+    engagementType: EngagementType.nullable(),
     jobFamily: JobFamily.nullable(),
     seniorityLevel: SeniorityLevel.nullable(),
     primaryLocation: InferredLocation.nullable(),
@@ -216,8 +219,9 @@ export const InferredJob = z
       "Minimum years of experience explicitly required.",
       "For ranges, use the lower bound.",
       "For 'X+ years', use X.",
-      "Example: '5-8 years' → '5'.",
-      "Example: '3+ years' → '3'."
+      "Examples:",
+      "'5-8 years' → 5;",
+      "'3+ years' → 3;"
     ),
     summary: zString(
       "1-2 sentence factual summary of the role's key responsibilities.",

@@ -44,11 +44,12 @@ export const CompanyStage = z
       "Map D/E/F/late-stage growth to series_d_plus.",
       "If explicitly public (listed/IPO/SPAC), return public.",
       "Return nonprofit only if legal status is stated.",
-      "Example: 'We are self-funded and profitable' → 'bootstrapped'.",
-      "Example: 'We raised a $30M Series C round last year' → 'series_c'.",
-      "Example: 'We recently closed our Series E funding round' → 'series_d_plus'.",
-      "Example: 'We are a publicly traded company' → 'public'.",
-      "Example: 'We are a 501(c)(3) nonprofit organization' → 'nonprofit'.",
+      "Examples:",
+      "'We are self-funded and profitable' → bootstrapped;",
+      "'We raised a $30M Series C round last year' → series_c;",
+      "'We recently closed our Series E funding round' → series_d_plus;",
+      "'We are a publicly traded company' → public;",
+      "'We are a 501(c)(3) nonprofit organization' → nonprofit;",
     ].join(" ")
   );
 export type CompanyStage = z.infer<typeof CompanyStage>;
@@ -64,34 +65,62 @@ export const Presence = z
       "The presence mode for the job.",
       "Return only if explicitly stated.",
       "Map general phrases to specific values.",
-      "Example: 'Remote (US only)' → 'remote'.",
-      "Example: 'We offer flexible work arrangements including hybrid options' → 'hybrid'.",
-      "Example: 'Candidates must be willing to work at our headquarters' → 'onsite'.",
+      "Examples:",
+      "'Remote (US only)' → remote;",
+      "'We offer flexible work arrangements including hybrid options' → hybrid;",
+      "'Candidates must be willing to work at our headquarters' → onsite;",
     ].join(" ")
   );
 export type Presence = z.infer<typeof Presence>;
 
-export const JobType = z
+/**
+ * Hours expectation / schedule basis.
+ */
+export const WorkTimeBasis = z
   .enum([
-    "full_time",
-    "part_time",
-    "contract",
-    "temporary",
-    "internship",
+    "full_time", // ~35–40+ hours, standard benefits typically apply
+    "part_time", // <35–40 hours, proportionate benefits
+    "variable", // fluctuating hours, e.g., staffing/on-call
+    "per_diem", // day-rate or shift-based, zero guaranteed hours
   ] as const)
   .describe(
     [
-      "The job type/category.",
-      "If not explicitly stated in the title or description but likely full-time, return 'full_time'.",
-      "Example: 'We are hiring a full-time software engineer' → 'full_time'.",
-      "Example: 'This is a part-time position' → 'part_time'.",
-      "Example: 'We need a contract designer' → 'contract'.",
-      "Example: 'Join us for a temporary project' → 'temporary'.",
-      "Example: 'This is an internship opportunity' → 'internship'.",
-      "Example: 'This hire will report to the CTO' → 'full_time'.",
+      "Hours expectation / schedule basis.",
+      "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'full_time'.",
+      "Examples:",
+      "'FT', '40 hrs/wk' → full_time;",
+      "'PT', '20 hrs/wk' → part_time;",
+      "'as-needed/on-call' → variable or per_diem (choose per_diem if day/shift-based pay).",
     ].join(" ")
   );
-export type JobType = z.infer<typeof JobType>;
+export type WorkTimeBasis = z.infer<typeof WorkTimeBasis>;
+
+/**
+ * Legal/contractual relationship with the hiring org.
+ */
+export const EngagementType = z
+  .enum([
+    "employee_permanent", // direct hire, open-ended employment
+    "employee_fixed_term", // direct hire, fixed end date (e.g., 6–12 mo)
+    "contractor", // independent contractor / B2B / freelance
+    "agency_temp", // employed by a staffing agency; assigned to client
+    "internship", // student/early-career program
+    "apprenticeship", // earn-while-you-learn track, formal training
+    "fellowship", // time-bound sponsored role (often research/policy)
+  ] as const)
+  .describe(
+    [
+      "Legal/contractual relationship with the hiring org.",
+      "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'employee_permanent'.",
+      "Examples:",
+      "'W-2, full benefits' → employee_permanent;",
+      "'6-month fixed-term employee' → employee_fixed_term;",
+      "'1099 contractor' → contractor;",
+      "'through Adecco' → agency_temp;",
+      "'summer internship' → internship.",
+    ].join(" ")
+  );
+export type EngagementType = z.infer<typeof EngagementType>;
 
 export const PayCadence = z
   .enum(["salary", "hourly", "stipend"] as const)
@@ -99,9 +128,10 @@ export const PayCadence = z
     [
       "The pay cadence for the job.",
       "Map common phrases to specific values.",
-      "Example: 'The pay range is $100,000 to $120,000' → 'salary'.",
-      "Example: 'Pay rate is $20/hour' → 'hourly'.",
-      "Example: 'This is a paid internship with a stipend' → 'stipend'.",
+      "Examples:",
+      "'The pay range is $100,000 to $120,000' → salary;",
+      "'Pay rate is $20/hour' → hourly;",
+      "'This is a paid internship with a stipend' → stipend;",
     ].join(" ")
   );
 export type PayCadence = z.infer<typeof PayCadence>;
@@ -122,10 +152,11 @@ export const SeniorityLevel = z
       "The seniority level of the job.",
       "Map common synonyms to specific values.",
       "If unclear, make an educated guess based on years of experience and job responsibilities.",
-      "Example: 'We are looking for a senior software engineer' → 'senior'.",
-      "Example: 'This is an entry-level position' → 'entry'.",
-      "Example: 'We are hiring a Principal Data Scientist' → 'staff+'.",
-      "Example: 'We need a director of marketing' → 'director'.",
+      "Examples:",
+      "'We are looking for a senior software engineer' → senior;",
+      "'This is an entry-level position' → entry;",
+      "'We are hiring a Principal Data Scientist' → staff+;",
+      "'We need a director of marketing' → director;",
     ].join(" ")
   );
 export type SeniorityLevel = z.infer<typeof SeniorityLevel>;
@@ -142,9 +173,10 @@ export const EducationLevel = z
     [
       "The minimum education level explicitly required.",
       "Map common phrases to specific values.",
-      "Example: 'Bachelor's degree in Computer Science required' → 'bachelor'.",
-      "Example: 'Master's degree preferred, but Bachelor's is considered' → 'bachelor'.",
-      "Example: 'PhD in relevant field required' → 'doctorate'.",
+      "Examples:",
+      "'Bachelor's degree in Computer Science required' → bachelor;",
+      "'Master's degree preferred, but Bachelor's is considered' → bachelor;",
+      "'PhD in relevant field required' → doctorate;",
     ].join(" ")
   );
 export type EducationLevel = z.infer<typeof EducationLevel>;
@@ -170,11 +202,12 @@ export const JobFamily = z
     [
       "The job family/category.",
       "Map common roles to specific families.",
-      "Example: 'We are hiring a UX designer' → 'design'.",
-      "Example: 'As a Customer Support Specialist, you will assist clients' → 'customer_success'.",
-      "Example: 'This role is for a Recruiting Coordinator' → 'hr'.",
-      "Example: 'We need a cybersecurity analyst' → 'security'.",
-      "Example: 'Join our sales team as an Account Executive' → 'sales'.",
+      "Examples:",
+      "'We are hiring a UX designer' → design;",
+      "'As a Customer Support Specialist, you will assist clients' → customer_success;",
+      "'This role is for a Recruiting Coordinator' → hr;",
+      "'We need a cybersecurity analyst' → security;",
+      "'Join our sales team as an Account Executive' → sales;",
     ].join(" ")
   );
 export type JobFamily = z.infer<typeof JobFamily>;
