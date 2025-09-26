@@ -9,6 +9,11 @@ export interface MatchResult {
   badOmit?: boolean;
 }
 
+export type MatchFunction = (
+  actual: unknown,
+  expected: unknown
+) => Promise<MatchResult>;
+
 /**
  * Checks if the actual value is strictly equal to the ground truth value.
  */
