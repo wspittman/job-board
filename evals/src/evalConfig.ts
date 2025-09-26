@@ -1,17 +1,18 @@
 import {
-  InferredBenefitHighlights,
-  InferredLocation,
-  InferredRemoteEligibility,
-  InferredSalaryRange,
-} from "../../packages/backend/src/models/inferredModels.ts";
-import { Company, Job } from "../../packages/backend/src/models/models.ts";
-import {
   arrayExactMatcher,
   equals,
   equalsCasePreferred,
-  type MatchFunction,
   similar,
 } from "./matchers.ts";
+import type {
+  BenefitHighlights,
+  Company,
+  Job,
+  Location,
+  RemoteEligibility,
+  SalaryRange,
+} from "./packagePortal.ts";
+import type { MatchFunction } from "./types.ts";
 
 // Model costs per million tokens [input, output], last pulled 9/25/2025
 export const llmModels = {
@@ -65,19 +66,19 @@ export const rubricCompany: Rubric<Company> = {
   description: similar,
 };
 
-const rubricLocation: Rubric<InferredLocation> = {
+const rubricLocation: Rubric<Location> = {
   city: equalsCasePreferred,
   regionCode: equalsCasePreferred,
   countryCode: equalsCasePreferred,
 };
 
-const rubricRemoteEligibility: Rubric<InferredRemoteEligibility> = {
+const rubricRemoteEligibility: Rubric<RemoteEligibility> = {
   countries: arrayExactMatcher,
   regions: arrayExactMatcher,
   notes: similar,
 };
 
-const rubricSalaryRange: Rubric<InferredSalaryRange> = {
+const rubricSalaryRange: Rubric<SalaryRange> = {
   currency: equalsCasePreferred,
   cadence: equals,
   min: equals,
@@ -86,7 +87,7 @@ const rubricSalaryRange: Rubric<InferredSalaryRange> = {
   maxOTE: equals,
 };
 
-const rubricBenefitHighlights: Rubric<InferredBenefitHighlights> = {
+const rubricBenefitHighlights: Rubric<BenefitHighlights> = {
   healthEmployerCoveragePct: equals,
   ptoDays: equals,
   parentalLeaveWeeks: equals,
