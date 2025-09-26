@@ -3,15 +3,15 @@ import {
   InferredLocation,
   InferredRemoteEligibility,
   InferredSalaryRange,
-} from "../packages/backend/src/models/inferredModels.ts";
-import { Company, Job } from "../packages/backend/src/models/models.ts";
+} from "../../packages/backend/src/models/inferredModels.ts";
+import { Company, Job } from "../../packages/backend/src/models/models.ts";
 import {
   arrayExactMatcher,
+  equals,
   equalsCasePreferred,
   type MatchFunction,
   similar,
-} from "./matchers";
-import { equals } from "./matchers.ts";
+} from "./matchers.ts";
 
 // Model costs per million tokens [input, output], last pulled 9/25/2025
 export const llmModels = {

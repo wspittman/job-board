@@ -1,6 +1,6 @@
 import { ats } from "../packages/backend/src/ats/ats.ts";
 import type { ATS } from "../packages/backend/src/models/models.ts";
-import { writeObj } from "./fileUtils.ts";
+import { writeObj } from "./src/fileUtils.ts";
 
 const actionTypes = ["company", "job"];
 const atsTypes = ["greenhouse", "lever"];

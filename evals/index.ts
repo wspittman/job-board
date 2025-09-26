@@ -1,6 +1,6 @@
 import { batch, setAsyncLogging } from "dry-utils-async";
 import { evaluate } from "./evaluate";
-import { readObj, readSources, writeObj } from "./fileUtils";
+import { readObj, readSources, writeObj } from "./src/fileUtils";
 import type { Company, Model, Outcome, Scenario, Score } from "./types";
 
 setAsyncLogging({
