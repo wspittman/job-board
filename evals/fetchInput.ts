@@ -1,23 +1,18 @@
 import { writeObj } from "./src/fileUtils.ts";
 import { type ATS, ats } from "./src/packagePortal.ts";
 
-const actionTypes = ["company", "job"];
+const dataModels = ["company", "job"];
 const atsTypes = ["greenhouse", "lever"];
 
 const args = process.argv.slice(2);
-const [action, atsId, companyId, jobId] = args;
+const [dataModel, atsId, companyId, jobId] = args;
 
 function usageReminder() {
   console.error(
-    "Usage: npm run eval-fetch-input -- actionType atsType <companyId> [jobId]\n" +
-      `  actionType: ${actionTypes.join("|")}\n` +
+    "Usage: npm run eval-fetch-input -- dataModel atsType <companyId> [jobId]\n" +
+      `  dataModel: ${dataModels.join("|")}\n` +
       `  atsType: ${atsTypes.join("|")}\n`
   );
-  process.exit(1);
-}
-
-if (!actionTypes.includes(action) || !atsTypes.includes(atsId) || !companyId) {
-  usageReminder();
 }
 
 async function fetchCompanyInput(): Promise<void> {
@@ -41,13 +36,28 @@ async function fetchJobInput(): Promise<void> {
   await writeObj(result, "Job", "Input", atsId, companyId, jobId);
 }
 
-switch (action) {
-  case "company":
-    fetchCompanyInput();
-    break;
-  case "job":
-    fetchJobInput();
-    break;
-  default:
-    console.error("Unknown action");
+async function run() {
+  if (
+    !dataModels.includes(dataModel) ||
+    !atsTypes.includes(atsId) ||
+    !companyId
+  ) {
+    usageReminder();
+    return;
+  }
+
+  switch (dataModel) {
+    case "company":
+      await fetchCompanyInput();
+      break;
+    case "job":
+      await fetchJobInput();
+      break;
+    default:
+      console.error("Unknown dataModel");
+  }
 }
+
+run().catch((err) => {
+  console.error("Error running evaluation:", err);
+});
