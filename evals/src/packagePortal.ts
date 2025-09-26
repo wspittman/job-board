@@ -10,11 +10,13 @@ import type {
   Company,
   Job,
 } from "../../packages/backend/src/models/models.ts";
+import type { Context } from "../../packages/backend/src/types/types.ts";
 
 export type {
   ATS,
   InferredBenefitHighlights as BenefitHighlights,
   Company,
+  Context,
   Job,
   InferredLocation as Location,
   InferredRemoteEligibility as RemoteEligibility,
