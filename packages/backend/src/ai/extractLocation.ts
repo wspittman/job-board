@@ -1,4 +1,5 @@
 import { jsonCompletion } from "dry-utils-openai";
+import { config } from "../config.ts";
 import { getCachedLocation, setCachedLocation } from "../db/cache.ts";
 import { InferredLocation } from "../models/inferredModels.ts";
 import type { Location } from "../models/models.ts";
@@ -14,10 +15,7 @@ Format your response in JSON, adhering to the provided schema. Use null for any 
  * @param location The location object to extract data into
  * @returns True if extraction was successful, false otherwise
  */
-export async function extractLocation(
-  location: string,
-  model?: string
-): Promise<Location> {
+export async function extractLocation(location: string): Promise<Location> {
   if (!location) return {};
 
   const cachedResult = await getCachedLocation(location);
@@ -31,7 +29,7 @@ export async function extractLocation(
     prompt,
     location,
     InferredLocation,
-    { model }
+    { model: config.LLM_MODEL }
   );
 
   if (!content) return {};

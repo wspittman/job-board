@@ -1,4 +1,5 @@
 import { ats } from "../../packages/backend/src/ats/ats.ts";
+import { config } from "../../packages/backend/src/config.ts";
 import type {
   InferredBenefitHighlights,
   InferredLocation,
@@ -24,3 +25,4 @@ export type {
 };
 
 export { ats };
+export const LLM_MODEL = config.LLM_MODEL;

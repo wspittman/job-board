@@ -1,4 +1,5 @@
 import { jsonCompletion } from "dry-utils-openai";
+import { config } from "../config.ts";
 import { InferredJobWithScratchpad } from "../models/inferredModels.ts";
 import type { Job } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
@@ -34,16 +35,13 @@ const prompt = `You are an information-extraction engine. Your sole job is to re
  * @param job The job object to extract data into
  * @returns True if extraction was successful, false otherwise
  */
-export async function fillJobInfo(
-  job: Context<Job>,
-  model?: string
-): Promise<boolean> {
+export async function fillJobInfo(job: Context<Job>): Promise<boolean> {
   const { content } = await jsonCompletion(
     "extractFacets",
     prompt,
     job.item,
     InferredJobWithScratchpad,
-    { context: job.context, model }
+    { context: job.context, model: config.LLM_MODEL }
   );
 
   if (content) {

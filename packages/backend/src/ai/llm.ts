@@ -17,27 +17,17 @@ subscribeOpenAILogging({
 });
 
 class LLMConnector {
-  private model?: string;
-
-  constructor(model?: string) {
-    this.model = model;
-  }
-
   async fillCompanyInfo(company: Context<Company>) {
-    return fillCompanyInfo(company, this.model);
+    return fillCompanyInfo(company);
   }
 
   async extractLocation(location: string) {
-    return extractLocation(location, this.model);
+    return extractLocation(location);
   }
 
   async fillJobInfo(job: Context<Job>) {
-    return fillJobInfo(job, this.model);
+    return fillJobInfo(job);
   }
 }
 
 export const llm = new LLMConnector();
-
-export function specificLLM(model: string) {
-  return new LLMConnector(model);
-}

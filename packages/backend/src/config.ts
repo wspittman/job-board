@@ -11,6 +11,8 @@ interface Config {
   GREENHOUSE_URL: string;
   LEVER_URL: string;
 
+  LLM_MODEL: string;
+
   ADMIN_TOKEN: string;
 
   APPLICATIONINSIGHTS_CONNECTION_STRING: string;
@@ -39,6 +41,7 @@ export const config: Config = {
 
   // AI configs
   // OPENAI_API_KEY present in .env, referenced directly in OpenAI SDK
+  LLM_MODEL: process.env["LLM_MODEL"] || "gpt-5-nano",
 
   // Auth configs
   ADMIN_TOKEN: process.env["ADMIN_TOKEN"] || "admin",

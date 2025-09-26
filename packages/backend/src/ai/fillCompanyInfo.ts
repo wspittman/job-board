@@ -1,4 +1,5 @@
 import { jsonCompletion } from "dry-utils-openai";
+import { config } from "../config.ts";
 import { InferredCompany } from "../models/inferredModels.ts";
 import type { Company } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
@@ -17,15 +18,14 @@ Format your response in JSON, adhering to the provided schema.`;
  * @returns True if extraction was successful, false otherwise
  */
 export async function fillCompanyInfo(
-  company: Context<Company>,
-  model?: string
+  company: Context<Company>
 ): Promise<boolean> {
   const { content } = await jsonCompletion(
     "extractCompanyInfo",
     prompt,
     company.item,
     InferredCompany,
-    { context: company.context, model }
+    { context: company.context, model: config.LLM_MODEL }
   );
 
   if (content) {
