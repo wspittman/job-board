@@ -1,46 +1,32 @@
 import axios from "axios";
-import type { MatchResult } from "./types";
+import type { MatchInput, MatchResult } from "./types";
 
 /**
  * Checks if the actual value is strictly equal to the ground truth value.
  */
-export async function equals(
-  actual: unknown,
-  expected: unknown
-): Promise<MatchResult> {
-  const undef = undefinedCheck(actual, expected);
+export async function equals(input: MatchInput): Promise<MatchResult> {
+  const undef = undefinedCheck(input);
   if (undef) return undef;
 
-  const ok = actual === expected;
+  const { actual, expected } = input;
 
-  return { match: ok, badMatch: !ok };
-}
-
-export async function equalsCaseInsensitive(
-  actual: unknown,
-  expected: unknown
-): Promise<MatchResult> {
-  const undef = undefinedCheck(actual, expected);
-  if (undef) return undef;
-
-  const ok = isEqualCaseInsensitive(actual, expected);
-
-  return { match: ok, badMatch: !ok };
+  return createMatchResult(input, { match: actual === expected });
 }
 
 export async function equalsCasePreferred(
-  actual: unknown,
-  expected: unknown
+  input: MatchInput
 ): Promise<MatchResult> {
-  const undef = undefinedCheck(actual, expected);
+  const undef = undefinedCheck(input);
   if (undef) return undef;
 
+  const { actual, expected } = input;
+
   if (actual === expected) {
-    return { match: true };
+    return createMatchResult(input, { match: true });
   }
 
   if (!isEqualCaseInsensitive(actual, expected)) {
-    return { badMatch: true };
+    return createMatchResult(input);
   }
 
   const actualStr = String(actual);
@@ -55,7 +41,7 @@ export async function equalsCasePreferred(
 
   const score = 1 - dist / expectedStr.length;
 
-  return { match: score >= 0.8, badMatch: score < 0.8, score };
+  return createMatchResult(input, { score });
 }
 
 /**
@@ -65,13 +51,11 @@ export async function equalsCasePreferred(
  * @param expected The expected value, converted to a string.
  * @returns A similarity score between 0 and 1.
  */
-export async function similar(
-  actual: unknown,
-  expected: unknown
-): Promise<MatchResult> {
-  const undef = undefinedCheck(actual, expected);
+export async function similar(input: MatchInput): Promise<MatchResult> {
+  const undef = undefinedCheck(input);
   if (undef) return undef;
 
+  const { actual, expected } = input;
   const actualEmb = await getEmbedding(String(actual));
   const expectedEmb = await getEmbedding(String(expected));
 
@@ -79,18 +63,19 @@ export async function similar(
   const eitherFails = !actualEmb.length || !expectedEmb.length;
   const score = eitherFails ? 0 : cosineSimilarity(actualEmb, expectedEmb);
 
-  return { match: score >= 0.8, badMatch: score < 0.8, score };
+  return createMatchResult(input, { score });
 }
 
 export async function arrayExactMatcher(
-  actual: unknown,
-  expected: unknown
+  input: MatchInput
 ): Promise<MatchResult> {
-  const undef = undefinedCheck(actual, expected);
+  const undef = undefinedCheck(input);
   if (undef) return undef;
 
+  const { actual, expected } = input;
+
   if (!Array.isArray(actual) || !Array.isArray(expected)) {
-    return { badMatch: true };
+    return createMatchResult(input);
   }
 
   const actualObj: Record<string, number> = {};
@@ -110,15 +95,15 @@ export async function arrayExactMatcher(
     }
   }
 
+  dist += Object.values(actualObj).reduce((sum, v) => sum + Math.max(v, 0), 0);
+
   const score = Math.max(1 - dist / expected.length, 0);
 
-  return { match: score >= 0.8, badMatch: score < 0.8, score };
+  return createMatchResult(input, { score });
 }
 
-function undefinedCheck(
-  actual: unknown,
-  expected: unknown
-): MatchResult | undefined {
+function undefinedCheck(input: MatchInput): MatchResult | undefined {
+  const { actual, expected } = input;
   const actualFound = actual !== undefined;
   const expectedFound = expected !== undefined;
 
@@ -127,11 +112,41 @@ function undefinedCheck(
     return undefined;
   }
 
-  return {
+  return createMatchResult(input, {
     badOmit: expectedFound,
     badFind: actualFound,
     match: !actualFound && !expectedFound,
-  };
+  });
+}
+
+function createMatchResult(
+  input: MatchInput,
+  partial: MatchResult = {}
+): MatchResult {
+  const { score, match, badFind, badOmit } = partial;
+
+  if (score != null) {
+    if (score >= 0.8) {
+      return { score, match: true };
+    } else {
+      return { score, badMatch: true, ...input };
+    }
+  }
+
+  if (match) {
+    return { match: true };
+  }
+
+  if (badFind) {
+    return { badFind: true, ...input };
+  }
+
+  if (badOmit) {
+    return { badOmit: true, ...input };
+  }
+
+  // Else assume bad match
+  return { badMatch: true, ...input };
 }
 
 function isEqualCaseInsensitive(a: unknown, b: unknown): boolean {

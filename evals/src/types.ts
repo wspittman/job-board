@@ -1,6 +1,46 @@
 import type { Context } from "./packagePortal";
 
-export interface MatchResult {
+// #region Inputs
+
+export type DataModel = "Company" | "Job";
+
+/**
+ * Basic information about a particular evaluation run, which has many scenarios.
+ */
+export interface Run {
+  runName: string;
+  dataModel: DataModel;
+  llmModel: string;
+}
+
+/**
+ * Represents a specific scenario within an evaluation run.
+ */
+export interface Scenario<T> extends Run {
+  source: Source<T>;
+}
+
+/**
+ * A source consists of the input context and the ground truth for a particular scenario.
+ */
+export interface Source<T> {
+  sourceName: string;
+  input: Context<T>;
+  ground: T;
+}
+
+// #endregion
+
+// #region Comparisons
+
+export interface MatchInput {
+  property: string;
+  matcher: string;
+  actual: unknown;
+  expected: unknown;
+}
+
+export interface MatchResult extends Partial<MatchInput> {
   // 0..1, only present for fuzzy matches
   score?: number;
   match?: boolean;
@@ -9,13 +49,34 @@ export interface MatchResult {
   badOmit?: boolean;
 }
 
-export type MatchFunction = (
-  actual: unknown,
-  expected: unknown
-) => Promise<MatchResult>;
+export type MatchFunction = (input: MatchInput) => Promise<MatchResult>;
 
-export interface Source<T> {
-  name: string;
-  input: Context<T>;
-  ground: T;
+// #endregion
+
+// #region Outputs
+
+/**
+ * A score summarizing performance on one or more scenarios.
+ */
+export interface Score extends Run {
+  timestamp: string;
+  tokens: number;
+  cost: number;
+  duration: number;
+  score: number;
+  matches: number;
+  badMatches: number;
+  badFinds: number;
+  badOmits: number;
 }
+
+/**
+ * The outcome of running a scenario, including various performance metrics.
+ */
+export interface Outcome<T> extends Score {
+  sourceName: string;
+  output: T;
+  suboptimal?: MatchResult[];
+}
+
+// #endregion

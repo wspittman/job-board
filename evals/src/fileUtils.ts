@@ -1,10 +1,9 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "node:path";
 import type { Context } from "./packagePortal";
-import type { Source } from "./types";
+import type { DataModel, Source } from "./types";
 
 type Role = "Input" | "Outcome" | "Ground" | "Report";
-type DataModel = "Company" | "Job";
 
 // Base directory for all evaluation-related files.
 const basePath = path.join(process.cwd(), "evals");
@@ -33,18 +32,18 @@ export async function readSources<T>(
  */
 async function readSource<T>(
   dataModel: DataModel,
-  name: string
+  sourceName: string
 ): Promise<Source<T> | undefined> {
-  const input = await readObj<Context<T>>(dataModel, "Input", name);
-  const ground = await readObj<T>(dataModel, "Ground", name);
+  const input = await readObj<Context<T>>(dataModel, "Input", sourceName);
+  const ground = await readObj<T>(dataModel, "Ground", sourceName);
 
   // If any essential part of the source is missing, warn and return undefined.
   if (!input || !ground) {
-    console.warn(`Missing a file for source: ${name}`);
+    console.warn(`Missing a file for source: ${sourceName}`);
     return undefined;
   }
 
-  return { name, input, ground };
+  return { sourceName, input, ground };
 }
 
 /**
