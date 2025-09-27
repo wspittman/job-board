@@ -1,6 +1,12 @@
 import { llmModels } from "./src/evalConfig.ts";
 import { readSources } from "./src/fileUtils.ts";
-import { Company, Job, LLM_MODEL } from "./src/packagePortal.ts";
+import {
+  Company,
+  CompanyFn,
+  Job,
+  JobFn,
+  LLM_MODEL,
+} from "./src/packagePortal.ts";
 import { Run, Scenario } from "./src/types.ts";
 
 const dataModels = ["company", "job"];
@@ -13,7 +19,7 @@ function usageReminder() {
   );
 }
 
-async function runEval<T>(run: Run): Promise<void> {
+async function runEval<T>(run: Run<T>): Promise<void> {
   const { runName, dataModel, llmModel } = run;
   console.log(`${runName}: Running eval for ${dataModel} with ${llmModel}`);
 
@@ -58,10 +64,15 @@ async function run() {
 
   switch (dataModel) {
     case "company":
-      await runEval<Company>({ runName, dataModel: "Company", llmModel });
+      await runEval<Company>({
+        runName,
+        dataModel: "Company",
+        llmModel,
+        fn: CompanyFn,
+      });
       break;
     case "job":
-      await runEval<Job>({ runName, dataModel: "Job", llmModel });
+      await runEval<Job>({ runName, dataModel: "Job", llmModel, fn: JobFn });
       break;
     default:
       console.error("Unknown dataModel");

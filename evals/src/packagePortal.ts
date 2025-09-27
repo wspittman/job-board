@@ -1,3 +1,4 @@
+import { llm } from "../../packages/backend/src/ai/llm.ts";
 import { ats } from "../../packages/backend/src/ats/ats.ts";
 import { config } from "../../packages/backend/src/config.ts";
 import type {
@@ -26,3 +27,5 @@ export type {
 
 export { ats };
 export const LLM_MODEL = config.LLM_MODEL;
+export const CompanyFn = llm.fillCompanyInfo;
+export const JobFn = llm.fillJobInfo;

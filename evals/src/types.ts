@@ -4,19 +4,23 @@ import type { Context } from "./packagePortal";
 
 export type DataModel = "Company" | "Job";
 
-/**
- * Basic information about a particular evaluation run, which has many scenarios.
- */
-export interface Run {
+interface RunBase {
   runName: string;
   dataModel: DataModel;
   llmModel: string;
 }
 
 /**
+ * Basic information about a particular evaluation run, which has many scenarios.
+ */
+export interface Run<T> extends RunBase {
+  fn: (input: Context<T>) => Promise<boolean>;
+}
+
+/**
  * Represents a specific scenario within an evaluation run.
  */
-export interface Scenario<T> extends Run {
+export interface Scenario<T> extends Run<T> {
   source: Source<T>;
 }
 
@@ -58,11 +62,10 @@ export type MatchFunction = (input: MatchInput) => Promise<MatchResult>;
 /**
  * A score summarizing performance on one or more scenarios.
  */
-export interface Score extends Run {
+export interface Score extends RunBase {
   timestamp: string;
-  tokens: number;
+  metrics: Record<string, number>;
   cost: number;
-  duration: number;
   score: number;
   matches: number;
   badMatches: number;
