@@ -34,8 +34,8 @@ async function readSource<T>(
   dataModel: DataModel,
   sourceName: string
 ): Promise<Source<T> | undefined> {
-  const input = await readObj<Context<T>>(dataModel, "Input", sourceName);
-  const ground = await readObj<T>(dataModel, "Ground", sourceName);
+  const input = await readObj<Context<T>>("Input", dataModel, sourceName);
+  const ground = await readObj<T>("Ground", dataModel, sourceName);
 
   // If any essential part of the source is missing, warn and return undefined.
   if (!input || !ground) {
@@ -51,8 +51,8 @@ async function readSource<T>(
  * Returns undefined if the file does not exist or an error occurs during reading/parsing.
  */
 export async function readObj<T>(
-  dataModel: DataModel,
   role: Role,
+  dataModel: DataModel,
   name: string
 ): Promise<T | undefined> {
   const filePath = getPath(role, dataModel, name);
@@ -71,8 +71,8 @@ export async function readObj<T>(
  */
 export async function writeObj(
   obj: object,
-  dataModel: DataModel,
   role: Role,
+  dataModel: DataModel,
   ...keys: string[]
 ): Promise<void> {
   const markedObj = { evalTS: new Date().toISOString(), ...obj };

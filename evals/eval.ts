@@ -14,8 +14,8 @@ function usageReminder() {
 }
 
 async function runEval<T>(run: Run): Promise<void> {
-  const { runName, dataModel } = run;
-  console.log(`${runName}: Running eval for ${dataModel}`);
+  const { runName, dataModel, llmModel } = run;
+  console.log(`${runName}: Running eval for ${dataModel} with ${llmModel}`);
 
   const sources = await readSources<T>(dataModel);
   console.log(`${runName}: Found ${sources.length} sources`);
@@ -34,8 +34,8 @@ async function runEval<T>(run: Run): Promise<void> {
   /*const outcome = await evaluate(scenario);
   await writeObj(
     outcome,
-    dataModel,
     "Outcome",
+    dataModel,
     runName,
     llmModel,
     scenario.source.sourceName

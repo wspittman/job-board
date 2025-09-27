@@ -21,7 +21,7 @@ async function fetchCompanyInput(): Promise<void> {
     true
   );
 
-  await writeObj(result, "Company", "Input", atsId, companyId);
+  await writeObj(result, "Input", "Company", atsId, companyId);
 }
 
 async function fetchJobInput(): Promise<void> {
@@ -33,7 +33,7 @@ async function fetchJobInput(): Promise<void> {
     { id: companyId, ats: atsId as ATS },
     { id: jobId, companyId }
   );
-  await writeObj(result, "Job", "Input", atsId, companyId, jobId);
+  await writeObj(result, "Input", "Job", atsId, companyId, jobId);
 }
 
 async function run() {
