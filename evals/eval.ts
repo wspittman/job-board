@@ -1,15 +1,8 @@
-import { llmModels } from "./src/evalConfig.ts";
+import { dataModels, llmModels } from "./src/evalConfig.ts";
+import { evaluate } from "./src/evaluate.ts";
 import { readSources } from "./src/fileUtils.ts";
-import {
-  Company,
-  CompanyFn,
-  Job,
-  JobFn,
-  LLM_MODEL,
-} from "./src/packagePortal.ts";
-import { Run, Scenario } from "./src/types.ts";
-
-const dataModels = ["company", "job"];
+import { LLM_MODEL } from "./src/packagePortal.ts";
+import { DataModel, Run } from "./src/types.ts";
 
 function usageReminder() {
   console.error(
@@ -19,20 +12,15 @@ function usageReminder() {
   );
 }
 
-async function runEval<T>(run: Run<T>): Promise<void> {
+async function runEval(run: Run): Promise<void> {
   const { runName, dataModel, llmModel } = run;
   console.log(`${runName}: Running eval for ${dataModel} with ${llmModel}`);
 
-  const sources = await readSources<T>(dataModel);
+  const sources = await readSources(dataModel);
   console.log(`${runName}: Found ${sources.length} sources`);
 
-  const scenarios: Scenario<T>[] = sources.map((source) => ({
-    ...run,
-    source,
-  }));
-
-  // for the moment, just draw out the first scenario
-  const scenario = scenarios[0];
+  // For now, just evaluate the first source as a proof of concept.
+  const outcome = await evaluate(run, sources[0]);
 
   // Read a previously saved outcome, or if not available run the evaluation.
   //let outcome = await readObj<Outcome<T>>(action, "Outcome", file);
@@ -51,9 +39,10 @@ async function runEval<T>(run: Run<T>): Promise<void> {
 async function run() {
   const args = process.argv.slice(2);
   const [dataModel, runName = `run_${Date.now()}`] = args;
+  const dm = dataModel?.toLowerCase();
   const llmModel = LLM_MODEL;
 
-  if (!dataModels.includes(dataModel)) {
+  if (!dataModels.includes(dm)) {
     usageReminder();
     return;
   }
@@ -62,21 +51,7 @@ async function run() {
     console.error(`Config.LLM_MODEL ${llmModel} is not a known priced model`);
   }
 
-  switch (dataModel) {
-    case "company":
-      await runEval<Company>({
-        runName,
-        dataModel: "Company",
-        llmModel,
-        fn: CompanyFn,
-      });
-      break;
-    case "job":
-      await runEval<Job>({ runName, dataModel: "Job", llmModel, fn: JobFn });
-      break;
-    default:
-      console.error("Unknown dataModel");
-  }
+  await runEval({ runName, dataModel: dm as DataModel, llmModel });
 }
 
 run().catch((err) => {

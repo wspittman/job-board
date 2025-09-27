@@ -1,36 +1,38 @@
-import type { Context } from "./packagePortal";
+import type { Context, InferFn } from "./packagePortal";
+
+export type Bag = Record<string, unknown>;
+export type NumBag = Record<string, number>;
 
 // #region Inputs
 
-export type DataModel = "Company" | "Job";
+export type DataModel = "company" | "job";
 
-interface RunBase {
+export type Rubric<T> = {
+  [key in keyof T]: MatchFunction | Rubric<Bag>;
+};
+
+export interface DataModelBundle {
+  dataModel: DataModel;
+  fn: InferFn;
+  rubric: Rubric<Bag>;
+}
+
+/**
+ * Basic information about a particular evaluation run, which has many scenarios.
+ */
+export interface Run {
   runName: string;
   dataModel: DataModel;
   llmModel: string;
 }
 
 /**
- * Basic information about a particular evaluation run, which has many scenarios.
- */
-export interface Run<T> extends RunBase {
-  fn: (input: Context<T>) => Promise<boolean>;
-}
-
-/**
- * Represents a specific scenario within an evaluation run.
- */
-export interface Scenario<T> extends Run<T> {
-  source: Source<T>;
-}
-
-/**
  * A source consists of the input context and the ground truth for a particular scenario.
  */
-export interface Source<T> {
+export interface Source {
   sourceName: string;
-  input: Context<T>;
-  ground: T;
+  input: Context;
+  ground: Bag;
 }
 
 // #endregion
@@ -62,9 +64,9 @@ export type MatchFunction = (input: MatchInput) => Promise<MatchResult>;
 /**
  * A score summarizing performance on one or more scenarios.
  */
-export interface Score extends RunBase {
+export interface Score extends Run {
   timestamp: string;
-  metrics: Record<string, number>;
+  metrics: NumBag;
   cost: number;
   score: number;
   matches: number;
@@ -76,9 +78,9 @@ export interface Score extends RunBase {
 /**
  * The outcome of running a scenario, including various performance metrics.
  */
-export interface Outcome<T> extends Score {
+export interface Outcome extends Score {
   sourceName: string;
-  output: T;
+  output: Bag;
   suboptimal?: MatchResult[];
 }
 

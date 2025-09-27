@@ -4,15 +4,17 @@ import {
   equalsCasePreferred,
   similar,
 } from "./matchers.ts";
-import type {
-  BenefitHighlights,
-  Company,
-  Job,
-  Location,
-  RemoteEligibility,
-  SalaryRange,
+import {
+  CompanyFn,
+  JobFn,
+  type BenefitHighlights,
+  type Company,
+  type Job,
+  type Location,
+  type RemoteEligibility,
+  type SalaryRange,
 } from "./packagePortal.ts";
-import type { MatchFunction } from "./types.ts";
+import type { DataModelBundle, Rubric } from "./types.ts";
 
 // Model costs per million tokens [input, output], last pulled 9/25/2025
 export const llmModels = {
@@ -46,11 +48,7 @@ export const llmModels = {
 
 // #region Rubrics
 
-type Rubric<T> = {
-  [key in keyof T]: MatchFunction | Rubric<unknown>;
-};
-
-export const rubricCompany: Rubric<Company> = {
+const rubricCompany: Rubric<Company> = {
   // Keys
   id: equals,
   ats: equals,
@@ -93,7 +91,7 @@ const rubricBenefitHighlights: Rubric<BenefitHighlights> = {
   parentalLeaveWeeks: equals,
 };
 
-export const rubricJob: Rubric<Job> = {
+const rubricJob: Rubric<Job> = {
   // Keys
   id: equals,
   companyId: equals,
@@ -121,3 +119,23 @@ export const rubricJob: Rubric<Job> = {
 };
 
 // #endregion
+
+const companyBundle: DataModelBundle = {
+  dataModel: "company" as const,
+  fn: CompanyFn,
+  rubric: rubricCompany,
+};
+
+const jobBundle: DataModelBundle = {
+  dataModel: "job" as const,
+  fn: JobFn,
+  rubric: rubricJob,
+};
+
+export const dataModelBundles = {
+  company: companyBundle,
+  job: jobBundle,
+};
+
+export const dataModels = Object.keys(dataModelBundles);
+export const atsTypes = ["greenhouse", "lever"];

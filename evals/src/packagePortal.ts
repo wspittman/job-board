@@ -12,13 +12,12 @@ import type {
   Company,
   Job,
 } from "../../packages/backend/src/models/models.ts";
-import type { Context } from "../../packages/backend/src/types/types.ts";
+import type { Context as GenericContext } from "../../packages/backend/src/types/types.ts";
 
 export type {
   ATS,
   InferredBenefitHighlights as BenefitHighlights,
   Company,
-  Context,
   Job,
   InferredLocation as Location,
   InferredRemoteEligibility as RemoteEligibility,
@@ -27,5 +26,9 @@ export type {
 
 export { ats };
 export const LLM_MODEL = config.LLM_MODEL;
-export const CompanyFn = llm.fillCompanyInfo;
-export const JobFn = llm.fillJobInfo;
+
+export type InferFn = (input: Context) => Promise<boolean>;
+export const CompanyFn = llm.fillCompanyInfo as unknown as InferFn;
+export const JobFn = llm.fillJobInfo as unknown as InferFn;
+
+export type Context = GenericContext<Record<string, unknown>>;

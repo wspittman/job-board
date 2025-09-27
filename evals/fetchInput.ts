@@ -1,11 +1,6 @@
+import { atsTypes, dataModels } from "./src/evalConfig.ts";
 import { writeObj } from "./src/fileUtils.ts";
 import { type ATS, ats } from "./src/packagePortal.ts";
-
-const dataModels = ["company", "job"];
-const atsTypes = ["greenhouse", "lever"];
-
-const args = process.argv.slice(2);
-const [dataModel, atsId, companyId, jobId] = args;
 
 function usageReminder() {
   console.error(
@@ -15,16 +10,23 @@ function usageReminder() {
   );
 }
 
-async function fetchCompanyInput(): Promise<void> {
+async function fetchCompanyInput(
+  companyId: string,
+  atsId: string
+): Promise<void> {
   const result = await ats.getCompany(
     { id: companyId, ats: atsId as ATS },
     true
   );
 
-  await writeObj(result, "Input", "Company", atsId, companyId);
+  await writeObj(result, "Input", "company", atsId, companyId);
 }
 
-async function fetchJobInput(): Promise<void> {
+async function fetchJobInput(
+  companyId: string,
+  atsId: string,
+  jobId: string
+): Promise<void> {
   if (!jobId) {
     console.error("Job ID is required for fetching job input.");
     usageReminder();
@@ -33,25 +35,26 @@ async function fetchJobInput(): Promise<void> {
     { id: companyId, ats: atsId as ATS },
     { id: jobId, companyId }
   );
-  await writeObj(result, "Input", "Job", atsId, companyId, jobId);
+  await writeObj(result, "Input", "job", atsId, companyId, jobId);
 }
 
 async function run() {
-  if (
-    !dataModels.includes(dataModel) ||
-    !atsTypes.includes(atsId) ||
-    !companyId
-  ) {
+  const args = process.argv.slice(2);
+  const [dataModel, atsId, companyId, jobId] = args;
+  const dm = dataModel?.toLowerCase();
+  const ats = atsId?.toLowerCase();
+
+  if (!dataModels.includes(dm) || !atsTypes.includes(ats) || !companyId) {
     usageReminder();
     return;
   }
 
-  switch (dataModel) {
+  switch (dm) {
     case "company":
-      await fetchCompanyInput();
+      await fetchCompanyInput(companyId, ats);
       break;
     case "job":
-      await fetchJobInput();
+      await fetchJobInput(companyId, ats, jobId);
       break;
     default:
       console.error("Unknown dataModel");

@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "node:path";
 import type { Context } from "./packagePortal";
-import type { DataModel, Source } from "./types";
+import type { Bag, DataModel, Source } from "./types";
 
 type Role = "Input" | "Outcome" | "Ground" | "Report";
 
@@ -10,19 +10,17 @@ const basePath = path.join(process.cwd(), "evals");
 
 // Constructs a file path for a given action, role, and optional name.
 const getPath = (role: Role, dataModel: DataModel, name = "") =>
-  path.join(basePath, role.toLowerCase(), dataModel.toLowerCase(), name);
+  path.join(basePath, role.toLowerCase(), dataModel, name);
 
 /**
  * Reads all source files for a given action and baseline model.
  * Source files consist of an input file, a ground truth file, and optionally a baseline outcome file.
  */
-export async function readSources<T>(
-  dataModel: DataModel
-): Promise<Source<T>[]> {
+export async function readSources(dataModel: DataModel): Promise<Source[]> {
   const names = await readdir(getPath("Input", dataModel));
   // Read all sources in parallel and filter out any undefined results (e.g., due to missing files).
   return (
-    await Promise.all(names.map((name) => readSource<T>(dataModel, name)))
+    await Promise.all(names.map((name) => readSource(dataModel, name)))
   ).filter((x) => !!x);
 }
 
@@ -30,12 +28,12 @@ export async function readSources<T>(
  * Reads a single source, which includes input and ground truth
  * Returns undefined if any of the required files are missing.
  */
-async function readSource<T>(
+async function readSource(
   dataModel: DataModel,
   sourceName: string
-): Promise<Source<T> | undefined> {
-  const input = await readObj<Context<T>>("Input", dataModel, sourceName);
-  const ground = await readObj<T>("Ground", dataModel, sourceName);
+): Promise<Source | undefined> {
+  const input = await readObj<Context>("Input", dataModel, sourceName);
+  const ground = await readObj<Bag>("Ground", dataModel, sourceName);
 
   // If any essential part of the source is missing, warn and return undefined.
   if (!input || !ground) {

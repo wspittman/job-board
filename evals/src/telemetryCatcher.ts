@@ -1,14 +1,14 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import { createHash } from "node:crypto";
 import type { Context } from "./packagePortal";
-import type { Scenario } from "./types";
+import type { NumBag, Source } from "./types";
 
 /**
  * Catches and stores AI telemetry metrics.
  * It uses a hash of scenario details to mark and later find metrics for specific AI calls.
  */
 class TelemetryCatcher {
-  private logs: Record<string, Record<string, number>> = {};
+  private logs: Record<string, NumBag> = {};
 
   constructor() {}
 
@@ -19,9 +19,9 @@ class TelemetryCatcher {
    * @param scenario The scenario for which to create the marked input.
    * @returns A tuple containing the hash and the modified context.
    */
-  createMarkedInput<T>({ runName, source }: Scenario<T>): [string, Context<T>] {
+  createMarkedInput(source: Source): [string, Context] {
     const { sourceName, input } = source;
-    const v = this.hash(runName, sourceName);
+    const v = this.hash(sourceName);
 
     return [
       v,
@@ -44,7 +44,7 @@ class TelemetryCatcher {
    * @param tag The tag from the log, expected to contain the hash.
    * @param metrics The metrics to store.
    */
-  catch(tag: string, metrics: Record<string, number>): void {
+  catch(tag: string, metrics: NumBag): void {
     // The key is the hash embedded in the input string (e.g., "item: { v: 'hash_value', ... }").
     // This extracts the 32-character hash.
     const key = tag.slice(6, 38);
@@ -57,7 +57,7 @@ class TelemetryCatcher {
    * @param v The hash to look for.
    * @returns The found metrics, or undefined if none matches.
    */
-  find(v: string): Record<string, number> | undefined {
+  find(v: string): NumBag | undefined {
     return this.logs[v];
   }
 
