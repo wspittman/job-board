@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { MatchInput, MatchResult } from "./types";
+import type { MatchInput, MatchResult } from "../types/types";
 
 /**
  * Checks if the actual value is strictly equal to the ground truth value.

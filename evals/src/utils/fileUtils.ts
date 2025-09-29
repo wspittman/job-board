@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "node:path";
-import type { Context } from "./packagePortal";
-import type { Bag, DataModel, Source } from "./types";
+import { DataModel } from "../portal/pTypes";
+import type { Bag, Source } from "../types/types";
 
 type Role = "Input" | "Outcome" | "Ground" | "Report";
 
@@ -32,7 +32,7 @@ async function readSource(
   dataModel: DataModel,
   sourceName: string
 ): Promise<Source | undefined> {
-  const input = await readObj<Context>("Input", dataModel, sourceName);
+  const input = await readObj<Bag>("Input", dataModel, sourceName);
   const ground = await readObj<Bag>("Ground", dataModel, sourceName);
 
   // If any essential part of the source is missing, warn and return undefined.
@@ -78,7 +78,7 @@ export async function writeObj(
 
   await mkdir(dir, { recursive: true });
   await writeFile(
-    path.join(dir, keys.join("_") + ".json"),
+    path.join(dir, keys.filter(Boolean).join("_") + ".json"),
     JSON.stringify(markedObj, null, 2)
   );
 }

@@ -1,16 +1,8 @@
-import { dataModelBundles } from "./evalConfig";
-import { catcher } from "./telemetryCatcher";
-import type {
-  Bag,
-  DataModelBundle,
-  MatchFunction,
-  MatchResult,
-  NumBag,
-  Outcome,
-  Rubric,
-  Run,
-  Source,
-} from "./types";
+import { compare } from "./compare/compare";
+import { rubrics } from "./evalConfig";
+import { infer } from "./portal/pFuncs";
+import type { Bag, NumBag, Outcome, Run, Source } from "./types/types";
+import { catcher } from "./utils/telemetryCatcher";
 
 /**
  * Evaluates a given scenario by running it and comparing the output against ground truth
@@ -19,15 +11,19 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
   const prefix = `${run.runName} / ${source.sourceName}`;
 
   console.log(`${prefix}: Running inference`);
-  const bundle = dataModelBundles[run.dataModel];
-  const [metrics, output] = await runInference(bundle, source);
+  const [metrics, output] = await runInference(run, source);
 
   if (!metrics) {
     throw new Error(`${prefix}: No metrics found`);
   }
 
   console.log(`${prefix}: Comparing ground truth`);
-  const matches = await compare("", output, source.ground, bundle.rubric);
+  const matches = await compare(
+    "",
+    output,
+    source.ground,
+    rubrics[run.dataModel]
+  );
 
   console.log(`${prefix}: Building outcome`);
 
@@ -48,42 +44,13 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
 }
 
 async function runInference(
-  bundle: DataModelBundle,
+  run: Run,
   source: Source
 ): Promise<[NumBag | undefined, Bag]> {
   // Use telemetryCatcher to mark the input and trace the LLM logs
   const [mark, markedInput] = catcher.createMarkedInput(source);
-  await bundle.fn(markedInput);
+  await infer(run.dataModel, markedInput);
   const metrics = catcher.find(mark);
 
-  return [metrics, markedInput.item];
-}
-
-async function compare(
-  property: string,
-  actual: unknown,
-  expected: unknown,
-  matcher: MatchFunction | Rubric<Bag>
-): Promise<MatchResult[]> {
-  if (typeof matcher === "object" && matcher !== null) {
-    const act = actual as Bag;
-    const exp = expected as Bag;
-
-    return (
-      await Promise.all(
-        Object.entries(matcher).map(async ([key, mVal]) => {
-          return await compare(`${property}.${key}`, act[key], exp[key], mVal);
-        })
-      )
-    ).flat();
-  } else {
-    return [
-      await matcher({
-        property,
-        matcher: matcher.name,
-        actual,
-        expected,
-      }),
-    ];
-  }
+  return [metrics, markedInput.item as Bag];
 }

@@ -1,13 +1,17 @@
-import { dataModels, llmModels } from "./src/evalConfig.ts";
+import { llmModels } from "./src/evalConfig.ts";
 import { evaluate } from "./src/evaluate.ts";
-import { readSources } from "./src/fileUtils.ts";
-import { LLM_MODEL } from "./src/packagePortal.ts";
-import { DataModel, Run } from "./src/types.ts";
+import {
+  dataModelTypes,
+  isValidDataModel,
+  LLM_MODEL,
+} from "./src/portal/pFuncs.ts";
+import { Run } from "./src/types/types.ts";
+import { readSources } from "./src/utils/fileUtils.ts";
 
 function usageReminder() {
   console.error(
     "Usage: npm run eval -- dataModel [runName]\n" +
-      `  dataModel: ${dataModels.join("|")}\n` +
+      `  dataModel: ${dataModelTypes.join("|")}\n` +
       "  runName: optional name for this run"
   );
 }
@@ -38,20 +42,21 @@ async function runEval(run: Run): Promise<void> {
 
 async function run() {
   const args = process.argv.slice(2);
-  const [dataModel, runName = `run_${Date.now()}`] = args;
-  const dm = dataModel?.toLowerCase();
+  const [dataModelArg, runName = `run_${Date.now()}`] = args;
+  const dataModel = dataModelArg?.toLowerCase();
   const llmModel = LLM_MODEL;
 
-  if (!dataModels.includes(dm)) {
+  if (!isValidDataModel(dataModel)) {
     usageReminder();
     return;
   }
 
   if (!Object.keys(llmModels).includes(llmModel)) {
     console.error(`Config.LLM_MODEL ${llmModel} is not a known priced model`);
+    return;
   }
 
-  await runEval({ runName, dataModel: dm as DataModel, llmModel });
+  await runEval({ runName, dataModel, llmModel });
 }
 
 run().catch((err) => {

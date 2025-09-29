@@ -1,21 +1,13 @@
-import type { Context, InferFn } from "./packagePortal";
+import { DataModel } from "../portal/pTypes";
 
 export type Bag = Record<string, unknown>;
 export type NumBag = Record<string, number>;
 
 // #region Inputs
 
-export type DataModel = "company" | "job";
-
 export type Rubric<T> = {
   [key in keyof T]: MatchFunction | Rubric<Bag>;
 };
-
-export interface DataModelBundle {
-  dataModel: DataModel;
-  fn: InferFn;
-  rubric: Rubric<Bag>;
-}
 
 /**
  * Basic information about a particular evaluation run, which has many scenarios.
@@ -31,7 +23,7 @@ export interface Run {
  */
 export interface Source {
   sourceName: string;
-  input: Context;
+  input: Bag;
   ground: Bag;
 }
 

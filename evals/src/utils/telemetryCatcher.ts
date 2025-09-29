@@ -1,7 +1,6 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import { createHash } from "node:crypto";
-import type { Context } from "./packagePortal";
-import type { NumBag, Source } from "./types";
+import type { Bag, NumBag, Source } from "../types/types";
 
 /**
  * Catches and stores AI telemetry metrics.
@@ -19,7 +18,7 @@ class TelemetryCatcher {
    * @param scenario The scenario for which to create the marked input.
    * @returns A tuple containing the hash and the modified context.
    */
-  createMarkedInput(source: Source): [string, Context] {
+  createMarkedInput(source: Source): [string, Bag] {
     const { sourceName, input } = source;
     const v = this.hash(sourceName);
 
@@ -31,7 +30,7 @@ class TelemetryCatcher {
           // Add a simple hash to differentiate parallel requests.
           // This DOES affect what is sent to the LLM, but should be opaque to it.
           v,
-          ...input.item,
+          ...(input["item"] as object),
         },
       },
     ];

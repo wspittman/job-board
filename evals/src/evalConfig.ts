@@ -3,18 +3,17 @@ import {
   equals,
   equalsCasePreferred,
   similar,
-} from "./matchers.ts";
-import {
-  CompanyFn,
-  JobFn,
-  type BenefitHighlights,
-  type Company,
-  type Job,
-  type Location,
-  type RemoteEligibility,
-  type SalaryRange,
-} from "./packagePortal.ts";
-import type { DataModelBundle, Rubric } from "./types.ts";
+} from "./compare/matchers.ts";
+import type {
+  BenefitHighlights,
+  Company,
+  DataModel,
+  Job,
+  Location,
+  RemoteEligibility,
+  SalaryRange,
+} from "./portal/pTypes.ts";
+import type { Bag, Rubric } from "./types/types.ts";
 
 // Model costs per million tokens [input, output], last pulled 9/25/2025
 export const llmModels = {
@@ -120,22 +119,7 @@ const rubricJob: Rubric<Job> = {
 
 // #endregion
 
-const companyBundle: DataModelBundle = {
-  dataModel: "company" as const,
-  fn: CompanyFn,
-  rubric: rubricCompany,
+export const rubrics: Record<DataModel, Rubric<Bag>> = {
+  company: rubricCompany,
+  job: rubricJob,
 };
-
-const jobBundle: DataModelBundle = {
-  dataModel: "job" as const,
-  fn: JobFn,
-  rubric: rubricJob,
-};
-
-export const dataModelBundles = {
-  company: companyBundle,
-  job: jobBundle,
-};
-
-export const dataModels = Object.keys(dataModelBundles);
-export const atsTypes = ["greenhouse", "lever"];
