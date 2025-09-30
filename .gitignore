@@ -8,7 +8,7 @@ agent_scripts/
 # Eval Folders
 evals/input/
 evals/ground/
-evals/output/
+evals/outcome/
 evals/report/
 
 # TypeScript cache

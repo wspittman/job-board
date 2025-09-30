@@ -3,7 +3,8 @@ import {
   equals,
   equalsCasePreferred,
   similar,
-} from "./compare/matchers.ts";
+} from "./judge/checks.ts";
+import { Rubric } from "./judge/judge.ts";
 import type {
   BenefitHighlights,
   Company,
@@ -13,7 +14,7 @@ import type {
   RemoteEligibility,
   SalaryRange,
 } from "./portal/pTypes.ts";
-import type { Bag, Rubric } from "./types/types.ts";
+import type { Bag } from "./types/types.ts";
 
 // Model costs per million tokens [input, output], last pulled 9/25/2025
 export const llmModels = {

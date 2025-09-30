@@ -78,7 +78,7 @@ export async function writeObj(
 
   await mkdir(dir, { recursive: true });
   await writeFile(
-    path.join(dir, keys.filter(Boolean).join("_") + ".json"),
+    path.join(dir, keys.filter(Boolean).join("_")),
     JSON.stringify(markedObj, null, 2)
   );
 }

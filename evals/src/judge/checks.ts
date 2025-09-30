@@ -1,32 +1,42 @@
 import axios from "axios";
-import type { MatchInput, MatchResult } from "../types/types";
+
+export interface CheckIn {
+  prop: string;
+  actual: unknown;
+  expected: unknown;
+}
+
+export interface CheckOut extends CheckIn {
+  check: string;
+  score: number;
+  out: "match" | "badMatch" | "badFind" | "badOmit";
+}
 
 /**
  * Checks if the actual value is strictly equal to the ground truth value.
  */
-export async function equals(input: MatchInput): Promise<MatchResult> {
-  const undef = undefinedCheck(input);
+export async function equals(input: CheckIn): Promise<CheckOut> {
+  const undef = found(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
+  const out = actual === expected ? "match" : "badMatch";
 
-  return createMatchResult(input, { match: actual === expected });
+  return createCheckOut(equals.name, input, { out });
 }
 
-export async function equalsCasePreferred(
-  input: MatchInput
-): Promise<MatchResult> {
-  const undef = undefinedCheck(input);
+export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
+  const undef = found(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
 
   if (actual === expected) {
-    return createMatchResult(input, { match: true });
+    return createCheckOut(equalsCasePreferred.name, input, { out: "match" });
   }
 
   if (!isEqualCaseInsensitive(actual, expected)) {
-    return createMatchResult(input);
+    return createCheckOut(equalsCasePreferred.name, input, { out: "badMatch" });
   }
 
   const actualStr = String(actual);
@@ -41,7 +51,7 @@ export async function equalsCasePreferred(
 
   const score = 1 - dist / expectedStr.length;
 
-  return createMatchResult(input, { score });
+  return createCheckOut(equalsCasePreferred.name, input, { score });
 }
 
 /**
@@ -51,8 +61,8 @@ export async function equalsCasePreferred(
  * @param expected The expected value, converted to a string.
  * @returns A similarity score between 0 and 1.
  */
-export async function similar(input: MatchInput): Promise<MatchResult> {
-  const undef = undefinedCheck(input);
+export async function similar(input: CheckIn): Promise<CheckOut> {
+  const undef = found(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
@@ -63,19 +73,17 @@ export async function similar(input: MatchInput): Promise<MatchResult> {
   const eitherFails = !actualEmb.length || !expectedEmb.length;
   const score = eitherFails ? 0 : cosineSimilarity(actualEmb, expectedEmb);
 
-  return createMatchResult(input, { score });
+  return createCheckOut(similar.name, input, { score });
 }
 
-export async function arrayExactMatcher(
-  input: MatchInput
-): Promise<MatchResult> {
-  const undef = undefinedCheck(input);
+export async function arrayExactMatcher(input: CheckIn): Promise<CheckOut> {
+  const undef = found(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
 
   if (!Array.isArray(actual) || !Array.isArray(expected)) {
-    return createMatchResult(input);
+    return createCheckOut(arrayExactMatcher.name, input, { out: "badMatch" });
   }
 
   const actualObj: Record<string, number> = {};
@@ -99,10 +107,10 @@ export async function arrayExactMatcher(
 
   const score = Math.max(1 - dist / expected.length, 0);
 
-  return createMatchResult(input, { score });
+  return createCheckOut(arrayExactMatcher.name, input, { score });
 }
 
-function undefinedCheck(input: MatchInput): MatchResult | undefined {
+function found(input: CheckIn): CheckOut | undefined {
   const { actual, expected } = input;
   const actualFound = actual !== undefined;
   const expectedFound = expected !== undefined;
@@ -112,41 +120,28 @@ function undefinedCheck(input: MatchInput): MatchResult | undefined {
     return undefined;
   }
 
-  return createMatchResult(input, {
-    badOmit: expectedFound,
-    badFind: actualFound,
-    match: !actualFound && !expectedFound,
-  });
+  const out: Partial<CheckOut> = { out: "match" };
+  out.out = expectedFound ? "badOmit" : out.out;
+  out.out = actualFound ? "badFind" : out.out;
+
+  return createCheckOut(found.name, input, out);
 }
 
-function createMatchResult(
-  input: MatchInput,
-  partial: MatchResult = {}
-): MatchResult {
-  const { score, match, badFind, badOmit } = partial;
+function createCheckOut(
+  check: string,
+  input: CheckIn,
+  { score, out }: Partial<CheckOut>
+): CheckOut {
+  const isScoreMatch = (score ?? 0) >= 0.8;
+  out = out ?? (isScoreMatch ? "match" : "badMatch");
+  score = score ?? (out === "match" ? 1 : 0);
 
-  if (score != null) {
-    if (score >= 0.8) {
-      return { score, match: true };
-    } else {
-      return { score, badMatch: true, ...input };
-    }
-  }
-
-  if (match) {
-    return { match: true };
-  }
-
-  if (badFind) {
-    return { badFind: true, ...input };
-  }
-
-  if (badOmit) {
-    return { badOmit: true, ...input };
-  }
-
-  // Else assume bad match
-  return { badMatch: true, ...input };
+  return {
+    check,
+    score,
+    out,
+    ...input,
+  };
 }
 
 function isEqualCaseInsensitive(a: unknown, b: unknown): boolean {

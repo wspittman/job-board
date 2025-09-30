@@ -6,7 +6,7 @@ import {
   LLM_MODEL,
 } from "./src/portal/pFuncs.ts";
 import { Run } from "./src/types/types.ts";
-import { readSources } from "./src/utils/fileUtils.ts";
+import { readSources, writeObj } from "./src/utils/fileUtils.ts";
 
 function usageReminder() {
   console.error(
@@ -25,6 +25,15 @@ async function runEval(run: Run): Promise<void> {
 
   // For now, just evaluate the first source as a proof of concept.
   const outcome = await evaluate(run, sources[0]);
+
+  await writeObj(
+    outcome,
+    "Outcome",
+    dataModel,
+    runName,
+    llmModel,
+    sources[0].sourceName
+  );
 
   // Read a previously saved outcome, or if not available run the evaluation.
   //let outcome = await readObj<Outcome<T>>(action, "Outcome", file);
