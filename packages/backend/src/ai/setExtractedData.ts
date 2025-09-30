@@ -16,7 +16,7 @@ function removeNulls(v: unknown): DeepPartialNullToUndef<unknown> | undefined {
   if (v == null) return undefined;
 
   if (typeof v === "string") {
-    if (["", "null", "undefined"].includes(v.trim().toLowerCase())) {
+    if (["", ":null", "null", "undefined"].includes(v.trim().toLowerCase())) {
       return undefined;
     }
     return v.trim();
