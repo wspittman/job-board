@@ -17,7 +17,7 @@ import type {
 import type { Bag } from "./types/types.ts";
 
 // Model costs per million tokens [input, output], last pulled 9/25/2025
-export const llmModels = {
+export const llmModelCost: Record<string, [number, number]> = {
   "gpt-4o-mini": [0.15, 0.6],
   "gpt-4o": [2.5, 10.0],
 

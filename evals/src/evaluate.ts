@@ -1,4 +1,4 @@
-import { rubrics } from "./evalConfig";
+import { llmModelCost, rubrics } from "./evalConfig";
 import { judge } from "./judge/judge";
 import { infer } from "./portal/pFuncs";
 import type { Bag, NumBag, Run, Source } from "./types/types";
@@ -21,12 +21,16 @@ export async function evaluate(run: Run, source: Source) {
   const judgement = await judge(output, source.ground, rubrics[run.dataModel]);
 
   console.log(`${prefix}: Building outcome`);
+  const [inCost, outCost] = llmModelCost[run.llmModel] || [0, 0];
 
   return {
     ...run,
     sourceName: source.sourceName,
     metrics,
-    cost: 0, // TBD
+    cost:
+      // Cost is per million tokens
+      (metrics.inTokens * inCost) / 1_000_000 +
+      (metrics.outTokens * outCost) / 1_000_000,
     output,
     ...judgement,
   };

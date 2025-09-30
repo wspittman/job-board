@@ -1,4 +1,4 @@
-import { llmModels } from "./src/evalConfig.ts";
+import { llmModelCost } from "./src/evalConfig.ts";
 import { evaluate } from "./src/evaluate.ts";
 import {
   dataModelTypes,
@@ -60,7 +60,7 @@ async function run() {
     return;
   }
 
-  if (!Object.keys(llmModels).includes(llmModel)) {
+  if (!Object.keys(llmModelCost).includes(llmModel)) {
     console.error(`Config.LLM_MODEL ${llmModel} is not a known priced model`);
     return;
   }
