@@ -8,11 +8,19 @@ export type Rubric<T> = {
 };
 
 interface Judgement {
-  score: number;
-  matches: number;
-  badMatches: number;
-  badFinds: number;
-  badOmits: number;
+  match: {
+    score: number;
+    good: number;
+    bad: number;
+  };
+  omit: {
+    good: number;
+    badFind: number;
+    badOmit: number;
+    precision: number;
+    recall: number;
+    f1: number;
+  };
   suboptimal: CheckOut[];
 }
 
@@ -48,30 +56,46 @@ async function runChecks(
   return [await check({ prop, actual, expected })];
 }
 
-export function aggregate(results: CheckOut[]): Judgement {
+function aggregate(results: CheckOut[]): Judgement {
   const jd: Judgement = {
-    score: 0,
-    matches: 0,
-    badMatches: 0,
-    badFinds: 0,
-    badOmits: 0,
+    match: {
+      score: 0,
+      good: 0,
+      bad: 0,
+    },
+    omit: {
+      good: 0,
+      badFind: 0,
+      badOmit: 0,
+      precision: 0,
+      recall: 0,
+      f1: 0,
+    },
     suboptimal: [],
   };
 
   for (const result of results) {
-    const { score, out } = result;
-    jd.score += score;
-    jd.matches += out === "match" ? 1 : 0;
-    jd.badMatches += out === "badMatch" ? 1 : 0;
-    jd.badFinds += out === "badFind" ? 1 : 0;
-    jd.badOmits += out === "badOmit" ? 1 : 0;
+    const { score, match, omit } = result;
+    jd.match.score += score ?? 0;
+    jd.match.good += match ? 1 : 0;
+    jd.match.bad += match ? 0 : 1;
+    jd.omit.good += omit === "good" ? 1 : 0;
+    jd.omit.badFind += omit === "badFind" ? 1 : 0;
+    jd.omit.badOmit += omit === "badOmit" ? 1 : 0;
 
-    if (out !== "match") {
+    if (!match && omit !== "good") {
       jd.suboptimal.push(result);
     }
   }
 
-  jd.score /= results.length;
+  jd.match.score /= jd.match.good + jd.match.bad || 1;
+
+  // TBD: These should be optional + when to include?
+  jd.omit.precision = jd.omit.good / (jd.omit.good + jd.omit.badOmit || 1);
+  jd.omit.recall = jd.omit.good / (jd.omit.good + jd.omit.badFind || 1);
+  jd.omit.f1 =
+    (2 * (jd.omit.precision * jd.omit.recall)) /
+    (jd.omit.precision + jd.omit.recall || 1);
 
   return jd;
 }

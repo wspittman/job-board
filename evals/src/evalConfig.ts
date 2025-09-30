@@ -49,14 +49,6 @@ export const llmModelCost: Record<string, [number, number]> = {
 // #region Rubrics
 
 const rubricCompany: Rubric<Company> = {
-  // Keys
-  id: equals,
-  ats: equals,
-
-  // Not inferred - should always be unchanged exact match
-  name: equals,
-
-  // Inferred
   website: equalsCasePreferred,
   foundingYear: equals,
   stage: equals,
@@ -92,18 +84,6 @@ const rubricBenefitHighlights: Rubric<BenefitHighlights> = {
 };
 
 const rubricJob: Rubric<Job> = {
-  // Keys
-  id: equals,
-  companyId: equals,
-
-  // Not inferred - should always be unchanged exact match
-  title: equals,
-  description: equals,
-  postTS: equals,
-  applyUrl: equals,
-  companyName: equals,
-
-  // Inferred
   presence: equals,
   workTimeBasis: equals,
   engagementType: equals,

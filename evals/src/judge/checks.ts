@@ -8,35 +8,37 @@ export interface CheckIn {
 
 export interface CheckOut extends CheckIn {
   check: string;
-  score: number;
-  out: "match" | "badMatch" | "badFind" | "badOmit";
+  // 0-1, only present if match is present
+  score?: number;
+  match?: boolean;
+  omit?: "good" | "badFind" | "badOmit";
 }
 
 /**
  * Checks if the actual value is strictly equal to the ground truth value.
  */
 export async function equals(input: CheckIn): Promise<CheckOut> {
-  const undef = found(input);
+  const undef = omit(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
-  const out = actual === expected ? "match" : "badMatch";
+  const match = actual === expected;
 
-  return createCheckOut(equals.name, input, { out });
+  return createCheckOut(equals.name, input, { match });
 }
 
 export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
-  const undef = found(input);
+  const undef = omit(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
 
   if (actual === expected) {
-    return createCheckOut(equalsCasePreferred.name, input, { out: "match" });
+    return createCheckOut(equalsCasePreferred.name, input, { match: true });
   }
 
   if (!isEqualCaseInsensitive(actual, expected)) {
-    return createCheckOut(equalsCasePreferred.name, input, { out: "badMatch" });
+    return createCheckOut(equalsCasePreferred.name, input, { match: false });
   }
 
   const actualStr = String(actual);
@@ -62,7 +64,7 @@ export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
  * @returns A similarity score between 0 and 1.
  */
 export async function similar(input: CheckIn): Promise<CheckOut> {
-  const undef = found(input);
+  const undef = omit(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
@@ -77,13 +79,13 @@ export async function similar(input: CheckIn): Promise<CheckOut> {
 }
 
 export async function arrayExactMatcher(input: CheckIn): Promise<CheckOut> {
-  const undef = found(input);
+  const undef = omit(input);
   if (undef) return undef;
 
   const { actual, expected } = input;
 
   if (!Array.isArray(actual) || !Array.isArray(expected)) {
-    return createCheckOut(arrayExactMatcher.name, input, { out: "badMatch" });
+    return createCheckOut(arrayExactMatcher.name, input, { match: false });
   }
 
   const actualObj: Record<string, number> = {};
@@ -110,7 +112,7 @@ export async function arrayExactMatcher(input: CheckIn): Promise<CheckOut> {
   return createCheckOut(arrayExactMatcher.name, input, { score });
 }
 
-function found(input: CheckIn): CheckOut | undefined {
+function omit(input: CheckIn): CheckOut | undefined {
   const { actual, expected } = input;
   const actualFound = actual !== undefined;
   const expectedFound = expected !== undefined;
@@ -120,28 +122,23 @@ function found(input: CheckIn): CheckOut | undefined {
     return undefined;
   }
 
-  const out: Partial<CheckOut> = { out: "match" };
-  out.out = expectedFound ? "badOmit" : out.out;
-  out.out = actualFound ? "badFind" : out.out;
-
-  return createCheckOut(found.name, input, out);
+  return {
+    check: omit.name,
+    omit: expectedFound ? "badOmit" : actualFound ? "badFind" : "good",
+    ...input,
+  };
 }
 
 function createCheckOut(
   check: string,
   input: CheckIn,
-  { score, out }: Partial<CheckOut>
+  { score, match }: Partial<CheckOut>
 ): CheckOut {
   const isScoreMatch = (score ?? 0) >= 0.8;
-  out = out ?? (isScoreMatch ? "match" : "badMatch");
-  score = score ?? (out === "match" ? 1 : 0);
+  match = match ?? isScoreMatch;
+  score = score ?? (match ? 1 : 0);
 
-  return {
-    check,
-    score,
-    out,
-    ...input,
-  };
+  return { check, score, match, ...input };
 }
 
 function isEqualCaseInsensitive(a: unknown, b: unknown): boolean {

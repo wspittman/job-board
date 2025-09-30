@@ -31,8 +31,8 @@ export async function evaluate(run: Run, source: Source) {
       // Cost is per million tokens
       (metrics.inTokens * inCost) / 1_000_000 +
       (metrics.outTokens * outCost) / 1_000_000,
-    output,
     ...judgement,
+    output,
   };
 }
 
