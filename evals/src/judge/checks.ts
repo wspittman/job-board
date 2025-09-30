@@ -1,6 +1,7 @@
 import axios from "axios";
+import { Bag } from "../types/types";
 
-export interface CheckIn {
+interface CheckIn {
   prop: string;
   actual: unknown;
   expected: unknown;
@@ -8,11 +9,49 @@ export interface CheckIn {
 
 export interface CheckOut extends CheckIn {
   check: string;
-  // 0-1, only present if match is present
-  score?: number;
-  match?: boolean;
+  // Either score or omit will be set
   omit?: "good" | "badFind" | "badOmit";
+  score?: number;
 }
+
+type CheckFunction = (input: CheckIn) => Promise<CheckOut>;
+
+export type Rubric<T> = {
+  [key in keyof T]: CheckFunction | Rubric<Bag>;
+};
+
+export async function runChecks(
+  actual: Bag,
+  expected: Bag,
+  rubric: Rubric<Bag>
+): Promise<CheckOut[]> {
+  return await runChecksInternal("", actual, expected, rubric);
+}
+
+async function runChecksInternal(
+  prop: string,
+  actual: unknown,
+  expected: unknown,
+  check: CheckFunction | Rubric<Bag>
+): Promise<CheckOut[]> {
+  if (typeof check === "object" && check !== null) {
+    const act = actual as Bag;
+    const exp = expected as Bag;
+
+    return (
+      await Promise.all(
+        Object.entries(check).map(async ([key, mVal]) => {
+          const newProp = prop ? `${prop}.${key}` : key;
+          return await runChecksInternal(newProp, act[key], exp[key], mVal);
+        })
+      )
+    ).flat();
+  }
+
+  return [await check({ prop, actual, expected })];
+}
+
+// #region Check Functions
 
 /**
  * Checks if the actual value is strictly equal to the ground truth value.
@@ -24,7 +63,7 @@ export async function equals(input: CheckIn): Promise<CheckOut> {
   const { actual, expected } = input;
   const match = actual === expected;
 
-  return createCheckOut(equals.name, input, { match });
+  return { check: equals.name, score: match ? 1 : 0, ...input };
 }
 
 export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
@@ -34,11 +73,11 @@ export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
   const { actual, expected } = input;
 
   if (actual === expected) {
-    return createCheckOut(equalsCasePreferred.name, input, { match: true });
+    return { check: equalsCasePreferred.name, score: 1, ...input };
   }
 
   if (!isEqualCaseInsensitive(actual, expected)) {
-    return createCheckOut(equalsCasePreferred.name, input, { match: false });
+    return { check: equalsCasePreferred.name, score: 0, ...input };
   }
 
   const actualStr = String(actual);
@@ -53,7 +92,7 @@ export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
 
   const score = 1 - dist / expectedStr.length;
 
-  return createCheckOut(equalsCasePreferred.name, input, { score });
+  return { check: equalsCasePreferred.name, score, ...input };
 }
 
 /**
@@ -75,7 +114,7 @@ export async function similar(input: CheckIn): Promise<CheckOut> {
   const eitherFails = !actualEmb.length || !expectedEmb.length;
   const score = eitherFails ? 0 : cosineSimilarity(actualEmb, expectedEmb);
 
-  return createCheckOut(similar.name, input, { score });
+  return { check: similar.name, score, ...input };
 }
 
 export async function arrayExactMatcher(input: CheckIn): Promise<CheckOut> {
@@ -85,7 +124,7 @@ export async function arrayExactMatcher(input: CheckIn): Promise<CheckOut> {
   const { actual, expected } = input;
 
   if (!Array.isArray(actual) || !Array.isArray(expected)) {
-    return createCheckOut(arrayExactMatcher.name, input, { match: false });
+    return { check: arrayExactMatcher.name, score: 0, ...input };
   }
 
   const actualObj: Record<string, number> = {};
@@ -109,7 +148,7 @@ export async function arrayExactMatcher(input: CheckIn): Promise<CheckOut> {
 
   const score = Math.max(1 - dist / expected.length, 0);
 
-  return createCheckOut(arrayExactMatcher.name, input, { score });
+  return { check: arrayExactMatcher.name, score, ...input };
 }
 
 function omit(input: CheckIn): CheckOut | undefined {
@@ -129,17 +168,9 @@ function omit(input: CheckIn): CheckOut | undefined {
   };
 }
 
-function createCheckOut(
-  check: string,
-  input: CheckIn,
-  { score, match }: Partial<CheckOut>
-): CheckOut {
-  const isScoreMatch = (score ?? 0) >= 0.8;
-  match = match ?? isScoreMatch;
-  score = score ?? (match ? 1 : 0);
+// #endregion
 
-  return { check, score, match, ...input };
-}
+// #region Helpers
 
 function isEqualCaseInsensitive(a: unknown, b: unknown): boolean {
   const aStr = typeof a === "string" ? a.toLowerCase() : a;
@@ -190,3 +221,5 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 
   return dotProduct / (magnitudeA * magnitudeB);
 }
+
+// #endregion

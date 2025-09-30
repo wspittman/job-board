@@ -2,9 +2,9 @@ import {
   arrayExactMatcher,
   equals,
   equalsCasePreferred,
+  Rubric,
   similar,
 } from "./judge/checks.ts";
-import { Rubric } from "./judge/judge.ts";
 import type {
   BenefitHighlights,
   Company,
