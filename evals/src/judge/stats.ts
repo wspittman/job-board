@@ -1,6 +1,6 @@
 import { CheckOut } from "./checks";
 
-interface Stats {
+export interface Stats {
   match?: {
     good: number;
     bad: number;

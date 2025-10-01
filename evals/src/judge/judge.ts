@@ -1,8 +1,16 @@
 import { Bag } from "../types/types";
-import { Rubric, runChecks } from "./checks";
-import { checksToStats } from "./stats";
+import { CheckOut, Rubric, runChecks } from "./checks";
+import { checksToStats, combineStats, Stats } from "./stats";
 
-export async function judge(actual: Bag, expected: Bag, rubric: Rubric<Bag>) {
+export interface Judgement extends Stats {
+  suboptimal?: CheckOut[];
+}
+
+export async function judge(
+  actual: Bag,
+  expected: Bag,
+  rubric: Rubric<Bag>
+): Promise<Judgement> {
   const results = await runChecks(actual, expected, rubric);
   const stats = checksToStats(results);
 
@@ -12,4 +20,8 @@ export async function judge(actual: Bag, expected: Bag, rubric: Rubric<Bag>) {
       (r) => (r.score ?? 0) < 0.8 && r.omit !== "good"
     ),
   };
+}
+
+export function aggregate(judgments: Judgement[]): Judgement {
+  return combineStats(judgments);
 }

@@ -1,5 +1,5 @@
 import { llmModelCost } from "./src/evalConfig.ts";
-import { evaluate } from "./src/evaluate.ts";
+import { evaluate, Outcome, report } from "./src/evaluate.ts";
 import {
   dataModelTypes,
   isValidDataModel,
@@ -23,17 +23,25 @@ async function runEval(run: Run): Promise<void> {
   const sources = await readSources(dataModel);
   console.log(`${runName}: Found ${sources.length} sources`);
 
-  // For now, just evaluate the first source as a proof of concept.
-  const outcome = await evaluate(run, sources[0]);
+  const outcomes: Outcome[] = [];
 
-  await writeObj(
-    outcome,
-    "Outcome",
-    dataModel,
-    runName,
-    llmModel,
-    sources[0].sourceName
-  );
+  // TBD: Process scenarios in dry-utils-async batch
+  for (const source of sources.slice(0, 3)) {
+    const outcome = await evaluate(run, source);
+    outcomes.push(outcome);
+
+    await writeObj(
+      outcome,
+      "Outcome",
+      dataModel,
+      runName,
+      llmModel,
+      source.sourceName
+    );
+  }
+
+  const f = await report(run, outcomes);
+  await writeObj(f, "Report", dataModel, runName, llmModel);
 
   // Read a previously saved outcome, or if not available run the evaluation.
   //let outcome = await readObj<Outcome<T>>(action, "Outcome", file);

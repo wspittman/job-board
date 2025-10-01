@@ -1,13 +1,20 @@
 import { llmModelCost, rubrics } from "./evalConfig";
-import { judge } from "./judge/judge";
+import { aggregate, judge, Judgement } from "./judge/judge";
 import { infer } from "./portal/pFuncs";
 import type { Bag, NumBag, Run, Source } from "./types/types";
 import { catcher } from "./utils/telemetryCatcher";
 
+export interface Outcome extends Run, Judgement {
+  sourceName: string;
+  metrics: NumBag;
+  cost: number;
+  output: Bag;
+}
+
 /**
  * Evaluates a given scenario by running it and comparing the output against ground truth
  */
-export async function evaluate(run: Run, source: Source) {
+export async function evaluate(run: Run, source: Source): Promise<Outcome> {
   const prefix = `${run.runName} / ${source.sourceName}`;
 
   console.log(`${prefix}: Running inference`);
@@ -33,6 +40,15 @@ export async function evaluate(run: Run, source: Source) {
       (metrics.outTokens * outCost) / 1_000_000,
     ...judgement,
     output,
+  };
+}
+
+export async function report(run: Run, outcomes: Outcome[]) {
+  console.log(`Combining ${outcomes.length} outcomes`);
+  // MORE STUFF HERE
+  return {
+    ...run,
+    ...aggregate(outcomes),
   };
 }
 
