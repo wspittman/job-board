@@ -42,9 +42,9 @@ export const InferredCompany = z
   .object({
     website: zString(
       "Primary company homepage URL. Use https if available.",
-      "Prefer the corporate root domain (e.g., https://example.com). Strip tracking params/fragments.",
+      "Prefer the corporate root domain (e.g., https://www.example.com). Strip tracking params/fragments.",
       "Exclude ATS/careers and vendor subdomains (e.g., *.lever.co, *.greenhouse.io, careers.example.com).",
-      "Example: 'Visit us at example.com' → 'https://example.com'."
+      "Example: 'Visit us at www.example.com' → 'https://www.example.com'."
     ),
     foundingYear: z
       .number()
@@ -64,7 +64,8 @@ export const InferredCompany = z
     description: zString(
       "1-3 sentence factual summary of what the company does (product/market, customers, differentiators).",
       "Third person, present tense. Avoid marketing slogans.",
-      "Exclude role-specific details (responsibilities, benefits, comp, team stack)."
+      "Exclude role-specific details (responsibilities, benefits, comp, team stack).",
+      "If no company details are present, return null."
     ),
   })
   .describe(
@@ -228,7 +229,8 @@ export const InferredJob = z
       "Third person, present tense.",
       "Use active voice and specific technologies/skills.",
       "Do not repeat the company or job title.",
-      "No marketing fluff. No internal reasoning."
+      "No marketing fluff. No internal reasoning.",
+      "If no useful job details are present, return null."
     ),
   })
   .describe(
