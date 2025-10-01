@@ -2,6 +2,7 @@ import { llmModelCost, rubrics } from "./evalConfig";
 import { aggregate, judge, Judgement } from "./judge/judge";
 import { infer } from "./portal/pFuncs";
 import type { Bag, NumBag, Run, Source } from "./types/types";
+import { addNumBags, cost, truncate } from "./utils/mathUtils";
 import { catcher } from "./utils/telemetryCatcher";
 
 export interface Outcome extends Run, Judgement {
@@ -34,10 +35,7 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
     ...run,
     sourceName: source.sourceName,
     metrics,
-    cost:
-      // Cost is per million tokens
-      (metrics.inTokens * inCost) / 1_000_000 +
-      (metrics.outTokens * outCost) / 1_000_000,
+    cost: cost(metrics.inTokens, metrics.outTokens, inCost, outCost),
     ...judgement,
     output,
   };
@@ -48,6 +46,11 @@ export async function report(run: Run, outcomes: Outcome[]) {
   // MORE STUFF HERE
   return {
     ...run,
+    metrics: outcomes.reduce((a, o) => addNumBags(a, o.metrics), {} as NumBag),
+    cost: truncate(
+      outcomes.reduce((a, o) => a + o.cost, 0),
+      8
+    ),
     ...aggregate(outcomes),
   };
 }

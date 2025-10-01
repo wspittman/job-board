@@ -1,3 +1,4 @@
+import { addNumBags, calcF1, truncate } from "../utils/mathUtils";
 import { CheckOut } from "./checks";
 
 export interface Stats {
@@ -16,6 +17,7 @@ export interface Stats {
     recall?: number;
     f1?: number;
   };
+  overall?: number;
 }
 
 export function checksToStats(results: CheckOut[]): Stats {
@@ -24,41 +26,51 @@ export function checksToStats(results: CheckOut[]): Stats {
 }
 
 export function combineStats(statList: Stats[]): Stats {
-  const combined: Stats = {};
-  statList.forEach((stats) => addStats(combined, stats));
+  const combined = statList.reduce(addStats, {});
 
   if (combined.match?.score) {
-    combined.match.score /= combined.match.total || 1;
+    combined.match.score = truncate(
+      combined.match.score / (combined.match.total || 1)
+    );
   }
 
   if (combined.omit) {
     const { good, badFind, badOmit } = combined.omit;
     const precision = good / (good + badOmit || 1);
     const recall = good / (good + badFind || 1);
-    combined.omit.precision = precision;
-    combined.omit.recall = recall;
-    combined.omit.f1 = (2 * (precision * recall)) / (precision + recall || 1);
+    combined.omit.precision = truncate(precision);
+    combined.omit.recall = truncate(recall);
+    combined.omit.f1 = calcF1(precision, recall);
   }
+
+  const { score = 0, total = 0 } = combined.match ?? {};
+  const { f1 = 0, total: omitTotal = 0 } = combined.omit ?? {};
+  const scoreWeighted = score * total;
+  const omitWeighted = f1 * omitTotal;
+  combined.overall = truncate(
+    (scoreWeighted + omitWeighted) / (total + omitTotal || 1)
+  );
 
   return combined;
 }
 
-function addStats(acc: Stats, { match, omit }: Stats): void {
+function addStats(acc: Stats, { match, omit }: Stats): Stats {
   if (match) {
-    acc.match ??= { good: 0, bad: 0, total: 0, score: 0 };
-    acc.match.good += match.good;
-    acc.match.bad += match.bad;
-    acc.match.total += match.total;
-    acc.match.score += match.score;
+    const aMatch = acc.match ?? { good: 0, bad: 0, total: 0, score: 0 };
+    addNumBags(aMatch, match);
+
+    // Ensure acc.match always comes before omit
+    if (!acc.match) {
+      acc = { match: aMatch, ...acc };
+    }
   }
 
   if (omit) {
     acc.omit ??= { good: 0, badFind: 0, badOmit: 0, total: 0 };
-    acc.omit.good += omit.good;
-    acc.omit.badFind += omit.badFind;
-    acc.omit.badOmit += omit.badOmit;
-    acc.omit.total += omit.total;
+    addNumBags(acc.omit, omit);
   }
+
+  return acc;
 }
 
 function checkToStat({ score, omit }: CheckOut): Stats {

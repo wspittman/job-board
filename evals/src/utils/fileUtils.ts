@@ -75,10 +75,12 @@ export async function writeObj(
 ): Promise<void> {
   const markedObj = { evalTS: new Date().toISOString(), ...obj };
   const dir = getPath(role, dataModel);
+  let filePath = path.join(dir, keys.filter(Boolean).join("_"));
+
+  if (!filePath.endsWith(".json")) {
+    filePath += ".json";
+  }
 
   await mkdir(dir, { recursive: true });
-  await writeFile(
-    path.join(dir, keys.filter(Boolean).join("_")),
-    JSON.stringify(markedObj, null, 2)
-  );
+  await writeFile(filePath, JSON.stringify(markedObj, null, 2));
 }
