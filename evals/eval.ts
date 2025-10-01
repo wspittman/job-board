@@ -1,3 +1,4 @@
+import { batch, subscribeAsyncLogging } from "dry-utils-async";
 import { llmModelCost } from "./src/evalConfig.ts";
 import { evaluate, Outcome, report } from "./src/evaluate.ts";
 import {
@@ -7,6 +8,11 @@ import {
 } from "./src/portal/pFuncs.ts";
 import { Run } from "./src/types/types.ts";
 import { readSources, writeObj } from "./src/utils/fileUtils.ts";
+
+subscribeAsyncLogging({
+  log: ({ tag, val }) => console.log(`${tag}: ${val}`),
+  error: ({ tag, val }) => console.error(new Error(tag, { cause: val })),
+});
 
 function usageReminder() {
   console.error(
@@ -25,36 +31,30 @@ async function runEval(run: Run): Promise<void> {
 
   const outcomes: Outcome[] = [];
 
-  // TBD: Process scenarios in dry-utils-async batch
-  for (const source of sources.slice(0, 3)) {
-    const outcome = await evaluate(run, source);
-    outcomes.push(outcome);
+  // Process sources in batch.
+  await batch(
+    `${runName}_${dataModel}_${llmModel}`,
+    sources.slice(0, 3),
+    async (source) => {
+      // Read a previously saved outcome, or if not available run the evaluation.
+      //let outcome = await readObj<Outcome<T>>(action, "Outcome", file);
 
-    await writeObj(
-      outcome,
-      "Outcome",
-      dataModel,
-      runName,
-      llmModel,
-      source.sourceName
-    );
-  }
+      const outcome = await evaluate(run, source);
+      outcomes.push(outcome);
+
+      await writeObj(
+        outcome,
+        "Outcome",
+        dataModel,
+        runName,
+        llmModel,
+        source.sourceName
+      );
+    }
+  );
 
   const f = await report(run, outcomes);
   await writeObj(f, "Report", dataModel, runName, llmModel);
-
-  // Read a previously saved outcome, or if not available run the evaluation.
-  //let outcome = await readObj<Outcome<T>>(action, "Outcome", file);
-  //outcome ??= await evaluate(scenario);
-  /*const outcome = await evaluate(scenario);
-  await writeObj(
-    outcome,
-    "Outcome",
-    dataModel,
-    runName,
-    llmModel,
-    scenario.source.sourceName
-  );*/
 }
 
 async function run() {
