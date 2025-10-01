@@ -2,6 +2,7 @@ import {
   arrayExactMatcher,
   equals,
   equalsCasePreferred,
+  equalsUrl,
   Rubric,
   similar,
 } from "./judge/checks.ts";
@@ -49,7 +50,7 @@ export const llmModelCost: Record<string, [number, number]> = {
 // #region Rubrics
 
 const rubricCompany: Rubric<Company> = {
-  website: equalsCasePreferred,
+  website: equalsUrl,
   foundingYear: equals,
   stage: equals,
   size: equals,

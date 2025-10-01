@@ -95,6 +95,32 @@ export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
   return { check: equalsCasePreferred.name, score, ...input };
 }
 
+export async function equalsUrl(input: CheckIn): Promise<CheckOut> {
+  const undef = omit(input);
+  if (undef) return undef;
+
+  const { actual, expected } = input;
+  const aUrl = new URL(String(actual));
+  const eUrl = new URL(String(expected));
+
+  let score = 0;
+  if (aUrl.href === eUrl.href) {
+    score = 1;
+  } else if (
+    aUrl.hostname === eUrl.hostname &&
+    aUrl.pathname === eUrl.pathname
+  ) {
+    score = 0.5;
+  } else if (
+    aUrl.hostname.includes(eUrl.hostname) ||
+    eUrl.hostname.includes(aUrl.hostname)
+  ) {
+    score = 0.25;
+  }
+
+  return { check: equals.name, score, ...input };
+}
+
 /**
  * Checks if the actual string value is semantically similar to the expected string value
  * using cosine similarity of their embeddings.
