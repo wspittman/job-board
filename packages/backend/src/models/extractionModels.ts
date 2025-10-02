@@ -82,12 +82,16 @@ export const ExtractionLocation = z
       "Exclude country/region names.",
       "Examples:",
       "'Located in downtown Seattle' → Seattle;",
+      "'Our office is in Cologne, Germany' → Cologne;",
+      "'We are headquartered in São Paulo' → São Paulo;",
       "'Remote US only' → ''."
     ),
     regionCode: zString(
       "ISO 3166-2 subdivision code (uppercase) excluding country prefix.",
       "Examples:",
       "'Located in downtown Seattle' → WA;",
+      "'Our office is in Cologne, Germany' → NW;",
+      "'We are headquartered in São Paulo' → SP;",
       "'Remote US only' → ''."
     ),
     countryCode: zString(
@@ -95,6 +99,8 @@ export const ExtractionLocation = z
       "When the role is explicitly global-remote with no country restriction, return ''.",
       "Examples:",
       "'Located in downtown Seattle' → US;",
+      "'Our office is in Cologne, Germany' → DE;",
+      "'We are headquartered in São Paulo' → BR;",
       "'Remote US only' → US.",
       "'Remote worldwide' → ''."
     ),
@@ -102,7 +108,7 @@ export const ExtractionLocation = z
   .describe(
     [
       "Normalized single location explicitly stated for the context.",
-      "Prefer the most recent explicit location mentioned.",
+      "When the context is remote, use the primary office location if stated.",
     ].join(" ")
   );
 export type ExtractionLocation = z.infer<typeof ExtractionLocation>;
@@ -134,7 +140,8 @@ export const ExtractionRemoteEligibility = z
       ),
     notes: zString().describe(
       [
-        "Freeform clarifications (e.g., time-zone limits, legal entity constraints, 'no contractors', 'US work authorization required').",
+        "Freeform clarifications, in this order: restrictions, exclusions, preferences, other.",
+        "This might include time-zone limits, legal entity constraints, work authorization requirements, and other factors.",
         "When the role is not remote or no clarifications are needed, return ''",
       ].join(" ")
     ),

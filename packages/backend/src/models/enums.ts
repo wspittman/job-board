@@ -71,7 +71,11 @@ export const Presence = z
     [
       "The presence mode for the job.",
       "Map general phrases to specific values.",
-      "If not explicitly stated, return ''.",
+      "Jobs with a mix of onsite and remote work should be classified as 'hybrid'.",
+      "Jobs that are fully remote but require occasional onsite visits (e.g., quarterly) should be classified as 'remote'.",
+      "Jobs are based at a specific office location but require offsite travel (e.g., client sites) should be classified as 'onsite'.",
+      "Prefer explicit mentions, but you may infer based on context.",
+      "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'Remote (US only)' → remote;",
       "'We offer flexible work arrangements including hybrid options' → hybrid;",
@@ -94,7 +98,7 @@ export const WorkTimeBasis = z
   .describe(
     [
       "Hours expectation / schedule basis.",
-      "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'full_time'.",
+      "Prefer explicit mentions, but you may infer 'full_time' if the context supports it.",
       "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'FT', '40 hrs/wk' → full_time;",
@@ -121,7 +125,7 @@ export const EngagementType = z
   .describe(
     [
       "Legal/contractual relationship with the hiring org.",
-      "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'employee_permanent'.",
+      "Prefer explicit mentions, but you may infer 'employee_permanent' if the context supports it.",
       "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'W-2, full benefits' → employee_permanent;",
@@ -139,7 +143,7 @@ export const PayCadence = z
     [
       "The pay cadence for the job.",
       "Map common phrases to specific values.",
-      "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'salary'.",
+      "Prefer explicit mentions, but you may infer 'salary' if the context supports it.",
       "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'The pay range is $100,000 to $120,000' → salary;",
@@ -164,7 +168,9 @@ export const SeniorityLevel = z
     [
       "The seniority level of the job.",
       "Map common synonyms to specific values.",
-      "If unclear, infer based on years of experience and job responsibilities.",
+      "If the role has direct reports or managerial duties, classify as 'manager' or 'director+'.",
+      "Prefer explicit mentions, but you may infer based on years of experience and job responsibilities.",
+      "When inferring based on years of experience, entry = 0-2, mid = 3-5, senior = 6-9, staff+ = 10+.",
       "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'We are looking for a senior software engineer' → senior;",
@@ -214,18 +220,21 @@ export const JobFamily = z
     "finance",
     "hr",
     "legal",
-    "other",
+    "",
   ] as const)
   .describe(
     [
       "The job family/category.",
       "Map common roles to specific families.",
+      "If the role spans multiple families, choose the primary one.",
+      "If the role does not fit any family or is unclear, return ''.",
       "Examples:",
       "'We are hiring a UX designer' → design;",
       "'As a Customer Support Specialist, you will assist clients' → customer_success;",
       "'This role is for a Recruiting Coordinator' → hr;",
       "'We need a cybersecurity analyst' → security;",
       "'Join our sales team as an Account Executive' → sales;",
+      "'We need a background music composer' → '';",
     ].join(" ")
   );
 export type JobFamily = z.infer<typeof JobFamily>;
