@@ -17,11 +17,12 @@ export const CompanySizeBand = z
   .describe(
     [
       "Company employee headcount band.",
-      "Do not infer from adjectives or team sizes.",
+      "Do not infer from adjectives, team sizes, or user/customer counts.",
       "Inclusive bounds; map open-ended phrases like '10k+' to 10000+.",
       "If a numeric headcount or explicit range is not stated, return ''.",
       "Examples:",
       "'We are a small team of 15 passionate individuals' → 11-50;",
+      "'With over 100 employees, we are growing fast' → 51-200;",
       "'We are a small team of like-minded individuals' → '';",
     ].join(" ")
   );
