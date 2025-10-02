@@ -1,6 +1,6 @@
 import { jsonCompletion } from "dry-utils-openai";
 import { config } from "../config.ts";
-import { ExtractionJobWithScratchpad } from "../models/extractionModels.ts";
+import { ExtractionJob } from "../models/extractionModels.ts";
 import type { Job } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { setExtractedData } from "./setExtractedData.ts";
@@ -40,12 +40,12 @@ export async function fillJobInfo(job: Context<Job>): Promise<boolean> {
     "extractFacets",
     prompt,
     job.item,
-    ExtractionJobWithScratchpad,
+    ExtractionJob,
     { context: job.context, model: config.LLM_MODEL }
   );
 
   if (content) {
-    setExtractedData(job.item, content.job);
+    setExtractedData(job.item, content);
   }
 
   return !!content;
