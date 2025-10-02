@@ -211,15 +211,15 @@ async function readJobsByFilters({
       locClause = `c.locationSearchKey = '${cityExact}'`;
       remoteMatches = [regionMatch, countryMatch, noLocationMatch];
     } else if (location.regionCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, '${regionEndsWith}'`;
+      locClause = `ENDSWITH(c.locationSearchKey, '${regionEndsWith}')`;
       remoteMatches = [countryMatch, noLocationMatch];
     } else if (location.countryCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, '${countryEndsWith}'`;
+      locClause = `ENDSWITH(c.locationSearchKey, '${countryEndsWith}')`;
       remoteMatches = [noLocationMatch];
     }
 
     if (isRemote !== false && remoteMatches.length) {
-      locClause += ` OR (${remoteMatch} AND (${remoteMatches.join(" OR ")})`;
+      locClause += ` OR (${remoteMatch} AND (${remoteMatches.join(" OR ")}))`;
     }
 
     if (locClause) {
