@@ -82,16 +82,23 @@ export const InferredLocation = z
     city: zString(
       "City name in English.",
       "Exclude country/region names.",
-      "Example: 'Seattle, WA' → 'Seattle'."
+      "Examples:",
+      "'Located in downtown Seattle' → Seattle;",
+      "'Remote US only' → null."
     ),
     regionCode: zString(
       "ISO 3166-2 subdivision code (uppercase) excluding country prefix.",
-      "Examples: 'Located in downtown Seattle' → 'WA'."
+      "Examples:",
+      "'Located in downtown Seattle' → WA;",
+      "'Remote US only' → null."
     ),
     countryCode: zString(
       "ISO 3166-1 alpha-2 country code (uppercase).",
       "Use null only when the role is explicitly global-remote with no country restriction.",
-      "Example: 'Located in downtown Seattle' → 'US'."
+      "Examples:",
+      "'Located in downtown Seattle' → US;",
+      "'Remote US only' → US.",
+      "'Remote worldwide' → null."
     ),
   })
   .describe(
@@ -126,7 +133,10 @@ export const InferredRemoteEligibility = z
         ].join(" ")
       ),
     notes: zString().describe(
-      "Freeform clarifications (e.g., time-zone limits, legal entity constraints, 'no contractors', 'US work authorization required')."
+      [
+        "Freeform clarifications (e.g., time-zone limits, legal entity constraints, 'no contractors', 'US work authorization required').",
+        "Use null if the role is not remote or no clarifications are needed.",
+      ].join(" ")
     ),
   })
   .describe(
@@ -160,7 +170,7 @@ export const InferredSalaryRange = z
       "Salary figures as stated, normalized to a single currency",
       "If only one number is provided, set both min and max to that number.",
       "Ensure min ≤ max",
-      "Set fields to null when not explicitly stated.",
+      "Set fields to null, not 0, when not explicitly stated.",
     ].join(" ")
   );
 export type InferredSalaryRange = z.infer<typeof InferredSalaryRange>;
@@ -197,7 +207,7 @@ export const InferredBenefitHighlights = z
     [
       "Key benefits as explicitly stated.",
       "Use numeric scalars; do not convert units.",
-      "Set fields to null when not explicitly stated.",
+      "Set fields to null, not 0, when not explicitly stated.",
     ].join(" ")
   );
 export type InferredBenefitHighlights = z.infer<

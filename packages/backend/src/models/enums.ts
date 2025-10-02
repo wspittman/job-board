@@ -128,6 +128,7 @@ export const PayCadence = z
     [
       "The pay cadence for the job.",
       "Map common phrases to specific values.",
+      "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'salary'.",
       "Examples:",
       "'The pay range is $100,000 to $120,000' → salary;",
       "'Pay rate is $20/hour' → hourly;",
@@ -156,7 +157,9 @@ export const SeniorityLevel = z
       "'We are looking for a senior software engineer' → senior;",
       "'This is an entry-level position' → entry;",
       "'We are hiring a Principal Data Scientist' → staff+;",
+      "'You will be managing a team of 5 engineers' → manager;",
       "'We need a director of marketing' → director;",
+      "'As the Head of Sales, you will lead our sales team' → director;",
     ].join(" ")
   );
 export type SeniorityLevel = z.infer<typeof SeniorityLevel>;
