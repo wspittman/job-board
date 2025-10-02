@@ -1,7 +1,7 @@
 import { jsonCompletion } from "dry-utils-openai";
 import { config } from "../config.ts";
 import { getCachedLocation, setCachedLocation } from "../db/cache.ts";
-import { InferredLocation } from "../models/inferredModels.ts";
+import { ExtractionLocation } from "../models/extractionModels.ts";
 import type { Location } from "../models/models.ts";
 import { setExtractedData } from "./setExtractedData.ts";
 
@@ -28,7 +28,7 @@ export async function extractLocation(location: string): Promise<Location> {
     "extractLocation",
     prompt,
     location,
-    InferredLocation,
+    ExtractionLocation,
     { model: config.LLM_MODEL }
   );
 

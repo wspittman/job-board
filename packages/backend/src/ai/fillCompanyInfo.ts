@@ -1,6 +1,6 @@
 import { jsonCompletion } from "dry-utils-openai";
 import { config } from "../config.ts";
-import { InferredCompany } from "../models/inferredModels.ts";
+import { ExtractionCompany } from "../models/extractionModels.ts";
 import type { Company } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { setExtractedData } from "./setExtractedData.ts";
@@ -24,7 +24,7 @@ export async function fillCompanyInfo(
     "extractCompanyInfo",
     prompt,
     company.item,
-    InferredCompany,
+    ExtractionCompany,
     { context: company.context, model: config.LLM_MODEL }
   );
 

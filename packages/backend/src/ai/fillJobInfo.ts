@@ -1,6 +1,6 @@
 import { jsonCompletion } from "dry-utils-openai";
 import { config } from "../config.ts";
-import { InferredJobWithScratchpad } from "../models/inferredModels.ts";
+import { ExtractionJobWithScratchpad } from "../models/extractionModels.ts";
 import type { Job } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { setExtractedData } from "./setExtractedData.ts";
@@ -40,7 +40,7 @@ export async function fillJobInfo(job: Context<Job>): Promise<boolean> {
     "extractFacets",
     prompt,
     job.item,
-    InferredJobWithScratchpad,
+    ExtractionJobWithScratchpad,
     { context: job.context, model: config.LLM_MODEL }
   );
 

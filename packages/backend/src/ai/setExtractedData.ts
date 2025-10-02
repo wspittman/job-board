@@ -26,6 +26,8 @@ function removeNulls(v: unknown): DeepPartialNullToUndef<unknown> | undefined {
     return v.trim();
   }
 
+  if (typeof v === "number" && v === -1) return undefined;
+
   if (typeof v !== "object") return v;
 
   if (Array.isArray(v)) {

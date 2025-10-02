@@ -12,14 +12,17 @@ export const CompanySizeBand = z
     "1001-5000",
     "5001-10000",
     "10000+",
+    "",
   ] as const)
   .describe(
     [
       "Company employee headcount band.",
-      "Return only if a numeric headcount or explicit range is stated.",
       "Do not infer from adjectives or team sizes.",
       "Inclusive bounds; map open-ended phrases like '10k+' to 10000+.",
-      "Example: 'We are a small team of 15 passionate individuals' → '11-50'.",
+      "If a numeric headcount or explicit range is not stated, return ''.",
+      "Examples:",
+      "'We are a small team of 15 passionate individuals' → 11-50;",
+      "'We are a small team of like-minded individuals' → '';",
     ].join(" ")
   );
 export type CompanySizeBand = z.infer<typeof CompanySizeBand>;
@@ -36,6 +39,7 @@ export const CompanyStage = z
     "private_equity",
     "public",
     "nonprofit",
+    "",
   ] as const)
   .describe(
     [
@@ -44,12 +48,14 @@ export const CompanyStage = z
       "Map D/E/F/late-stage growth to series_d_plus.",
       "If explicitly public (listed/IPO/SPAC), return public.",
       "Return nonprofit only if legal status is stated.",
+      "If not explicitly stated, return ''.",
       "Examples:",
       "'We are self-funded and profitable' → bootstrapped;",
       "'We raised a $30M Series C round last year' → series_c;",
       "'We recently closed our Series E funding round' → series_d_plus;",
       "'We are a publicly traded company' → public;",
       "'We are a 501(c)(3) nonprofit organization' → nonprofit;",
+      "'We are a fast-growing, venture-backed startup' → '';",
     ].join(" ")
   );
 export type CompanyStage = z.infer<typeof CompanyStage>;
@@ -59,12 +65,12 @@ export type CompanyStage = z.infer<typeof CompanyStage>;
 // #region Job
 
 export const Presence = z
-  .enum(["onsite", "remote", "hybrid"] as const)
+  .enum(["onsite", "remote", "hybrid", ""] as const)
   .describe(
     [
       "The presence mode for the job.",
-      "Return only if explicitly stated.",
       "Map general phrases to specific values.",
+      "If not explicitly stated, return ''.",
       "Examples:",
       "'Remote (US only)' → remote;",
       "'We offer flexible work arrangements including hybrid options' → hybrid;",
@@ -82,11 +88,13 @@ export const WorkTimeBasis = z
     "part_time", // <35–40 hours, proportionate benefits
     "variable", // fluctuating hours, e.g., staffing/on-call
     "per_diem", // day-rate or shift-based, zero guaranteed hours
+    "",
   ] as const)
   .describe(
     [
       "Hours expectation / schedule basis.",
       "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'full_time'.",
+      "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'FT', '40 hrs/wk' → full_time;",
       "'PT', '20 hrs/wk' → part_time;",
@@ -107,11 +115,13 @@ export const EngagementType = z
     "internship", // student/early-career program
     "apprenticeship", // earn-while-you-learn track, formal training
     "fellowship", // time-bound sponsored role (often research/policy)
+    "",
   ] as const)
   .describe(
     [
       "Legal/contractual relationship with the hiring org.",
       "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'employee_permanent'.",
+      "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'W-2, full benefits' → employee_permanent;",
       "'6-month fixed-term employee' → employee_fixed_term;",
@@ -123,12 +133,13 @@ export const EngagementType = z
 export type EngagementType = z.infer<typeof EngagementType>;
 
 export const PayCadence = z
-  .enum(["salary", "hourly", "stipend"] as const)
+  .enum(["salary", "hourly", "stipend", ""] as const)
   .describe(
     [
       "The pay cadence for the job.",
       "Map common phrases to specific values.",
       "Prefer explicit mentions. If unstated but clearly a normal, permanent role, default to 'salary'.",
+      "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'The pay range is $100,000 to $120,000' → salary;",
       "'Pay rate is $20/hour' → hourly;",
@@ -145,21 +156,22 @@ export const SeniorityLevel = z
     "senior",
     "staff+",
     "manager",
-    "director",
-    "executive",
+    "director+",
+    "",
   ] as const)
   .describe(
     [
       "The seniority level of the job.",
       "Map common synonyms to specific values.",
-      "If unclear, make an educated guess based on years of experience and job responsibilities.",
+      "If unclear, infer based on years of experience and job responsibilities.",
+      "If there is inadequate or conflicting info, return ''.",
       "Examples:",
       "'We are looking for a senior software engineer' → senior;",
       "'This is an entry-level position' → entry;",
       "'We are hiring a Principal Data Scientist' → staff+;",
       "'You will be managing a team of 5 engineers' → manager;",
-      "'We need a director of marketing' → director;",
-      "'As the Head of Sales, you will lead our sales team' → director;",
+      "'We need a director of marketing' → director+;",
+      "'As the Head of Sales, you will lead our sales team' → director+;",
     ].join(" ")
   );
 export type SeniorityLevel = z.infer<typeof SeniorityLevel>;
@@ -171,11 +183,13 @@ export const EducationLevel = z
     "bachelor",
     "master",
     "doctorate",
+    "",
   ] as const)
   .describe(
     [
       "The minimum education level explicitly required.",
       "Map common phrases to specific values.",
+      "If not explicitly stated, return ''.",
       "Examples:",
       "'Bachelor's degree in Computer Science required' → bachelor;",
       "'Master's degree preferred, but Bachelor's is considered' → bachelor;",

@@ -1,21 +1,21 @@
 import type {
-  InferredBenefitHighlights,
-  InferredCompany,
-  InferredJob,
-  InferredLocation,
-  InferredRemoteEligibility,
-  InferredSalaryRange,
-} from "../../../packages/backend/src/models/inferredModels.ts";
+  ExtractionBenefitHighlights,
+  ExtractionCompany,
+  ExtractionJob,
+  ExtractionLocation,
+  ExtractionRemoteEligibility,
+  ExtractionSalaryRange,
+} from "../../../packages/backend/src/models/extractionModels.ts";
 import type { ATS } from "../../../packages/backend/src/models/models.ts";
 
 export type {
   ATS,
-  InferredBenefitHighlights as BenefitHighlights,
-  InferredCompany as Company,
-  InferredJob as Job,
-  InferredLocation as Location,
-  InferredRemoteEligibility as RemoteEligibility,
-  InferredSalaryRange as SalaryRange,
+  ExtractionBenefitHighlights as BenefitHighlights,
+  ExtractionCompany as Company,
+  ExtractionJob as Job,
+  ExtractionLocation as Location,
+  ExtractionRemoteEligibility as RemoteEligibility,
+  ExtractionSalaryRange as SalaryRange,
 };
 
 export type DataModel = "company" | "job";

@@ -1,9 +1,9 @@
 import type { DeepPartialNullToUndef } from "../types/types.ts";
 import type {
-  InferredCompany,
-  InferredJob,
-  InferredLocation,
-} from "./inferredModels.ts";
+  ExtractionCompany,
+  ExtractionJob,
+  ExtractionLocation,
+} from "./extractionModels.ts";
 
 export type ATS = "greenhouse" | "lever";
 
@@ -23,7 +23,7 @@ export interface CompanyKeys {
 
 export interface Company
   extends CompanyKey,
-    DeepPartialNullToUndef<InferredCompany> {
+    DeepPartialNullToUndef<ExtractionCompany> {
   name: string;
 }
 
@@ -36,7 +36,7 @@ export interface JobKey {
   companyId: string;
 }
 
-export interface Job extends JobKey, DeepPartialNullToUndef<InferredJob> {
+export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
   title: string;
   description: string;
   postTS: number;
@@ -74,7 +74,7 @@ export interface Metadata {
  * - id: The freehand location string
  * - pKey: The first character of the freehand location string
  */
-export interface Location extends DeepPartialNullToUndef<InferredLocation> {
+export interface Location extends DeepPartialNullToUndef<ExtractionLocation> {
   id?: string;
   pKey?: string;
 }
