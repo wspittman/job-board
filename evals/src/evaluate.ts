@@ -9,7 +9,9 @@ export interface Outcome extends Run, Judgement {
   sourceName: string;
   metrics: NumBag;
   cost: number;
+  avgCost?: number;
   output: Bag;
+  costPerMillion?: number;
 }
 
 /**
@@ -43,15 +45,18 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
 
 export async function report(run: Run, outcomes: Outcome[]) {
   console.log(`Combining ${outcomes.length} outcomes`);
-  // MORE STUFF HERE
+
+  const cost = outcomes.reduce((a, o) => a + o.cost, 0);
+  const avgCost = cost / (outcomes.length || 1);
+  const costPerMillion = avgCost * 1_000_000;
+
   return {
     ...run,
     metrics: outcomes.reduce((a, o) => addNumBags(a, o.metrics), {} as NumBag),
-    cost: truncate(
-      outcomes.reduce((a, o) => a + o.cost, 0),
-      8
-    ),
+    cost: truncate(cost, 8),
+    avgCost: truncate(avgCost, 8),
     ...aggregate(outcomes),
+    costPerMillion: truncate(costPerMillion, 2),
   };
 }
 

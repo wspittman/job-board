@@ -42,7 +42,7 @@ async function runChecksInternal(
       await Promise.all(
         Object.entries(check).map(async ([key, mVal]) => {
           const newProp = prop ? `${prop}.${key}` : key;
-          return await runChecksInternal(newProp, act[key], exp[key], mVal);
+          return await runChecksInternal(newProp, act?.[key], exp?.[key], mVal);
         })
       )
     ).flat();

@@ -57,7 +57,11 @@ export function combineStats(statList: Stats[]): Stats {
 function addStats(acc: Stats, { match, omit }: Stats): Stats {
   if (match) {
     const aMatch = acc.match ?? { good: 0, bad: 0, total: 0, score: 0 };
-    addNumBags(aMatch, match);
+    const { good, bad, total, score } = match;
+    addNumBags(aMatch, { good, bad, total, score: 0 });
+
+    // Score need to be weighted
+    aMatch.score += (score ?? 0) * total;
 
     // Ensure acc.match always comes before omit
     if (!acc.match) {
