@@ -196,26 +196,27 @@ async function readJobsByFilters({
   }
 
   if (location) {
-    const countryEndsWith = "|@countryCode|";
-    const regionEndsWith = "|@regionCode|@countryCode|";
-    const cityExact = "|@city|@regionCode|@countryCode|";
     const remoteMatch = "c.presence = 'remote'";
-    const noLocationMatch = "c.locationSearchKey = '||||'";
-    const countryMatch = `c.locationSearchKey = '||${countryEndsWith}'`;
-    const regionMatch = `c.locationSearchKey = '|${regionEndsWith}'`;
+    // Comment out for now since it doesn't take RemoteEligibility into account
+    //const noLocationMatch = "c.locationSearchKey = '||||'";
+    const countryMatch = `c.locationSearchKey = CONCAT('|||', @countryCode, '|')`;
+    const regionMatch = `c.locationSearchKey = CONCAT('||', @regionCode, '|', @countryCode, '|')`;
 
     let locClause = "";
     let remoteMatches: string[] = [];
 
     if (location.city) {
-      locClause = `c.locationSearchKey = '${cityExact}'`;
-      remoteMatches = [regionMatch, countryMatch, noLocationMatch];
+      locClause = `c.locationSearchKey = CONCAT('|', @city, '|', @regionCode, '|', @countryCode, '|')`;
+      remoteMatches = [regionMatch, countryMatch];
+      //remoteMatches = [regionMatch, countryMatch, noLocationMatch];
     } else if (location.regionCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, '${regionEndsWith}')`;
-      remoteMatches = [countryMatch, noLocationMatch];
+      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @regionCode, '|', @countryCode, '|'))`;
+      remoteMatches = [countryMatch];
+      //remoteMatches = [countryMatch, noLocationMatch];
     } else if (location.countryCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, '${countryEndsWith}')`;
-      remoteMatches = [noLocationMatch];
+      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @countryCode, '|'))`;
+      remoteMatches = [];
+      //remoteMatches = [noLocationMatch];
     }
 
     if (isRemote !== false && remoteMatches.length) {
