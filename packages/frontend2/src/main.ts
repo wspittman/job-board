@@ -3,7 +3,7 @@ import "modern-normalize/modern-normalize.css";
 import "./style2.css";
 
 import { setupCounter } from "./counter.ts";
-import { Header } from "./frame/header.ts";
+import { Header } from "./frame/Header.ts";
 import viteLogo from "/favicon.svg";
 
 const header = Header();
