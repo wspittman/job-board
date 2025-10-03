@@ -18,11 +18,7 @@ export function normalizedLocation({
   }
 
   if (regionCode) {
-    try {
-      parts.push(`${intlNames.of(regionCode)} (${regionCode})`);
-    } catch {
-      parts.push(regionCode);
-    }
+    parts.push(regionCode);
   }
 
   if (countryCode) {
