@@ -40,8 +40,7 @@
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,
     // Record treats accessed values as potentially undefined
-    "noUncheckedIndexedAccess": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src"]
 }

@@ -1,15 +1,14 @@
+import "@fontsource-variable/inter";
+import "modern-normalize/modern-normalize.css";
+import "./style2.css";
+
 import { setupCounter } from "./counter.ts";
-import "./style.css";
-import typescriptLogo from "./typescript.svg";
 import viteLogo from "/favicon.svg";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
     <a href="https://vite.dev" target="_blank">
       <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
     </a>
     <h1>Vite + TypeScript</h1>
     <div class="card">
