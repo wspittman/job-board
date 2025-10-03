@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 
 interface Config {
   PORT: number;
@@ -11,9 +11,12 @@ interface Config {
   GREENHOUSE_URL: string;
   LEVER_URL: string;
 
+  LLM_MODEL: string;
+
   ADMIN_TOKEN: string;
 
   APPLICATIONINSIGHTS_CONNECTION_STRING: string;
+  ENABLE_VERBOSE_BLOB_LOGGING: boolean;
 }
 
 export const config: Config = {
@@ -38,6 +41,7 @@ export const config: Config = {
 
   // AI configs
   // OPENAI_API_KEY present in .env, referenced directly in OpenAI SDK
+  LLM_MODEL: process.env["LLM_MODEL"] || "gpt-5-nano",
 
   // Auth configs
   ADMIN_TOKEN: process.env["ADMIN_TOKEN"] || "admin",
@@ -46,4 +50,6 @@ export const config: Config = {
   // In theory App Insights SDK should pick up this env var automatically, but it doesn't
   APPLICATIONINSIGHTS_CONNECTION_STRING:
     process.env["APPLICATIONINSIGHTS_CONNECTION_STRING"] || "",
+  ENABLE_VERBOSE_BLOB_LOGGING:
+    (process.env["VERBOSE_BLOB_LOGGING"] || "false").toLowerCase() === "true",
 };

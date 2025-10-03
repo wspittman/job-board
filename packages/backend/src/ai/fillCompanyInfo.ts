@@ -1,12 +1,7 @@
-import {
-  jsonCompletion,
-  zEnum,
-  zNumber,
-  zObj,
-  zString,
-} from "dry-utils-openai";
-import type { Company } from "../types/dbModels.ts";
-import { IndustryEnum, StageEnum, VisaEnum } from "../types/enums.ts";
+import { jsonCompletion } from "dry-utils-openai";
+import { config } from "../config.ts";
+import { ExtractionCompany } from "../models/extractionModels.ts";
+import type { Company } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { setExtractedData } from "./setExtractedData.ts";
 
@@ -17,49 +12,20 @@ Then, identify and extract pertinent company details.
 Then, compose a concise, clear, and engaging company description paragraph.
 Format your response in JSON, adhering to the provided schema.`;
 
-const schema = zObj(
-  "Company attributes. Use null for any property for which information is not available.",
-  {
-    website: zString(
-      "The company's website homepage URL. Do not use the ATS URL (eg. *.lever.co or *.greenhouse.io)."
-    ),
-    industry: zEnum(
-      "The industry in which the company operates. Avoid using 'Technology & Software' if a different option is valid. Select 'Other' if no other option is a strong match. Select null if insufficient information to decide.",
-      IndustryEnum
-    ),
-    foundingYear: zNumber("The year the company was founded."),
-    stage: zEnum(
-      "The stage of the company. Only include if a stage marked is explicitly mentioned, such as 'Seed Stage', 'Series A', 'Bootstrapped', 'Public', or 'NonProfit'. Do not infer based on other attributes, including the word 'startup' or indications of how much investment money has been raised.",
-      StageEnum
-    ),
-    size: zNumber(
-      "The lower bound of the number of employees at the company. Only include if explicitly mentioned. Do not infer based on other attributes."
-    ),
-    visa: zEnum(
-      "The visa sponsorship status of the company. Only include if the word 'visa' is explicitly mentioned. Do not infer based on other attributes.",
-      VisaEnum
-    ),
-    description: zString(
-      "A concise, clear, and engaging company description paragraph. Be sure to highlight key company attributes and values. Only include information that is specifically about the company. Avoid mentioning information that pertains only to the example role."
-    ),
-  }
-);
-
 /**
  * Fills in company information.
  * @param company The company object to extract data into
  * @returns True if extraction was successful, false otherwise
  */
 export async function fillCompanyInfo(
-  company: Context<Company>,
-  model?: string
+  company: Context<Company>
 ): Promise<boolean> {
   const { content } = await jsonCompletion(
     "extractCompanyInfo",
     prompt,
     company.item,
-    schema,
-    { context: company.context, model }
+    ExtractionCompany,
+    { context: company.context, model: config.LLM_MODEL }
   );
 
   if (content) {

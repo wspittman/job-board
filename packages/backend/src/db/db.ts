@@ -9,9 +9,9 @@ import type {
   CompanyKey,
   Job,
   JobKey,
-  LocationCache,
+  Location,
   Metadata,
-} from "../types/dbModels.ts";
+} from "../models/models.ts";
 import {
   createSubscribeAggregator,
   subscribeError,
@@ -75,6 +75,14 @@ class JobContainer extends Container<Job> {
   }
 
   async upsert(job: Job) {
+    job.locationSearchKey = [
+      "",
+      job.primaryLocation?.city ?? "",
+      job.primaryLocation?.regionCode ?? "",
+      job.primaryLocation?.countryCode ?? "",
+      "",
+    ].join("|");
+
     return this.upsertItem(job);
   }
 
@@ -87,7 +95,7 @@ class DB {
   private _company: CompanyContainer | undefined;
   private _job: JobContainer | undefined;
   private _metadata: Container<Metadata> | undefined;
-  private _locationCache: Container<LocationCache> | undefined;
+  private _locationCache: Container<Location> | undefined;
 
   get company() {
     if (!this._company) {
@@ -158,9 +166,7 @@ class DB {
     );
     this._job = new JobContainer(containers["job"] as Container<Job>);
     this._metadata = containers["metadata"] as Container<Metadata>;
-    this._locationCache = containers[
-      "locationCache"
-    ] as Container<LocationCache>;
+    this._locationCache = containers["locationCache"] as Container<Location>;
   }
 }
 

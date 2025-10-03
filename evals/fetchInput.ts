@@ -1,38 +1,40 @@
-import { ats } from "../packages/backend/src/ats/ats.ts";
-import type { ATS } from "../packages/backend/src/types/dbModels.ts";
-import { writeObj } from "./fileUtils.ts";
-
-const args = process.argv.slice(2);
-const [action, atsId, companyId, jobId] = args;
-const actionTypes = ["company", "job"];
-const atsTypes = ["greenhouse", "lever"];
+import {
+  atsTypes,
+  dataModelTypes,
+  fetchInput,
+  isValidAts,
+  isValidDataModel,
+} from "./src/portal/pFuncs.ts";
+import { writeObj } from "./src/utils/fileUtils.ts";
 
 function usageReminder() {
   console.error(
-    "Usage: npm fetch-input -- actionType atsType <companyId> [jobId]\n" +
-      `  actionType: ${actionTypes.join("|")}\n` +
+    "Usage: npm run eval-fetch-input -- dataModel atsType <companyId> [jobId]\n" +
+      `  dataModel: ${dataModelTypes.join("|")}\n` +
       `  atsType: ${atsTypes.join("|")}\n`
   );
-  process.exit(1);
 }
 
-if (!actionTypes.includes(action) || !atsTypes.includes(atsId) || !companyId) {
-  usageReminder();
+async function run() {
+  const args = process.argv.slice(2);
+  const [dataModelArg, atsArg, companyId, jobId] = args;
+  const dataModel = dataModelArg?.toLowerCase();
+  const ats = atsArg?.toLowerCase();
+
+  if (
+    !isValidDataModel(dataModel) ||
+    !isValidAts(ats) ||
+    !companyId ||
+    (dataModel === "job" && !jobId)
+  ) {
+    usageReminder();
+    return;
+  }
+
+  const result = await fetchInput(dataModel, ats, companyId, jobId);
+  await writeObj(result, "Input", dataModel, ats, companyId, jobId);
 }
 
-async function getCompanyInput(): Promise<void> {
-  const result = await ats.getCompany(
-    { ats: atsId as ATS, id: companyId },
-    true
-  );
-
-  await writeObj("fillCompanyInfo", "Input", `${atsId}_${companyId}`, result);
-}
-
-switch (action) {
-  case "company":
-    getCompanyInput();
-    break;
-  default:
-    console.error("Unknown action");
-}
+run().catch((err) => {
+  console.error("Error running evaluation:", err);
+});

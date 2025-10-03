@@ -1,8 +1,9 @@
 import { standardizeUntrustedHtml } from "dry-utils-text";
 import { config } from "../config.ts";
-import type { Company, CompanyKey, Job, JobKey } from "../types/dbModels.ts";
+import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
+import { logError } from "../utils/telemetry.ts";
 import { ATSBase } from "./atsBase.ts";
 
 interface JobResult {
@@ -82,8 +83,20 @@ export class Lever extends ATSBase {
     return jobs.map((job) => this.formatJob(id, job));
   }
 
-  async getJob(_: JobKey): Promise<Context<Job>> {
-    throw new AppError("This should never be called", 500);
+  async getJob({ id, companyId }: JobKey): Promise<Context<Job>> {
+    // Lever ALWAYS returns the top X jobs, so we have to fetch them all and find the right one
+    // This is inefficient and should be avoided
+    // We log an error so we can track if this accidentally happens in production
+    logError("Lever.getJob: This should never be called when deployed");
+
+    const jobs = await this.fetchJobs(companyId);
+    const job = jobs.find((job) => job.id === id);
+
+    if (!job) {
+      throw new AppError("Job not found", 404);
+    }
+
+    return this.formatJob(companyId, job);
   }
 
   private formatCompany(id: string): Company {
@@ -122,15 +135,16 @@ export class Lever extends ATSBase {
     const jdHtml = `<div>${description}<div>${listHtml}</div>${salaryDescription}${additional}</div>`;
 
     const job: Job = {
+      // Keys
       id,
       companyId: companyId,
-      company: companyId,
+
+      // Basic
       title: text,
-      location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
       description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),
       applyUrl,
-      facets: {},
+      companyName: companyId,
     };
 
     // Useful pieces that aren't redundant with the job object
@@ -141,6 +155,7 @@ export class Lever extends ATSBase {
         country,
         workplaceType,
         salaryRange,
+        location: `${workplaceType}: [${categories.allLocations.join("; ")}]`,
       },
     };
 

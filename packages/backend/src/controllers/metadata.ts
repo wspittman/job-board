@@ -1,5 +1,5 @@
 import { db } from "../db/db.ts";
-import type { ClientMetadata } from "../types/clientModels.ts";
+import type { ClientMetadata } from "../models/clientModels.ts";
 import { AsyncExecutor } from "../utils/asyncExecutor.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
@@ -49,22 +49,14 @@ export async function getMetadata() {
     // TBD: This would benefit from a lock
     const companyMetadata = await db.metadata.getItem("company", "company");
     const jobMetadata = await db.metadata.getItem("job", "job");
-    // Legacy version during transition
-    const metadata = await db.metadata.getItem("metadata", "metadata");
 
     cachedMetadata = {
-      companyCount:
-        companyMetadata?.companyCount ?? metadata?.companyCount ?? 0,
-      companyNames:
-        companyMetadata?.companyNames ?? metadata?.companyNames ?? [],
-      jobCount: jobMetadata?.jobCount ?? metadata?.jobCount ?? 0,
+      companyCount: companyMetadata?.companyCount ?? 0,
+      companyNames: companyMetadata?.companyNames ?? [],
+      jobCount: jobMetadata?.jobCount ?? 0,
       // _ts is in seconds, but the client expects milliseconds
       timestamp:
-        Math.max(
-          companyMetadata?._ts ?? 0,
-          jobMetadata?._ts ?? 0,
-          metadata?._ts ?? 0
-        ) * 1000,
+        Math.max(companyMetadata?._ts ?? 0, jobMetadata?._ts ?? 0) * 1000,
     };
   }
 

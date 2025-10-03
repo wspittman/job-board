@@ -4,7 +4,7 @@ import type {
   CompanyKey,
   Job,
   JobKey,
-} from "../types/dbModels.ts";
+} from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { ATSBase } from "./atsBase.ts";
 import { Greenhouse } from "./greenhouse.ts";

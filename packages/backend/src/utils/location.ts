@@ -1,4 +1,4 @@
-import type { Location } from "../types/dbModels.ts";
+import type { Location } from "../models/models.ts";
 
 /**
  * Normalizes the given location data into a string format.
@@ -7,30 +7,25 @@ import type { Location } from "../types/dbModels.ts";
  */
 export function normalizedLocation({
   city,
-  state,
-  stateCode,
-  country,
+  regionCode,
   countryCode,
 }: Location): string {
   const parts: string[] = [];
+  const intlNames = new Intl.DisplayNames(["en"], { type: "region" });
 
   if (city) {
     parts.push(city);
   }
 
-  if (state || stateCode) {
-    if (state && stateCode) {
-      parts.push(`${state} (${stateCode})`);
-    } else {
-      parts.push(state || stateCode!);
-    }
+  if (regionCode) {
+    parts.push(regionCode);
   }
 
-  if (country || countryCode) {
-    if (country && countryCode) {
-      parts.push(`${country} (${countryCode})`);
-    } else {
-      parts.push(country || countryCode!);
+  if (countryCode) {
+    try {
+      parts.push(`${intlNames.of(countryCode)} (${countryCode})`);
+    } catch {
+      parts.push(countryCode);
     }
   }
 

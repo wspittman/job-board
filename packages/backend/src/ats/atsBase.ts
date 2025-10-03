@@ -6,8 +6,8 @@ import type {
   CompanyKey,
   Job,
   JobKey,
-} from "../types/dbModels.ts";
-import type { Context } from "../types/types.ts";
+} from "../models/models.ts";
+import type { Bag, Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { createSubscribeAggregator, logError } from "../utils/telemetry.ts";
 
@@ -108,7 +108,7 @@ function logAtsCall(
   { status, statusText }: Pick<AxiosResponse, "status" | "statusText">
 ) {
   try {
-    const log: Record<string, unknown> = { name, ats, id, ms };
+    const log: Bag = { name, ats, id, ms };
 
     if (status !== 200) {
       log["status"] = status;
@@ -119,6 +119,7 @@ function logAtsCall(
       tag: `${ats} ${name}`,
       dense: log,
       metrics: { ms },
+      blob: {},
     });
   } catch (error) {
     logError(error);

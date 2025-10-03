@@ -9,6 +9,7 @@ on:
 jobs:
   call_api:
     runs-on: ubuntu-latest
+    timeout-minutes: 1
 
     steps:
       - name: Make API call to trigger job refresh
