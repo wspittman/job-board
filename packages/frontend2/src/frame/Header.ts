@@ -1,0 +1,33 @@
+export function Header(): HTMLElement {
+  const header = document.createElement("header");
+  header.className = "appbar";
+  header.innerHTML = `
+    <div class="toolbar toolbar--dense">
+      <a class="icon-btn" href="/" aria-label="Home">
+        <!-- placeholder logo: white rounded square -->
+        <svg width="32" height="32" viewBox="0 0 32 32" class="logo">
+          <rect x="1" y="1" width="30" height="30" rx="8" fill="#fff" />
+          <path d="M8 16h16M16 8v16" stroke="#6036c6" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </a>
+
+      <a class="brand" href="/">Better Job Board</a>
+
+      <div class="spacer"></div>
+
+      <nav class="nav sm-only">
+        <a class="nav-link" href="/explore">Explore</a>
+        <a class="nav-link" href="/faq">FAQ</a>
+
+        <!-- placeholder GitHub circle button -->
+        <a class="gh-btn" href="https://github.com/" aria-label="GitHub">
+          <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="12" fill="currentColor" opacity="0.25"></circle>
+            <path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.68c-2.78.6-3.37-1.17-3.37-1.17-.46-1.16-1.12-1.47-1.12-1.47-.92-.63.07-.62.07-.62 1.02.07 1.56 1.05 1.56 1.05 .9 1.54 2.36 1.09 2.94.84 .09-.65.35-1.09.63-1.34 -2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.04-2.68 -.1-.26-.45-1.3.1-2.71 0 0 .84-.27 2.75 1.02A9.58 9.58 0 0 1 12 6.83c.85.004 1.7.115 2.5.337 1.9-1.29 2.74-1.02 2.74-1.02 .55 1.41.2 2.45.1 2.71 .65.7 1.04 1.59 1.04 2.68 0 3.85-2.34 4.7-4.57 4.95 .36.31.68.92.68 1.86v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/>
+          </svg>
+        </a>
+      </nav>
+    </div>
+  `;
+  return header;
+}

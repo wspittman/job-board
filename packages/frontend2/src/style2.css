@@ -121,3 +121,101 @@ button,
 .chip--filled:hover {
   background: var(--color-secondary-dark);
 }
+
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  background: var(--primary);
+  color: var(--primary-contrast);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  height: 64px;
+  font-family: var(--font-sans);
+}
+.toolbar--dense {
+  height: 48px;
+} /* MUI dense */
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 4px;
+  margin-right: 4px;
+  text-decoration: none;
+  color: inherit;
+}
+.logo {
+  display: block;
+}
+
+.brand {
+  font-size: 1.5rem; /* matches your h4 in theme */
+  line-height: 1.2;
+  color: var(--primary-contrast);
+  text-decoration: none;
+  padding: 2px 6px;
+}
+.brand:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.nav-link {
+  font-size: 1rem; /* matches your h5 in theme */
+  line-height: 1.2;
+  color: var(--primary-contrast);
+  text-decoration: none;
+  cursor: pointer;
+}
+.nav-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.gh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  width: 28px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary-contrast);
+  text-decoration: none;
+}
+.gh-btn:hover {
+  background: var(--primary);
+}
+
+/* hide right-side group on xs, show on ≥600px similar to MUI sm breakpoint */
+.sm-only {
+  display: none;
+}
+@media (min-width: 600px) {
+  .sm-only {
+    display: flex;
+  }
+}
+
+/* Optional: prevent layout jump when sticky overlaps body */
+body {
+  margin: 0;
+  background: var(--bg-default);
+}

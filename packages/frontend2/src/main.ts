@@ -3,7 +3,10 @@ import "modern-normalize/modern-normalize.css";
 import "./style2.css";
 
 import { setupCounter } from "./counter.ts";
+import { Header } from "./frame/header.ts";
 import viteLogo from "/favicon.svg";
+
+const header = Header();
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -19,5 +22,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     </p>
   </div>
 `;
+
+document.querySelector<HTMLDivElement>("#app")!.prepend(header);
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
