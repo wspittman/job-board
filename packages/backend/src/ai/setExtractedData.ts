@@ -12,7 +12,7 @@ const undefinedRegex = new RegExp(/^[^a-zA-Z0-9]*undefined[^a-zA-Z0-9]*$/);
  */
 export function setExtractedData(item: object, completion: object) {
   // Note: Assign isn't recursive, so top-level objects will be replaced
-  Object.assign(item, removeNulls(completion));
+  Object.assign(item, removeNulls(completion) ?? {});
 }
 
 function removeNulls(v: unknown): DeepPartialNullToUndef<unknown> | undefined {
