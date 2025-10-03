@@ -6,9 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.3",
+    "lucide": "^0.544.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.1",
     "typescript": "~5.9.3",
     "vite": "^7.1.7"
   }
