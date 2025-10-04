@@ -28,7 +28,7 @@ function htmlPartials(): Plugin {
     return expandedContent
       .split("\n")
       .map((line) => (line ? indentation + line : line))
-      .join("\n");
+      .join("");
   }
 
   async function expand(
