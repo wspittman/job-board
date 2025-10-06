@@ -5,8 +5,8 @@ import type {
   ExtractionLocation,
   ExtractionRemoteEligibility,
   ExtractionSalaryRange,
-} from "../../../packages/backend/src/models/extractionModels.ts";
-import type { ATS } from "../../../packages/backend/src/models/models.ts";
+} from "../../../backend/src/models/extractionModels.ts";
+import type { ATS } from "../../../backend/src/models/models.ts";
 
 export type {
   ATS,

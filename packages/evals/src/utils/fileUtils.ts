@@ -1,12 +1,15 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { DataModel } from "../portal/pTypes";
 import type { Bag, Source } from "../types/types";
 
 type Role = "Input" | "Outcome" | "Ground" | "Report";
 
 // Base directory for all evaluation-related files.
-const basePath = path.join(process.cwd(), "evals");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const basePath = path.join(__dirname, "../..");
 
 // Constructs a file path for a given action, role, and optional name.
 const getPath = (role: Role, dataModel: DataModel, name = "") =>
