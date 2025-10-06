@@ -1,19 +1,18 @@
 /* ===== Theme Variables ===== */
 :root {
   /* Palette */
-  --color-primary-main: #6036c6;
-  --color-primary-dark: #4d2b9e; /* approx. darkened */
-  --color-primary-contrast: #ffffff;
+  --primary-main: #6036c6;
+  --primary-dark: #4d2b9e;
+  --primary-contrast: #ffffff;
 
-  --color-secondary-main: #3672c6;
-  --color-secondary-dark: #2b5b9e; /* approx. darkened */
-  --color-secondary-contrast: #ffffff;
+  --secondary-main: #3672c6;
+  --secondary-dark: #2b5b9e;
+  --secondary-contrast: #ffffff;
 
-  --color-bg-default: #fafafa;
+  --bg-default: #fafafa;
 
   /* Typography */
-  --font-family-sans: "Inter Variable", "Roboto", "Helvetica", "Arial",
-    sans-serif;
+  --fonts: "Inter Variable", "Roboto", "Helvetica", "Arial", sans-serif;
 
   --h1-size: 3rem;
   --h2-size: 2.5rem;
@@ -34,9 +33,9 @@ body {
 }
 body {
   margin: 0;
-  background: var(--color-bg-default);
+  background: var(--bg-default);
   color: #111;
-  font-family: var(--font-family-sans);
+  font-family: var(--fonts);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -70,25 +69,25 @@ h5 {
 button,
 .btn {
   text-transform: none;
-  font-family: var(--font-family-sans);
+  font-family: var(--fonts);
   border-radius: var(--radius);
 }
 
 /* ===== Utilities (optional) ===== */
 .text-primary {
-  color: var(--color-primary-main);
+  color: var(--primary-main);
 }
 .text-secondary {
-  color: var(--color-secondary-main);
+  color: var(--secondary-main);
 }
 
 .bg-primary {
-  background: var(--color-primary-main);
-  color: var(--color-primary-contrast);
+  background: var(--primary-main);
+  color: var(--primary-contrast);
 }
 .bg-secondary {
-  background: var(--color-secondary-main);
-  color: var(--color-secondary-contrast);
+  background: var(--secondary-main);
+  color: var(--secondary-contrast);
 }
 
 .rounded {
@@ -113,20 +112,20 @@ button,
 }
 
 .chip--filled {
-  background: var(--color-secondary-main);
-  color: var(--color-secondary-contrast);
+  background: var(--secondary-main);
+  color: var(--secondary-contrast);
   transition: background-color 120ms ease-in-out, color 120ms ease-in-out;
 }
 
 .chip--filled:hover {
-  background: var(--color-secondary-dark);
+  background: var(--secondary-dark);
 }
 
 .appbar {
   position: sticky;
   top: 0;
   z-index: 1100;
-  background: var(--primary);
+  background: var(--primary-main);
   color: var(--primary-contrast);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -136,7 +135,7 @@ button,
   align-items: center;
   padding: 0 12px;
   height: 64px;
-  font-family: var(--font-sans);
+  font-family: var(--fonts);
 }
 .toolbar--dense {
   height: 48px;
@@ -191,17 +190,11 @@ button,
 
 .gh-btn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 28px;
-  width: 28px;
   border-radius: 999px;
-  background: var(--primary-light);
-  color: var(--primary-contrast);
-  text-decoration: none;
-}
-.gh-btn:hover {
-  background: var(--primary);
+
+  &:hover {
+    background: var(--primary-dark);
+  }
 }
 
 /* hide right-side group on xs, show on ≥600px similar to MUI sm breakpoint */
