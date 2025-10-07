@@ -1,78 +1,36 @@
-import process from 'node:process';
+import process from "node:process";
+import { fetcher } from "./fetcher.ts";
 
-interface UpdateCompaniesPayload {
-  ats: string;
-  ids: string[];
+const atsTypes = ["greenhouse", "lever"];
+
+function usageReminder() {
+  console.error(
+    "Usage: npm run update-companies -- <ATS_ID> <COMPANY_ID> [...COMPANY_ID]\n" +
+      `  atsType: ${atsTypes.join("|")}\n`
+  );
 }
 
-function getRequiredEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-  return value;
+async function updateCompanies(ats: string, ids: string[]): Promise<void> {
+  console.log(`Adding ${ids.length} companies from ${ats}`);
+  const result = await fetcher("/companies", "PUT", { ats, ids });
+  console.log("Success", result);
 }
 
-function parseArgs(argv: string[]): UpdateCompaniesPayload {
-  const args = argv.slice(2);
-  if (args.length < 2) {
-    throw new Error('Usage: npm run update-companies -- <ATS_ID> <COMPANY_ID> [...COMPANY_ID]');
+async function run() {
+  const args = process.argv.slice(2);
+  let [ats, ...companyIds] = args;
+  ats = ats?.toLowerCase() ?? "";
+  companyIds = companyIds.map((id) => id.trim()).filter((id) => !!id.length);
+
+  if (!atsTypes.includes(ats) || !companyIds.length) {
+    usageReminder();
+    return;
   }
 
-  const [ats, ...ids] = args;
-  const normalizedIds = Array.from(new Set(ids.map((id) => id.trim()).filter((id) => id.length > 0)));
-
-  if (normalizedIds.length === 0) {
-    throw new Error('At least one company ID must be provided.');
-  }
-
-  return { ats, ids: normalizedIds };
+  await updateCompanies(ats, companyIds);
 }
 
-async function updateCompanies(): Promise<void> {
-  const { ats, ids } = parseArgs(process.argv);
-
-  const baseUrl = getRequiredEnv('ADMIN_API_BASE_URL');
-  const token = getRequiredEnv('ADMIN_API_TOKEN');
-
-  const endpoint = new URL('/api/companies', baseUrl).toString();
-
-  const response = await fetch(endpoint, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ ats, ids })
-  });
-
-  const responseText = await response.text();
-  const contentType = response.headers.get('content-type') ?? '';
-  const maybeJson = contentType.includes('application/json') ? safeJsonParse(responseText) : undefined;
-
-  if (!response.ok) {
-    const errorMessage = maybeJson ?? (responseText || response.statusText);
-    throw new Error(`Request failed with status ${response.status}: ${errorMessage}`);
-  }
-
-  if (maybeJson !== undefined) {
-    console.log(JSON.stringify(maybeJson, null, 2));
-  } else if (responseText.length > 0) {
-    console.log(responseText);
-  } else {
-    console.log(`Request succeeded with status ${response.status}.`);
-  }
-}
-
-function safeJsonParse(value: string): unknown {
-  try {
-    return JSON.parse(value);
-  } catch (error) {
-    return undefined;
-  }
-}
-
-updateCompanies().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
+run().catch((err) => {
+  console.error(err instanceof Error ? err.message : err);
   process.exitCode = 1;
 });
