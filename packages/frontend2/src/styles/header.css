@@ -1,0 +1,199 @@
+.appbar {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  padding: 0 12px;
+  gap: var(--space);
+  height: 48px;
+  background: var(--primary-main);
+  color: var(--primary-contrast);
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.app-link {
+  line-height: var(--heading-line-height);
+  color: var(--primary-contrast);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.brand {
+  font-size: var(--h4-size);
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* Hamburger, Toggle, and Backdrop */
+
+.menu-toggle {
+  display: none;
+}
+
+.hamburger {
+  display: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background-color 200ms ease-in-out;
+
+  &:hover {
+    background: var(--primary-dark);
+  }
+}
+
+.hamburger-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+}
+
+.hamburger-line {
+  height: 2px;
+  background: currentColor;
+  border-radius: var(--radius);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.menu-toggle:checked ~ .hamburger .hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle:checked ~ .hamburger .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.menu-toggle:checked ~ .hamburger .hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 599px) {
+  .menu-toggle:checked ~ .menu-backdrop {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+}
+
+.menu-backdrop {
+  display: none;
+  position: fixed;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1099;
+  opacity: 0;
+  transition: opacity 250ms ease-in-out;
+  pointer-events: none;
+}
+
+/* Desktop Nav */
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nav-divider {
+  display: none;
+}
+
+.gh-btn {
+  display: inline-flex;
+  border-radius: 999px;
+
+  &:hover {
+    background: var(--primary-dark);
+  }
+}
+
+/* Mobile Nav */
+
+@media (max-width: 599px) {
+  .nav {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-default);
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space);
+    gap: 4px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    border-radius: 0 0 0 var(--radius);
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 250ms ease-in-out, transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1100;
+  }
+
+  .menu-toggle:checked ~ .nav {
+    max-height: 400px;
+    opacity: 1;
+  }
+
+  .nav-link {
+    padding: var(--space);
+    border-radius: var(--radius);
+    transition: background-color 150ms ease-in-out;
+    text-decoration: none;
+    color: var(--text-default);
+
+    &:hover {
+      text-decoration: none;
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .nav-divider {
+    display: block;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    margin: var(--space);
+  }
+
+  .gh-btn {
+    align-items: center;
+    padding: var(--space);
+    gap: var(--space);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: background-color 150ms ease-in-out;
+    color: var(--text-default);
+
+    &::before {
+      content: "View on GitHub";
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+}

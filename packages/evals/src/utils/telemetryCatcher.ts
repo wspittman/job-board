@@ -1,6 +1,6 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import { createHash } from "node:crypto";
-import type { Bag, NumBag, Source } from "../types/types";
+import type { Bag, NumBag, Source } from "../types/types.ts";
 
 /**
  * Catches and stores AI telemetry metrics.

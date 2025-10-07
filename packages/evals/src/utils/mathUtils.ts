@@ -1,8 +1,8 @@
-import { NumBag } from "../types/types";
+import type { NumBag } from "../types/types.ts";
 
 export function addNumBags<T extends NumBag>(acc: T, b: T): T {
   for (const key in b) {
-    acc[key] = ((acc[key] ?? 0) + b[key]) as T[Extract<keyof T, string>];
+    acc[key] = ((acc[key] ?? 0) + (b[key] ?? 0)) as T[Extract<keyof T, string>];
   }
   return acc;
 }

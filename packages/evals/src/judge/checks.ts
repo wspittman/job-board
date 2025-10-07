@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Bag } from "../types/types";
+import type { Bag } from "../types/types.ts";
 
 interface CheckIn {
   prop: string;
@@ -241,7 +241,10 @@ async function getEmbedding(input: string): Promise<number[]> {
  * @returns The cosine similarity score, a value between -1 and 1 (typically 0 to 1 for positive embeddings).
  */
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  const dotProduct = vecA.reduce((sum, val, i) => sum + val * vecB[i], 0);
+  const dotProduct = vecA.reduce(
+    (sum, val, i) => sum + val * (vecB[i] ?? 0),
+    0
+  );
   const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val ** 2, 0));
   const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val ** 2, 0));
 

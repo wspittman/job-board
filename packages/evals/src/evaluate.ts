@@ -1,9 +1,9 @@
-import { llmModelCost, rubrics } from "./evalConfig";
-import { aggregate, judge, Judgement } from "./judge/judge";
-import { infer } from "./portal/pFuncs";
-import type { Bag, NumBag, Run, Source } from "./types/types";
-import { addNumBags, cost, truncate } from "./utils/mathUtils";
-import { catcher } from "./utils/telemetryCatcher";
+import { llmModelCost, rubrics } from "./evalConfig.ts";
+import { aggregate, judge, type Judgement } from "./judge/judge.ts";
+import { infer } from "./portal/pFuncs.ts";
+import type { Bag, NumBag, Run, Source } from "./types/types.ts";
+import { addNumBags, cost, truncate } from "./utils/mathUtils.ts";
+import { catcher } from "./utils/telemetryCatcher.ts";
 
 export interface Outcome extends Run, Judgement {
   sourceName: string;
@@ -37,7 +37,12 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
     ...run,
     sourceName: source.sourceName,
     metrics,
-    cost: cost(metrics.inTokens, metrics.outTokens, inCost, outCost),
+    cost: cost(
+      metrics["inTokens"] ?? 0,
+      metrics["outTokens"] ?? 0,
+      inCost,
+      outCost
+    ),
     ...judgement,
     output,
   };
@@ -69,5 +74,5 @@ async function runInference(
   await infer(run.dataModel, markedInput);
   const metrics = catcher.find(mark);
 
-  return [metrics, markedInput.item as Bag];
+  return [metrics, markedInput["item"] as Bag];
 }

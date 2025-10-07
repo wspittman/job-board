@@ -1,12 +1,11 @@
 import "@fontsource-variable/inter";
 import "modern-normalize/modern-normalize.css";
-import "./style2.css";
+//import "./style2.css";
+import "./styles/base.css";
+import "./styles/header.css";
 
 import { setupCounter } from "./counter.ts";
-import { Header } from "./frame/Header.ts";
 import viteLogo from "/favicon.svg";
-
-const header = Header();
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div>
@@ -22,7 +21,5 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     </p>
   </div>
 `;
-
-document.querySelector<HTMLDivElement>("#app")!.prepend(header);
 
 setupCounter(document.querySelector<HTMLButtonElement>("#counter")!);
