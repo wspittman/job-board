@@ -1,8 +1,8 @@
 {
   "name": "evals",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
+  "private": true,
   "scripts": {
     "eval": "tsx --env-file=.env ./eval.ts",
     "fetch-input": "tsx --env-file=.env ./fetchInput.ts"

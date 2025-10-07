@@ -7,8 +7,7 @@
     "noEmit": true,
 
     "outDir": "./dist",
-    // All source files under `packages/evals/src` and `packages/backend/src`
-    "rootDir": "..",
+    "rootDir": "./src",
 
     // [Environment Dependent]
     // Node 22 App/Lib: ES2022, NodeNext, NodeNext
@@ -57,6 +56,6 @@
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true
   },
-  "include": ["src/**/*", "../../../backend/src/"],
+  "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }
