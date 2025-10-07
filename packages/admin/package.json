@@ -4,8 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "add-companies": "tsx --env-file=.env src/index.ts",
-    "delete-job": "tsx --env-file=.env src/index.ts delete-job"
+    "admin": "tsx --env-file=.env src/index.ts"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
