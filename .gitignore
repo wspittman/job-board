@@ -1,6 +1,5 @@
 cosmosdbcert.cer
 .env
-!packages/evals/.env
 
 # Agent Folders
 agent_notes/
