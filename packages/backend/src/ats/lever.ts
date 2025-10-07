@@ -167,6 +167,6 @@ export class Lever extends ATSBase {
 
   private async fetchJobs(id: string, single = false): Promise<JobResult[]> {
     const query = single ? "?mode=json&limit=1" : "?mode=json";
-    return this.axiosCall<JobResult[]>("Jobs", id, query);
+    return this.httpCall<JobResult[]>("Jobs", id, query);
   }
 }
