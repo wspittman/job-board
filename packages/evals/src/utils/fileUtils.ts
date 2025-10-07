@@ -1,8 +1,8 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DataModel } from "../portal/pTypes";
-import type { Bag, Source } from "../types/types";
+import type { DataModel } from "../portal/pTypes.ts";
+import type { Bag, Source } from "../types/types.ts";
 
 type Role = "Input" | "Outcome" | "Ground" | "Report";
 
