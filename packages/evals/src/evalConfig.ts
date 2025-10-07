@@ -3,7 +3,7 @@ import {
   equals,
   equalsCasePreferred,
   equalsUrl,
-  Rubric,
+  type Rubric,
   similar,
 } from "./judge/checks.ts";
 import type {

@@ -6,10 +6,10 @@ agent_notes/
 agent_scripts/
 
 # Eval Folders
-evals/input/
-evals/ground/
-evals/outcome/
-evals/report/
+packages/evals/input/
+packages/evals/ground/
+packages/evals/outcome/
+packages/evals/report/
 
 # TypeScript cache
 *.tsbuildinfo

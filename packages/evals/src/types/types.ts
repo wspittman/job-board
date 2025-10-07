@@ -1,4 +1,4 @@
-import { DataModel } from "../portal/pTypes";
+import type { DataModel } from "../portal/pTypes.ts";
 
 export type Bag = Record<string, unknown>;
 export type NumBag = Record<string, number>;
