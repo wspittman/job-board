@@ -5,12 +5,12 @@ const atsTypes = ["greenhouse", "lever"];
 
 function usageReminder() {
   console.error(
-    "Usage: npm run update-companies -- <ATS_ID> <COMPANY_ID> [...COMPANY_ID]\n" +
+    "Usage: npm run add-companies -- <ATS_ID> <COMPANY_ID> [...COMPANY_ID]\n" +
       `  atsType: ${atsTypes.join("|")}\n`
   );
 }
 
-async function updateCompanies(ats: string, ids: string[]): Promise<void> {
+async function addCompanies(ats: string, ids: string[]): Promise<void> {
   console.log(`Adding ${ids.length} companies from ${ats}`);
   const result = await fetcher("/companies", "PUT", { ats, ids });
   console.log("Success", result);
@@ -27,7 +27,7 @@ async function run() {
     return;
   }
 
-  await updateCompanies(ats, companyIds);
+  await addCompanies(ats, companyIds);
 }
 
 run().catch((err) => {

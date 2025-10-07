@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "update-companies": "tsx --env-file=.env src/index.ts"
+    "add-companies": "tsx --env-file=.env src/index.ts"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",

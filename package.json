@@ -9,7 +9,7 @@
     "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "eval": "npm run eval --workspace=evals --",
     "eval-fetch-input": "npm run fetch-input --workspace=evals --",
-    "update-companies": "npm run update-companies --workspace=admin",
+    "add-companies": "npm run add-companies --workspace=admin",
     "clean": "git clean -fdx node_modules && git clean -fdx **/dist/ **/tsconfig.tsbuildinfo"
   },
   "private": true,
