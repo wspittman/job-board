@@ -12,7 +12,7 @@ function usageReminder() {
 
 async function addCompanies(ats: string, ids: string[]): Promise<void> {
   console.log(`Adding ${ids.length} companies from ${ats}`);
-  const result = await fetcher("/companies", "PUT", { ats, ids });
+  const result = await fetcher("companies", "PUT", { ats, ids });
   console.log("Success", result);
 }
 
@@ -20,7 +20,9 @@ async function run() {
   const args = process.argv.slice(2);
   let [ats, ...companyIds] = args;
   ats = ats?.toLowerCase() ?? "";
-  companyIds = companyIds.map((id) => id.trim()).filter((id) => !!id.length);
+  companyIds = companyIds
+    .map((id) => id.replace(",", "").trim())
+    .filter((id) => !!id.length);
 
   if (!atsTypes.includes(ats) || !companyIds.length) {
     usageReminder();

@@ -2,7 +2,7 @@ const baseUrl = process.env["ADMIN_API_BASE_URL"];
 const token = process.env["ADMIN_API_TOKEN"];
 
 export async function fetcher(path: string, method: string, body?: unknown) {
-  const endpoint = new URL(path, baseUrl).toString();
+  const endpoint = new URL(`${baseUrl}${path}`).toString();
 
   const response = await fetch(endpoint, {
     method,
