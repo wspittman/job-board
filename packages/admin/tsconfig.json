@@ -1,16 +1,61 @@
 {
+  // References
+  // - https://tduyng.com/blog/tsconfig-options-you-should-use/
+  // - https://2ality.com/2025/01/tsconfig-json.html
+
   "compilerOptions": {
+    "noEmit": true,
+
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    // [Environment Dependent]
+    // Node 22 App/Lib: ES2022, NodeNext, NodeNext
+    // Browser App    : ES2020, ESNext, node
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "node",
-    "outDir": "dist",
-    "rootDir": "src",
-    "strict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    // [Node Only] Don't allow non-JS constructs, including JSX
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+
+    // Perf improvements
+    "incremental": true,
     "skipLibCheck": true,
-    "types": ["node"]
+
+    // Strict typechecking, a combination of (at least)
+    // - noImplicitAny
+    // - strictNullChecks
+    // - strictFunctionTypes
+    // - strictBindCallApply
+    // - strictPropertyInitialization
+    // - noImplicitThis
+    // - alwaysStrict
+    // - useUnknownInCatchVariables
+    "strict": true,
+
+    // Debugging
+    "sourceMap": true,
+
+    // Code Quality
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noImplicitOverride": true,
+    "allowUnreachableCode": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    // Record treats accessed values as potentially undefined
+    "noUncheckedIndexedAccess": true,
+
+    // Interoperability
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   },
   "include": ["src/**/*"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "node_modules", "**/*.test.ts"]
 }

@@ -55,10 +55,7 @@
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true,
-    // To get the .cjs workaround for Application Insights
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true
+    "rewriteRelativeImportExtensions": true
   },
   "include": ["src/**/*", "../../../backend/src/"],
   "exclude": ["dist", "node_modules", "**/*.test.ts"]
