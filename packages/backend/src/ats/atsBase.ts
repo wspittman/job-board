@@ -9,12 +9,12 @@ import type { Bag, Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { createSubscribeAggregator, logError } from "../utils/telemetry.ts";
 
+type StatusResponse = { status: number; statusText: string };
+
 /**
  * Base class for ATS (Applicant Tracking System) implementations
  * providing common functionality and required interface
  */
-type StatusResponse = { status: number; statusText: string };
-
 export abstract class ATSBase {
   protected ats: ATS;
   protected baseUrl: string;
@@ -68,13 +68,11 @@ export abstract class ATSBase {
         signal: AbortSignal.timeout(10_000),
       });
 
-      logStatus = {
-        status: response.status,
-        statusText: response.statusText,
-      };
+      const { status, statusText, ok } = response;
+      logStatus = { status, statusText };
 
-      if (!response.ok) {
-        if (response.status === 404) {
+      if (!ok) {
+        if (status === 404) {
           throw new AppError(`${this.ats} / ${id}: Not Found`, 404);
         }
 
@@ -83,14 +81,12 @@ export abstract class ATSBase {
 
       return (await response.json()) as T;
     } catch (error) {
+      logStatus = this.errorToStatus(error);
+
       if (error instanceof AppError) {
-        if (logStatus.statusText === "Request Exception") {
-          logStatus = this.errorToStatus(error);
-        }
         throw error;
       }
 
-      logStatus = this.errorToStatus(error);
       throw new AppError(`${this.ats} / ${id}: Request Failed`, 500, error);
     } finally {
       const duration = Date.now() - start;
