@@ -124,7 +124,7 @@ export class Greenhouse extends ATSBase {
 
   private formatJobBasic(
     companyId: string,
-    { id, title, updated_at, location, absolute_url }: JobResultBasic
+    { id, title, updated_at, absolute_url }: JobResultBasic
   ): Context<Job> {
     const job: Job = {
       // Keys
