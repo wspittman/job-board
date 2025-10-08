@@ -10,7 +10,8 @@
   --secondary-contrast: #ffffff;
 
   --bg-default: #fafafa;
-  --text-default: #111;
+  --surface: #ffffff;
+  --text-default: #111111;
 
   /* Typography */
   --fonts: "Inter Variable", "Roboto", "Helvetica", "Arial", sans-serif;
@@ -30,11 +31,25 @@
 
 /* ===== Base ===== */
 body {
+  margin: 0;
+  min-height: 100vh;
   background: var(--bg-default);
   color: var(--text-default);
   font-family: var(--fonts);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+main {
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+a:hover {
+  color: inherit;
 }
 
 h1,
