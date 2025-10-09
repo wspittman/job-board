@@ -8,8 +8,8 @@
     "fetch-input": "tsx --env-file=.env ./fetchInput.ts"
   },
   "dependencies": {
-    "dry-utils-async": "^0.3.0",
-    "dry-utils-openai": "^0.3.0"
+    "dry-utils-async": "^0.3.1",
+    "dry-utils-openai": "^0.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",

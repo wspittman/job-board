@@ -1,5 +1,7 @@
 import path from "node:path";
 
+type ReasoningEffort = "minimal" | "low" | "medium" | "high";
+
 interface Config {
   PORT: number;
   NODE_ENV: string;
@@ -12,6 +14,7 @@ interface Config {
   LEVER_URL: string;
 
   LLM_MODEL: string;
+  LLM_REASONING_EFFORT?: ReasoningEffort;
 
   ADMIN_TOKEN: string;
 
@@ -19,9 +22,18 @@ interface Config {
   ENABLE_VERBOSE_BLOB_LOGGING: boolean;
 }
 
+const prep = (key: keyof Config) =>
+  process.env[key]?.trim().toLowerCase() ?? "";
+
+function isReasoningEffort(val: string): val is ReasoningEffort {
+  return ["minimal", "low", "medium", "high"].includes(val as ReasoningEffort);
+}
+
+let llmReasoningEffort = prep("LLM_REASONING_EFFORT");
+
 export const config: Config = {
   PORT: parseInt(process.env["PORT"] || "3000", 10),
-  NODE_ENV: process.env["NODE_ENV"] || "dev",
+  NODE_ENV: prep("NODE_ENV") || "dev",
 
   // Database configs
   DATABASE_URL: process.env["DATABASE_URL"] || "https://localhost:8081",
@@ -41,7 +53,10 @@ export const config: Config = {
 
   // AI configs
   // OPENAI_API_KEY present in .env, referenced directly in OpenAI SDK
-  LLM_MODEL: process.env["LLM_MODEL"] || "gpt-5-nano",
+  LLM_MODEL: prep("LLM_MODEL") || "gpt-5-nano",
+  LLM_REASONING_EFFORT: isReasoningEffort(llmReasoningEffort)
+    ? llmReasoningEffort
+    : undefined,
 
   // Auth configs
   ADMIN_TOKEN: process.env["ADMIN_TOKEN"] || "admin",
@@ -51,5 +66,5 @@ export const config: Config = {
   APPLICATIONINSIGHTS_CONNECTION_STRING:
     process.env["APPLICATIONINSIGHTS_CONNECTION_STRING"] || "",
   ENABLE_VERBOSE_BLOB_LOGGING:
-    (process.env["VERBOSE_BLOB_LOGGING"] || "false").toLowerCase() === "true",
+    (prep("ENABLE_VERBOSE_BLOB_LOGGING") || "false") === "true",
 };

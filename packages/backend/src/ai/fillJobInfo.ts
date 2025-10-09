@@ -41,7 +41,11 @@ export async function fillJobInfo(job: Context<Job>): Promise<boolean> {
     prompt,
     job.item,
     ExtractionJob,
-    { context: job.context, model: config.LLM_MODEL }
+    {
+      context: job.context,
+      model: config.LLM_MODEL,
+      reasoningEffort: config.LLM_REASONING_EFFORT,
+    }
   );
 
   if (content) {

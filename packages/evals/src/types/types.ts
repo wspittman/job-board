@@ -12,6 +12,7 @@ export interface Run {
   runName: string;
   dataModel: DataModel;
   llmModel: string;
+  llmReasoningEffort?: string;
 }
 
 /**

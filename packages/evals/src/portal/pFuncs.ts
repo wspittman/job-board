@@ -5,6 +5,7 @@ import type { Bag } from "../../../backend/src/types/types.ts";
 import type { ATS, DataModel } from "./pTypes.ts";
 
 export const LLM_MODEL = config.LLM_MODEL;
+export const LLM_REASONING_EFFORT = config.LLM_REASONING_EFFORT;
 
 export const atsTypes: ATS[] = ["greenhouse", "lever"];
 export const dataModelTypes: DataModel[] = ["company", "job"];
