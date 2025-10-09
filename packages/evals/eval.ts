@@ -37,7 +37,7 @@ async function runEval(run: Run): Promise<void> {
   // Process sources in batch.
   await batch(
     `${runName}_${dataModel}_${llmModel}`,
-    sources.slice(1, 2),
+    sources,
     async (source) => {
       // Read a previously saved outcome, or if not available run the evaluation.
       //let outcome = await readObj<Outcome<T>>(action, "Outcome", file);
