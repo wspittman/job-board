@@ -124,7 +124,7 @@ export class Greenhouse extends ATSBase {
 
   private formatJobBasic(
     companyId: string,
-    { id, title, updated_at, location, absolute_url }: JobResultBasic
+    { id, title, updated_at, absolute_url }: JobResultBasic
   ): Context<Job> {
     const job: Job = {
       // Keys
@@ -139,32 +139,25 @@ export class Greenhouse extends ATSBase {
       companyName: companyId,
     };
 
-    const context = {
-      description: `Additional information about the job ${id}`,
-      content: {
-        location: location.name,
-      },
-    };
-
-    return { item: job, context: [context] };
+    // NOTE: Don't set context here because refreshJobInfo depends on it being undefined to know when to fetch full job data
+    return { item: job };
   }
 
   private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
     const result = this.formatJobBasic(companyId, jobResult);
 
-    const { id, metadata, content, departments, offices } = jobResult;
+    const { id, metadata, content, departments, offices, location } = jobResult;
 
     result.item.description = standardizeUntrustedHtml(content);
 
     // Useful pieces that aren't redundant with the job object
-    const existingContext = result.context?.[0]?.content ?? {};
     const context = {
       description: `Additional information about the job ${id}`,
       content: {
-        ...existingContext,
         metadata,
         departments,
         offices,
+        location: location.name,
       },
     };
     result.context = [context];
