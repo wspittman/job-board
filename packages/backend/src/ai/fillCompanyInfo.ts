@@ -25,7 +25,11 @@ export async function fillCompanyInfo(
     prompt,
     company.item,
     ExtractionCompany,
-    { context: company.context, model: config.LLM_MODEL }
+    {
+      context: company.context,
+      model: config.LLM_MODEL,
+      reasoningEffort: config.LLM_REASONING_EFFORT,
+    }
   );
 
   if (content) {

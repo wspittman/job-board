@@ -4,10 +4,12 @@
   "scripts": {
     "start:backend": "npm run dev --workspace=backend",
     "start:frontend": "npm run dev --workspace=frontend",
+    "start:frontend2": "npm run dev --workspace=frontend2",
     "link-dry-utils": "npm link dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
-    "eval": "tsx --env-file ./packages/backend/.env ./evals/eval.ts",
-    "eval-fetch-input": "tsx ./evals/fetchInput.ts",
+    "eval": "npm run eval --workspace=evals --",
+    "eval-fetch-input": "npm run fetch-input --workspace=evals --",
+    "admin": "npm run admin --workspace=admin",
     "clean": "git clean -fdx node_modules && git clean -fdx **/dist/ **/tsconfig.tsbuildinfo"
   },
   "private": true,

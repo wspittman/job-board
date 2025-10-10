@@ -1,5 +1,5 @@
-import axios from "axios";
-import { Bag } from "../types/types";
+import { embed } from "dry-utils-openai";
+import type { Bag } from "../types/types.ts";
 
 interface CheckIn {
   prop: string;
@@ -205,33 +205,20 @@ function isEqualCaseInsensitive(a: unknown, b: unknown): boolean {
 }
 
 /**
- * Fetches text embeddings from the OpenAI API.
- * TODO: This should be available through dry-utils/openai.
+ * Fetches text embeddings.
  * TODO: Implement caching for embeddings to reduce API calls and costs.
  * @param input The string to get an embedding for.
  * @returns An array of numbers representing the embedding, or an empty array on failure.
  */
 async function getEmbedding(input: string): Promise<number[]> {
-  const apiKey = process.env["OPENAI_API_KEY"];
-  const body = { input, model: "text-embedding-3-small" };
+  const { embeddings, error } = await embed("eval_check", input);
 
-  try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/embeddings",
-      body,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-      }
-    );
-
-    return response.data.data[0].embedding;
-  } catch (err) {
-    console.error("Error calling OpenAI embeddings API:", err);
+  if (error) {
+    console.error("Error calling embeddings API:", error);
     return [];
   }
+
+  return embeddings?.[0] ?? [];
 }
 
 /**
@@ -241,7 +228,10 @@ async function getEmbedding(input: string): Promise<number[]> {
  * @returns The cosine similarity score, a value between -1 and 1 (typically 0 to 1 for positive embeddings).
  */
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  const dotProduct = vecA.reduce((sum, val, i) => sum + val * vecB[i], 0);
+  const dotProduct = vecA.reduce(
+    (sum, val, i) => sum + val * (vecB[i] ?? 0),
+    0
+  );
   const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val ** 2, 0));
   const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val ** 2, 0));
 

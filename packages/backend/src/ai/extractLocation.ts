@@ -29,7 +29,7 @@ export async function extractLocation(location: string): Promise<Location> {
     prompt,
     location,
     ExtractionLocation,
-    { model: config.LLM_MODEL }
+    { model: config.LLM_MODEL, reasoningEffort: config.LLM_REASONING_EFFORT }
   );
 
   if (!content) return {};

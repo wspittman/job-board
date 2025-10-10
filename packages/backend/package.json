@@ -9,12 +9,11 @@
   },
   "dependencies": {
     "applicationinsights": "^2.9.5",
-    "axios": "^1.7.7",
     "cors": "^2.8.5",
-    "dry-utils-async": "^0.3.0",
+    "dry-utils-async": "^0.3.1",
     "dry-utils-cosmosdb": "^0.3.0",
-    "dry-utils-openai": "^0.3.0",
-    "dry-utils-text": "^0.1.0",
+    "dry-utils-openai": "^0.4.0",
+    "dry-utils-text": "^0.2.0",
     "express": "^5.1.0",
     "helmet": "^8.0.0"
   },
@@ -23,7 +22,7 @@
     "@types/express": "^5.0.1",
     "@types/node": "^22.5.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "typescript": "^5.6.2"
   }
 }

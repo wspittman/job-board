@@ -166,18 +166,18 @@ export class Greenhouse extends ATSBase {
   }
 
   private async fetchCompany(id: string): Promise<CompanyResult> {
-    return this.axiosCall<CompanyResult>("Company", id, "");
+    return this.httpCall<CompanyResult>("Company", id, "");
   }
 
   private async fetchJob(id: string, jobId: string): Promise<JobResult> {
-    return this.axiosCall<JobResult>("Job", id, `jobs/${jobId}`);
+    return this.httpCall<JobResult>("Job", id, `jobs/${jobId}`);
   }
 
   private async fetchJobs(id: string): Promise<JobsResult> {
-    return this.axiosCall<JobsResult>("Jobs", id, "/jobs?content=true");
+    return this.httpCall<JobsResult>("Jobs", id, "/jobs?content=true");
   }
 
   private async fetchJobsBasic(id: string): Promise<JobsResultBasic> {
-    return this.axiosCall<JobsResultBasic>("JobsBasic", id, "/jobs");
+    return this.httpCall<JobsResultBasic>("JobsBasic", id, "/jobs");
   }
 }

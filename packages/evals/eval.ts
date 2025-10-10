@@ -5,6 +5,7 @@ import {
   dataModelTypes,
   isValidDataModel,
   LLM_MODEL,
+  LLM_REASONING_EFFORT,
 } from "./src/portal/pFuncs.ts";
 import { Run } from "./src/types/types.ts";
 import { readSources, writeObj } from "./src/utils/fileUtils.ts";
@@ -23,8 +24,10 @@ function usageReminder() {
 }
 
 async function runEval(run: Run): Promise<void> {
-  const { runName, dataModel, llmModel } = run;
-  console.log(`${runName}: Running eval for ${dataModel} with ${llmModel}`);
+  const { runName, dataModel, llmModel, llmReasoningEffort } = run;
+  console.log(
+    `${runName}: Running eval for ${dataModel} with ${llmModel} ${llmReasoningEffort}`
+  );
 
   const sources = await readSources(dataModel);
   console.log(`${runName}: Found ${sources.length} sources`);
@@ -48,13 +51,21 @@ async function runEval(run: Run): Promise<void> {
         dataModel,
         runName,
         llmModel,
+        llmReasoningEffort ?? "",
         source.sourceName
       );
     }
   );
 
-  const f = await report(run, outcomes);
-  await writeObj(f, "Report", dataModel, runName, llmModel);
+  const rep = await report(run, outcomes);
+  await writeObj(
+    rep,
+    "Report",
+    dataModel,
+    runName,
+    llmModel,
+    llmReasoningEffort ?? ""
+  );
 }
 
 async function run() {
@@ -62,6 +73,7 @@ async function run() {
   const [dataModelArg, runName = `run_${Date.now()}`] = args;
   const dataModel = dataModelArg?.toLowerCase();
   const llmModel = LLM_MODEL;
+  const llmReasoningEffort = LLM_REASONING_EFFORT;
 
   if (!isValidDataModel(dataModel)) {
     usageReminder();
@@ -73,7 +85,7 @@ async function run() {
     return;
   }
 
-  await runEval({ runName, dataModel, llmModel });
+  await runEval({ runName, dataModel, llmModel, llmReasoningEffort });
 }
 
 run().catch((err) => {

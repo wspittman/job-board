@@ -1,5 +1,3 @@
-import axios, { type AxiosResponse } from "axios";
-import https from "https";
 import type {
   ATS,
   Company,
@@ -11,12 +9,13 @@ import type { Bag, Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { createSubscribeAggregator, logError } from "../utils/telemetry.ts";
 
+type StatusResponse = { status: number; statusText: string };
+
 /**
  * Base class for ATS (Applicant Tracking System) implementations
  * providing common functionality and required interface
  */
 export abstract class ATSBase {
-  private agent = new https.Agent({ keepAlive: true });
   protected ats: ATS;
   protected baseUrl: string;
 
@@ -53,26 +52,41 @@ export abstract class ATSBase {
    * @returns API response data
    * @throws AppError for 404 or other error responses
    */
-  protected async axiosCall<T>(
+  protected async httpCall<T>(
     name: string,
     id: string,
     url: string
   ): Promise<T> {
     const start = Date.now();
-    let logStatus = { status: 500, statusText: "Request Exception" };
+    let logStatus: StatusResponse = {
+      status: 500,
+      statusText: "Request Exception",
+    };
 
     try {
-      const result = await axios.get<T>(`${this.baseUrl}/${id}/${url}`, {
-        httpsAgent: this.agent,
-        timeout: 10000,
+      const response = await fetch(`${this.baseUrl}/${id}/${url}`, {
+        signal: AbortSignal.timeout(10_000),
       });
-      logStatus = result;
-      return result.data;
+
+      const { status, statusText, ok } = response;
+      logStatus = { status, statusText };
+
+      if (!ok) {
+        if (status === 404) {
+          throw new AppError(`${this.ats} / ${id}: Not Found`, 404);
+        }
+
+        throw new AppError(`${this.ats} / ${id}: Request Failed`, 500);
+      }
+
+      return (await response.json()) as T;
     } catch (error) {
       logStatus = this.errorToStatus(error);
-      if (logStatus.status === 404) {
-        throw new AppError(`${this.ats} / ${id}: Not Found`, 404, error);
+
+      if (error instanceof AppError) {
+        throw error;
       }
+
       throw new AppError(`${this.ats} / ${id}: Request Failed`, 500, error);
     } finally {
       const duration = Date.now() - start;
@@ -80,19 +94,16 @@ export abstract class ATSBase {
     }
   }
 
-  private errorToStatus(error: unknown) {
-    if (axios.isAxiosError(error)) {
-      return (
-        error.response ?? {
-          status: 500,
-          statusText: error.message,
-        }
-      );
-    } else if (error instanceof Error) {
-      return { status: -1, statusText: error.message };
-    } else {
-      return { status: -1, statusText: String(error) };
+  private errorToStatus(error: unknown): StatusResponse {
+    if (error instanceof AppError) {
+      return { status: error.statusCode, statusText: error.message };
     }
+
+    if (error instanceof Error) {
+      return { status: -1, statusText: error.message };
+    }
+
+    return { status: -1, statusText: String(error) };
   }
 }
 
@@ -105,7 +116,7 @@ function logAtsCall(
   ats: ATS,
   id: string,
   ms: number,
-  { status, statusText }: Pick<AxiosResponse, "status" | "statusText">
+  { status, statusText }: StatusResponse
 ) {
   try {
     const log: Bag = { name, ats, id, ms };

@@ -1,5 +1,5 @@
-import { addNumBags, calcF1, truncate } from "../utils/mathUtils";
-import { CheckOut } from "./checks";
+import { addNumBags, calcF1, truncate } from "../utils/mathUtils.ts";
+import type { CheckOut } from "./checks.ts";
 
 export interface Stats {
   match?: {

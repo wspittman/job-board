@@ -1,6 +1,6 @@
-import { Bag } from "../types/types";
-import { CheckOut, Rubric, runChecks } from "./checks";
-import { checksToStats, combineStats, Stats } from "./stats";
+import type { Bag } from "../types/types.ts";
+import { type CheckOut, type Rubric, runChecks } from "./checks.ts";
+import { checksToStats, combineStats, type Stats } from "./stats.ts";
 
 export interface Judgement extends Stats {
   suboptimal?: CheckOut[];
