@@ -3,7 +3,6 @@
 }
 
 .faq-container {
-  width: min(960px, calc(100% - var(--space-xl)));
   margin-left: auto;
   margin-right: auto;
 }
@@ -86,22 +85,9 @@
   font-size: 0.95rem;
 }
 
-@media (max-width: 768px) {
-  .faq-container {
-    width: calc(100% - var(--space-lg));
-  }
-
+@media (max-width: 599px) {
   .faq-item summary {
     font-size: var(--h5-size);
-  }
-}
-
-@media (max-width: 599px) {
-  .faq-page {
-    padding: var(--space-xl) 0;
-  }
-
-  .faq-item summary {
     padding: var(--space-xs) var(--space-md);
   }
 }

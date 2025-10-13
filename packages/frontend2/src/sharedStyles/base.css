@@ -45,12 +45,22 @@ body {
   background: var(--bg-default);
   color: var(--text-default);
   font-family: var(--fonts);
+  font-size: 1.2rem;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (max-width: 599px) {
+  body {
+    font-size: 1rem;
+  }
+}
+
 main {
   display: block;
+  max-width: min(70ch, 100% - 4rem);
+  margin-inline: auto;
 }
 
 a {
@@ -63,7 +73,6 @@ a:hover {
 
 p {
   margin: 0;
-  line-height: 1.65;
 }
 
 h1,
