@@ -3,13 +3,13 @@
   position: sticky;
   top: 0;
   z-index: 1100;
-  padding: 0 12px;
-  gap: var(--space);
-  height: 48px;
+  padding: 0 var(--space-lg);
+  gap: var(--space-md);
+  height: var(--space-xl);
   background: var(--primary-main);
   color: var(--primary-contrast);
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-soft);
 }
 
 .app-link {
@@ -18,7 +18,7 @@
 
   &:hover {
     text-decoration: underline;
-    text-underline-offset: 3px;
+    text-underline-offset: var(--space-xs);
   }
 }
 
@@ -48,8 +48,7 @@
 }
 
 .hamburger-icon {
-  width: 24px;
-  height: 24px;
+  width: var(--space-lg);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -92,7 +91,7 @@
 .menu-backdrop {
   display: none;
   position: fixed;
-  top: 48px;
+  top: var(--space-xl);
   left: 0;
   right: 0;
   bottom: 0;
@@ -108,7 +107,7 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-md);
 }
 
 .nav-divider {
@@ -128,6 +127,7 @@
 
 @media (max-width: 599px) {
   .nav {
+    display: none;
     position: absolute;
     top: 100%;
     right: 0;
@@ -135,24 +135,21 @@
     color: var(--text-default);
     flex-direction: column;
     align-items: stretch;
-    padding: var(--space);
-    gap: 4px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    padding: var(--space-sm);
+    gap: var(--space-xs);
+    box-shadow: var(--shadow-soft);
     border-radius: 0 0 0 var(--radius);
     overflow: hidden;
-    opacity: 0;
-    transition: max-height 300ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 250ms ease-in-out, transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1100;
   }
 
   .menu-toggle:checked ~ .nav {
     max-height: 400px;
-    opacity: 1;
+    display: flex;
   }
 
   .nav-link {
-    padding: var(--space);
+    padding: var(--space-sm);
     border-radius: var(--radius);
     transition: background-color 150ms ease-in-out;
     text-decoration: none;
@@ -171,13 +168,13 @@
     display: block;
     height: 1px;
     background: rgba(0, 0, 0, 0.1);
-    margin: var(--space);
+    margin: var(--space-sm);
   }
 
   .gh-btn {
     align-items: center;
-    padding: var(--space);
-    gap: var(--space);
+    padding: var(--space-sm);
+    gap: var(--space-sm);
     border-radius: var(--radius);
     text-decoration: none;
     transition: background-color 150ms ease-in-out;

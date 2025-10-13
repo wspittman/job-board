@@ -12,6 +12,7 @@
   --bg-default: #fafafa;
   --surface: #ffffff;
   --text-default: #111111;
+  --text-muted: rgba(17, 17, 17, 0.68);
 
   /* Typography */
   --fonts: "Inter Variable", "Roboto", "Helvetica", "Arial", sans-serif;
@@ -24,9 +25,17 @@
 
   --heading-line-height: 1.2;
 
-  /* Shape */
+  /* Spacing */
+  --space-xs: calc(var(--space-sm) / 2);
+  --space-sm: 8px;
+  --space-md: calc(var(--space-sm) * 2);
+  --space-lg: calc(var(--space-sm) * 3);
+  --space-xl: calc(var(--space-sm) * 6);
+
+  /* Shapes */
   --radius: 8px;
-  --space: 8px;
+  --shadow-soft: 0 10px 30px rgba(34, 33, 81, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(96, 54, 198, 0.2);
 }
 
 /* ===== Base ===== */
@@ -50,6 +59,11 @@ a {
 
 a:hover {
   color: inherit;
+}
+
+p {
+  margin: 0;
+  line-height: 1.65;
 }
 
 h1,
