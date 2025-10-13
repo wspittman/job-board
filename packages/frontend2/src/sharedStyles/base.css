@@ -17,11 +17,12 @@
   /* Typography */
   --fonts: "Inter Variable", "Roboto", "Helvetica", "Arial", sans-serif;
 
-  --h1-size: 3rem;
-  --h2-size: 2.5rem;
-  --h3-size: 2rem;
-  --h4-size: 1.5rem;
-  --h5-size: 1rem;
+  --h1-size: clamp(2.75rem, 4vw, 3.5rem);
+  --h2-size: clamp(2.25rem, 3.5vw, 3rem);
+
+  --size-lg: clamp(1.5rem, 2.5vw, 2rem);
+  --size-md: clamp(1rem, 2vw, 1.5rem);
+  --size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
 
   --heading-line-height: 1.2;
 
@@ -45,16 +46,10 @@ body {
   background: var(--bg-default);
   color: var(--text-default);
   font-family: var(--fonts);
-  font-size: 1.2rem;
+  font-size: var(--size-sm);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-@media (max-width: 599px) {
-  body {
-    font-size: 1rem;
-  }
 }
 
 main {
@@ -76,10 +71,7 @@ p {
 }
 
 h1,
-h2,
-h3,
-h4,
-h5 {
+h2 {
   line-height: var(--heading-line-height);
   margin: 0 0 0.5em 0;
 }
@@ -88,15 +80,6 @@ h1 {
 }
 h2 {
   font-size: var(--h2-size);
-}
-h3 {
-  font-size: var(--h3-size);
-}
-h4 {
-  font-size: var(--h4-size);
-}
-h5 {
-  font-size: var(--h5-size);
 }
 
 button,
