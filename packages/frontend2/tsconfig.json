@@ -42,5 +42,5 @@
     // Record treats accessed values as potentially undefined
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src"]
+  "include": ["src", "plugins"]
 }
