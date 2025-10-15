@@ -1,12 +1,8 @@
-import "@fontsource-variable/inter";
-import "modern-normalize/modern-normalize.css";
-import { api } from "../api/api.ts";
 import "../components/stat-card-area.ts";
-import "../sharedStyles/base.css";
-import "../sharedStyles/header.css";
+import "../sharedStyles/all.css";
 import "./index.css";
 
-const metaEl = document.getElementById("meta")!;
+/*const metaEl = document.getElementById("meta")!;
 
 metaEl.innerHTML = "<p>Loading...</p>";
 try {
@@ -23,4 +19,4 @@ setTimeout(async () => {
 }, 1000);
 setTimeout(async () => {
   await api.fetchMetadata();
-}, 10000);
+}, 10000);*/
