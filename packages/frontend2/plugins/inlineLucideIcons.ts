@@ -24,7 +24,20 @@ export function inlineLucideIcons(): Plugin {
     enforce: "pre",
 
     async transformIndexHtml(html) {
-      return expand(html);
+      return await expand(html);
+    },
+
+    async load(id) {
+      if (!id.endsWith(".html?raw")) {
+        return;
+      }
+
+      const filepath = id.split("?", 1)[0]!;
+      const file = await readFile(filepath, "utf8");
+      const html = await expand(file);
+
+      // Return an ES module exporting the processed HTML
+      return `export default ${JSON.stringify(html)};`;
     },
   };
 }

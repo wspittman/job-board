@@ -1,6 +1,7 @@
 import "@fontsource-variable/inter";
 import "modern-normalize/modern-normalize.css";
-import { api } from "../api/api";
+import { api } from "../api/api.ts";
+import "../components/stat-card-area.ts";
 import "../sharedStyles/base.css";
 import "../sharedStyles/header.css";
 import "./index.css";
