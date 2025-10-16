@@ -10,7 +10,7 @@
     "eval": "npm run eval --workspace=evals --",
     "eval-fetch-input": "npm run fetch-input --workspace=evals --",
     "admin": "npm run admin --workspace=admin",
-    "clean": "git clean -fdx node_modules && git clean -fdx **/dist/ **/tsconfig.tsbuildinfo"
+    "clean": "git clean -fdx -- \":(glob)**/node_modules/**\" \":(glob)**/dist/**\" \":(glob)**/*.tsbuildinfo\""
   },
   "private": true,
   "workspaces": [
