@@ -5,7 +5,7 @@ name: frontend2 - Deploy Main - Temporary
 
 on:
   push:
-    branches:: [main]
+    branches: [main]
     paths:
       - "packages/frontend2/**"
   workflow_dispatch:
