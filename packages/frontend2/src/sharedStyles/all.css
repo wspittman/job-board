@@ -1,0 +1,5 @@
+@import "@fontsource-variable/inter";
+@import "modern-normalize/modern-normalize.css";
+@import "./base.css";
+@import "./header.css";
+@import "./parts.css";

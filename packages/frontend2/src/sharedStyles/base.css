@@ -1,10 +1,12 @@
 /* ===== Theme Variables ===== */
 :root {
   /* Palette */
+  --primary-light: #8e6ff5;
   --primary-main: #6036c6;
   --primary-dark: #4d2b9e;
   --primary-contrast: #ffffff;
 
+  --secondary-light: #5a8de6;
   --secondary-main: #3672c6;
   --secondary-dark: #2b5b9e;
   --secondary-contrast: #ffffff;
@@ -12,21 +14,54 @@
   --bg-default: #fafafa;
   --surface: #ffffff;
   --text-default: #111111;
+  --text-muted: rgba(17, 17, 17, 0.68);
+
+  --primary-gradient-bg: linear-gradient(
+    135deg,
+    var(--bg-default),
+    var(--primary-light)
+  );
+  --primary-gradient-btn: linear-gradient(
+    135deg,
+    var(--primary-light),
+    var(--primary-dark)
+  );
+
+  --secondary-gradient-bg: linear-gradient(
+    135deg,
+    var(--bg-default),
+    var(--secondary-light)
+  );
+  --secondary-gradient-btn: linear-gradient(
+    135deg,
+    var(--secondary-light),
+    var(--secondary-dark)
+  );
 
   /* Typography */
   --fonts: "Inter Variable", "Roboto", "Helvetica", "Arial", sans-serif;
 
-  --h1-size: 3rem;
-  --h2-size: 2.5rem;
-  --h3-size: 2rem;
-  --h4-size: 1.5rem;
-  --h5-size: 1rem;
+  --h1-size: clamp(2.75rem, 4vw, 3.5rem);
+  --h2-size: clamp(1.75rem, 1.75vw, 2.5rem);
+
+  --size-lg: clamp(1.5rem, 2.5vw, 2rem);
+  --size-md: clamp(1rem, 2vw, 1.5rem);
+  --size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
 
   --heading-line-height: 1.2;
 
-  /* Shape */
+  /* Spacing */
+  --space-xs: calc(var(--space-sm) / 2);
+  --space-sm: 8px;
+  --space-md: calc(var(--space-sm) * 2);
+  --space-lg: calc(var(--space-sm) * 3);
+  --space-xl: calc(var(--space-sm) * 6);
+  --space-xxl: calc(var(--space-sm) * 9);
+
+  /* Shapes */
   --radius: 8px;
-  --space: 8px;
+  --shadow-soft: 0 10px 30px rgba(34, 33, 81, 0.12);
+  --shadow-focus: 0 0 0 3px rgba(96, 54, 198, 0.2);
 }
 
 /* ===== Base ===== */
@@ -36,47 +71,14 @@ body {
   background: var(--bg-default);
   color: var(--text-default);
   font-family: var(--fonts);
+  font-size: var(--size-sm);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 main {
   display: block;
-}
-
-a {
-  color: inherit;
-}
-
-a:hover {
-  color: inherit;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5 {
-  line-height: var(--heading-line-height);
-  margin: 0 0 0.5em 0;
-}
-h1 {
-  font-size: var(--h1-size);
-}
-h2 {
-  font-size: var(--h2-size);
-}
-h3 {
-  font-size: var(--h3-size);
-}
-h4 {
-  font-size: var(--h4-size);
-}
-h5 {
-  font-size: var(--h5-size);
-}
-
-button,
-.btn {
-  border-radius: var(--radius);
+  max-width: min(70ch, 100% - 4rem);
+  margin-inline: auto;
 }

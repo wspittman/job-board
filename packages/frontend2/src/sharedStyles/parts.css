@@ -1,0 +1,28 @@
+a {
+  color: inherit;
+}
+
+a:hover {
+  color: inherit;
+}
+
+p {
+  margin: 0;
+}
+
+h1,
+h2 {
+  line-height: var(--heading-line-height);
+  margin: 0 0 0.5em 0;
+}
+h1 {
+  font-size: var(--h1-size);
+}
+h2 {
+  font-size: var(--h2-size);
+}
+
+button,
+.btn {
+  border-radius: var(--radius);
+}

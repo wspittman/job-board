@@ -1,11 +1,15 @@
-import "@fontsource-variable/inter";
-import "modern-normalize/modern-normalize.css";
-import "../sharedStyles/base.css";
-import "../sharedStyles/header.css";
+import { api } from "../api/api";
+import { setDisplay, setText } from "../components/utils";
+import "../sharedStyles/all.css";
 import "./faq.css";
 
-document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
-  <div>
-    FAQ
-  </div>
-`;
+try {
+  const data = await api.fetchMetadata();
+  const lastRefreshed = `Last refreshed: ${new Date(
+    data.timestamp
+  ).toLocaleString()}`;
+  setText(document, ".faq-note", lastRefreshed);
+  setDisplay(document, ".faq-note", "block");
+} catch (err) {
+  // ignore
+}

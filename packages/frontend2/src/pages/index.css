@@ -1,0 +1,114 @@
+.hm-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  text-align: center;
+}
+
+.hm-hero-visual {
+  flex: 1 1 260px;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.hm-hero-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 32% 68% 52% 48% / 45% 39% 61% 55%;
+  background: linear-gradient(140deg, #7154ff, #ad8dff 55%, #57d3a7);
+  filter: drop-shadow(0 32px 60px rgba(65, 40, 166, 0.25));
+}
+
+.hm-hero-ring::after {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0)
+  );
+}
+
+.hm-hero-filter {
+  position: relative;
+  width: 62%;
+  max-width: 260px;
+  z-index: 1;
+}
+
+.hm-hero-content {
+  flex: 1 1 320px;
+}
+
+.hm-hero-title {
+  font-size: var(--h1-size);
+  color: var(--primary-dark);
+
+  & span {
+    display: block;
+  }
+}
+
+.hm-hero-subtitle {
+  font-size: var(--size-md);
+  color: var(--text-muted);
+}
+
+.hm-search-card {
+  margin: var(--space-xl) auto;
+  padding: var(--space-xl);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+  color: var(--primary-main);
+}
+
+.chip-list {
+  margin: var(--space-lg);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-md);
+  color: var(--secondary-contrast);
+}
+
+.chip {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  background: var(--secondary-gradient-btn);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: var(--space-xs);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.cta-button {
+  display: inline-flex;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius);
+  background: var(--primary-gradient-btn);
+  color: var(--primary-contrast);
+  font-size: var(--size-sm);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: var(--space-xs);
+    box-shadow: var(--shadow-focus);
+    color: var(--primary-contrast);
+  }
+}

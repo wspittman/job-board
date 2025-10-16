@@ -1,0 +1,40 @@
+.stats {
+  display: none; /* hidden by default, "grid" when populated */
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+
+  & svg {
+    width: var(--space-xl);
+    height: auto;
+  }
+}
+
+.stat-card {
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.stat-icon {
+  width: var(--space-xxl);
+  height: var(--space-xxl);
+  border-radius: var(--radius);
+  background: var(--primary-gradient-bg);
+  display: grid;
+  place-items: center;
+  color: var(--primary-main);
+}
+
+.stat-value {
+  font-size: var(--size-lg);
+  color: var(--primary-main);
+}
+
+.stat-label {
+  font-size: var(--size-sm);
+}
