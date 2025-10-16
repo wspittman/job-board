@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
-    "@tanstack/query-core": "^5.90.3",
+    "@tanstack/query-core": "5.90.2",
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.3",
     "modern-normalize": "^3.0.1"
