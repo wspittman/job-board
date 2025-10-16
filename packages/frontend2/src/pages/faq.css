@@ -76,6 +76,7 @@
 }
 
 .faq-note {
+  display: none; /* Hidden by default, "block" when populated */
   color: var(--text-muted);
   font-size: calc(var(--size-sm) * 0.9);
 }

@@ -26,10 +26,12 @@ class StatCardAreaElement extends HTMLElement {
       const data = await api.fetchMetadata();
       if (!this.isConnected) return;
 
-      setText(this.#root, "#job-count", String(data.jobCount));
-      setText(this.#root, "#company-count", String(data.companyCount));
+      setText(this.#root, "#job-count", data.jobCount.toLocaleString());
+      setText(this.#root, "#company-count", data.companyCount.toLocaleString());
       setDisplay(this.#root, ".stats", "grid");
-    } catch (err: any) {}
+    } catch (err) {
+      // ignore
+    }
   }
 }
 

@@ -6,7 +6,7 @@ const API_URL = import.meta.env["VITE_API_URL"];
 const qc = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: 1,
       // data is fresh for 1 hour
       staleTime: 60 * 60_000,
     },
