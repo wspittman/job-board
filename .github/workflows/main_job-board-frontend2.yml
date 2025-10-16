@@ -95,6 +95,6 @@ jobs:
         id: deploy
         uses: azure/webapps-deploy@v3
         with:
-          app-name: better-job-board
+          app-name: frontend2
           package: release.zip
           # clean: true
