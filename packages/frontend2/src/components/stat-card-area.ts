@@ -1,17 +1,35 @@
-import { RESET } from "./reset.ts";
+import { api } from "../api/api.ts";
 import "./stat-card-area.css";
 import css from "./stat-card-area.css?raw";
 import html from "./stat-card-area.html?raw";
+import { componentCssReset, setDisplay, setText } from "./utils.ts";
 
-const SHEET = new CSSStyleSheet();
-SHEET.replaceSync(css);
+const cssSheet = new CSSStyleSheet();
+cssSheet.replaceSync(css);
 
 class StatCardAreaElement extends HTMLElement {
+  #root: ShadowRoot;
+
   constructor() {
     super();
-    const root = this.attachShadow({ mode: "open" });
-    root.adoptedStyleSheets = [...RESET, SHEET];
-    root.innerHTML = html;
+    this.#root = this.attachShadow({ mode: "open" });
+    this.#root.adoptedStyleSheets = [...componentCssReset, cssSheet];
+    this.#root.innerHTML = html;
+  }
+
+  connectedCallback() {
+    this.#load();
+  }
+
+  async #load() {
+    try {
+      const data = await api.fetchMetadata();
+      if (!this.isConnected) return;
+
+      setText(this.#root, "#job-count", String(data.jobCount));
+      setText(this.#root, "#company-count", String(data.companyCount));
+      setDisplay(this.#root, ".stats", "grid");
+    } catch (err: any) {}
   }
 }
 
