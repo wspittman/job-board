@@ -1,0 +1,100 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: frontend2 - Deploy Main - Temporary
+
+on:
+  push:
+    branches:: [main]
+    paths:
+      - "packages/frontend2/**"
+  workflow_dispatch:
+
+# Prevent overlapping runs, last one wins
+concurrency:
+  group: frontend2-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only access to repo contents
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Latest commit only
+          fetch-depth: 1
+          # Do not store GITHUB_TOKEN in git config
+          persist-credentials: false
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: CI, build, test
+        working-directory: packages/frontend2
+        run: |
+          npm ci
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Prepare production bundle
+        run: |
+          mkdir deploy
+          cp -r packages/frontend2/dist deploy/
+          cp packages/frontend2/package.json deploy/
+          cp packages/frontend2/server.js deploy/
+          cp package-lock.json deploy/
+          cd deploy
+          npm ci --omit=dev
+          npm prune --omit=dev
+
+      - name: Zip artifact
+        working-directory: deploy
+        run: zip -r ../release.zip ./*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend2-${{ github.run_number }}
+          path: release.zip
+          if-no-files-found: error
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    timeout-minutes: 15
+    environment:
+      name: Production
+      url: ${{ steps.deploy.outputs.webapp-url }}
+    permissions:
+      # This is required for requesting the JWT
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend2-${{ github.run_number }}
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BETTER_JOB_BOARD_ID_9432  }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CCB273F3D13F48FAB5C669116A6B0EB2 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_27C1AD0950F6474D8D37E0D56B2F2615 }}
+
+      - name: Deploy to Azure Web App
+        id: deploy
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: better-job-board
+          package: release.zip
+          # clean: true
