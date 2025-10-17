@@ -1,0 +1,210 @@
+.explore-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(260px, 320px);
+  gap: var(--space-xl);
+  align-items: start;
+  padding: var(--space-xl) clamp(var(--space-md), 5vw, var(--space-xxl)) var(--space-xxl);
+  width: min(1200px, 100%);
+  margin-inline: auto;
+  max-width: none;
+  background: var(--bg-default);
+}
+
+.explore-heading {
+  font-size: var(--h2-size);
+  margin: 0;
+  color: var(--primary-dark);
+}
+
+.explore-filters {
+  position: relative;
+  background: var(--surface);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  transition: box-shadow 0.2s ease;
+}
+
+.explore-filters__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.explore-filters__toggle {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius);
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background: var(--bg-default);
+  color: var(--primary-dark);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.explore-filters__toggle:hover,
+.explore-filters__toggle:focus-visible {
+  background: var(--primary-main);
+  color: var(--primary-contrast);
+}
+
+.explore-filters__content {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.explore-filters[data-state="closed"] .explore-filters__content {
+  display: none;
+}
+
+.explore-filters__group {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.explore-filters__legend {
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.explore-filters__label {
+  font-size: var(--size-sm);
+  color: var(--text-muted);
+}
+
+.explore-filters__input {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  background: var(--surface);
+  font: inherit;
+}
+
+.explore-results {
+  background: var(--surface);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.explore-results__title {
+  margin: 0;
+  font-size: var(--h3-size);
+  color: var(--primary-dark);
+}
+
+.explore-results__subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--size-sm);
+}
+
+.explore-results__list {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.job-card {
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  background: var(--surface);
+  cursor: pointer;
+  display: grid;
+  gap: var(--space-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.job-card:hover,
+.job-card:focus-visible {
+  border-color: var(--primary-main);
+  box-shadow: var(--shadow-focus);
+}
+
+.job-card.is-selected {
+  background: var(--primary-gradient-bg);
+  border-color: var(--primary-main);
+  box-shadow: var(--shadow-focus);
+}
+
+.job-card__title {
+  margin: 0;
+  font-size: var(--size-lg);
+  color: var(--primary-dark);
+}
+
+.job-card__meta {
+  margin: 0;
+  font-size: var(--size-sm);
+  color: var(--text-muted);
+}
+
+.job-card__summary {
+  margin: 0;
+  color: var(--text-default);
+  font-size: var(--size-sm);
+}
+
+.explore-details {
+  background: var(--surface);
+  border-radius: calc(var(--radius) * 1.5);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-xl);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.explore-details__title {
+  margin: 0;
+  font-size: var(--h3-size);
+  color: var(--primary-dark);
+}
+
+.explore-details__meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--size-sm);
+}
+
+.explore-details__body {
+  display: grid;
+  gap: var(--space-md);
+  color: var(--text-default);
+  font-size: var(--size-sm);
+}
+
+@media (max-width: 1100px) {
+  .explore-layout {
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+  }
+
+  .explore-details {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .explore-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .explore-details {
+    grid-column: auto;
+  }
+
+  .explore-filters__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
