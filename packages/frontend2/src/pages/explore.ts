@@ -1,6 +1,9 @@
 import "../sharedStyles/all.css";
 import "./explore.css";
 
+import { api } from "../api/api";
+import type { Filters } from "../api/apiTypes";
+
 type ExploreJob = {
   id: string;
   title: string;
@@ -57,6 +60,51 @@ const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));
 
 const filtersElement = document.querySelector<HTMLElement>("[data-filters]");
 const filterToggle = document.querySelector<HTMLButtonElement>("[data-filters-toggle]");
+const filtersForm = document.querySelector<HTMLFormElement>("#explore-filter-content");
+
+const buildFilters = (): Filters => {
+  const filters: Filters = {};
+
+  if (!filtersForm) {
+    return filters;
+  }
+
+  const formData = new FormData(filtersForm);
+  const titleValue = (formData.get("title") as string | null)?.trim();
+
+  if (titleValue) {
+    filters.title = titleValue;
+  }
+
+  const postedRaw = formData.get("posted");
+
+  if (typeof postedRaw === "string") {
+    const trimmedPosted = postedRaw.trim();
+
+    if (trimmedPosted) {
+      const days = Number.parseInt(trimmedPosted, 10);
+
+      if (!Number.isNaN(days)) {
+        filters.daysSince = days;
+      }
+    }
+  }
+
+  const remoteValue = formData.get("remote");
+
+  if (remoteValue === "remote") {
+    filters.isRemote = true;
+  } else if (remoteValue === "hybrid") {
+    filters.isRemote = false;
+  }
+
+  return filters;
+};
+
+const handleFiltersChange = () => {
+  const filters = buildFilters();
+  void api.fetchJobs(filters);
+};
 
 filterToggle?.addEventListener("click", () => {
   if (!filtersElement) {
@@ -68,6 +116,11 @@ filterToggle?.addEventListener("click", () => {
   filtersElement.dataset["state"] = nextState;
   filterToggle.setAttribute("aria-expanded", String(nextState === "open"));
 });
+
+if (filtersForm) {
+  filtersForm.addEventListener("input", handleFiltersChange);
+  filtersForm.addEventListener("change", handleFiltersChange);
+}
 
 const jobCards = document.querySelectorAll<HTMLButtonElement>("[data-job-card]");
 const detailSection = document.querySelector<HTMLElement>("[data-job-detail]");
