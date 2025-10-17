@@ -4,7 +4,7 @@ import { access, constants } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ALLOWED_PAGES = ["index", "faq", "404"];
+const ALLOWED_PAGES = ["index", "faq", "404", "explore"];
 
 // Get current directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);

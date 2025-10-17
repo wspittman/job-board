@@ -15,6 +15,7 @@ export default defineConfig({
         index: resolve(__dirname, "index.html"),
         faq: resolve(__dirname, "faq.html"),
         404: resolve(__dirname, "404.html"),
+        explore: resolve(__dirname, "explore.html"),
       },
     },
   },
