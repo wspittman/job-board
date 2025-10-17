@@ -7,7 +7,99 @@
   </head>
   <body>
     <!-- @include: ./src/partials/header.html -->
-    <h1>Explore Jobs</h1>
+    <main class="explore-layout" id="explore-layout" aria-labelledby="explore-heading">
+      <aside class="explore-filters" data-state="open" data-filters>
+        <div class="explore-filters__header">
+          <h1 class="explore-heading" id="explore-heading">Explore Jobs</h1>
+          <button
+            class="explore-filters__toggle"
+            type="button"
+            aria-expanded="true"
+            aria-controls="explore-filter-content"
+            data-filters-toggle
+          >
+            Filters
+          </button>
+        </div>
+        <form class="explore-filters__content" id="explore-filter-content">
+          <fieldset class="explore-filters__group">
+            <legend class="explore-filters__legend">Job Title</legend>
+            <label class="explore-filters__label" for="filter-title">Search by title</label>
+            <input
+              class="explore-filters__input"
+              type="text"
+              id="filter-title"
+              name="title"
+              placeholder="e.g. Product Designer"
+            />
+          </fieldset>
+
+          <fieldset class="explore-filters__group">
+            <legend class="explore-filters__legend">Posted Since</legend>
+            <label class="explore-filters__label" for="filter-posted">Within the last (days)</label>
+            <input
+              class="explore-filters__input"
+              type="number"
+              id="filter-posted"
+              name="posted"
+              min="0"
+              placeholder="7"
+            />
+          </fieldset>
+
+          <fieldset class="explore-filters__group">
+            <legend class="explore-filters__legend">Work Style</legend>
+            <label class="explore-filters__label" for="filter-remote">Location</label>
+            <select class="explore-filters__input" id="filter-remote" name="remote">
+              <option value="any">Any</option>
+              <option value="remote">Remote</option>
+              <option value="hybrid">In-Person / Hybrid</option>
+            </select>
+          </fieldset>
+        </form>
+      </aside>
+
+      <section class="explore-results" aria-labelledby="results-heading">
+        <div class="explore-results__header">
+          <h2 class="explore-results__title" id="results-heading">Job Results</h2>
+          <p class="explore-results__subtitle">Select a role to preview the details.</p>
+        </div>
+        <div class="explore-results__list" role="list" data-results-list>
+          <button class="job-card is-selected" type="button" role="listitem" data-job-card="aurora" aria-pressed="true">
+            <h3 class="job-card__title">Product Designer</h3>
+            <p class="job-card__meta">SkyBound Labs · Remote (US)</p>
+            <p class="job-card__summary">Lead end-to-end design work for launch-ready experiences.</p>
+          </button>
+          <button class="job-card" type="button" role="listitem" data-job-card="lumen" aria-pressed="false">
+            <h3 class="job-card__title">Staff Frontend Engineer</h3>
+            <p class="job-card__meta">Lumen Analytics · Austin, TX</p>
+            <p class="job-card__summary">Build robust data visualizations and mentor the web platform team.</p>
+          </button>
+          <button class="job-card" type="button" role="listitem" data-job-card="harbor" aria-pressed="false">
+            <h3 class="job-card__title">Technical Program Manager</h3>
+            <p class="job-card__meta">Harbor Systems · New York, NY</p>
+            <p class="job-card__summary">Coordinate cross-functional initiatives for infrastructure modernization.</p>
+          </button>
+        </div>
+      </section>
+
+      <section class="explore-details" aria-labelledby="details-heading" data-job-detail>
+        <h2 class="explore-details__title" id="details-heading" data-detail-title>
+          Product Designer at SkyBound Labs
+        </h2>
+        <p class="explore-details__meta" data-detail-meta>Remote (US) · Full-time · Posted 3 days ago</p>
+        <div class="explore-details__body" data-detail-body>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vestibulum ligula eget metus viverra,
+            vitae consequat lorem mattis. Integer id nisi ut quam ullamcorper ullamcorper vitae eget sapien.
+          </p>
+          <p>
+            Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris
+            pharetra magna vitae lectus vulputate, ut hendrerit velit volutpat.
+          </p>
+        </div>
+      </section>
+    </main>
   </body>
 
   <script type="module" src="./src/pages/explore.ts"></script>
