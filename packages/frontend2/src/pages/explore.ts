@@ -13,51 +13,62 @@ type ExploreJob = {
   posted: string;
   details: string[];
 };
+import type { Job } from "../api/apiTypes";
 
-const jobEntries: ExploreJob[] = [
+const daysAgo = (days: number) => Date.now() - days * 24 * 60 * 60 * 1000;
+
+const jobEntries: Job[] = [
   {
     id: "aurora",
-    title: "Product Designer",
+    companyId: "skybound-labs",
     company: "SkyBound Labs",
+    title: "Product Designer",
+    description:
+      "Lead end-to-end design work for launch-ready experiences.\n\nCollaborate with cross-functional partners to deliver intuitive workflows.\n\nCreate design systems that scale across multiple product surfaces.",
+    postTS: daysAgo(3),
+    applyUrl: "#",
+    isRemote: true,
     location: "Remote (US)",
-    commitment: "Full-time · Remote",
-    posted: "Posted 3 days ago",
-    details: [
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vestibulum ligula eget metus viverra, vitae consequat lorem mattis.",
-      "Integer id nisi ut quam ullamcorper ullamcorper vitae eget sapien. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
-      "Curabitur tristique, libero vitae egestas scelerisque, lectus libero venenatis purus, vel cursus massa enim sit amet lorem.",
-    ],
+    facets: {
+      summary: "Lead end-to-end design work for launch-ready experiences.",
+    },
   },
   {
     id: "lumen",
-    title: "Staff Frontend Engineer",
+    companyId: "lumen-analytics",
     company: "Lumen Analytics",
+    title: "Staff Frontend Engineer",
+    description:
+      "Build robust data visualizations and mentor the web platform team.\n\nShip performant interfaces in partnership with data scientists and product management.\n\nElevate code quality through reviews, documentation, and pairing sessions.",
+    postTS: daysAgo(7),
+    applyUrl: "#",
+    isRemote: false,
     location: "Austin, TX",
-    commitment: "Full-time · Hybrid",
-    posted: "Posted 1 week ago",
-    details: [
-      "Suspendisse sodales, lacus sit amet tristique sagittis, mauris velit dapibus lorem, id vulputate mauris enim vel arcu.",
-      "Mauris pharetra magna vitae lectus vulputate, ut hendrerit velit volutpat. In volutpat, nisl id volutpat accumsan, elit lorem aliquet arcu, ac porta erat ipsum sit amet est.",
-      "Aliquam vel lacus bibendum, iaculis justo at, suscipit augue. Sed fermentum ut neque eu volutpat.",
-    ],
+    facets: {
+      summary: "Build robust data visualizations and mentor the web platform team.",
+    },
   },
   {
     id: "harbor",
-    title: "Technical Program Manager",
+    companyId: "harbor-systems",
     company: "Harbor Systems",
+    title: "Technical Program Manager",
+    description:
+      "Coordinate cross-functional initiatives for infrastructure modernization.\n\nAlign engineering teams on timelines, milestones, and delivery expectations.\n\nFacilitate risk mitigation plans and stakeholder communications.",
+    postTS: daysAgo(14),
+    applyUrl: "#",
+    isRemote: false,
     location: "New York, NY",
-    commitment: "Full-time · Onsite",
-    posted: "Posted 2 weeks ago",
-    details: [
-      "Praesent convallis velit erat, vitae tincidunt nunc gravida eget. Integer egestas orci eu nibh interdum, nec ultrices libero imperdiet.",
-      "Vestibulum condimentum nisl nec purus dictum, sed rhoncus orci faucibus. Duis convallis orci ut elit aliquet, id blandit magna vehicula.",
-      "Donec vitae porta nisl. Integer suscipit, urna sed faucibus vestibulum, velit eros mattis metus, at interdum dolor sapien vitae nisi.",
-    ],
+    facets: {
+      summary: "Coordinate cross-functional initiatives for infrastructure modernization.",
+    },
   },
 ];
 
 const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));
+const jobCards = new Map<string, HTMLButtonElement>();
 
+const resultsList = document.querySelector<HTMLElement>("[data-results-list]");
 const filtersElement = document.querySelector<HTMLElement>("[data-filters]");
 const filterToggle = document.querySelector<HTMLButtonElement>("[data-filters-toggle]");
 const filtersForm = document.querySelector<HTMLFormElement>("#explore-filter-content");
@@ -105,6 +116,10 @@ const handleFiltersChange = () => {
   const filters = buildFilters();
   void api.fetchJobs(filters);
 };
+const detailSection = document.querySelector<HTMLElement>("[data-job-detail]");
+const detailTitle = detailSection?.querySelector<HTMLElement>("[data-detail-title]");
+const detailMeta = detailSection?.querySelector<HTMLElement>("[data-detail-meta]");
+const detailBody = detailSection?.querySelector<HTMLElement>("[data-detail-body]");
 
 filterToggle?.addEventListener("click", () => {
   if (!filtersElement) {
@@ -127,8 +142,38 @@ const detailSection = document.querySelector<HTMLElement>("[data-job-detail]");
 const detailTitle = detailSection?.querySelector<HTMLElement>("[data-detail-title]");
 const detailMeta = detailSection?.querySelector<HTMLElement>("[data-detail-meta]");
 const detailBody = detailSection?.querySelector<HTMLElement>("[data-detail-body]");
+const getDescriptionParagraphs = (description: string) =>
+  description
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
 
-const updateDetail = (jobId: string) => {
+const getSummaryFromJob = (job: Job) => {
+  if (job.facets?.summary) {
+    return job.facets.summary;
+  }
+
+  const [firstParagraph] = getDescriptionParagraphs(job.description);
+  return firstParagraph ?? "";
+};
+
+const formatPostedDate = (postTS: number) => {
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  const elapsed = Date.now() - postTS;
+  const days = Math.max(0, Math.round(elapsed / millisecondsPerDay));
+
+  if (days === 0) {
+    return "Posted today";
+  }
+
+  if (days === 1) {
+    return "Posted 1 day ago";
+  }
+
+  return `Posted ${days} days ago`;
+};
+
+function updateDetail(jobId: string) {
   const job = jobMap.get(jobId);
 
   if (!job || !detailTitle || !detailMeta || !detailBody) {
@@ -136,42 +181,73 @@ const updateDetail = (jobId: string) => {
   }
 
   detailTitle.textContent = `${job.title} at ${job.company}`;
-  detailMeta.textContent = `${job.location} · ${job.commitment} · ${job.posted}`;
-  detailBody.innerHTML = "";
 
-  job.details.forEach((text) => {
+  const metaParts = [job.location, job.isRemote ? "Remote" : "Onsite", formatPostedDate(job.postTS)];
+  detailMeta.textContent = metaParts.join(" · ");
+
+  detailBody.innerHTML = "";
+  getDescriptionParagraphs(job.description).forEach((text) => {
     const paragraph = document.createElement("p");
     paragraph.textContent = text;
     detailBody.appendChild(paragraph);
   });
-};
+}
 
-const selectCard = (selectedId: string) => {
-  jobCards.forEach((card) => {
-    const cardId = card.dataset["jobCard"] ?? "";
-    const isActive = cardId === selectedId;
+function selectCard(selectedId: string) {
+  jobCards.forEach((card, id) => {
+    const isActive = id === selectedId;
     card.classList.toggle("is-selected", isActive);
     card.setAttribute("aria-pressed", String(isActive));
   });
+}
+
+function showJob(jobId: string) {
+  selectCard(jobId);
+  updateDetail(jobId);
+}
+
+const renderJobCard = (job: Job, isSelected: boolean) => {
+  const card = document.createElement("button");
+  card.className = "job-card";
+  card.type = "button";
+  card.dataset["jobCard"] = job.id;
+  card.setAttribute("role", "listitem");
+  card.classList.toggle("is-selected", isSelected);
+  card.setAttribute("aria-pressed", String(isSelected));
+
+  const title = document.createElement("h3");
+  title.className = "job-card__title";
+  title.textContent = job.title;
+  card.appendChild(title);
+
+  const meta = document.createElement("p");
+  meta.className = "job-card__meta";
+  meta.textContent = `${job.company} · ${job.location}`;
+  card.appendChild(meta);
+
+  const summary = document.createElement("p");
+  summary.className = "job-card__summary";
+  summary.textContent = getSummaryFromJob(job);
+  card.appendChild(summary);
+
+  card.addEventListener("click", () => {
+    showJob(job.id);
+  });
+
+  jobCards.set(job.id, card);
+
+  return card;
 };
 
-jobCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    const jobId = card.dataset["jobCard"];
-
-    if (!jobId) {
-      return;
-    }
-
-    selectCard(jobId);
-    updateDetail(jobId);
+if (resultsList) {
+  jobEntries.forEach((job, index) => {
+    const card = renderJobCard(job, index === 0);
+    resultsList.appendChild(card);
   });
-});
+}
 
-const defaultCard = document.querySelector<HTMLButtonElement>(".job-card.is-selected");
-const initialId = defaultCard?.dataset["jobCard"] ?? jobEntries[0]?.id;
+const initialId = jobEntries[0]?.id;
 
 if (initialId) {
-  selectCard(initialId);
-  updateDetail(initialId);
+  showJob(initialId);
 }
