@@ -1,7 +1,9 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
 import type { Metadata } from "./apiTypes";
 
-const API_URL = import.meta.env["VITE_API_URL"];
+const viteApiUrl = import.meta.env["VITE_API_URL"];
+const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
+const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -23,7 +25,9 @@ class APIConnector {
   }
 
   protected async httpCall<T>(url: string): Promise<T> {
-    const response = await fetch(`${API_URL}/${url}`, {
+    const trimmedUrl = url.replace(/^\/+/, "");
+
+    const response = await fetch(`${API_URL}/${trimmedUrl}`, {
       signal: AbortSignal.timeout(10_000),
     });
 
