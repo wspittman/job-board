@@ -2,18 +2,7 @@ import "../sharedStyles/all.css";
 import "./explore.css";
 
 import { api } from "../api/api";
-import type { Filters } from "../api/apiTypes";
-
-type ExploreJob = {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  commitment: string;
-  posted: string;
-  details: string[];
-};
-import type { Job } from "../api/apiTypes";
+import type { Filters, Job } from "../api/apiTypes";
 
 const daysAgo = (days: number) => Date.now() - days * 24 * 60 * 60 * 1000;
 
@@ -45,7 +34,8 @@ const jobEntries: Job[] = [
     isRemote: false,
     location: "Austin, TX",
     facets: {
-      summary: "Build robust data visualizations and mentor the web platform team.",
+      summary:
+        "Build robust data visualizations and mentor the web platform team.",
     },
   },
   {
@@ -60,7 +50,8 @@ const jobEntries: Job[] = [
     isRemote: false,
     location: "New York, NY",
     facets: {
-      summary: "Coordinate cross-functional initiatives for infrastructure modernization.",
+      summary:
+        "Coordinate cross-functional initiatives for infrastructure modernization.",
     },
   },
 ];
@@ -70,8 +61,12 @@ const jobCards = new Map<string, HTMLButtonElement>();
 
 const resultsList = document.querySelector<HTMLElement>("[data-results-list]");
 const filtersElement = document.querySelector<HTMLElement>("[data-filters]");
-const filterToggle = document.querySelector<HTMLButtonElement>("[data-filters-toggle]");
-const filtersForm = document.querySelector<HTMLFormElement>("#explore-filter-content");
+const filterToggle = document.querySelector<HTMLButtonElement>(
+  "[data-filters-toggle]"
+);
+const filtersForm = document.querySelector<HTMLFormElement>(
+  "#explore-filter-content"
+);
 
 const buildFilters = (): Filters => {
   const filters: Filters = {};
@@ -117,9 +112,13 @@ const handleFiltersChange = () => {
   void api.fetchJobs(filters);
 };
 const detailSection = document.querySelector<HTMLElement>("[data-job-detail]");
-const detailTitle = detailSection?.querySelector<HTMLElement>("[data-detail-title]");
-const detailMeta = detailSection?.querySelector<HTMLElement>("[data-detail-meta]");
-const detailBody = detailSection?.querySelector<HTMLElement>("[data-detail-body]");
+const detailTitle = detailSection?.querySelector<HTMLElement>(
+  "[data-detail-title]"
+);
+const detailMeta =
+  detailSection?.querySelector<HTMLElement>("[data-detail-meta]");
+const detailBody =
+  detailSection?.querySelector<HTMLElement>("[data-detail-body]");
 
 filterToggle?.addEventListener("click", () => {
   if (!filtersElement) {
@@ -137,11 +136,6 @@ if (filtersForm) {
   filtersForm.addEventListener("change", handleFiltersChange);
 }
 
-const jobCards = document.querySelectorAll<HTMLButtonElement>("[data-job-card]");
-const detailSection = document.querySelector<HTMLElement>("[data-job-detail]");
-const detailTitle = detailSection?.querySelector<HTMLElement>("[data-detail-title]");
-const detailMeta = detailSection?.querySelector<HTMLElement>("[data-detail-meta]");
-const detailBody = detailSection?.querySelector<HTMLElement>("[data-detail-body]");
 const getDescriptionParagraphs = (description: string) =>
   description
     .split(/\n\s*\n/)
@@ -182,7 +176,11 @@ function updateDetail(jobId: string) {
 
   detailTitle.textContent = `${job.title} at ${job.company}`;
 
-  const metaParts = [job.location, job.isRemote ? "Remote" : "Onsite", formatPostedDate(job.postTS)];
+  const metaParts = [
+    job.location,
+    job.isRemote ? "Remote" : "Onsite",
+    formatPostedDate(job.postTS),
+  ];
   detailMeta.textContent = metaParts.join(" · ");
 
   detailBody.innerHTML = "";
