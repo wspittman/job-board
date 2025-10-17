@@ -1,6 +1,6 @@
 # Frontend 2
 
-This package contains the second iteration of the Job Board frontend. It is a Vite-powered React application that renders the marketing site (home, FAQ, explore, and 404 pages) that complements the primary dashboard experience.
+This package contains the second iteration of the Job Board frontend. It is a Vite-powered React application intended as a near-future replacement for the existing frontend experience.
 
 ## Getting started
 
@@ -41,8 +41,13 @@ packages/frontend2/
 
 ## Environment variables
 
-The marketing experience does not currently rely on environment variables. If you add configuration in the future, document it here so the setup remains self-contained.
+The development server relies on the backend proxy defined in `vite.config.ts`. For production, `server.js` reads these variables:
 
-## Related packages
+| Variable  | Description                                                                                               |
+| --------- | --------------------------------------------------------------------------------------------------------- |
+| `PORT`    | Port used by the Express static file server (defaults to `8080`).                                         |
+| `API_URL` | Base URL for proxied API requests, including the `/api` prefix (defaults to `http://localhost:3000/api`). |
 
-The broader Job Board application also contains the main dashboard frontend in `packages/frontend` and the API server in `packages/backend`. Changes in those workspaces may require coordinating updates here to keep navigation and shared resources aligned.
+## Troubleshooting
+
+- Ensure the backend service is running (or `API_URL` points to a deployed instance) so proxied API calls succeed during development and production.
