@@ -1,6 +1,18 @@
 import "../sharedStyles/all.css";
 import "./explore.css";
 
+import { api } from "../api/api";
+import type { Filters } from "../api/apiTypes";
+
+type ExploreJob = {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  commitment: string;
+  posted: string;
+  details: string[];
+};
 import type { Job } from "../api/apiTypes";
 
 const daysAgo = (days: number) => Date.now() - days * 24 * 60 * 60 * 1000;
@@ -59,6 +71,51 @@ const jobCards = new Map<string, HTMLButtonElement>();
 const resultsList = document.querySelector<HTMLElement>("[data-results-list]");
 const filtersElement = document.querySelector<HTMLElement>("[data-filters]");
 const filterToggle = document.querySelector<HTMLButtonElement>("[data-filters-toggle]");
+const filtersForm = document.querySelector<HTMLFormElement>("#explore-filter-content");
+
+const buildFilters = (): Filters => {
+  const filters: Filters = {};
+
+  if (!filtersForm) {
+    return filters;
+  }
+
+  const formData = new FormData(filtersForm);
+  const titleValue = (formData.get("title") as string | null)?.trim();
+
+  if (titleValue) {
+    filters.title = titleValue;
+  }
+
+  const postedRaw = formData.get("posted");
+
+  if (typeof postedRaw === "string") {
+    const trimmedPosted = postedRaw.trim();
+
+    if (trimmedPosted) {
+      const days = Number.parseInt(trimmedPosted, 10);
+
+      if (!Number.isNaN(days)) {
+        filters.daysSince = days;
+      }
+    }
+  }
+
+  const remoteValue = formData.get("remote");
+
+  if (remoteValue === "remote") {
+    filters.isRemote = true;
+  } else if (remoteValue === "hybrid") {
+    filters.isRemote = false;
+  }
+
+  return filters;
+};
+
+const handleFiltersChange = () => {
+  const filters = buildFilters();
+  void api.fetchJobs(filters);
+};
 const detailSection = document.querySelector<HTMLElement>("[data-job-detail]");
 const detailTitle = detailSection?.querySelector<HTMLElement>("[data-detail-title]");
 const detailMeta = detailSection?.querySelector<HTMLElement>("[data-detail-meta]");
@@ -75,6 +132,16 @@ filterToggle?.addEventListener("click", () => {
   filterToggle.setAttribute("aria-expanded", String(nextState === "open"));
 });
 
+if (filtersForm) {
+  filtersForm.addEventListener("input", handleFiltersChange);
+  filtersForm.addEventListener("change", handleFiltersChange);
+}
+
+const jobCards = document.querySelectorAll<HTMLButtonElement>("[data-job-card]");
+const detailSection = document.querySelector<HTMLElement>("[data-job-detail]");
+const detailTitle = detailSection?.querySelector<HTMLElement>("[data-detail-title]");
+const detailMeta = detailSection?.querySelector<HTMLElement>("[data-detail-meta]");
+const detailBody = detailSection?.querySelector<HTMLElement>("[data-detail-body]");
 const getDescriptionParagraphs = (description: string) =>
   description
     .split(/\n\s*\n/)

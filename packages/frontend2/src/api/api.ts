@@ -1,5 +1,5 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
-import type { Metadata } from "./apiTypes";
+import type { Filters, Job, Metadata } from "./apiTypes";
 
 const viteApiUrl = import.meta.env["VITE_API_URL"];
 const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
@@ -22,6 +22,11 @@ class APIConnector {
       queryKey: ["metadata"],
       queryFn: () => this.httpCall<Metadata>("metadata"),
     });
+  }
+
+  public async fetchJobs(filters: Filters): Promise<Job[]> {
+    console.log(filters);
+    return [];
   }
 
   protected async httpCall<T>(url: string): Promise<T> {
