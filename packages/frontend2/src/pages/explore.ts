@@ -1,60 +1,11 @@
+import "../components/explore-details.ts";
 import "../sharedStyles/all.css";
 import "./explore.css";
 
 import { api } from "../api/api";
 import type { Filters, Job } from "../api/apiTypes";
 
-const daysAgo = (days: number) => Date.now() - days * 24 * 60 * 60 * 1000;
-
-const jobEntries: Job[] = [
-  {
-    id: "aurora",
-    companyId: "skybound-labs",
-    company: "SkyBound Labs",
-    title: "Product Designer",
-    description:
-      "Lead end-to-end design work for launch-ready experiences.\n\nCollaborate with cross-functional partners to deliver intuitive workflows.\n\nCreate design systems that scale across multiple product surfaces.",
-    postTS: daysAgo(3),
-    applyUrl: "#",
-    isRemote: true,
-    location: "Remote (US)",
-    facets: {
-      summary: "Lead end-to-end design work for launch-ready experiences.",
-    },
-  },
-  {
-    id: "lumen",
-    companyId: "lumen-analytics",
-    company: "Lumen Analytics",
-    title: "Staff Frontend Engineer",
-    description:
-      "Build robust data visualizations and mentor the web platform team.\n\nShip performant interfaces in partnership with data scientists and product management.\n\nElevate code quality through reviews, documentation, and pairing sessions.",
-    postTS: daysAgo(7),
-    applyUrl: "#",
-    isRemote: false,
-    location: "Austin, TX",
-    facets: {
-      summary:
-        "Build robust data visualizations and mentor the web platform team.",
-    },
-  },
-  {
-    id: "harbor",
-    companyId: "harbor-systems",
-    company: "Harbor Systems",
-    title: "Technical Program Manager",
-    description:
-      "Coordinate cross-functional initiatives for infrastructure modernization.\n\nAlign engineering teams on timelines, milestones, and delivery expectations.\n\nFacilitate risk mitigation plans and stakeholder communications.",
-    postTS: daysAgo(14),
-    applyUrl: "#",
-    isRemote: false,
-    location: "New York, NY",
-    facets: {
-      summary:
-        "Coordinate cross-functional initiatives for infrastructure modernization.",
-    },
-  },
-];
+const jobEntries: Job[] = await api.fetchJobs({});
 
 const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));
 const jobCards = new Map<string, HTMLButtonElement>();
@@ -202,6 +153,11 @@ function selectCard(selectedId: string) {
 function showJob(jobId: string) {
   selectCard(jobId);
   updateDetail(jobId);
+
+  const deets = document.querySelector<HTMLElement>("explore-details");
+  if (deets) {
+    (deets as any).job = jobMap.get(jobId);
+  }
 }
 
 const renderJobCard = (job: Job, isSelected: boolean) => {

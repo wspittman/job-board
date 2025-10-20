@@ -7,24 +7,18 @@
   </head>
   <body>
     <!-- @include: ./src/partials/header.html -->
-    <main class="explore-layout" id="explore-layout" aria-labelledby="explore-heading">
+
+    <main class="explore-page">
       <aside class="explore-filters" data-state="open" data-filters>
         <div class="explore-filters__header">
           <h1 class="explore-heading" id="explore-heading">Explore Jobs</h1>
-          <button
-            class="explore-filters__toggle"
-            type="button"
-            aria-expanded="true"
-            aria-controls="explore-filter-content"
-            data-filters-toggle
-          >
-            Filters
-          </button>
         </div>
         <form class="explore-filters__content" id="explore-filter-content">
           <fieldset class="explore-filters__group">
             <legend class="explore-filters__legend">Job Title</legend>
-            <label class="explore-filters__label" for="filter-title">Search by title</label>
+            <label class="explore-filters__label" for="filter-title"
+              >Search by title</label
+            >
             <input
               class="explore-filters__input"
               type="text"
@@ -36,7 +30,9 @@
 
           <fieldset class="explore-filters__group">
             <legend class="explore-filters__legend">Posted Since</legend>
-            <label class="explore-filters__label" for="filter-posted">Within the last (days)</label>
+            <label class="explore-filters__label" for="filter-posted"
+              >Within the last (days)</label
+            >
             <input
               class="explore-filters__input"
               type="number"
@@ -49,8 +45,14 @@
 
           <fieldset class="explore-filters__group">
             <legend class="explore-filters__legend">Work Style</legend>
-            <label class="explore-filters__label" for="filter-remote">Location</label>
-            <select class="explore-filters__input" id="filter-remote" name="remote">
+            <label class="explore-filters__label" for="filter-remote"
+              >Location</label
+            >
+            <select
+              class="explore-filters__input"
+              id="filter-remote"
+              name="remote"
+            >
               <option value="any">Any</option>
               <option value="remote">Remote</option>
               <option value="hybrid">In-Person / Hybrid</option>
@@ -61,19 +63,33 @@
 
       <section class="explore-results" aria-labelledby="results-heading">
         <div class="explore-results__header">
-          <h2 class="explore-results__title" id="results-heading">Job Results</h2>
-          <p class="explore-results__subtitle">Select a role to preview the details.</p>
+          <h2 class="explore-results__title" id="results-heading">
+            Job Results
+          </h2>
+          <p class="explore-results__subtitle">
+            Select a role to preview the details.
+          </p>
         </div>
         <div class="explore-results__list" role="list" data-results-list></div>
       </section>
 
-      <section class="explore-details" aria-labelledby="details-heading" data-job-detail>
-        <h2 class="explore-details__title" id="details-heading" data-detail-title>
+      <section
+        class="explore-details"
+        aria-labelledby="details-heading"
+        data-job-detail
+      >
+        <h2
+          class="explore-details__title"
+          id="details-heading"
+          data-detail-title
+        >
           Select a role to preview the details
         </h2>
         <p class="explore-details__meta" data-detail-meta></p>
         <div class="explore-details__body" data-detail-body></div>
       </section>
+
+      <explore-details></explore-details>
     </main>
   </body>
 

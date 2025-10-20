@@ -1,13 +1,9 @@
-.explore-layout {
-  display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(260px, 320px);
-  gap: var(--space-xl);
+.explore-page {
+  display: flex;
   align-items: start;
-  padding: var(--space-xl) clamp(var(--space-md), 5vw, var(--space-xxl)) var(--space-xxl);
-  width: min(1200px, 100%);
-  margin-inline: auto;
   max-width: none;
-  background: var(--bg-default);
+  padding: var(--space-md);
+  gap: var(--space-md);
 }
 
 .explore-heading {

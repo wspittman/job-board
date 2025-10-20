@@ -11,9 +11,10 @@ partsSheet.replaceSync(parts);
 
 export const componentCssReset = [normSheet, partsSheet];
 
-const getEl = (root: Node, selector: string) =>
+export const getEl = (root: Node, selector: string) =>
   root.querySelector<HTMLElement>(selector);
-const getAllEls = (root: Node, selector: string) =>
+
+export const getAllEls = (root: Node, selector: string) =>
   root.querySelectorAll<HTMLElement>(selector);
 
 export function setText(root: Node, selector: string, value: string) {

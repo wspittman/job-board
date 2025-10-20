@@ -1,5 +1,4 @@
 import { api } from "../api/api.ts";
-import "./stat-card-area.css";
 import css from "./stat-card-area.css?raw";
 import html from "./stat-card-area.html?raw";
 import { componentCssReset, setDisplay, setText } from "./utils.ts";
