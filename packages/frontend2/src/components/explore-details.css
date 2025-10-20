@@ -1,4 +1,4 @@
-.explore-details {
+.container {
   background: var(--surface);
   border-radius: calc(var(--radius) * 1.5);
   box-shadow: var(--shadow-soft);

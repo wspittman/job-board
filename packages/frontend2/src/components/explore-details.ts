@@ -1,22 +1,15 @@
 import type { Job } from "../api/apiTypes.ts";
+import { ComponentBase } from "./componentBase.ts";
 import css from "./explore-details.css?raw";
 import html from "./explore-details.html?raw";
-import { componentCssReset, getEl, setText } from "./utils.ts";
 
-const cssSheet = new CSSStyleSheet();
-cssSheet.replaceSync(css);
+const cssSheet = ComponentBase.createCSSSheet(css);
 
-class ExploreDetails extends HTMLElement {
-  static tag = "explore-details";
-
-  #root: ShadowRoot;
+class ExploreDetails extends ComponentBase {
   #job?: Job;
 
   constructor() {
-    super();
-    this.#root = this.attachShadow({ mode: "open" });
-    this.#root.adoptedStyleSheets = [...componentCssReset, cssSheet];
-    this.#root.innerHTML = html;
+    super(cssSheet, html);
   }
 
   set job(value: Job | undefined) {
@@ -27,28 +20,19 @@ class ExploreDetails extends HTMLElement {
   }
 
   #render() {
-    const job = this.#job;
+    const { title, company, location, postTS, description } = this.#job ?? {};
+    const postDate = postTS ? new Date(postTS).toLocaleDateString() : "";
 
-    setText(
-      this.#root,
-      "#details-heading",
-      job ? job.title : "Select a role to preview the deets"
+    this.setText(
+      "details-heading",
+      title ?? "Select a role to preview the deets"
     );
 
-    setText(this.#root, "#company", job ? job.company : "");
-
-    setText(this.#root, "#location", job ? job.location : "");
-
-    setText(
-      this.#root,
-      "#posted-date",
-      job ? new Date(job.postTS).toLocaleDateString() : ""
-    );
-
-    getEl(this.#root, "#description")!.innerHTML = job ? job.description : "";
+    this.setText("company", company);
+    this.setText("location", location);
+    this.setText("posted-date", postDate);
+    this.getEl("description")!.innerHTML = description ?? "";
   }
 }
 
-if (!customElements.get(ExploreDetails.tag)) {
-  customElements.define(ExploreDetails.tag, ExploreDetails);
-}
+ComponentBase.register("explore-details", ExploreDetails);

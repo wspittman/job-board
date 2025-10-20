@@ -1,5 +1,5 @@
-.stats {
-  display: none; /* hidden by default, "grid" when populated */
+.container {
+  display: grid;
   gap: var(--space-md);
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 

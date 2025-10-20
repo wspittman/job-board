@@ -1,19 +1,13 @@
 import { api } from "../api/api.ts";
+import { ComponentBase } from "./componentBase.ts";
 import css from "./stat-card-area.css?raw";
 import html from "./stat-card-area.html?raw";
-import { componentCssReset, setDisplay, setText } from "./utils.ts";
 
-const cssSheet = new CSSStyleSheet();
-cssSheet.replaceSync(css);
+const cssSheet = ComponentBase.createCSSSheet(css);
 
-class StatCardAreaElement extends HTMLElement {
-  #root: ShadowRoot;
-
+class StatCardArea extends ComponentBase {
   constructor() {
-    super();
-    this.#root = this.attachShadow({ mode: "open" });
-    this.#root.adoptedStyleSheets = [...componentCssReset, cssSheet];
-    this.#root.innerHTML = html;
+    super(cssSheet, html);
   }
 
   connectedCallback() {
@@ -25,15 +19,13 @@ class StatCardAreaElement extends HTMLElement {
       const data = await api.fetchMetadata();
       if (!this.isConnected) return;
 
-      setText(this.#root, "#job-count", data.jobCount.toLocaleString());
-      setText(this.#root, "#company-count", data.companyCount.toLocaleString());
-      setDisplay(this.#root, ".stats", "grid");
+      this.setText("job-count", data.jobCount.toLocaleString());
+      this.setText("company-count", data.companyCount.toLocaleString());
+      this.show();
     } catch (err) {
       // ignore
     }
   }
 }
 
-if (!customElements.get("stat-card-area")) {
-  customElements.define("stat-card-area", StatCardAreaElement);
-}
+ComponentBase.register("stat-card-area", StatCardArea);
