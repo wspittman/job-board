@@ -1,5 +1,6 @@
 import type { Job } from "../api/apiTypes.ts";
 import { ComponentBase } from "./componentBase.ts";
+import { ExploreDetailEmbed } from "./explore-detail-embed.ts";
 import css from "./explore-details.css?raw";
 import html from "./explore-details.html?raw";
 
@@ -9,7 +10,7 @@ class ExploreDetails extends ComponentBase {
   #job?: Job;
 
   constructor() {
-    super(cssSheet, html);
+    super(html, cssSheet);
   }
 
   set job(value: Job | undefined) {
@@ -31,7 +32,11 @@ class ExploreDetails extends ComponentBase {
     this.setText("company", company);
     this.setText("location", location);
     this.setText("posted-date", postDate);
-    this.getEl("description")!.innerHTML = description ?? "";
+
+    const desc = this.getEl<ExploreDetailEmbed>("description");
+    if (desc) {
+      desc.description = description ?? "";
+    }
   }
 }
 

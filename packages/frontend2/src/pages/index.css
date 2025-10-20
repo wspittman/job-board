@@ -68,7 +68,6 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
   text-align: center;
-  color: var(--primary-main);
 }
 
 .chip-list {

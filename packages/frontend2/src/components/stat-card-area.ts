@@ -7,7 +7,7 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 
 class StatCardArea extends ComponentBase {
   constructor() {
-    super(cssSheet, html);
+    super(html, cssSheet);
   }
 
   connectedCallback() {

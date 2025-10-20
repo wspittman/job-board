@@ -7,15 +7,17 @@ export abstract class ComponentBase extends HTMLElement {
 
   protected root: ShadowRoot;
 
-  constructor(css: CSSStyleSheet, initialHtml: string) {
+  constructor(html: string, css: CSSStyleSheet, omitPartsCss: boolean = false) {
     super();
     this.root = this.attachShadow({ mode: "open" });
-    this.root.adoptedStyleSheets = [
-      ComponentBase.#normSheet,
-      ComponentBase.#partsSheet,
-      css,
-    ];
-    this.root.innerHTML = initialHtml;
+
+    const sheets = [ComponentBase.#normSheet];
+    if (!omitPartsCss) {
+      sheets.push(ComponentBase.#partsSheet);
+    }
+    sheets.push(css);
+    this.root.adoptedStyleSheets = sheets;
+    this.root.innerHTML = html;
   }
 
   protected hide() {
@@ -31,8 +33,8 @@ export abstract class ComponentBase extends HTMLElement {
     if (el) el.textContent = value;
   }
 
-  protected getEl(id: string): HTMLElement | null {
-    return this.root.getElementById(id);
+  protected getEl<T extends HTMLElement>(id: string): T | null {
+    return this.root.getElementById(id) as T | null;
   }
 
   static register(tag: string, element: typeof HTMLElement) {

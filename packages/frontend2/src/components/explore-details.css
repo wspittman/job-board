@@ -7,19 +7,19 @@
   gap: var(--space-md);
 }
 
-.explore-details__title {
+.title {
   margin: 0;
   font-size: var(--h3-size);
   color: var(--primary-dark);
 }
 
-.explore-details__meta {
+.meta {
   margin: 0;
   color: var(--text-muted);
   font-size: var(--size-sm);
 }
 
-.explore-details__body {
+.description {
   display: grid;
   gap: var(--space-md);
   color: var(--text-default);
@@ -27,13 +27,13 @@
 }
 
 @media (max-width: 1100px) {
-  .explore-details {
+  .container {
     grid-column: span 2;
   }
 }
 
 @media (max-width: 768px) {
-  .explore-details {
+  .container {
     grid-column: auto;
   }
 }

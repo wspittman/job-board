@@ -14,6 +14,7 @@ h1,
 h2 {
   line-height: var(--heading-line-height);
   margin: 0 0 0.5em 0;
+  color: var(--primary-main);
 }
 h1 {
   font-size: var(--h1-size);

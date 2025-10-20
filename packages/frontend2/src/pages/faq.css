@@ -7,10 +7,6 @@
   margin-bottom: var(--space-xl);
 }
 
-.faq-title {
-  color: var(--primary-main);
-}
-
 .faq-intro {
   max-width: 720px;
   margin: 0 auto;
