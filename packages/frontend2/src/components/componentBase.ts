@@ -28,6 +28,12 @@ export abstract class ComponentBase extends HTMLElement {
     this.style.display = "block";
   }
 
+  protected setManyTexts(values: Record<string, string | undefined>) {
+    for (const [id, value] of Object.entries(values)) {
+      this.setText(id, value);
+    }
+  }
+
   protected setText(id: string, value: string = "") {
     const el = this.getEl(id);
     if (el) el.textContent = value;

@@ -24,11 +24,12 @@ export class ExploreDetails extends ComponentBase {
     const { title, company, location, postTS, description } = this.#job ?? {};
     const postDate = postTS ? new Date(postTS).toLocaleDateString() : "";
 
-    this.setText("heading", title ?? "Select a role to preview the deets");
-
-    this.setText("company", company);
-    this.setText("location", location);
-    this.setText("posted-date", postDate);
+    this.setManyTexts({
+      heading: title,
+      company,
+      location,
+      "posted-date": postDate,
+    });
 
     const desc = this.getEl<ExploreDetailEmbed>("description");
     if (desc) {

@@ -8,14 +8,35 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 export class ExploreJobCard extends ComponentBase {
   #job?: Job;
   #isSelected = false;
+  #onClick?: (id: string) => void;
 
   constructor() {
     super(html, cssSheet);
   }
 
+  set job(value: Job | undefined) {
+    if (this.#job?.id === value?.id) return;
+    this.#job = value;
+
+    const { title, company, location, postTS = 0, facets } = this.#job ?? {};
+    const { salary, experience, summary } = facets ?? {};
+    const postDays = Math.floor((Date.now() - postTS) / (1000 * 60 * 60 * 24));
+    const postedText = !Number.isNaN(postDays) && (postDays || "today");
+    const postedSuffix = postDays ? "days ago" : "";
+
+    this.setManyTexts({
+      title,
+      company,
+      location,
+      salary: salary?.toLocaleString(),
+      experience: experience ? `${experience} years experience` : "",
+      "posted-date": `${postedText} ${postedSuffix}`,
+      summary,
+    });
+  }
+
   set isSelected(value: boolean) {
     if (this.#isSelected === value) return;
-
     this.#isSelected = value;
 
     const el = this.getEl<HTMLElement>("container");
@@ -25,30 +46,14 @@ export class ExploreJobCard extends ComponentBase {
     }
   }
 
-  set job(value: Job | undefined) {
-    if (this.#job?.id === value?.id) return;
+  set onClick(value: ((id: string) => void) | undefined) {
+    if (this.#onClick === value) return;
+    this.#onClick = value;
 
-    this.#job = value;
-    this.#render();
-  }
-
-  #render() {
-    const { title, company, location, postTS = 0, facets } = this.#job ?? {};
-    const { salary, experience, summary } = facets ?? {};
-    const postDays = Math.floor((Date.now() - postTS) / (1000 * 60 * 60 * 24));
-    const postedText = !Number.isNaN(postDays) && (postDays || "today");
-    const postedSuffix = postDays ? "days ago" : "";
-
-    this.setText("title", title);
-    this.setText("company", company);
-    this.setText("location", location);
-    this.setText("salary", salary?.toLocaleString());
-    this.setText(
-      "experience",
-      experience ? `${experience} years experience` : ""
-    );
-    this.setText("posted-date", `${postedText} ${postedSuffix}`);
-    this.setText("summary", summary);
+    const el = this.getEl<HTMLElement>("container");
+    if (el) {
+      el.onclick = () => this.#onClick?.(this.#job?.id ?? "");
+    }
   }
 }
 

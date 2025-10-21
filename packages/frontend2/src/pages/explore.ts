@@ -84,17 +84,12 @@ if (filtersForm) {
 
 function selectCard(selectedId: string) {
   jobCards.forEach((card, id) => {
-    const isActive = id === selectedId;
-    card.isSelected = isActive;
+    card.isSelected = id === selectedId;
   });
-}
-
-function showJob(jobId: string) {
-  selectCard(jobId);
 
   const deets = document.querySelector<ExploreDetails>("explore-details");
   if (deets) {
-    deets.job = jobMap.get(jobId);
+    deets.job = jobMap.get(selectedId);
   }
 }
 
@@ -102,10 +97,7 @@ const renderJobCard = (job: Job, isSelected: boolean) => {
   const card = document.createElement("explore-job-card") as ExploreJobCard;
   card.job = job;
   card.isSelected = isSelected;
-
-  card.addEventListener("click", () => {
-    showJob(job.id);
-  });
+  card.onClick = selectCard;
 
   jobCards.set(job.id, card);
 
@@ -122,5 +114,5 @@ if (resultsList) {
 const initialId = jobEntries[0]?.id;
 
 if (initialId) {
-  showJob(initialId);
+  selectCard(initialId);
 }
