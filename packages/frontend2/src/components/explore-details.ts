@@ -6,7 +6,7 @@ import html from "./explore-details.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
-class ExploreDetails extends ComponentBase {
+export class ExploreDetails extends ComponentBase {
   #job?: Job;
 
   constructor() {

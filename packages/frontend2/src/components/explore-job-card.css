@@ -1,0 +1,39 @@
+.container {
+  background: var(--bg-surface);
+  padding: var(--space-md);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-soft);
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-default);
+  line-height: 1.6;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--primary-main);
+    box-shadow: var(--shadow-focus);
+  }
+
+  &.is-selected {
+    background: var(--primary-soft);
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.company {
+  color: var(--primary-dark);
+  margin-bottom: var(--space-md);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.meta {
+  display: flex;
+  gap: var(--space-sm);
+}
