@@ -1,5 +1,5 @@
 .container {
-  background: var(--surface);
+  background: var(--bg-surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
   padding: var(--space-lg);
@@ -19,7 +19,7 @@
 .apply {
   padding: var(--space-sm) var(--space-md);
   background: var(--primary-gradient-btn);
-  color: var(--primary-contrast);
+  color: var(--text-contrast);
 
   &:hover,
   &:focus-visible {

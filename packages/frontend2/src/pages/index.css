@@ -64,7 +64,7 @@
 .hm-search-card {
   margin: var(--space-xl) auto;
   padding: var(--space-xl);
-  background: var(--surface);
+  background: var(--bg-surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
   text-align: center;
@@ -76,7 +76,7 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-md);
-  color: var(--secondary-contrast);
+  color: var(--text-contrast);
 }
 
 .chip {
@@ -99,7 +99,7 @@
   padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius);
   background: var(--primary-gradient-btn);
-  color: var(--primary-contrast);
+  color: var(--text-contrast);
   font-size: var(--size-sm);
   text-decoration: none;
 
@@ -108,6 +108,6 @@
     text-decoration: underline;
     text-underline-offset: var(--space-xs);
     box-shadow: var(--shadow-focus);
-    color: var(--primary-contrast);
+    color: var(--text-contrast);
   }
 }

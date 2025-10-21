@@ -22,7 +22,7 @@
 
 .faq-item {
   border-radius: var(--radius);
-  background: var(--surface);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-soft);
   overflow: hidden;
 
@@ -56,7 +56,7 @@
 }
 
 .faq-item[open] summary {
-  background: rgba(96, 54, 198, 0.06);
+  background: var(--primary-soft);
 
   &::after {
     transform: rotate(90deg);

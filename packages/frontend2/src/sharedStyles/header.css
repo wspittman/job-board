@@ -7,7 +7,7 @@
   gap: var(--space-md);
   height: var(--space-xl);
   background: var(--primary-main);
-  color: var(--primary-contrast);
+  color: var(--text-contrast);
   align-items: center;
   box-shadow: var(--shadow-soft);
 }
@@ -95,7 +95,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--bg-backdrop);
   z-index: 1099;
   opacity: 0;
   transition: opacity 250ms ease-in-out;
@@ -156,18 +156,18 @@
 
     &:hover {
       text-decoration: none;
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--bg-hover);
     }
 
     &:active {
-      background: rgba(0, 0, 0, 0.1);
+      background: var(--bg-active);
     }
   }
 
   .nav-divider {
     display: block;
     height: 1px;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--bg-active);
     margin: var(--space-sm);
   }
 
@@ -184,11 +184,11 @@
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--bg-hover);
     }
 
     &:active {
-      background: rgba(0, 0, 0, 0.1);
+      background: var(--bg-active);
     }
   }
 }

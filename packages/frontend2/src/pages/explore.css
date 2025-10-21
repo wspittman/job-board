@@ -14,7 +14,7 @@
 
 .explore-filters {
   position: relative;
-  background: var(--surface);
+  background: var(--bg-surface);
   border-radius: calc(var(--radius) * 1.5);
   box-shadow: var(--shadow-soft);
   padding: var(--space-lg);
@@ -45,7 +45,7 @@
 .explore-filters__toggle:hover,
 .explore-filters__toggle:focus-visible {
   background: var(--primary-main);
-  color: var(--primary-contrast);
+  color: var(--text-contrast);
 }
 
 .explore-filters__content {
@@ -79,14 +79,14 @@
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius);
   border: 1px solid rgba(17, 17, 17, 0.12);
-  background: var(--surface);
+  background: var(--bg-surface);
   font: inherit;
 }
 
 .explore-results {
-  background: var(--surface);
+  /*background: var(--bg-surface);*/
   border-radius: calc(var(--radius) * 1.5);
-  box-shadow: var(--shadow-soft);
+  /*box-shadow: var(--shadow-soft);*/
   padding: var(--space-xl);
   display: flex;
   flex-direction: column;
@@ -115,7 +115,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius);
   padding: var(--space-lg);
-  background: var(--surface);
+  background: var(--bg-surface);
   cursor: pointer;
   display: grid;
   gap: var(--space-sm);
