@@ -1,19 +1,21 @@
-<section class="container">
-  <h2 class="title" id="details-heading">
-    Select a role to preview the details
-  </h2>
-  <button>Apply</button>
-  <div>
-    <svg data-icon="building-2" aria-hidden="true"></svg>
-    <span id="company"></span>
+<section class="container" aria-labelledby="heading">
+  <div class="row">
+    <h2 class="title" id="heading">Select a role to preview the details</h2>
+    <button class="apply">Apply</button>
   </div>
-  <div>
-    <svg data-icon="map-pin" aria-hidden="true"></svg>
-    <span id="location"></span>
-  </div>
-  <div>
-    <svg data-icon="calendar" aria-hidden="true"></svg>
-    <span id="posted-date"></span>
+  <div class="row">
+    <div class="meta">
+      <svg data-icon="building-2" aria-hidden="true"></svg>
+      <span id="company"></span>
+    </div>
+    <div class="meta">
+      <svg data-icon="map-pin" aria-hidden="true"></svg>
+      <span id="location"></span>
+    </div>
+    <div class="meta">
+      <svg data-icon="calendar" aria-hidden="true"></svg>
+      <span id="posted-date"></span>
+    </div>
   </div>
   <explore-detail-embed id="description"></explore-detail-embed>
 </section>

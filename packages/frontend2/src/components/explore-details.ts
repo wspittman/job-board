@@ -24,10 +24,7 @@ class ExploreDetails extends ComponentBase {
     const { title, company, location, postTS, description } = this.#job ?? {};
     const postDate = postTS ? new Date(postTS).toLocaleDateString() : "";
 
-    this.setText(
-      "details-heading",
-      title ?? "Select a role to preview the deets"
-    );
+    this.setText("heading", title ?? "Select a role to preview the deets");
 
     this.setText("company", company);
     this.setText("location", location);
