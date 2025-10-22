@@ -6,18 +6,40 @@ import html from "./explore-job-card.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 export class ExploreJobCard extends ComponentBase {
+  // Init-only
   #job?: Job;
-  #isSelected = false;
   #onClick?: (id: string) => void;
+
+  // Editable
+  #isSelected = false;
 
   constructor() {
     super(html, cssSheet);
   }
 
-  set job(value: Job | undefined) {
-    if (this.#job?.id === value?.id) return;
-    this.#job = value;
+  init(job: Job, isSelected: boolean, onClick?: (id: string) => void) {
+    this.#job = job;
+    this.#isSelected = isSelected;
+    this.#onClick = onClick;
+    this.#renderInit();
+    this.#renderSelected();
+  }
 
+  set isSelected(value: boolean) {
+    if (this.#isSelected === value) return;
+    this.#isSelected = value;
+    this.#renderSelected();
+  }
+
+  #renderSelected() {
+    const el = this.getEl("container");
+    if (el) {
+      el.classList.toggle("is-selected", this.#isSelected);
+      el.setAttribute("aria-pressed", String(this.#isSelected));
+    }
+  }
+
+  #renderInit() {
     const {
       title,
       company,
@@ -47,22 +69,6 @@ export class ExploreJobCard extends ComponentBase {
       [!!isRemote, "Remote"],
       [showRecencyChip, recencyChipText],
     ]);
-  }
-
-  set isSelected(value: boolean) {
-    if (this.#isSelected === value) return;
-    this.#isSelected = value;
-
-    const el = this.getEl("container");
-    if (el) {
-      el.classList.toggle("is-selected", value);
-      el.setAttribute("aria-pressed", String(value));
-    }
-  }
-
-  set onClick(value: ((id: string) => void) | undefined) {
-    if (this.#onClick === value) return;
-    this.#onClick = value;
 
     const el = this.getEl("container");
     if (el) {

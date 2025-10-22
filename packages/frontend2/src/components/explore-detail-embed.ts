@@ -1,14 +1,13 @@
 import { ComponentBase } from "./componentBase";
 
+const html = '<div id="content"></div>';
+const cssSheet = ComponentBase.createCSSSheet(
+  "* { font: 14px/1.5 system-ui, sans-serif; }"
+);
+
 export class ExploreDetailEmbed extends ComponentBase {
   constructor() {
-    super(
-      '<div id="content"></div>',
-      ComponentBase.createCSSSheet(
-        "* { font: 14px/1.5 system-ui, sans-serif; }"
-      ),
-      true
-    );
+    super(html, cssSheet, { omitPartsCss: true });
   }
 
   set description(descriptionHtml: string) {

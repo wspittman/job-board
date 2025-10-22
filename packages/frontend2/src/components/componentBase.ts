@@ -1,24 +1,35 @@
 import norm from "modern-normalize/modern-normalize.css?raw";
 import parts from "../sharedStyles/parts.css?raw";
 
+interface Options {
+  omitPartsCss?: boolean;
+}
+
 export abstract class ComponentBase extends HTMLElement {
   static #normSheet = ComponentBase.createCSSSheet(norm);
   static #partsSheet = ComponentBase.createCSSSheet(parts);
 
   protected root: ShadowRoot;
 
-  constructor(html: string, css: CSSStyleSheet, omitPartsCss: boolean = false) {
+  constructor(html: string, css: CSSStyleSheet, options: Options = {}) {
+    const { omitPartsCss = false } = options;
+
     super();
     this.root = this.attachShadow({ mode: "open" });
 
-    const sheets = [ComponentBase.#normSheet];
-    if (!omitPartsCss) {
-      sheets.push(ComponentBase.#partsSheet);
-    }
-    sheets.push(css);
+    const sheets = omitPartsCss
+      ? [ComponentBase.#normSheet, css]
+      : [ComponentBase.#normSheet, ComponentBase.#partsSheet, css];
     this.root.adoptedStyleSheets = sheets;
+
     this.root.innerHTML = html;
   }
+
+  connectedCallback() {
+    this.onLoad();
+  }
+
+  protected onLoad(): void {}
 
   protected hide() {
     this.style.display = "none";

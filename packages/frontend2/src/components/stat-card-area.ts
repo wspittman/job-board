@@ -10,11 +10,7 @@ class StatCardArea extends ComponentBase {
     super(html, cssSheet);
   }
 
-  connectedCallback() {
-    this.#load();
-  }
-
-  async #load() {
+  override async onLoad() {
     try {
       const data = await api.fetchMetadata();
       if (!this.isConnected) return;
