@@ -23,17 +23,25 @@
 
 .company {
   color: var(--primary-dark);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.chip {
+  color: var(--primary-dark);
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--primary-dark);
+  border-radius: var(--radius);
+  font-size: var(--size-xs);
 }
 
 .meta {
   display: flex;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
 }

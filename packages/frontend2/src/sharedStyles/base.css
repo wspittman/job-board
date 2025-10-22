@@ -56,6 +56,7 @@
   --size-lg: clamp(1.5rem, 2.5vw, 2rem);
   --size-md: clamp(1rem, 2vw, 1.5rem);
   --size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
+  --size-xs: clamp(0.8rem, 1.25vw, 1rem);
 
   --heading-line-height: 1.2;
 
