@@ -5,41 +5,20 @@ import html from "./explore-job-card.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
-export class ExploreJobCard extends ComponentBase {
-  // Init-only
-  #job?: Job;
-  #onClick?: (id: string) => void;
+interface Props {
+  job: Job;
+  onClick?: (id: string) => void;
+  isSelected: boolean;
+}
 
-  // Editable
+export class ExploreJobCard extends ComponentBase {
   #isSelected = false;
 
   constructor() {
     super(html, cssSheet);
   }
 
-  init(job: Job, isSelected: boolean, onClick?: (id: string) => void) {
-    this.#job = job;
-    this.#isSelected = isSelected;
-    this.#onClick = onClick;
-    this.#renderInit();
-    this.#renderSelected();
-  }
-
-  set isSelected(value: boolean) {
-    if (this.#isSelected === value) return;
-    this.#isSelected = value;
-    this.#renderSelected();
-  }
-
-  #renderSelected() {
-    const el = this.getEl("container");
-    if (el) {
-      el.classList.toggle("is-selected", this.#isSelected);
-      el.setAttribute("aria-pressed", String(this.#isSelected));
-    }
-  }
-
-  #renderInit() {
+  init({ job, onClick, isSelected }: Props) {
     const {
       title,
       company,
@@ -47,7 +26,7 @@ export class ExploreJobCard extends ComponentBase {
       location,
       postTS = 0,
       facets,
-    } = this.#job ?? {};
+    } = job ?? {};
     const { salary, experience, summary } = facets ?? {};
     const postDays = Math.floor((Date.now() - postTS) / (1000 * 60 * 60 * 24));
     const postedText = !Number.isNaN(postDays) && (postDays || "today");
@@ -70,9 +49,24 @@ export class ExploreJobCard extends ComponentBase {
       [showRecencyChip, recencyChipText],
     ]);
 
+    if (onClick) {
+      const el = this.getEl("container");
+      if (el) {
+        el.onclick = () => onClick(job.id);
+      }
+    }
+
+    this.isSelected = isSelected;
+  }
+
+  set isSelected(value: boolean) {
+    if (this.#isSelected === value) return;
+    this.#isSelected = value;
+
     const el = this.getEl("container");
     if (el) {
-      el.onclick = () => this.#onClick?.(this.#job?.id ?? "");
+      el.classList.toggle("is-selected", this.#isSelected);
+      el.setAttribute("aria-pressed", String(this.#isSelected));
     }
   }
 
