@@ -1,4 +1,4 @@
-import type { Job } from "../../api/apiTypes.ts";
+import type { JobModel } from "../../api/apiTypes.ts";
 import "../../components/chip.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
 import css from "./job-card.css?raw";
@@ -8,7 +8,7 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 
 interface Props {
   // init-only
-  job: Job;
+  job: JobModel;
   onClick?: (id: string) => void;
   // editable
   isSelected: boolean;

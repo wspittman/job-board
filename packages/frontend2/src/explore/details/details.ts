@@ -1,4 +1,4 @@
-import type { Job } from "../../api/apiTypes.ts";
+import type { JobModel } from "../../api/apiTypes.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
 import { DetailEmbed } from "./detail-embed.ts";
 import css from "./details.css?raw";
@@ -7,13 +7,13 @@ import html from "./details.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 export class Details extends ComponentBase {
-  #job?: Job;
+  #job?: JobModel;
 
   constructor() {
     super(html, cssSheet);
   }
 
-  set job(value: Job | undefined) {
+  set job(value: JobModel | undefined) {
     if (this.#job?.id === value?.id) return;
 
     this.#job = value;

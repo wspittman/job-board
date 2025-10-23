@@ -5,7 +5,7 @@ import "./filters/filters.ts";
 import "./results/job-card.ts";
 
 import { api } from "../api/api.ts";
-import type { Filters, Job } from "../api/apiTypes.ts";
+import type { FilterModel, JobModel } from "../api/apiTypes.ts";
 import type { JobCard } from "./results/job-card.ts";
 
 const f = document.querySelector<any>("explore-filters");
@@ -15,7 +15,7 @@ if (f) {
   });
 }
 
-const jobEntries: Job[] = await api.fetchJobs({});
+const jobEntries: JobModel[] = await api.fetchJobs({});
 
 const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));
 const jobCards = new Map<string, JobCard>();
@@ -29,8 +29,8 @@ const filtersForm = document.querySelector<HTMLFormElement>(
   "#explore-filter-content"
 );
 
-const buildFilters = (): Filters => {
-  const filters: Filters = {};
+const buildFilters = (): FilterModel => {
+  const filters: FilterModel = {};
 
   if (!filtersForm) {
     return filters;
@@ -100,7 +100,7 @@ function selectCard(selectedId: string) {
   }
 }
 
-const renderJobCard = (job: Job, isSelected: boolean) => {
+const renderJobCard = (job: JobModel, isSelected: boolean) => {
   const card = document.createElement("explore-job-card");
   card.init({ job, isSelected, onClick: selectCard });
 
