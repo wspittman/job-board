@@ -1,5 +1,5 @@
-import type { Job } from "../api/apiTypes.ts";
-import { ComponentBase } from "../components/componentBase.ts";
+import type { Job } from "../../api/apiTypes.ts";
+import { ComponentBase } from "../../components/componentBase.ts";
 import { DetailEmbed } from "./detail-embed.ts";
 import css from "./details.css?raw";
 import html from "./details.html?raw";

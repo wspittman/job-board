@@ -1,12 +1,12 @@
 import "../sharedStyles/all.css";
-import "./details.ts";
+import "./details/details.ts";
 import "./explore.css";
-import "./filters.ts";
-import "./job-card.ts";
+import "./filters/filters.ts";
+import "./results/job-card.ts";
 
 import { api } from "../api/api.ts";
 import type { Filters, Job } from "../api/apiTypes.ts";
-import type { JobCard } from "./job-card.ts";
+import type { JobCard } from "./results/job-card.ts";
 
 const jobEntries: Job[] = await api.fetchJobs({});
 

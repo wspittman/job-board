@@ -1,6 +1,6 @@
-import { ComponentBase } from "../components/componentBase";
-import "../components/form-input";
-import type { FormInput } from "../components/form-input";
+import { ComponentBase } from "../../components/componentBase";
+import "../../components/form-input";
+import type { FormInput } from "../../components/form-input";
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
 

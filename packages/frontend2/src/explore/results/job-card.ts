@@ -1,6 +1,6 @@
-import type { Job } from "../api/apiTypes.ts";
-import "../components/chip.ts";
-import { ComponentBase } from "../components/componentBase.ts";
+import type { Job } from "../../api/apiTypes.ts";
+import "../../components/chip.ts";
+import { ComponentBase } from "../../components/componentBase.ts";
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
 
