@@ -1,0 +1,8 @@
+.container {
+  display: block;
+  color: var(--primary-dark);
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--primary-dark);
+  border-radius: var(--radius);
+  font-size: var(--size-xs);
+}

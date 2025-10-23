@@ -59,4 +59,4 @@ export class FormInput extends ComponentBase {
   }
 }
 
-ComponentBase.register("form-input", FormInput);
+ComponentBase.register("jb-form-input", FormInput);

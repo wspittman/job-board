@@ -50,6 +50,14 @@ export abstract class ComponentBase extends HTMLElement {
     if (el) el.textContent = value;
   }
 
+  protected setOnClick(id: string, onClick?: () => void) {
+    if (!onClick) return;
+    const el = this.getEl(id);
+    if (el) {
+      el.onclick = () => onClick();
+    }
+  }
+
   protected getEl<T extends HTMLElement>(id: string): T | null {
     return this.root.getElementById(id) as T | null;
   }

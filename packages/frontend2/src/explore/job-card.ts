@@ -1,4 +1,6 @@
 import type { Job } from "../api/apiTypes.ts";
+import "../components/chip.ts";
+import type { Chip } from "../components/chip.ts";
 import { ComponentBase } from "../components/componentBase.ts";
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
@@ -51,12 +53,8 @@ export class JobCard extends ComponentBase {
       [showRecencyChip, recencyChipText],
     ]);
 
-    if (onClick) {
-      const el = this.getEl("container");
-      if (el) {
-        el.onclick = () => onClick(job.id);
-      }
-    }
+    const realOnClick = onClick ? () => onClick(job.id) : undefined;
+    this.setOnClick("container", realOnClick);
 
     this.isSelected = isSelected;
   }
@@ -79,9 +77,8 @@ export class JobCard extends ComponentBase {
 
       for (const [condition, label] of pairs) {
         if (condition) {
-          const chip = document.createElement("span");
-          chip.className = "chip";
-          chip.textContent = label;
+          const chip = document.createElement("jb-chip") as Chip;
+          chip.init({ label });
           chipsEl.appendChild(chip);
         }
       }
