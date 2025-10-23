@@ -25,3 +25,9 @@ class Stats extends ComponentBase {
 }
 
 ComponentBase.register("home-stats", Stats);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "home-stats": Stats;
+  }
+}

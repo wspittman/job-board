@@ -16,3 +16,9 @@ export class DetailEmbed extends ComponentBase {
 }
 
 ComponentBase.register("explore-detail-embed", DetailEmbed);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "explore-detail-embed": DetailEmbed;
+  }
+}

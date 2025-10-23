@@ -95,7 +95,7 @@ function selectCard(selectedId: string) {
 }
 
 const renderJobCard = (job: Job, isSelected: boolean) => {
-  const card = document.createElement("explore-job-card") as JobCard;
+  const card = document.createElement("explore-job-card");
   card.init({ job, isSelected, onClick: selectCard });
 
   jobCards.set(job.id, card);

@@ -39,3 +39,9 @@ export class Details extends ComponentBase {
 }
 
 ComponentBase.register("explore-details", Details);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "explore-details": Details;
+  }
+}

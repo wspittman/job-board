@@ -10,8 +10,8 @@ interface Options {
  * Automatically includes normalize CSS and optional shared parts CSS in all derived components.
  */
 export abstract class ComponentBase extends HTMLElement {
-  static #normSheet = ComponentBase.createCSSSheet(norm);
-  static #partsSheet = ComponentBase.createCSSSheet(parts);
+  static readonly #normSheet = ComponentBase.createCSSSheet(norm);
+  static readonly #partsSheet = ComponentBase.createCSSSheet(parts);
 
   protected root: ShadowRoot;
 
@@ -63,6 +63,8 @@ export abstract class ComponentBase extends HTMLElement {
     this.style.display = "block";
   }
 
+  // #region Element Actions
+
   /**
    * Sets the text content of multiple elements by their IDs.
    * @param values - A map of element IDs to their text values
@@ -105,6 +107,10 @@ export abstract class ComponentBase extends HTMLElement {
     return this.root.getElementById(id) as T | null;
   }
 
+  // #endregion
+
+  // #region Static Methods
+
   /**
    * Registers a custom element with the given tag name.
    * Only registers if the tag is not already defined.
@@ -127,4 +133,6 @@ export abstract class ComponentBase extends HTMLElement {
     sheet.replaceSync(css);
     return sheet;
   }
+
+  // #endregion
 }

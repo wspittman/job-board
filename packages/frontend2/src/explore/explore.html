@@ -11,58 +11,6 @@
     <main class="explore-page">
       <explore-filters></explore-filters>
 
-      <aside class="explore-filters" data-state="open" data-filters>
-        <div class="explore-filters__header">
-          <h1 class="explore-heading" id="explore-heading">Explore Jobs</h1>
-        </div>
-        <form class="explore-filters__content" id="explore-filter-content">
-          <fieldset class="explore-filters__group">
-            <legend class="explore-filters__legend">Job Title</legend>
-            <label class="explore-filters__label" for="filter-title"
-              >Search by title</label
-            >
-            <input
-              class="explore-filters__input"
-              type="text"
-              id="filter-title"
-              name="title"
-              placeholder="e.g. Product Designer"
-            />
-          </fieldset>
-
-          <fieldset class="explore-filters__group">
-            <legend class="explore-filters__legend">Posted Since</legend>
-            <label class="explore-filters__label" for="filter-posted"
-              >Within the last (days)</label
-            >
-            <input
-              class="explore-filters__input"
-              type="number"
-              id="filter-posted"
-              name="posted"
-              min="0"
-              placeholder="7"
-            />
-          </fieldset>
-
-          <fieldset class="explore-filters__group">
-            <legend class="explore-filters__legend">Work Style</legend>
-            <label class="explore-filters__label" for="filter-remote"
-              >Location</label
-            >
-            <select
-              class="explore-filters__input"
-              id="filter-remote"
-              name="remote"
-            >
-              <option value="any">Any</option>
-              <option value="remote">Remote</option>
-              <option value="hybrid">In-Person / Hybrid</option>
-            </select>
-          </fieldset>
-        </form>
-      </aside>
-
       <section>
         <div class="explore-results__list" role="list" data-results-list></div>
       </section>

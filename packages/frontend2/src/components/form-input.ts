@@ -60,3 +60,9 @@ export class FormInput extends ComponentBase {
 }
 
 ComponentBase.register("jb-form-input", FormInput);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "jb-form-input": FormInput;
+  }
+}

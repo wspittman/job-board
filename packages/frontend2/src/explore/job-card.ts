@@ -1,6 +1,5 @@
 import type { Job } from "../api/apiTypes.ts";
 import "../components/chip.ts";
-import type { Chip } from "../components/chip.ts";
 import { ComponentBase } from "../components/componentBase.ts";
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
@@ -77,7 +76,7 @@ export class JobCard extends ComponentBase {
 
       for (const [condition, label] of pairs) {
         if (condition) {
-          const chip = document.createElement("jb-chip") as Chip;
+          const chip = document.createElement("jb-chip");
           chip.init({ label });
           chipsEl.appendChild(chip);
         }
@@ -87,3 +86,9 @@ export class JobCard extends ComponentBase {
 }
 
 ComponentBase.register("explore-job-card", JobCard);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "explore-job-card": JobCard;
+  }
+}

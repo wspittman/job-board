@@ -1,6 +1,17 @@
-.filters {
+.container {
   background: var(--bg-surface);
   border-radius: var(--radius);
-  padding: var(--space-md);
   box-shadow: var(--shadow-soft);
+  padding: var(--space-lg);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
 }

@@ -21,3 +21,9 @@ export class Chip extends ComponentBase {
 }
 
 ComponentBase.register("jb-chip", Chip);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "jb-chip": Chip;
+  }
+}
