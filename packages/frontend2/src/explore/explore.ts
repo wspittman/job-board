@@ -8,6 +8,13 @@ import { api } from "../api/api.ts";
 import type { Filters, Job } from "../api/apiTypes.ts";
 import type { JobCard } from "./results/job-card.ts";
 
+const f = document.querySelector<any>("explore-filters");
+if (f) {
+  f.addEventListener("explore-filters-change", () => {
+    console.log("Filters changed");
+  });
+}
+
 const jobEntries: Job[] = await api.fetchJobs({});
 
 const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));

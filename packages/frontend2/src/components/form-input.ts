@@ -8,7 +8,7 @@ interface Props {
   // init-only
   label: string;
   name: string;
-  onChange?: (value: unknown) => void;
+  onChange?: () => void;
   prefix?: string;
   suffix?: string;
 
@@ -17,33 +17,25 @@ interface Props {
 }
 
 export class FormInput extends ComponentBase {
-  #value: unknown;
-
   constructor() {
     super(html, cssSheet);
   }
 
   init({ label, name, onChange, prefix, suffix, value }: Props) {
-    this.setText("label", label);
-    this.setText("legend", label);
+    this.setManyTexts({ label, legend: label });
 
     const inputEl = this.getEl<HTMLInputElement>("input");
     if (inputEl) {
       inputEl.name = name;
       inputEl.value = String(value ?? "");
-      inputEl.onchange = (e) => {
-        const target = e.target as HTMLInputElement;
-        this.#value = target.value;
-        onChange?.(this.#value);
-      };
-
+      inputEl.onchange = () => onChange?.();
+      inputEl.oninput = () => onChange?.();
       this.#createAdornment(inputEl, true, prefix);
       this.#createAdornment(inputEl, false, suffix);
     }
   }
 
   set value(value: unknown) {
-    this.#value = value;
     const inputEl = this.getEl<HTMLInputElement>("input");
     if (inputEl) {
       inputEl.value = String(value ?? "");

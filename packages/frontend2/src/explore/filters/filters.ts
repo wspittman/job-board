@@ -49,9 +49,21 @@ export class Filters extends ComponentBase {
     if (!hostEl) return;
     for (const props of defs) {
       const el = document.createElement("jb-form-input");
-      el.init(props);
+      el.init({
+        ...props,
+        onChange: () => this.#notifyChange(),
+      });
       hostEl.append(el);
     }
+  }
+
+  #notifyChange() {
+    this.dispatchEvent(
+      new CustomEvent("explore-filters-change", {
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 }
 
