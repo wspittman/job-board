@@ -6,7 +6,6 @@ import "./job-card.ts";
 
 import { api } from "../api/api.ts";
 import type { Filters, Job } from "../api/apiTypes.ts";
-import type { Details } from "./details.ts";
 import type { JobCard } from "./job-card.ts";
 
 const jobEntries: Job[] = await api.fetchJobs({});
@@ -88,7 +87,7 @@ function selectCard(selectedId: string) {
     card.isSelected = id === selectedId;
   });
 
-  const deets = document.querySelector<Details>("explore-details");
+  const deets = document.querySelector("explore-details");
   if (deets) {
     deets.job = jobMap.get(selectedId);
   }

@@ -12,23 +12,46 @@ export class Filters extends ComponentBase {
   }
 
   protected override onLoad(): void {
-    const el = this.getEl("filters");
-    if (el) {
-      this.#appendInput(el, {
+    this.#appendInputs(
+      this.getEl("filters"),
+      {
         label: "Title",
         name: "title",
-        prefix: "🔍",
-      });
-    }
+      },
+      {
+        label: "Location",
+        name: "location",
+        prefix: "Working from",
+      },
+      {
+        label: "Minimum Salary",
+        name: "minSalary",
+        prefix: "$",
+      },
+      {
+        label: "Required Experience",
+        name: "experience",
+        prefix: "I have at least",
+        suffix: "years experience",
+      },
+      {
+        label: "Posted Since",
+        name: "posted",
+        suffix: "days ago",
+      }
+    );
   }
 
-  #appendInput(
-    hostEl: HTMLElement,
-    props: Parameters<FormInput["init"]>[0]
+  #appendInputs(
+    hostEl: HTMLElement | null,
+    ...defs: Parameters<FormInput["init"]>[0][]
   ): void {
-    const formInput = document.createElement("jb-form-input");
-    formInput.init(props);
-    hostEl.append(formInput);
+    if (!hostEl) return;
+    for (const props of defs) {
+      const el = document.createElement("jb-form-input");
+      el.init(props);
+      hostEl.append(el);
+    }
   }
 }
 
