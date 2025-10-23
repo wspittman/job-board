@@ -6,8 +6,10 @@ import html from "./explore-job-card.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 interface Props {
+  // init-only
   job: Job;
   onClick?: (id: string) => void;
+  // editable
   isSelected: boolean;
 }
 

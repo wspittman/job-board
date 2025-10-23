@@ -21,8 +21,9 @@
   --bg-default: hsl(0 0% 98%);
   --bg-surface: hsl(0 0% 100%);
   --bg-backdrop: hsl(0 0% 0% / 0.5);
-  --bg-hover: hsl(0 0% 0% / 0.05);
+  --bg-border: hsl(0 0% 0% / 0.2);
   --bg-active: hsl(0 0% 0% / 0.1);
+  --bg-hover: hsl(0 0% 0% / 0.05);
 
   --primary-gradient-bg: linear-gradient(
     135deg,
@@ -57,6 +58,7 @@
   --size-md: clamp(1rem, 2vw, 1.5rem);
   --size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
   --size-xs: clamp(0.8rem, 1.25vw, 1rem);
+  --size-xxs: clamp(0.6rem, 0.8vw, 0.75rem);
 
   --heading-line-height: 1.2;
 

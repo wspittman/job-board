@@ -1,0 +1,91 @@
+.container {
+  position: relative;
+
+  &:focus-within .label,
+  &:has(.input:not(:placeholder-shown)) .label,
+  &:has(.prefix) .label {
+    font-size: var(--size-xxs);
+    transform: translate(
+      calc(var(--space-md) - 3px),
+      calc(0px - var(--space-sm))
+    );
+  }
+
+  &:focus-within .label {
+    color: var(--primary-main);
+  }
+
+  &:focus-within .legend,
+  &:has(.input:not(:placeholder-shown)) .legend,
+  &:has(.prefix) .legend {
+    max-width: 100%;
+    padding: 0 var(--space-xs);
+    transition: max-width 100ms cubic-bezier(0, 0, 0.2, 1) 50ms;
+  }
+
+  &:focus-within .legend-wrap {
+    border-color: var(--primary-main);
+  }
+}
+
+.label {
+  position: absolute;
+  max-width: 90%;
+
+  font-size: var(--size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  transform: translate(var(--space-md), calc(var(--space-sm) * 1.4));
+
+  transition: color 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,
+    transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,
+    max-width 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+}
+
+.input-wrap {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-md);
+}
+
+.input {
+  box-sizing: content-box;
+  border: none;
+  background: none;
+  height: var(--space-md);
+  width: 100%;
+  padding: var(--space-md) var(--space-sm);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.legend-wrap {
+  pointer-events: none;
+  position: absolute;
+  inset: calc(0px - var(--space-xs)) 0 0;
+  margin: 0;
+  padding: 0 var(--space-sm);
+  border: solid 1px var(--bg-border);
+  border-radius: var(--radius);
+}
+
+.legend {
+  pointer-events: none;
+  visibility: hidden;
+  height: var(--space-sm);
+  font-size: var(--size-xxs);
+  max-width: 0.01px;
+  transition: max-width 50ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+}
+
+.prefix,
+.suffix {
+  font-size: var(--size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
