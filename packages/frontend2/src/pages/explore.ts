@@ -1,4 +1,5 @@
 import "../components/explore-details.ts";
+import "../components/explore-filters.ts";
 import "../components/explore-job-card.ts";
 import "../sharedStyles/all.css";
 import "./explore.css";
@@ -95,7 +96,7 @@ function selectCard(selectedId: string) {
 
 const renderJobCard = (job: Job, isSelected: boolean) => {
   const card = document.createElement("explore-job-card") as ExploreJobCard;
-  card.init(job, isSelected, selectCard);
+  card.init({ job, isSelected, onClick: selectCard });
 
   jobCards.set(job.id, card);
 

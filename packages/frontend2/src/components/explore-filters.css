@@ -1,0 +1,6 @@
+.filters {
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-soft);
+}
