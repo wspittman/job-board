@@ -1,13 +1,13 @@
-import "../components/explore-details.ts";
-import "../components/explore-filters.ts";
-import "../components/explore-job-card.ts";
 import "../sharedStyles/all.css";
+import "./explore-details.ts";
+import "./explore-filters.ts";
+import "./explore-job-card.ts";
 import "./explore.css";
 
-import { api } from "../api/api";
-import type { Filters, Job } from "../api/apiTypes";
-import type { ExploreDetails } from "../components/explore-details.ts";
-import type { ExploreJobCard } from "../components/explore-job-card.ts";
+import { api } from "../api/api.ts";
+import type { Filters, Job } from "../api/apiTypes.ts";
+import type { ExploreDetails } from "./explore-details.ts";
+import type { ExploreJobCard } from "./explore-job-card.ts";
 
 const jobEntries: Job[] = await api.fetchJobs({});
 

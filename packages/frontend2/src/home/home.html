@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- @include: ../partials/head.html -->
+    <title>Better Job Board</title>
+    <link rel="canonical" href="https://betterjobboard.net/" />
+  </head>
+  <body>
+    <!-- @include: ../partials/header.html -->
+
+    <main class="hm-page">
+      <section class="hm-hero">
+        <div class="hm-hero-visual" aria-hidden="true">
+          <div class="hm-hero-ring"></div>
+          <svg
+            class="hm-hero-filter"
+            viewBox="0 0 120 120"
+            xmlns="http://www.w3.org/2000/svg"
+            role="presentation"
+          >
+            <defs>
+              <linearGradient id="filter-fill" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                <stop offset="100%" stop-color="#d9d0ff" stop-opacity="0.75" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M20 18h80L70 60v32l-20 12V60L20 18Z"
+              fill="url(#filter-fill)"
+              stroke="#31207a"
+              stroke-width="5"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        <div class="hm-hero-content">
+          <h1 class="hm-hero-title">
+            Stop scrolling.
+            <span>Start finding.</span>
+          </h1>
+          <p class="hm-hero-subtitle">
+            The better job board with smarter search – no account needed.
+          </p>
+        </div>
+      </section>
+
+      <section class="hm-search-card" aria-labelledby="example-searches">
+        <h2 id="example-searches">Start from an example search</h2>
+        <div class="chip-list" role="list">
+          <a class="chip" href="/explore?title=intern+" role="listitem"
+            >Internships</a
+          >
+          <a
+            class="chip"
+            href="/explore?isRemote=true&amp;title=Staff+Software+Engineer&amp;location=USA"
+            role="listitem"
+          >
+            Remote Staff Software Engineer, USA-based
+          </a>
+          <a
+            class="chip"
+            href="/explore?isRemote=false&amp;title=Sales&amp;location=New+York"
+            role="listitem"
+          >
+            Sales in New York
+          </a>
+          <a
+            class="chip"
+            href="/explore?isRemote=true&amp;daysSince=7&amp;minSalary=100000"
+            role="listitem"
+          >
+            6-figure remote roles posted this week
+          </a>
+        </div>
+        <h2>Or start from scratch</h2>
+        <a class="cta-button" href="/explore">Explore</a>
+      </section>
+
+      <stat-card-area style="display: none"></stat-card-area>
+    </main>
+
+    <script type="module" src="./src/home/home.ts"></script>
+  </body>
+</html>

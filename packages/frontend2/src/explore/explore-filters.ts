@@ -1,7 +1,7 @@
-import { ComponentBase } from "./componentBase";
+import { ComponentBase } from "../components/componentBase";
+import "../components/form-input";
 import css from "./explore-filters.css?raw";
 import html from "./explore-filters.html?raw";
-import "./form-input";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 

@@ -1,5 +1,5 @@
 import { api } from "../api/api.ts";
-import { ComponentBase } from "./componentBase.ts";
+import { ComponentBase } from "../components/componentBase.ts";
 import css from "./stat-card-area.css?raw";
 import html from "./stat-card-area.html?raw";
 

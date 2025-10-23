@@ -1,4 +1,4 @@
-import { ComponentBase } from "./componentBase";
+import { ComponentBase } from "../components/componentBase";
 
 const html = '<div id="content"></div>';
 const cssSheet = ComponentBase.createCSSSheet(
