@@ -1,11 +1,11 @@
 import { ComponentBase } from "../components/componentBase";
 import "../components/form-input";
-import css from "./explore-filters.css?raw";
-import html from "./explore-filters.html?raw";
+import css from "./filters.css?raw";
+import html from "./filters.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
-export class ExploreFilters extends ComponentBase {
+export class Filters extends ComponentBase {
   constructor() {
     super(html, cssSheet);
   }
@@ -13,4 +13,4 @@ export class ExploreFilters extends ComponentBase {
   protected override onLoad(): void {}
 }
 
-ComponentBase.register("explore-filters", ExploreFilters);
+ComponentBase.register("explore-filters", Filters);

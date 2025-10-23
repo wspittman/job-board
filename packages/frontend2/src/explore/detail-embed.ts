@@ -5,7 +5,7 @@ const cssSheet = ComponentBase.createCSSSheet(
   "* { font: 14px/1.5 system-ui, sans-serif; }"
 );
 
-export class ExploreDetailEmbed extends ComponentBase {
+export class DetailEmbed extends ComponentBase {
   constructor() {
     super(html, cssSheet, { omitPartsCss: true });
   }
@@ -15,4 +15,4 @@ export class ExploreDetailEmbed extends ComponentBase {
   }
 }
 
-ComponentBase.register("explore-detail-embed", ExploreDetailEmbed);
+ComponentBase.register("explore-detail-embed", DetailEmbed);

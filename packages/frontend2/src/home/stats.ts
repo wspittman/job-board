@@ -1,11 +1,11 @@
 import { api } from "../api/api.ts";
 import { ComponentBase } from "../components/componentBase.ts";
-import css from "./stat-card-area.css?raw";
-import html from "./stat-card-area.html?raw";
+import css from "./stats.css?raw";
+import html from "./stats.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
-class StatCardArea extends ComponentBase {
+class Stats extends ComponentBase {
   constructor() {
     super(html, cssSheet);
   }
@@ -24,4 +24,4 @@ class StatCardArea extends ComponentBase {
   }
 }
 
-ComponentBase.register("stat-card-area", StatCardArea);
+ComponentBase.register("home-stats", Stats);

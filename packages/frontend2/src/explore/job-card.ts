@@ -1,7 +1,7 @@
 import type { Job } from "../api/apiTypes.ts";
 import { ComponentBase } from "../components/componentBase.ts";
-import css from "./explore-job-card.css?raw";
-import html from "./explore-job-card.html?raw";
+import css from "./job-card.css?raw";
+import html from "./job-card.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
@@ -13,7 +13,7 @@ interface Props {
   isSelected: boolean;
 }
 
-export class ExploreJobCard extends ComponentBase {
+export class JobCard extends ComponentBase {
   #isSelected = false;
 
   constructor() {
@@ -89,4 +89,4 @@ export class ExploreJobCard extends ComponentBase {
   }
 }
 
-ComponentBase.register("explore-job-card", ExploreJobCard);
+ComponentBase.register("explore-job-card", JobCard);

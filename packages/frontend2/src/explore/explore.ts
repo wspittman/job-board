@@ -1,18 +1,18 @@
 import "../sharedStyles/all.css";
-import "./explore-details.ts";
-import "./explore-filters.ts";
-import "./explore-job-card.ts";
+import "./details.ts";
 import "./explore.css";
+import "./filters.ts";
+import "./job-card.ts";
 
 import { api } from "../api/api.ts";
 import type { Filters, Job } from "../api/apiTypes.ts";
-import type { ExploreDetails } from "./explore-details.ts";
-import type { ExploreJobCard } from "./explore-job-card.ts";
+import type { Details } from "./details.ts";
+import type { JobCard } from "./job-card.ts";
 
 const jobEntries: Job[] = await api.fetchJobs({});
 
 const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));
-const jobCards = new Map<string, ExploreJobCard>();
+const jobCards = new Map<string, JobCard>();
 
 const resultsList = document.querySelector<HTMLElement>("[data-results-list]");
 const filtersElement = document.querySelector<HTMLElement>("[data-filters]");
@@ -88,14 +88,14 @@ function selectCard(selectedId: string) {
     card.isSelected = id === selectedId;
   });
 
-  const deets = document.querySelector<ExploreDetails>("explore-details");
+  const deets = document.querySelector<Details>("explore-details");
   if (deets) {
     deets.job = jobMap.get(selectedId);
   }
 }
 
 const renderJobCard = (job: Job, isSelected: boolean) => {
-  const card = document.createElement("explore-job-card") as ExploreJobCard;
+  const card = document.createElement("explore-job-card") as JobCard;
   card.init({ job, isSelected, onClick: selectCard });
 
   jobCards.set(job.id, card);

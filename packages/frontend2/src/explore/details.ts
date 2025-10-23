@@ -1,12 +1,12 @@
 import type { Job } from "../api/apiTypes.ts";
 import { ComponentBase } from "../components/componentBase.ts";
-import { ExploreDetailEmbed } from "./explore-detail-embed.ts";
-import css from "./explore-details.css?raw";
-import html from "./explore-details.html?raw";
+import { DetailEmbed } from "./detail-embed.ts";
+import css from "./details.css?raw";
+import html from "./details.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
-export class ExploreDetails extends ComponentBase {
+export class Details extends ComponentBase {
   #job?: Job;
 
   constructor() {
@@ -31,11 +31,11 @@ export class ExploreDetails extends ComponentBase {
       "posted-date": postDate,
     });
 
-    const desc = this.getEl<ExploreDetailEmbed>("description");
+    const desc = this.getEl<DetailEmbed>("description");
     if (desc) {
       desc.description = description ?? "";
     }
   }
 }
 
-ComponentBase.register("explore-details", ExploreDetails);
+ComponentBase.register("explore-details", Details);
