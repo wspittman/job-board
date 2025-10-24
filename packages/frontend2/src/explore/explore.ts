@@ -1,59 +1,35 @@
 import "../sharedStyles/all.css";
-import "./details/details.ts";
 import "./explore.css";
+
+import "./details/details.ts";
 import "./filters/filters.ts";
-import "./results/job-card.ts";
+import "./results/results.ts";
 
 import { api } from "../api/api.ts";
-import type { JobModel } from "../api/apiTypes.ts";
-import type { Filters } from "./filters/filters.ts";
-import type { JobCard } from "./results/job-card.ts";
+import type { FilterModel, JobModel } from "../api/apiTypes.ts";
 
-const exploreFilters = document.querySelector<Filters>("explore-filters")!;
-exploreFilters.init({
-  onChange: (filters) => {
-    console.log("Filters changed");
-    console.log(filters);
-    // api.fetchJobs goes here
-  },
-});
+const exploreFilters = document.querySelector("explore-filters")!;
+exploreFilters.init({ onChange: onFilterChange });
 
-const jobEntries: JobModel[] = await api.fetchJobs({});
+const exploreResults = document.querySelector("explore-results")!;
+exploreResults.init({ onSelect: onJobSelect });
 
-const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));
-const jobCards = new Map<string, JobCard>();
+const exploreDetails = document.querySelector("explore-details")!;
 
-const resultsList = document.querySelector<HTMLElement>("[data-results-list]");
+const jobMap = new Map<string, JobModel>();
 
-function selectCard(selectedId: string) {
-  jobCards.forEach((card, id) => {
-    card.isSelected = id === selectedId;
-  });
+async function onFilterChange(filters: FilterModel) {
+  const jobs = await api.fetchJobs(filters);
 
-  const deets = document.querySelector("explore-details");
-  if (deets) {
-    deets.job = jobMap.get(selectedId);
+  jobMap.clear();
+  for (const job of jobs) {
+    jobMap.set(job.id, job);
   }
+
+  exploreResults.jobs = jobs;
+  exploreDetails.job = jobs[0];
 }
 
-const renderJobCard = (job: JobModel, isSelected: boolean) => {
-  const card = document.createElement("explore-job-card");
-  card.init({ job, isSelected, onClick: selectCard });
-
-  jobCards.set(job.id, card);
-
-  return card;
-};
-
-if (resultsList) {
-  jobEntries.forEach((job, index) => {
-    const card = renderJobCard(job, index === 0);
-    resultsList.appendChild(card);
-  });
-}
-
-const initialId = jobEntries[0]?.id;
-
-if (initialId) {
-  selectCard(initialId);
+function onJobSelect(jobId: string) {
+  exploreDetails.job = jobMap.get(jobId);
 }

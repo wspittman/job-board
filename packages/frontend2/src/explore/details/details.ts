@@ -4,6 +4,7 @@ import { DetailEmbed } from "./detail-embed.ts";
 import css from "./details.css?raw";
 import html from "./details.html?raw";
 
+const tag = "explore-details";
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 export class Details extends ComponentBase {
@@ -38,10 +39,10 @@ export class Details extends ComponentBase {
   }
 }
 
-ComponentBase.register("explore-details", Details);
+ComponentBase.register(tag, Details);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "explore-details": Details;
+    [tag]: Details;
   }
 }
