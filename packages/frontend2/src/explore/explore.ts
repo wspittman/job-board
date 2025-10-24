@@ -18,6 +18,15 @@ const emptyPlaceholder = {
   },
 } as JobModel;
 
+const noMatchPlaceholder = {
+  title: "No Matches Found",
+  company: "Try adjusting your filters.",
+  facets: {
+    summary:
+      "Consider broadening your criteria to see more results. Or maybe we don't have good jobs posted for you yet. =(",
+  },
+} as JobModel;
+
 const exploreFilters = document.querySelector("explore-filters")!;
 exploreFilters.init({ onChange: onFilterChange });
 
@@ -37,6 +46,13 @@ async function onFilterChange(filters: FilterModel) {
   }
 
   const jobs = await api.fetchJobs(filters);
+
+  if (!jobs.length) {
+    exploreResults.jobs = [noMatchPlaceholder];
+    exploreDetails.job = undefined;
+    exploreDetails.hide();
+    return;
+  }
 
   jobMap.clear();
   for (const job of jobs) {
