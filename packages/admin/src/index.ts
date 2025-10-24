@@ -1,5 +1,5 @@
 import process from "node:process";
-import { addCompanies, deleteJob } from "./commands.ts";
+import { addCompanies, deleteCompany, deleteJob } from "./commands.ts";
 import { atsTypes, commands } from "./types.ts";
 
 function usageReminder() {
@@ -14,6 +14,8 @@ function usageReminder() {
       `    ATS_ID: ${atsTypes.join("|")}`,
       "",
       "  npm run admin -- delete-job <COMPANY_ID> <JOB_ID>",
+      "", 
+      "  npm run admin -- delete-company <ATS_ID> <COMPANY_ID>",
     ].join("\n")
   );
 }
@@ -27,6 +29,9 @@ async function run() {
       break;
     case "delete-job":
       await deleteJob(args);
+      break;
+    case "delete-company":
+      await deleteCompany(args);
       break;
     default:
       throw new Error("Invalid command");
