@@ -5,15 +5,16 @@ import "./filters/filters.ts";
 import "./results/job-card.ts";
 
 import { api } from "../api/api.ts";
-import type { FilterModel, JobModel } from "../api/apiTypes.ts";
+import type { JobModel } from "../api/apiTypes.ts";
+import type { Filters } from "./filters/filters.ts";
 import type { JobCard } from "./results/job-card.ts";
 
-const f = document.querySelector<any>("explore-filters");
-if (f) {
-  f.addEventListener("explore-filters-change", () => {
-    console.log("Filters changed");
-  });
-}
+const exploreFilters = document.querySelector<Filters>("explore-filters")!;
+exploreFilters.addEventListener("explore-filters-change", () => {
+  console.log("Filters changed");
+  console.log(exploreFilters.filterData);
+  // api.fetchJobs goes here
+});
 
 const jobEntries: JobModel[] = await api.fetchJobs({});
 
@@ -21,73 +22,6 @@ const jobMap = new Map(jobEntries.map((job) => [job.id, job] as const));
 const jobCards = new Map<string, JobCard>();
 
 const resultsList = document.querySelector<HTMLElement>("[data-results-list]");
-const filtersElement = document.querySelector<HTMLElement>("[data-filters]");
-const filterToggle = document.querySelector<HTMLButtonElement>(
-  "[data-filters-toggle]"
-);
-const filtersForm = document.querySelector<HTMLFormElement>(
-  "#explore-filter-content"
-);
-
-const buildFilters = (): FilterModel => {
-  const filters: FilterModel = {};
-
-  if (!filtersForm) {
-    return filters;
-  }
-
-  const formData = new FormData(filtersForm);
-  const titleValue = (formData.get("title") as string | null)?.trim();
-
-  if (titleValue) {
-    filters.title = titleValue;
-  }
-
-  const postedRaw = formData.get("posted");
-
-  if (typeof postedRaw === "string") {
-    const trimmedPosted = postedRaw.trim();
-
-    if (trimmedPosted) {
-      const days = Number.parseInt(trimmedPosted, 10);
-
-      if (!Number.isNaN(days)) {
-        filters.daysSince = days;
-      }
-    }
-  }
-
-  const remoteValue = formData.get("remote");
-
-  if (remoteValue === "remote") {
-    filters.isRemote = true;
-  } else if (remoteValue === "hybrid") {
-    filters.isRemote = false;
-  }
-
-  return filters;
-};
-
-const handleFiltersChange = () => {
-  const filters = buildFilters();
-  void api.fetchJobs(filters);
-};
-
-filterToggle?.addEventListener("click", () => {
-  if (!filtersElement) {
-    return;
-  }
-
-  const isOpen = filtersElement.dataset["state"] !== "closed";
-  const nextState = isOpen ? "closed" : "open";
-  filtersElement.dataset["state"] = nextState;
-  filterToggle.setAttribute("aria-expanded", String(nextState === "open"));
-});
-
-if (filtersForm) {
-  filtersForm.addEventListener("input", handleFiltersChange);
-  filtersForm.addEventListener("change", handleFiltersChange);
-}
 
 function selectCard(selectedId: string) {
   jobCards.forEach((card, id) => {
