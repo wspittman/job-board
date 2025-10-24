@@ -17,37 +17,50 @@ interface Props {
 }
 
 export class FormInput extends ComponentBase {
+  static formAssociated = true;
+
+  #internals = this.attachInternals();
+  #input!: HTMLInputElement;
+
+  static get observedAttributes() {
+    return ["name", "value"];
+  }
+
   constructor() {
     super(html, cssSheet);
+    this.#input = this.getEl<HTMLInputElement>("input")!;
+
+    // Keep the external form value attribute in sync with the internal input value
+    this.#input.addEventListener("input", () => {
+      this.setAttribute("value", this.#input.value);
+      this.#internals.setFormValue(this.#input.value);
+    });
   }
 
   init({ label, name, onChange, prefix, suffix, value }: Props) {
     this.setManyTexts({ label, legend: label });
 
-    const inputEl = this.getEl<HTMLInputElement>("input");
-    if (inputEl) {
-      inputEl.name = name;
-      inputEl.value = String(value ?? "");
-      inputEl.onchange = () => onChange?.();
-      inputEl.oninput = () => onChange?.();
-      this.#createAdornment(inputEl, true, prefix);
-      this.#createAdornment(inputEl, false, suffix);
-    }
+    this.setAttribute("name", name);
+    this.#input.value = String(value ?? "");
+    this.#input.onchange = () => onChange?.();
+    this.#input.oninput = () => onChange?.();
+    this.#createAdornment(true, prefix);
+    this.#createAdornment(false, suffix);
   }
 
   set value(value: unknown) {
-    const inputEl = this.getEl<HTMLInputElement>("input");
-    if (inputEl) {
-      inputEl.value = String(value ?? "");
-    }
+    this.#input.value = String(value ?? "");
   }
 
-  #createAdornment(hostEl: HTMLElement, isPrefix: boolean, text?: string) {
+  #createAdornment(isPrefix: boolean, text?: string) {
     if (!text) return;
     const el = document.createElement("p");
     el.className = isPrefix ? "prefix" : "suffix";
     el.textContent = text;
-    hostEl.insertAdjacentElement(isPrefix ? "beforebegin" : "afterend", el);
+    this.#input.insertAdjacentElement(
+      isPrefix ? "beforebegin" : "afterend",
+      el
+    );
   }
 }
 
