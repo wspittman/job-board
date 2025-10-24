@@ -5,16 +5,26 @@ import type { FormInput } from "../../components/form-input";
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
 
+const tag = "explore-filters";
 const cssSheet = ComponentBase.createCSSSheet(css);
+const DEBOUNCE_DELAY = 500;
+
+interface Props {
+  onChange?: (filters: FilterModel) => void;
+}
+
+type FormInputProps = Parameters<FormInput["init"]>[0];
 
 export class Filters extends ComponentBase {
+  readonly #form: HTMLFormElement;
+  #debounceTimer: number | undefined;
+  #onChange?: (filters: FilterModel) => void;
+
   constructor() {
     super(html, cssSheet);
-  }
+    this.#form = this.getEl<HTMLFormElement>("form")!;
 
-  protected override onLoad(): void {
     this.#appendInputs(
-      this.getEl("form"),
       {
         label: "Title",
         name: "title",
@@ -43,11 +53,33 @@ export class Filters extends ComponentBase {
     );
   }
 
-  get filterData(): FilterModel {
-    const formEl = this.getEl<HTMLFormElement>("form");
-    if (!formEl) return {};
+  init({ onChange }: Props) {
+    this.#onChange = onChange;
+  }
 
-    const formData = new FormData(formEl);
+  #appendInputs(...defs: FormInputProps[]): void {
+    const onChange = () => this.#debounceOnChange();
+    for (const props of defs) {
+      const el = document.createElement("jb-form-input");
+      el.init({ ...props, onChange });
+      this.#form.append(el);
+    }
+  }
+
+  #debounceOnChange(): void {
+    if (!this.#onChange) return;
+
+    if (this.#debounceTimer) {
+      clearTimeout(this.#debounceTimer);
+    }
+
+    this.#debounceTimer = window.setTimeout(() => {
+      this.#onChange?.(this.#getFilterData());
+    }, DEBOUNCE_DELAY);
+  }
+
+  #getFilterData(): FilterModel {
+    const formData = new FormData(this.#form);
     const toString = (key: string) =>
       formData.get(key)?.toString().trim() || undefined;
     const toNumber = (key: string) => {
@@ -65,36 +97,12 @@ export class Filters extends ComponentBase {
       daysSince: toNumber("posted"),
     };
   }
-
-  #appendInputs(
-    hostEl: HTMLElement | null,
-    ...defs: Parameters<FormInput["init"]>[0][]
-  ): void {
-    if (!hostEl) return;
-    for (const props of defs) {
-      const el = document.createElement("jb-form-input");
-      el.init({
-        ...props,
-        onChange: () => this.#notifyChange(),
-      });
-      hostEl.append(el);
-    }
-  }
-
-  #notifyChange() {
-    this.dispatchEvent(
-      new CustomEvent("explore-filters-change", {
-        bubbles: true,
-        composed: true,
-      })
-    );
-  }
 }
 
-ComponentBase.register("explore-filters", Filters);
+ComponentBase.register(tag, Filters);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "explore-filters": Filters;
+    [tag]: Filters;
   }
 }

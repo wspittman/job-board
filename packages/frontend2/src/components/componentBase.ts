@@ -36,16 +36,8 @@ export abstract class ComponentBase extends HTMLElement {
   }
 
   /**
-   * Called when the element is inserted into the DOM.
-   * Triggers the onLoad lifecycle hook.
-   */
-  connectedCallback() {
-    this.onLoad();
-  }
-
-  /**
    * Lifecycle hook called when the component is connected to the DOM.
-   * Override this method in derived classes to perform initialization logic.
+   * Override this method in derived classes to perform logic on DOM insertion.
    */
   protected onLoad(): void {}
 
@@ -135,4 +127,12 @@ export abstract class ComponentBase extends HTMLElement {
   }
 
   // #endregion
+
+  /**
+   * Called when the element is inserted into the DOM.
+   * Triggers the onLoad lifecycle hook.
+   */
+  connectedCallback() {
+    this.onLoad();
+  }
 }

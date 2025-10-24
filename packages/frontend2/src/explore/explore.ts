@@ -10,10 +10,12 @@ import type { Filters } from "./filters/filters.ts";
 import type { JobCard } from "./results/job-card.ts";
 
 const exploreFilters = document.querySelector<Filters>("explore-filters")!;
-exploreFilters.addEventListener("explore-filters-change", () => {
-  console.log("Filters changed");
-  console.log(exploreFilters.filterData);
-  // api.fetchJobs goes here
+exploreFilters.init({
+  onChange: (filters) => {
+    console.log("Filters changed");
+    console.log(filters);
+    // api.fetchJobs goes here
+  },
 });
 
 const jobEntries: JobModel[] = await api.fetchJobs({});
