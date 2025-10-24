@@ -1,3 +1,4 @@
+import type { FilterModel } from "../../api/apiTypes";
 import { ComponentBase } from "../../components/componentBase";
 import "../../components/form-input";
 import type { FormInput } from "../../components/form-input";
@@ -13,7 +14,7 @@ export class Filters extends ComponentBase {
 
   protected override onLoad(): void {
     this.#appendInputs(
-      this.getEl("filters"),
+      this.getEl("form"),
       {
         label: "Title",
         name: "title",
@@ -40,6 +41,29 @@ export class Filters extends ComponentBase {
         suffix: "days ago",
       }
     );
+  }
+
+  get filterData(): FilterModel {
+    const formEl = this.getEl<HTMLFormElement>("form");
+    if (!formEl) return {};
+
+    const formData = new FormData(formEl);
+    const toString = (key: string) =>
+      formData.get(key)?.toString().trim() || undefined;
+    const toNumber = (key: string) => {
+      const val = toString(key);
+      if (!val) return undefined;
+      const num = Number.parseInt(val, 10);
+      return Number.isNaN(num) ? undefined : num;
+    };
+
+    return {
+      title: toString("title"),
+      location: toString("location"),
+      minSalary: toNumber("minSalary"),
+      maxExperience: toNumber("experience"),
+      daysSince: toNumber("posted"),
+    };
   }
 
   #appendInputs(
