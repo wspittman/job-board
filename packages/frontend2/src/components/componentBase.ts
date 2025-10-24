@@ -44,14 +44,14 @@ export abstract class ComponentBase extends HTMLElement {
   /**
    * Hides the component by setting display to none.
    */
-  protected hide() {
+  hide() {
     this.style.display = "none";
   }
 
   /**
    * Shows the component by setting display to block.
    */
-  protected show() {
+  show() {
     this.style.display = "block";
   }
 

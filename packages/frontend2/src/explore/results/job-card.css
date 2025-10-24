@@ -44,4 +44,8 @@
 .meta {
   display: flex;
   gap: var(--space-xs);
+
+  &:has(span:empty) {
+    display: none;
+  }
 }

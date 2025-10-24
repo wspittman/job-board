@@ -1,4 +1,5 @@
 import type { FilterModel } from "../../api/apiTypes";
+import { formDataToFilterModel } from "../../api/filterModelUtils";
 import { ComponentBase } from "../../components/componentBase";
 import "../../components/form-input";
 import type { FormInput } from "../../components/form-input";
@@ -41,13 +42,13 @@ export class Filters extends ComponentBase {
       },
       {
         label: "Required Experience",
-        name: "experience",
+        name: "maxExperience",
         prefix: "I have at least",
         suffix: "years experience",
       },
       {
         label: "Posted Since",
-        name: "posted",
+        name: "daysSince",
         suffix: "days ago",
       }
     );
@@ -80,22 +81,7 @@ export class Filters extends ComponentBase {
 
   #getFilterData(): FilterModel {
     const formData = new FormData(this.#form);
-    const toString = (key: string) =>
-      formData.get(key)?.toString().trim() || undefined;
-    const toNumber = (key: string) => {
-      const val = toString(key);
-      if (!val) return undefined;
-      const num = Number.parseInt(val, 10);
-      return Number.isNaN(num) ? undefined : num;
-    };
-
-    return {
-      title: toString("title"),
-      location: toString("location"),
-      minSalary: toNumber("minSalary"),
-      maxExperience: toNumber("experience"),
-      daysSince: toNumber("posted"),
-    };
+    return formDataToFilterModel(formData);
   }
 }
 

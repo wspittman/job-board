@@ -22,17 +22,11 @@ export class JobCard extends ComponentBase {
   }
 
   init({ job, onClick, isSelected }: Props) {
-    const {
-      title,
-      company,
-      isRemote,
-      location,
-      postTS = 0,
-      facets,
-    } = job ?? {};
+    const { title, company, isRemote, location, postTS, facets } = job ?? {};
     const { salary, experience, summary } = facets ?? {};
+
     const postDays = Math.floor((Date.now() - postTS) / (1000 * 60 * 60 * 24));
-    const postedText = !Number.isNaN(postDays) && (postDays || "today");
+    const postedText = !Number.isNaN(postDays) ? postDays || "today" : "";
     const postedSuffix = postDays ? "days ago" : "";
     const showRecencyChip = postDays < 30;
     const recencyChipText = postDays < 7 ? "New" : "Recent";
@@ -43,7 +37,7 @@ export class JobCard extends ComponentBase {
       location,
       salary: salary?.toLocaleString(),
       experience: experience ? `${experience} years experience` : "",
-      "posted-date": `${postedText} ${postedSuffix}`,
+      "posted-date": `${postedText} ${postedSuffix}`.trim(),
       summary,
     });
 
