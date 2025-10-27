@@ -27,6 +27,9 @@ const noMatchPlaceholder = {
   },
 } as JobModel;
 
+const actionButton = document.getElementById("action-button")!;
+actionButton.addEventListener("click", onActionClick);
+
 const exploreFilters = document.querySelector("explore-filters")!;
 exploreFilters.init({ onChange: onFilterChange });
 
@@ -40,8 +43,7 @@ const jobMap = new Map<string, JobModel>();
 async function onFilterChange(filters: FilterModel) {
   if (isEmptyFilterModel(filters)) {
     exploreResults.jobs = [emptyPlaceholder];
-    exploreDetails.job = undefined;
-    exploreDetails.hide();
+    jobDeselect();
     return;
   }
 
@@ -49,8 +51,7 @@ async function onFilterChange(filters: FilterModel) {
 
   if (!jobs.length) {
     exploreResults.jobs = [noMatchPlaceholder];
-    exploreDetails.job = undefined;
-    exploreDetails.hide();
+    jobDeselect();
     return;
   }
 
@@ -60,12 +61,51 @@ async function onFilterChange(filters: FilterModel) {
   }
 
   exploreResults.jobs = jobs;
-  exploreDetails.job = jobs[0];
-  exploreDetails.show();
+  exploreDetails.job = jobMap.get(jobs[0]!.id);
+  exploreDetails.toggleAttribute("empty", false);
+}
+
+function jobDeselect() {
+  exploreDetails.job = undefined;
+  exploreDetails.toggleAttribute("empty", true);
 }
 
 function onJobSelect(jobId: string) {
   exploreDetails.job = jobMap.get(jobId);
+  actionButton.toggleAttribute("close", true);
+  actionButton.textContent = "Close";
+  activeDetails();
 }
 
+function onActionClick() {
+  const openFilters = actionButton.toggleAttribute("close");
+
+  if (openFilters) {
+    actionButton.textContent = "Close";
+    activeFilters();
+  } else {
+    actionButton.textContent = "Show Filters";
+    activeResults();
+  }
+}
+
+function activeFilters() {
+  exploreFilters.toggleAttribute("inactive", false);
+  exploreResults.toggleAttribute("inactive", true);
+  exploreDetails.toggleAttribute("inactive", true);
+}
+
+function activeResults() {
+  exploreFilters.toggleAttribute("inactive", true);
+  exploreResults.toggleAttribute("inactive", false);
+  exploreDetails.toggleAttribute("inactive", true);
+}
+
+function activeDetails() {
+  exploreFilters.toggleAttribute("inactive", true);
+  exploreResults.toggleAttribute("inactive", true);
+  exploreDetails.toggleAttribute("inactive", false);
+}
+
+activeResults();
 onFilterChange({});

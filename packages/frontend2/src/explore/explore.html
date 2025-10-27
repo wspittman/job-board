@@ -9,9 +9,14 @@
   <body>
     <!-- @include: ../partials/header.html -->
     <main class="explore-page">
-      <explore-filters></explore-filters>
-      <explore-results></explore-results>
-      <explore-details></explore-details>
+      <button id="action-button" type="button" class="action-button">
+        Show Filters
+      </button>
+      <div class="explore-layout">
+        <explore-filters></explore-filters>
+        <explore-results></explore-results>
+        <explore-details></explore-details>
+      </div>
     </main>
   </body>
 

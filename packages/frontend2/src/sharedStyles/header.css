@@ -76,7 +76,7 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-@media (max-width: 599px) {
+@media (max-width: 600px) {
   .menu-toggle:checked ~ .menu-backdrop {
     display: block;
     opacity: 1;
@@ -125,7 +125,7 @@
 
 /* Mobile Nav */
 
-@media (max-width: 599px) {
+@media (max-width: 600px) {
   .nav {
     display: none;
     position: absolute;

@@ -41,6 +41,7 @@ export class Results extends ComponentBase {
   }
 
   #selectCard(selectedId: string) {
+    if (!selectedId) return;
     this.#onSelect?.(selectedId);
     this.#jobs.forEach(([id, card]) => {
       card.isSelected = id === selectedId;

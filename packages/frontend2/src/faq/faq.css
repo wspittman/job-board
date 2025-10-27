@@ -77,7 +77,7 @@
   font-size: calc(var(--size-sm) * 0.9);
 }
 
-@media (max-width: 599px) {
+@media (max-width: 600px) {
   .faq-item summary {
     padding: var(--space-xs) var(--space-md);
   }
