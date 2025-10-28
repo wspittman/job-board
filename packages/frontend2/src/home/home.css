@@ -8,20 +8,35 @@
 }
 
 .hm-hero-visual {
-  flex: 1 1 260px;
-  max-width: 420px;
+  flex: 1 1 clamp(200px, 30vw, 320px);
+  max-width: clamp(200px, 30vw, 320px);
   aspect-ratio: 1 / 1;
   position: relative;
   display: grid;
   place-items: center;
+
+  & svg {
+    transform: scale(-1, 1);
+    width: 75%;
+    height: 75%;
+    stroke: var(--primary-dark);
+    stroke-width: 1;
+    fill: var(--bg-border);
+  }
 }
 
 .hm-hero-ring {
   position: absolute;
   inset: 0;
   border-radius: 32% 68% 52% 48% / 45% 39% 61% 55%;
-  background: linear-gradient(140deg, #7154ff, #ad8dff 55%, #57d3a7);
-  filter: drop-shadow(0 32px 60px rgba(65, 40, 166, 0.25));
+  background: linear-gradient(
+    140deg,
+    var(--secondary-dark),
+    hsl(var(--palette-secondary) 70%) 35%,
+    hsl(var(--palette-primary) 65%) 65%,
+    hsl(var(--palette-primary) 90%)
+  );
+  filter: drop-shadow(0 32px 68px hsl(var(--palette-primary) 50% / 0.3));
 }
 
 .hm-hero-ring::after {
@@ -31,16 +46,9 @@
   border-radius: inherit;
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(255, 255, 255, 0.35),
-    rgba(255, 255, 255, 0)
+    hsla(0, 0%, 100%, 0.45),
+    hsla(0, 0%, 100%, 0)
   );
-}
-
-.hm-hero-filter {
-  position: relative;
-  width: 62%;
-  max-width: 260px;
-  z-index: 1;
 }
 
 .hm-hero-content {
