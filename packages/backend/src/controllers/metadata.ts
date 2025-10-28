@@ -56,8 +56,10 @@ export async function getMetadata() {
 }
 
 async function loadMetadata(): Promise<ClientMetadata> {
-  const companyMetadata = await db.metadata.getItem("company", "company");
-  const jobMetadata = await db.metadata.getItem("job", "job");
+  const [companyMetadata, jobMetadata] = await Promise.all([
+    db.metadata.getItem("company", "company"),
+    db.metadata.getItem("job", "job"),
+  ]);
 
   const metadata: ClientMetadata = {
     companyCount: companyMetadata?.companyCount ?? 0,
