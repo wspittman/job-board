@@ -47,8 +47,10 @@ async function refreshJobMetadata() {
 export async function getMetadata() {
   if (!cachedMetadata) {
     // TBD: This would benefit from a lock
-    const companyMetadata = await db.metadata.getItem("company", "company");
-    const jobMetadata = await db.metadata.getItem("job", "job");
+    const [companyMetadata, jobMetadata] = await Promise.all([
+      db.metadata.getItem("company", "company"),
+      db.metadata.getItem("job", "job"),
+    ]);
 
     cachedMetadata = {
       companyCount: companyMetadata?.companyCount ?? 0,
