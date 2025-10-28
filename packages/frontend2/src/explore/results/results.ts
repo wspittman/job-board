@@ -28,7 +28,7 @@ export class Results extends ComponentBase {
 
   set jobs(value: JobModel[]) {
     this.#jobs = [];
-    this.#list.innerHTML = "";
+    const fragment = document.createDocumentFragment();
     const onClick = (id: string) => this.#selectCard(id);
 
     value.forEach((job, index) => {
@@ -36,8 +36,10 @@ export class Results extends ComponentBase {
       const card = document.createElement("explore-job-card");
       card.init({ job, isSelected, onClick });
       this.#jobs.push([job.id, card]);
-      this.#list.appendChild(card);
+      fragment.appendChild(card);
     });
+
+    this.#list.replaceChildren(fragment);
   }
 
   #selectCard(selectedId: string) {
