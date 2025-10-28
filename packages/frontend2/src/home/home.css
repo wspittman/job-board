@@ -16,12 +16,40 @@
   place-items: center;
 
   & svg {
+    position: absolute;
+  }
+
+  & .lucide-funnel {
     transform: scale(-1, 1);
     width: 75%;
     height: 75%;
     stroke: var(--primary-dark);
     stroke-width: 1;
     fill: var(--bg-border);
+  }
+
+  & .lucide-dollar-sign {
+    top: 80%;
+    left: 45%;
+    width: 20%;
+    height: 20%;
+    stroke: darkgreen;
+  }
+
+  & .lucide-smile {
+    top: 72%;
+    left: 24%;
+    width: 20%;
+    height: 20%;
+    stroke: green;
+  }
+
+  & .lucide-party-popper {
+    top: 66%;
+    left: 62%;
+    width: 20%;
+    height: 20%;
+    stroke: blue;
   }
 }
 
