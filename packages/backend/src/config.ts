@@ -31,6 +31,12 @@ function isReasoningEffort(val: string): val is ReasoningEffort {
 
 let llmReasoningEffort = prep("LLM_REASONING_EFFORT");
 
+const adminToken = process.env["ADMIN_TOKEN"]?.trim();
+
+if (!adminToken || adminToken.length < 16) {
+  throw new Error("ADMIN_TOKEN must be set and at least 16 characters long.");
+}
+
 export const config: Config = {
   PORT: parseInt(process.env["PORT"] || "3000", 10),
   NODE_ENV: prep("NODE_ENV") || "dev",
@@ -59,7 +65,7 @@ export const config: Config = {
     : undefined,
 
   // Auth configs
-  ADMIN_TOKEN: process.env["ADMIN_TOKEN"] || "admin",
+  ADMIN_TOKEN: adminToken,
 
   // App Insights configs
   // In theory App Insights SDK should pick up this env var automatically, but it doesn't
