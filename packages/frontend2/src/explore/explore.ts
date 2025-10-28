@@ -39,8 +39,11 @@ exploreResults.init({ onSelect: onJobSelect });
 const exploreDetails = document.querySelector("explore-details")!;
 
 const jobMap = new Map<string, JobModel>();
+let lastRequestId = 0;
 
 async function onFilterChange(filters: FilterModel) {
+  const requestId = ++lastRequestId;
+
   if (isEmptyFilterModel(filters)) {
     exploreResults.jobs = [emptyPlaceholder];
     jobDeselect();
@@ -48,6 +51,10 @@ async function onFilterChange(filters: FilterModel) {
   }
 
   const jobs = await api.fetchJobs(filters);
+
+  if (requestId !== lastRequestId) {
+    return;
+  }
 
   if (!jobs.length) {
     exploreResults.jobs = [noMatchPlaceholder];
