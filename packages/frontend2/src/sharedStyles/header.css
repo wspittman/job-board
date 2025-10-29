@@ -12,6 +12,45 @@
   box-shadow: var(--shadow-soft);
 }
 
+.header-logo {
+  height: 75%;
+  background: var(--bg-default);
+  border-radius: var(--radius);
+  aspect-ratio: 1 / 1;
+  position: relative;
+
+  & svg {
+    position: absolute;
+  }
+
+  & .lucide-funnel {
+    transform: scale(-1, 1);
+    width: 70%;
+    height: 70%;
+    stroke: var(--primary-main);
+    fill: var(--bg-hover);
+    position: relative;
+    left: 15%;
+    top: 15%;
+  }
+
+  & .lucide-dollar-sign {
+    top: 60%;
+    left: 60%;
+    width: 40%;
+    height: 40%;
+    stroke: darkgreen;
+  }
+
+  & .random-icon svg {
+    top: calc(5% + var(--dy, 0));
+    left: calc(30% + var(--dx, 0));
+    width: calc(40% + var(--ds, 0));
+    height: calc(40% + var(--ds, 0));
+    stroke: hsl(var(--dc));
+  }
+}
+
 .app-link {
   line-height: var(--heading-line-height);
   text-decoration: none;

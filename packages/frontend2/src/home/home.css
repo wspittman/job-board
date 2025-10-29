@@ -52,16 +52,12 @@
     stroke: mediumblue;
   }
 
-  & .random-icon {
-    & svg {
-      top: calc(10% * var(--tri-row) + var(--dy, 0));
-      left: calc(
-        3% + 6% * var(--tri-row) + 12% * var(--tri-col) + var(--dx, 0)
-      );
-      width: calc(10% + var(--ds, 0));
-      height: calc(10% + var(--ds, 0));
-      stroke: hsl(var(--dc));
-    }
+  & .random-icon svg {
+    top: calc(10% * var(--tri-row) + var(--dy, 0));
+    left: calc(3% + 6% * var(--tri-row) + 12% * var(--tri-col) + var(--dx, 0));
+    width: calc(10% + var(--ds, 0));
+    height: calc(10% + var(--ds, 0));
+    stroke: hsl(var(--dc));
   }
 }
 
