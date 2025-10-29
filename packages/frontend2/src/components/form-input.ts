@@ -5,7 +5,6 @@ import html from "./form-input.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 interface Props {
-  // init-only
   label: string;
   name: string;
   onChange?: () => void;
@@ -31,17 +30,14 @@ export class FormInput extends ComponentBase {
     this.#input = this.getEl<HTMLInputElement>("input")!;
 
     // Keep the external form value attribute in sync with the internal input value
-    this.#input.addEventListener("input", () => {
-      this.setAttribute("value", this.#input.value);
-      this.#internals.setFormValue(this.#input.value);
-    });
+    this.#input.addEventListener("input", () => this.#syncAttribute());
   }
 
   init({ label, name, onChange, prefix, suffix, value }: Props) {
     this.setManyTexts({ label, legend: label });
 
     this.setAttribute("name", name);
-    this.#input.value = String(value ?? "");
+    this.value = value;
     this.#input.onchange = () => onChange?.();
     this.#input.oninput = () => onChange?.();
     this.#createAdornment(true, prefix);
@@ -50,6 +46,12 @@ export class FormInput extends ComponentBase {
 
   set value(value: unknown) {
     this.#input.value = String(value ?? "");
+    this.#syncAttribute();
+  }
+
+  #syncAttribute() {
+    this.setAttribute("value", this.#input.value);
+    this.#internals.setFormValue(this.#input.value);
   }
 
   #createAdornment(isPrefix: boolean, text?: string) {

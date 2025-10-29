@@ -1,22 +1,35 @@
 import css from "./chip.css?raw";
+import html from "./chip.html?raw";
 import { ComponentBase } from "./componentBase";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 interface Props {
-  // init-only
   label: string;
   onDelete?: () => void;
+  filled?: boolean;
 }
 
 export class Chip extends ComponentBase {
   constructor() {
-    super("<span id='container' class='container'></span>", cssSheet);
+    super(html, cssSheet);
   }
 
-  init({ label, onDelete }: Props) {
-    this.setText("container", label);
-    this.setOnClick("container", onDelete);
+  init({ label, onDelete, filled }: Props) {
+    this.setText("label", label);
+
+    if (filled) {
+      this.getEl("container")!.classList.add("filled");
+    }
+
+    if (onDelete) {
+      const deleteBtn = this.getEl<HTMLButtonElement>("delete")!;
+      deleteBtn.style.display = "inline-flex";
+      deleteBtn.onclick = () => {
+        this.hide();
+        onDelete();
+      };
+    }
   }
 }
 
