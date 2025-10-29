@@ -25,7 +25,7 @@
     height: 75%;
     stroke: var(--primary-dark);
     stroke-width: 1;
-    fill: var(--bg-border);
+    fill: var(--bg-active);
   }
 
   & .lucide-dollar-sign {
@@ -49,7 +49,19 @@
     left: 62%;
     width: 20%;
     height: 20%;
-    stroke: blue;
+    stroke: mediumblue;
+  }
+
+  & .random-icon {
+    & svg {
+      top: calc(10% * var(--tri-row) + var(--dy, 0));
+      left: calc(
+        3% + 6% * var(--tri-row) + 12% * var(--tri-col) + var(--dx, 0)
+      );
+      width: calc(10% + var(--ds, 0));
+      height: calc(10% + var(--ds, 0));
+      stroke: hsl(var(--dc));
+    }
   }
 }
 
