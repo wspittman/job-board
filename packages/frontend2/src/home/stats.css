@@ -1,5 +1,5 @@
-.stats {
-  display: none; /* hidden by default, "grid" when populated */
+.container {
+  display: grid;
   gap: var(--space-md);
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 
@@ -12,7 +12,7 @@
 .stat-card {
   padding: var(--space-md);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-soft);
   display: grid;
   grid-template-columns: auto 1fr;

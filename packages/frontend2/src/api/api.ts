@@ -1,7 +1,10 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
-import type { Metadata } from "./apiTypes";
+import type { JobModel, MetadataModel } from "./apiTypes";
+import type { FilterModel } from "./filterModel";
 
-const API_URL = import.meta.env["VITE_API_URL"];
+const viteApiUrl = import.meta.env["VITE_API_URL"];
+const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
+const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -18,12 +21,24 @@ class APIConnector {
   public async fetchMetadata() {
     return await qc.fetchQuery({
       queryKey: ["metadata"],
-      queryFn: () => this.httpCall<Metadata>("metadata"),
+      queryFn: () => this.httpCall<MetadataModel>("metadata"),
+    });
+  }
+
+  public async fetchJobs(filters: FilterModel): Promise<JobModel[]> {
+    if (filters.isEmpty()) return [];
+
+    const params = filters.toUrlSearchParams().toString();
+    return await qc.fetchQuery({
+      queryKey: ["jobs", params],
+      queryFn: () => this.httpCall<JobModel[]>(`jobs?${params}`),
     });
   }
 
   protected async httpCall<T>(url: string): Promise<T> {
-    const response = await fetch(`${API_URL}/${url}`, {
+    const trimmedUrl = url.replace(/^\/+/, "");
+
+    const response = await fetch(`${API_URL}/${trimmedUrl}`, {
       signal: AbortSignal.timeout(10_000),
     });
 

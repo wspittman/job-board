@@ -7,9 +7,48 @@
   gap: var(--space-md);
   height: var(--space-xl);
   background: var(--primary-main);
-  color: var(--primary-contrast);
+  color: var(--text-contrast);
   align-items: center;
   box-shadow: var(--shadow-soft);
+}
+
+.header-logo {
+  height: 75%;
+  background: var(--bg-default);
+  border-radius: var(--radius);
+  aspect-ratio: 1 / 1;
+  position: relative;
+
+  & svg {
+    position: absolute;
+  }
+
+  & .lucide-funnel {
+    transform: scale(-1, 1);
+    width: 70%;
+    height: 70%;
+    stroke: var(--primary-main);
+    fill: var(--bg-hover);
+    position: relative;
+    left: 15%;
+    top: 15%;
+  }
+
+  & .lucide-dollar-sign {
+    top: 60%;
+    left: 60%;
+    width: 40%;
+    height: 40%;
+    stroke: darkgreen;
+  }
+
+  & .random-icon svg {
+    top: calc(5% + var(--dy, 0));
+    left: calc(30% + var(--dx, 0));
+    width: calc(40% + var(--ds, 0));
+    height: calc(40% + var(--ds, 0));
+    stroke: hsl(var(--dc));
+  }
 }
 
 .app-link {
@@ -76,7 +115,7 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-@media (max-width: 599px) {
+@media (max-width: 600px) {
   .menu-toggle:checked ~ .menu-backdrop {
     display: block;
     opacity: 1;
@@ -95,7 +134,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--bg-backdrop);
   z-index: 1099;
   opacity: 0;
   transition: opacity 250ms ease-in-out;
@@ -125,7 +164,7 @@
 
 /* Mobile Nav */
 
-@media (max-width: 599px) {
+@media (max-width: 600px) {
   .nav {
     display: none;
     position: absolute;
@@ -156,18 +195,18 @@
 
     &:hover {
       text-decoration: none;
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--bg-hover);
     }
 
     &:active {
-      background: rgba(0, 0, 0, 0.1);
+      background: var(--bg-active);
     }
   }
 
   .nav-divider {
     display: block;
     height: 1px;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--bg-active);
     margin: var(--space-sm);
   }
 
@@ -184,11 +223,11 @@
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--bg-hover);
     }
 
     &:active {
-      background: rgba(0, 0, 0, 0.1);
+      background: var(--bg-active);
     }
   }
 }

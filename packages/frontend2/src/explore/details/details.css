@@ -1,0 +1,40 @@
+.container {
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-lg);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.title {
+  color: var(--primary-dark);
+}
+
+.apply {
+  display: inline-flex;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  background: var(--primary-gradient-btn);
+  color: var(--text-contrast);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: var(--space-xs);
+    box-shadow: var(--shadow-focus);
+    color: var(--text-contrast);
+  }
+}
+
+.meta {
+  color: var(--text-muted);
+  display: flex;
+  gap: var(--space-sm);
+}

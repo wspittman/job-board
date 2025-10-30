@@ -1,5 +1,4 @@
 import { api } from "../api/api";
-import { setDisplay, setText } from "../components/utils";
 import "../sharedStyles/all.css";
 import "./faq.css";
 
@@ -8,8 +7,12 @@ try {
   const lastRefreshed = `Last refreshed: ${new Date(
     data.timestamp
   ).toLocaleString()}`;
-  setText(document, ".faq-note", lastRefreshed);
-  setDisplay(document, ".faq-note", "block");
+
+  const els = document.querySelectorAll<HTMLElement>(".faq-note");
+  for (const el of els) {
+    el.textContent = lastRefreshed;
+    el.style.display = "block";
+  }
 } catch (err) {
   // ignore
 }

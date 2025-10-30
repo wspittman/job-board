@@ -1,20 +1,29 @@
 /* ===== Theme Variables ===== */
 :root {
   /* Palette */
-  --primary-light: #8e6ff5;
-  --primary-main: #6036c6;
-  --primary-dark: #4d2b9e;
-  --primary-contrast: #ffffff;
+  --palette-primary: 256 60%;
+  --palette-secondary: 218 60%;
 
-  --secondary-light: #5a8de6;
-  --secondary-main: #3672c6;
-  --secondary-dark: #2b5b9e;
-  --secondary-contrast: #ffffff;
+  --primary-light: hsl(var(--palette-primary) 60%);
+  --primary-main: hsl(var(--palette-primary) 50%);
+  --primary-dark: hsl(var(--palette-primary) 40%);
+  --primary-soft: hsl(var(--palette-primary) 50% / 0.1);
+  --primary-focus: hsl(var(--palette-primary) 50% / 0.2);
 
-  --bg-default: #fafafa;
-  --surface: #ffffff;
-  --text-default: #111111;
-  --text-muted: rgba(17, 17, 17, 0.68);
+  --secondary-light: hsl(var(--palette-secondary) 60%);
+  --secondary-main: hsl(var(--palette-secondary) 50%);
+  --secondary-dark: hsl(var(--palette-secondary) 40%);
+
+  --text-default: hsl(0 0% 10%);
+  --text-muted: hsl(0 0% 10% / 0.7);
+  --text-contrast: hsl(0 0% 100%);
+
+  --bg-default: hsl(0 0% 98%);
+  --bg-surface: hsl(0 0% 100%);
+  --bg-backdrop: hsl(0 0% 0% / 0.5);
+  --bg-border: hsl(0 0% 0% / 0.2);
+  --bg-active: hsl(0 0% 0% / 0.1);
+  --bg-hover: hsl(0 0% 0% / 0.05);
 
   --primary-gradient-bg: linear-gradient(
     135deg,
@@ -43,10 +52,13 @@
 
   --h1-size: clamp(2.75rem, 4vw, 3.5rem);
   --h2-size: clamp(1.75rem, 1.75vw, 2.5rem);
+  --h3-size: clamp(1.25rem, 1.25vw, 1.75rem);
 
   --size-lg: clamp(1.5rem, 2.5vw, 2rem);
   --size-md: clamp(1rem, 2vw, 1.5rem);
   --size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
+  --size-xs: clamp(0.8rem, 1.25vw, 1rem);
+  --size-xxs: clamp(0.6rem, 0.8vw, 0.75rem);
 
   --heading-line-height: 1.2;
 
@@ -60,8 +72,8 @@
 
   /* Shapes */
   --radius: 8px;
-  --shadow-soft: 0 10px 30px rgba(34, 33, 81, 0.12);
-  --shadow-focus: 0 0 0 3px rgba(96, 54, 198, 0.2);
+  --shadow-soft: 0 10px 30px var(--primary-soft);
+  --shadow-focus: 0 0 0 3px var(--primary-focus);
 }
 
 /* ===== Base ===== */

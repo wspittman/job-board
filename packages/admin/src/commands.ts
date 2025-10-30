@@ -28,3 +28,17 @@ export async function deleteJob(args: string[]): Promise<void> {
   const result = await fetcher("job", "DELETE", { id, companyId });
   console.log("Success", result);
 }
+
+export async function deleteCompany(args: string[]): Promise<void> {
+  const [atsInput, id] = args;
+
+  const ats = atsInput?.toLowerCase() ?? "";
+
+  if (!atsTypes.includes(ats) || !id) {
+    throw new Error("Invalid arguments");
+  }
+
+  console.log(`Deleting company ${id} from ${ats}`);
+  const result = await fetcher("company", "DELETE", { ats, id });
+  console.log("Success", result);
+}

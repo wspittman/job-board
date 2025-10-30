@@ -1,0 +1,32 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--primary-dark);
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--primary-dark);
+  border-radius: var(--radius);
+
+  &.filled {
+    background: var(--secondary-main);
+    color: var(--text-contrast);
+
+    & .delete:focus-visible {
+      outline: 2px solid var(--text-contrast);
+    }
+  }
+}
+
+.delete {
+  display: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.delete:focus-visible {
+  outline: 2px solid var(--primary-dark);
+  outline-offset: 2px;
+}

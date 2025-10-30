@@ -1,0 +1,38 @@
+.explore-page {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  padding: var(--space-md);
+  gap: var(--space-md);
+}
+
+.explore-layout {
+  display: grid;
+  gap: var(--space-md);
+  align-items: start;
+  grid-template-columns: 1fr 2fr 2fr;
+}
+
+.action-button {
+  display: none;
+}
+
+explore-details[empty] {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .action-button {
+    display: inline-flex;
+  }
+
+  .explore-layout {
+    grid-template-columns: 1fr;
+  }
+
+  explore-filters[inactive],
+  explore-results[inactive],
+  explore-details[inactive] {
+    display: none;
+  }
+}

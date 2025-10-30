@@ -3,7 +3,7 @@ import type { ClientMetadata } from "../models/clientModels.ts";
 import { AsyncExecutor } from "../utils/asyncExecutor.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
-let cachedMetadata: ClientMetadata | undefined;
+let cachedMetadata: Promise<ClientMetadata> | undefined;
 
 export const metadataCompanyExecutor = new AsyncExecutor(
   "RefreshMetadata",
@@ -46,19 +46,29 @@ async function refreshJobMetadata() {
 
 export async function getMetadata() {
   if (!cachedMetadata) {
-    // TBD: This would benefit from a lock
-    const companyMetadata = await db.metadata.getItem("company", "company");
-    const jobMetadata = await db.metadata.getItem("job", "job");
-
-    cachedMetadata = {
-      companyCount: companyMetadata?.companyCount ?? 0,
-      companyNames: companyMetadata?.companyNames ?? [],
-      jobCount: jobMetadata?.jobCount ?? 0,
-      // _ts is in seconds, but the client expects milliseconds
-      timestamp:
-        Math.max(companyMetadata?._ts ?? 0, jobMetadata?._ts ?? 0) * 1000,
-    };
+    cachedMetadata = loadMetadata().catch((error) => {
+      cachedMetadata = undefined;
+      throw error;
+    });
   }
 
   return cachedMetadata;
+}
+
+async function loadMetadata(): Promise<ClientMetadata> {
+  const [companyMetadata, jobMetadata] = await Promise.all([
+    db.metadata.getItem("company", "company"),
+    db.metadata.getItem("job", "job"),
+  ]);
+
+  const metadata: ClientMetadata = {
+    companyCount: companyMetadata?.companyCount ?? 0,
+    companyNames: companyMetadata?.companyNames ?? [],
+    jobCount: jobMetadata?.jobCount ?? 0,
+    // _ts is in seconds, but the client expects milliseconds
+    timestamp:
+      Math.max(companyMetadata?._ts ?? 0, jobMetadata?._ts ?? 0) * 1000,
+  };
+
+  return metadata;
 }

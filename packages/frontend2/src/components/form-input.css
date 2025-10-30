@@ -1,0 +1,14 @@
+.intake-wrap {
+  padding: 0 var(--space-md);
+}
+
+.intake {
+  padding: var(--space-md) var(--space-sm) var(--space-sm);
+}
+
+.adornment {
+  font-size: var(--size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding: var(--space-sm) 0 0;
+}

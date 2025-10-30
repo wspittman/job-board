@@ -1,11 +1,11 @@
-export interface Metadata {
+export interface MetadataModel {
   companyCount: number;
   companyNames: [string, string][];
   jobCount: number;
   timestamp: number;
 }
 
-export interface Job {
+export interface JobModel {
   id: string;
   companyId: string;
   company: string;
@@ -24,7 +24,7 @@ export interface Job {
   };
 }
 
-export interface Filters {
+export interface FilterModelApi {
   // Exact Match
   companyId?: string;
   isRemote?: boolean;

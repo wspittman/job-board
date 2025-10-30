@@ -39,7 +39,7 @@ Configuration is handled in `src/config.ts`. Defaults exist for local developmen
 | `GREENHOUSE_URL` / `LEVER_URL`          | Base URLs for ATS integrations fetched by the data ingestion jobs.                                |
 | `LLM_MODEL` / `LLM_REASONING_EFFORT`    | OpenAI model identifier and optional reasoning setting used by AI-powered features.               |
 | `OPENAI_API_KEY`                        | Consumed implicitly by the OpenAI SDK when AI features are enabled.                               |
-| `ADMIN_TOKEN`                           | Shared secret protecting administrative endpoints.                                                |
+| `ADMIN_TOKEN`                           | Required shared secret protecting administrative endpoints (minimum 16 characters).                                                |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Connection string for Application Insights telemetry collection.                                  |
 | `ENABLE_VERBOSE_BLOB_LOGGING`           | Enables expanded telemetry payload logging when set to `true`.                                    |
 
