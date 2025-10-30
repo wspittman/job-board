@@ -4,7 +4,7 @@ import css from "./form-input.css?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
-interface Props extends FormElementProps {
+export interface FormInputProps extends FormElementProps {
   prefix?: string;
   suffix?: string;
 }
@@ -16,7 +16,7 @@ export class FormInput extends FormElement {
     this.intake.setAttribute("placeholder", " ");
   }
 
-  override init({ prefix, suffix, ...rest }: Props) {
+  override init({ prefix, suffix, ...rest }: FormInputProps) {
     super.init(rest);
     this.#createAdornment(true, prefix);
     this.#createAdornment(false, suffix);

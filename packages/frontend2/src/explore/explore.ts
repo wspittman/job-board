@@ -6,8 +6,8 @@ import "./filters/filters.ts";
 import "./results/results.ts";
 
 import { api } from "../api/api.ts";
-import type { FilterModel, JobModel } from "../api/apiTypes.ts";
-import { isEmptyFilterModel } from "../api/filterModelUtils.ts";
+import type { JobModel } from "../api/apiTypes.ts";
+import type { FilterModel } from "../api/filterModel.ts";
 
 const emptyPlaceholder = {
   title: "Add Filters To Begin",
@@ -44,7 +44,7 @@ let lastRequestId = 0;
 async function onFilterChange(filters: FilterModel) {
   const requestId = ++lastRequestId;
 
-  if (isEmptyFilterModel(filters)) {
+  if (filters.isEmpty()) {
     exploreResults.jobs = [emptyPlaceholder];
     jobDeselect();
     return;
@@ -115,4 +115,5 @@ function activeDetails() {
 }
 
 activeResults();
-onFilterChange({});
+exploreResults.jobs = [emptyPlaceholder];
+jobDeselect();

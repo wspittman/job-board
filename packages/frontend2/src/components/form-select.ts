@@ -9,7 +9,7 @@ interface OptionDefinition {
   value: unknown;
 }
 
-interface Props extends FormElementProps {
+export interface FormSelectProps extends FormElementProps {
   options: OptionDefinition[];
 }
 
@@ -18,7 +18,7 @@ export class FormSelect extends FormElement {
     super("select", cssSheet);
   }
 
-  override init({ options, ...rest }: Props) {
+  override init({ options, ...rest }: FormSelectProps) {
     super.init(rest);
     this.#setOptions(options);
   }

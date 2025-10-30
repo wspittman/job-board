@@ -1,9 +1,11 @@
-import type { FilterModel } from "../../api/apiTypes";
-import { formDataToFilterModel } from "../../api/filterModelUtils";
+import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import "../../components/chip";
 import { ComponentBase } from "../../components/componentBase";
+import type { FormElement } from "../../components/form-element";
 import "../../components/form-input";
-import type { FormInput } from "../../components/form-input";
+import type { FormInputProps } from "../../components/form-input";
+import "../../components/form-select";
+import type { FormSelectProps } from "../../components/form-select";
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
 
@@ -15,12 +17,61 @@ interface Props {
   onChange?: (filters: FilterModel) => void;
 }
 
-type FormInputProps = Parameters<FormInput["init"]>[0];
+interface FormInputDef extends FormInputProps {
+  type: "input";
+}
+
+interface FormSelectDef extends FormSelectProps {
+  type: "select";
+}
+
+const filterDefs: (FormInputDef | FormSelectDef)[] = [
+  {
+    type: "input",
+    name: "title",
+    label: "Title",
+  },
+  {
+    type: "select",
+    name: "isRemote",
+    label: "isRemote",
+    options: [
+      { label: "", value: "" },
+      { label: "Remote", value: "true" },
+      { label: "In-Person / Hybrid", value: "false" },
+    ],
+  },
+  {
+    type: "input",
+    name: "location",
+    label: "Location",
+    prefix: "Working from",
+  },
+  {
+    type: "input",
+    name: "minSalary",
+    label: "Minimum Salary",
+    prefix: "$",
+  },
+  {
+    type: "input",
+    name: "maxExperience",
+    label: "Required Experience",
+    prefix: "I have at least",
+    suffix: "years experience",
+  },
+  {
+    type: "input",
+    name: "daysSince",
+    label: "Posted Since",
+    suffix: "days ago",
+  },
+];
 
 export class Filters extends ComponentBase {
   readonly #form: HTMLFormElement;
   readonly #chips: HTMLElement;
-  readonly #inputs = new Map<keyof FilterModel, FormInput>();
+  readonly #inputs = new Map<FilterModelKey, FormElement>();
   #debounceTimer: number | undefined;
   #onChange?: (filters: FilterModel) => void;
 
@@ -28,50 +79,34 @@ export class Filters extends ComponentBase {
     super(html, cssSheet);
     this.#form = this.getEl<HTMLFormElement>("form")!;
     this.#chips = this.getEl<HTMLElement>("chips")!;
-
-    this.#appendInputs(
-      {
-        label: "Title",
-        name: "title",
-      },
-      {
-        label: "Location",
-        name: "location",
-        prefix: "Working from",
-      },
-      {
-        label: "Minimum Salary",
-        name: "minSalary",
-        prefix: "$",
-      },
-      {
-        label: "Required Experience",
-        name: "maxExperience",
-        prefix: "I have at least",
-        suffix: "years experience",
-      },
-      {
-        label: "Posted Since",
-        name: "daysSince",
-        suffix: "days ago",
-      }
-    );
+    this.#appendInputs();
   }
 
   init({ onChange }: Props) {
     this.#onChange = onChange;
   }
 
-  #appendInputs(...defs: FormInputProps[]): void {
+  #appendInputs(): void {
     const onChange = () => this.#debounceOnChange();
     const fragment = document.createDocumentFragment();
-    for (const props of defs) {
-      const el = document.createElement("jb-form-input");
-      el.init({ ...props, onChange });
+    for (const props of filterDefs) {
+      const el = this.#createFromFilterDef({ ...props, onChange });
       fragment.append(el);
-      this.#inputs.set(props.name as keyof FilterModel, el);
+      this.#inputs.set(props.name as FilterModelKey, el);
     }
     this.#form.append(fragment);
+  }
+
+  #createFromFilterDef(def: FormInputDef | FormSelectDef): FormElement {
+    if (def.type === "select") {
+      const el = document.createElement("jb-form-select");
+      el.init(def);
+      return el;
+    }
+
+    const el = document.createElement("jb-form-input");
+    el.init(def);
+    return el;
   }
 
   #debounceOnChange(): void {
@@ -90,42 +125,12 @@ export class Filters extends ComponentBase {
 
   #getFilterData(): FilterModel {
     const formData = new FormData(this.#form);
-    return formDataToFilterModel(formData);
+    return FilterModel.fromFormData(formData);
   }
 
   #renderChips(filters: FilterModel): void {
-    const entries: [keyof FilterModel, string][] = [];
-
-    if (filters.title) {
-      entries.push(["title", `Title: ${filters.title}`]);
-    }
-
-    if (filters.location) {
-      entries.push(["location", `Location: ${filters.location}`]);
-    }
-
-    if (typeof filters.minSalary === "number") {
-      entries.push([
-        "minSalary",
-        `Salary: At least $${filters.minSalary.toLocaleString()}`,
-      ]);
-    }
-
-    if (typeof filters.maxExperience === "number") {
-      entries.push([
-        "maxExperience",
-        `Experience: I have at least ${filters.maxExperience} years`,
-      ]);
-    }
-
-    if (typeof filters.daysSince === "number") {
-      entries.push([
-        "daysSince",
-        `Posted: Within ${filters.daysSince.toLocaleString()} days`,
-      ]);
-    }
-
     const fragment = document.createDocumentFragment();
+    const entries = filters.toFriendlyStrings();
 
     for (const [key, label] of entries) {
       const chip = document.createElement("jb-chip");

@@ -1,6 +1,6 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
-import type { FilterModel, JobModel, MetadataModel } from "./apiTypes";
-import { filterModelToParams } from "./filterModelUtils";
+import type { JobModel, MetadataModel } from "./apiTypes";
+import type { FilterModel } from "./filterModel";
 
 const viteApiUrl = import.meta.env["VITE_API_URL"];
 const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
@@ -26,12 +26,12 @@ class APIConnector {
   }
 
   public async fetchJobs(filters: FilterModel): Promise<JobModel[]> {
-    const params = filterModelToParams(filters);
-    if (!params) return [];
+    if (filters.isEmpty()) return [];
 
+    const params = filters.toUrlSearchParams().toString();
     return await qc.fetchQuery({
-      queryKey: ["jobs", filters],
-      queryFn: () => this.httpCall<JobModel[]>(`jobs?${params.toString()}`),
+      queryKey: ["jobs", params],
+      queryFn: () => this.httpCall<JobModel[]>(`jobs?${params}`),
     });
   }
 
