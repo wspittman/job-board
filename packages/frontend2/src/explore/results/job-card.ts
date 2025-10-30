@@ -7,11 +7,11 @@ import html from "./job-card.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 interface Props {
-  // init-only
   job: JobModel;
   onClick?: (id: string) => void;
+
   // editable
-  isSelected: boolean;
+  isSelected?: boolean;
 }
 
 export class JobCard extends ComponentBase {
@@ -49,7 +49,7 @@ export class JobCard extends ComponentBase {
     const realOnClick = onClick ? () => onClick(job.id) : undefined;
     this.setOnClick("container", realOnClick);
 
-    this.isSelected = isSelected;
+    this.isSelected = !!isSelected;
   }
 
   set isSelected(value: boolean) {

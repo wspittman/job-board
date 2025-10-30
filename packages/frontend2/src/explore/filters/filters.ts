@@ -34,7 +34,7 @@ const filterDefs: (FormInputDef | FormSelectDef)[] = [
   {
     type: "select",
     name: "isRemote",
-    label: "isRemote",
+    label: "Remote",
     options: [
       { label: "", value: "" },
       { label: "Remote", value: "true" },

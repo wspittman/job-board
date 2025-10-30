@@ -9,24 +9,6 @@ import { api } from "../api/api.ts";
 import type { JobModel } from "../api/apiTypes.ts";
 import type { FilterModel } from "../api/filterModel.ts";
 
-const emptyPlaceholder = {
-  title: "Add Filters To Begin",
-  company: "Try to have fun with it!",
-  facets: {
-    summary:
-      "As you apply filters, jobs will begin appearing here. We'll return the first 24 matches we find for your filter set. You can always adjust your filters until you have a great set of matches.",
-  },
-} as JobModel;
-
-const noMatchPlaceholder = {
-  title: "No Matches Found",
-  company: "Try adjusting your filters.",
-  facets: {
-    summary:
-      "Consider broadening your criteria to see more results. Or maybe we don't have good jobs posted for you yet. =(",
-  },
-} as JobModel;
-
 const actionButton = document.getElementById("action-button")!;
 actionButton.addEventListener("click", onActionClick);
 
@@ -45,7 +27,7 @@ async function onFilterChange(filters: FilterModel) {
   const requestId = ++lastRequestId;
 
   if (filters.isEmpty()) {
-    exploreResults.jobs = [emptyPlaceholder];
+    exploreResults.jobs = undefined;
     jobDeselect();
     return;
   }
@@ -57,7 +39,7 @@ async function onFilterChange(filters: FilterModel) {
   }
 
   if (!jobs.length) {
-    exploreResults.jobs = [noMatchPlaceholder];
+    exploreResults.jobs = [];
     jobDeselect();
     return;
   }
@@ -115,5 +97,4 @@ function activeDetails() {
 }
 
 activeResults();
-exploreResults.jobs = [emptyPlaceholder];
 jobDeselect();
