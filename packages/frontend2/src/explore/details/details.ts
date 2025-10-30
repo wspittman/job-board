@@ -8,9 +8,9 @@ const tag = "explore-details";
 const cssSheet = ComponentBase.createCSSSheet(css);
 
 export class Details extends ComponentBase {
+  readonly #applyLink: HTMLAnchorElement;
+  readonly #detailEmbed: DetailEmbed;
   #job?: JobModel;
-  #applyLink: HTMLAnchorElement;
-  #detailEmbed: DetailEmbed;
 
   constructor() {
     super(html, cssSheet);

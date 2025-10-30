@@ -14,6 +14,7 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 const DEBOUNCE_DELAY = 500;
 
 interface Props {
+  initialFilters?: FilterModel;
   onChange?: (filters: FilterModel) => void;
 }
 
@@ -82,8 +83,17 @@ export class Filters extends ComponentBase {
     this.#appendInputs();
   }
 
-  init({ onChange }: Props) {
+  init({ onChange, initialFilters }: Props) {
     this.#onChange = onChange;
+
+    if (initialFilters && !initialFilters.isEmpty()) {
+      for (const [key, value] of initialFilters.toEntries()) {
+        const input = this.#inputs.get(key);
+        if (input) {
+          input.value = value ?? "";
+        }
+      }
+    }
   }
 
   #appendInputs(): void {
