@@ -21,15 +21,20 @@ export abstract class ComponentBase extends HTMLElement {
    * @param css - The component-specific CSS stylesheet
    * @param options - Configuration options for the component
    */
-  constructor(html: string, css: CSSStyleSheet, options: Options = {}) {
+  constructor(
+    html: string,
+    css: CSSStyleSheet | CSSStyleSheet[],
+    options: Options = {}
+  ) {
+    const cssSheets = Array.isArray(css) ? css : [css];
     const { omitPartsCss = false } = options;
 
     super();
     this.root = this.attachShadow({ mode: "open" });
 
     const sheets = omitPartsCss
-      ? [ComponentBase.#normSheet, css]
-      : [ComponentBase.#normSheet, ComponentBase.#partsSheet, css];
+      ? [ComponentBase.#normSheet, ...cssSheets]
+      : [ComponentBase.#normSheet, ComponentBase.#partsSheet, ...cssSheets];
     this.root.adoptedStyleSheets = sheets;
 
     this.root.innerHTML = html;
