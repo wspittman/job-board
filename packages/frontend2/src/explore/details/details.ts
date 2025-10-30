@@ -9,9 +9,13 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 
 export class Details extends ComponentBase {
   #job?: JobModel;
+  #applyLink: HTMLAnchorElement;
+  #detailEmbed: DetailEmbed;
 
   constructor() {
     super(html, cssSheet);
+    this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
+    this.#detailEmbed = this.getEl<DetailEmbed>("description")!;
   }
 
   set job(value: JobModel | undefined) {
@@ -22,8 +26,11 @@ export class Details extends ComponentBase {
   }
 
   #render() {
-    const { title, company, location, postTS, description } = this.#job ?? {};
-    const postDate = postTS ? new Date(postTS).toLocaleDateString() : "";
+    if (!this.#job) return;
+
+    const { title, company, location, postTS, description, applyUrl } =
+      this.#job;
+    const postDate = new Date(postTS).toLocaleDateString();
 
     this.setManyTexts({
       heading: title,
@@ -32,10 +39,12 @@ export class Details extends ComponentBase {
       "posted-date": postDate,
     });
 
-    const desc = this.getEl<DetailEmbed>("description");
-    if (desc) {
-      desc.description = description ?? "";
-    }
+    this.#detailEmbed.description = description;
+    this.#applyLink.href = applyUrl;
+    this.#applyLink.setAttribute(
+      "aria-label",
+      `Apply for ${title} position at ${company}`
+    );
   }
 }
 
