@@ -127,12 +127,12 @@ async function loadRandomIcon(
   const dx = randInt(-3, 3);
   const dy = randInt(-3, 3);
   const name = getRandomIconName();
-  const icon = await loadIcon(name, indent);
+  const icon = await loadIcon(name, indent + "  ");
 
   return [
-    `<div class="random-icon" style="${style}--dc: ${dc}; --ds: ${ds}%; --dx: ${dx}%; --dy: ${dy}%;">`,
+    `${indent}<div class="random-icon" style="${style}--dc: ${dc}; --ds: ${ds}%; --dx: ${dx}%; --dy: ${dy}%;">`,
     icon,
-    "</div>",
+    `${indent}</div>`,
   ].join("\n");
 }
 
@@ -142,8 +142,9 @@ async function loadIcon(name: string, indent: string): Promise<string> {
     const icon = await readFile(file, "utf8");
     return icon
       .split("\n")
+      .filter(Boolean)
       .map((line) => (line ? indent + line : line))
-      .join("");
+      .join("\n");
   } catch {
     throw new Error(`Icon "${name}" not found.`);
   }
