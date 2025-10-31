@@ -4,7 +4,7 @@ import type { FilterModel } from "./filterModel";
 
 const viteApiUrl = import.meta.env["VITE_API_URL"];
 const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
-const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
+export const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
 
 const qc = new QueryClient({
   defaultOptions: {

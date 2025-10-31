@@ -4,7 +4,7 @@ import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { Building, Calendar, MapPin } from "lucide-react";
-import { Job } from "../services/api";
+import { API_URL, Job } from "../services/api";
 import { IconTypography } from "./IconTypography";
 
 interface Props {
@@ -48,7 +48,7 @@ export const JobDetail = ({ job }: Props) => {
             variant="contained"
             size="large"
             fullWidth
-            href={job.applyUrl}
+            href={API_URL + job.applyUrl}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Apply for ${job.title} position at ${job.company}`}

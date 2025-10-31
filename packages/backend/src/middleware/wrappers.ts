@@ -56,6 +56,27 @@ export function asyncRoute<T>(
   };
 }
 
+/**
+ * Creates an Express route handler for redirects
+ * @param fn - Async function that returns the redirect URL based on validated input
+ * @param inputValidator - Optional function to validate and transform the input
+ * @returns Express middleware that handles the request
+ */
+export function redirectRoute<IN>(
+  fn: (input: IN) => Promise<string>,
+  inputValidator?: (input: unknown) => IN
+) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const input = getInput(req, inputValidator);
+      const redirectUrl = await fn(input);
+      res.redirect(302, redirectUrl);
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
 function pathToLogName(path: string) {
   return path
     .split("/")
