@@ -74,6 +74,25 @@ export class Results extends ComponentBase {
     this.#list.replaceChildren(fragment);
   }
 
+  showError(message: string) {
+    this.#jobs = [];
+    const fragment = document.createDocumentFragment();
+
+    const errorCard = document.createElement("div");
+    errorCard.className = "error-card";
+    errorCard.setAttribute("role", "alert");
+
+    const titleEl = document.createElement("strong");
+    titleEl.textContent = "Well that's not better!";
+    const messageEl = document.createElement("span");
+    messageEl.textContent = message;
+
+    errorCard.append(titleEl, messageEl);
+    fragment.appendChild(errorCard);
+
+    this.#list.replaceChildren(fragment);
+  }
+
   #selectCard(selectedId: string) {
     if (!selectedId) return;
     this.#onSelect?.(selectedId);
@@ -83,8 +102,12 @@ export class Results extends ComponentBase {
   }
 
   #getInfoCard(jobCount?: number): JobCard {
-    const card = document.createElement("explore-job-card");
     const [title, company, summary] = infoMessage(jobCount);
+    return this.#createInfoCard(title, company, summary);
+  }
+
+  #createInfoCard(title: string, company: string, summary: string): JobCard {
+    const card = document.createElement("explore-job-card");
     card.init({ job: { title, company, facets: { summary } } as JobModel });
     return card;
   }

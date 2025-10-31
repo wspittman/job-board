@@ -36,26 +36,39 @@ async function onFilterChange(filters: FilterModel) {
     return;
   }
 
-  const jobs = await api.fetchJobs(filters);
+  try {
+    const jobs = await api.fetchJobs(filters);
 
-  if (requestId !== lastRequestId) {
-    return;
-  }
+    if (requestId !== lastRequestId) {
+      return;
+    }
 
-  if (!jobs.length) {
-    exploreResults.jobs = [];
+    if (!jobs.length) {
+      exploreResults.jobs = [];
+      jobDeselect();
+      return;
+    }
+
+    jobMap.clear();
+    for (const job of jobs) {
+      jobMap.set(job.id, job);
+    }
+
+    exploreResults.jobs = jobs;
+    exploreDetails.job = jobMap.get(jobs[0]!.id);
+    exploreDetails.toggleAttribute("empty", false);
+  } catch (error) {
+    if (requestId !== lastRequestId) {
+      return;
+    }
+
+    jobMap.clear();
+    exploreResults.showError(
+      "Unable to load job data. Please try again later."
+    );
     jobDeselect();
-    return;
+    console.error("Failed to load jobs", error);
   }
-
-  jobMap.clear();
-  for (const job of jobs) {
-    jobMap.set(job.id, job);
-  }
-
-  exploreResults.jobs = jobs;
-  exploreDetails.job = jobMap.get(jobs[0]!.id);
-  exploreDetails.toggleAttribute("empty", false);
 }
 
 function jobDeselect() {

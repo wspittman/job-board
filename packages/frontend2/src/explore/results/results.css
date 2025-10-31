@@ -2,3 +2,19 @@
   display: grid;
   gap: var(--space-md);
 }
+
+.error-card {
+  padding: var(--space-lg);
+  border-radius: var(--radius);
+  border: 1px solid hsl(356 74% 48% / 0.4);
+  background: hsl(356 100% 97%);
+  color: hsl(356 70% 30%);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: var(--space-sm);
+  font-size: var(--size-sm);
+}
+
+.error-card strong {
+  font-size: var(--size-md);
+}
