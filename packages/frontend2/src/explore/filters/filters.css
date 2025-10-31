@@ -5,11 +5,12 @@
   padding: var(--space-lg);
 }
 
-.row {
+.chips {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
 }
 
 .form {
