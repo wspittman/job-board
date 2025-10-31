@@ -70,16 +70,25 @@ const filterDefs: (FormInputDef | FormSelectDef)[] = [
 ];
 
 export class Filters extends ComponentBase {
-  readonly #form: HTMLFormElement;
+  readonly #container: HTMLElement;
+  readonly #toggle: HTMLButtonElement;
   readonly #chips: HTMLElement;
+  readonly #form: HTMLFormElement;
   readonly #inputs = new Map<FilterModelKey, FormElement>();
+
   #debounceTimer: number | undefined;
   #onChange?: (filters: FilterModel) => void;
+  #isCollapsed = false;
 
   constructor() {
     super(html, cssSheet);
+    this.#container = this.getEl("container")!;
+    this.#toggle = this.getEl<HTMLButtonElement>("toggle")!;
     this.#form = this.getEl<HTMLFormElement>("form")!;
-    this.#chips = this.getEl<HTMLElement>("chips")!;
+    this.#chips = this.getEl("chips")!;
+
+    this.#toggle.addEventListener("click", () => this.#handleToggle());
+    this.#setCollapsed(false);
     this.#appendInputs();
   }
 
@@ -153,6 +162,21 @@ export class Filters extends ComponentBase {
     }
 
     this.#chips.replaceChildren(fragment);
+  }
+
+  #handleToggle(): void {
+    this.#setCollapsed(!this.#isCollapsed);
+  }
+
+  #setCollapsed(collapsed: boolean): void {
+    this.#isCollapsed = collapsed;
+    this.#container.classList.toggle("collapsed", collapsed);
+    this.#toggle.textContent = collapsed ? "\u203A" : "\u2039";
+    this.#toggle.setAttribute("aria-expanded", String(!collapsed));
+    this.#toggle.setAttribute(
+      "aria-label",
+      collapsed ? "Expand filters panel" : "Collapse filters panel"
+    );
   }
 }
 

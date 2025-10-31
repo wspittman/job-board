@@ -7,10 +7,18 @@
 }
 
 .explore-layout {
-  display: grid;
+  display: flex;
   gap: var(--space-md);
-  align-items: start;
-  grid-template-columns: 1fr 2fr 2fr;
+  align-items: flex-start;
+}
+
+explore-filters {
+  flex-basis: min-content;
+}
+
+explore-results,
+explore-details {
+  flex: 2;
 }
 
 .action-button {
@@ -18,7 +26,7 @@
 }
 
 explore-details[empty] {
-  display: none;
+  visibility: hidden;
 }
 
 @media (max-width: 900px) {
@@ -26,8 +34,8 @@ explore-details[empty] {
     display: inline-flex;
   }
 
-  .explore-layout {
-    grid-template-columns: 1fr;
+  explore-filters {
+    flex: 2;
   }
 
   explore-filters[inactive],
