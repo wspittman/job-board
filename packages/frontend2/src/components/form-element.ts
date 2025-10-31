@@ -51,9 +51,21 @@ export abstract class FormElement extends ComponentBase {
   }
 
   #syncAttribute() {
-    this.intake.classList.toggle("has-value", !!this.intake.value);
-    this.setAttribute("value", this.intake.value);
-    this.#internals.setFormValue(this.intake.value);
+    const displayValue = this.intake.value;
+    const hasValue = this.hasDisplayValue(displayValue);
+    const formValue = this.computeFormValue(displayValue);
+
+    this.intake.classList.toggle("has-value", hasValue);
+    this.setAttribute("value", formValue);
+    this.#internals.setFormValue(formValue);
     this.#onChange?.();
+  }
+
+  protected hasDisplayValue(displayValue: string) {
+    return !!displayValue;
+  }
+
+  protected computeFormValue(displayValue: string) {
+    return displayValue;
   }
 }
