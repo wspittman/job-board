@@ -19,13 +19,13 @@ export function htmlPartials(): Plugin {
     indentation: string,
     seen: Set<string>
   ): Promise<string> {
-    const file = await readFile(path, "utf8");
+    const file = (await readFile(path, "utf8")).replace(/\r?\n/g, "\n");
     const expandedContent = await expand(file, path, new Set(seen).add(path));
 
     return expandedContent
       .split("\n")
       .map((line) => (line ? indentation + line : line))
-      .join("");
+      .join("\n");
   }
 
   async function expand(

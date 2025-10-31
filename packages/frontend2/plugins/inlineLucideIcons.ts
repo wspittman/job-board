@@ -139,7 +139,7 @@ async function loadRandomIcon(
 async function loadIcon(name: string, indent: string): Promise<string> {
   const file = path.join(ICON_DIR, `${name}.svg`);
   try {
-    const icon = await readFile(file, "utf8");
+    const icon = (await readFile(file, "utf8")).replace(/\r?\n/g, "\n");
     return icon
       .split("\n")
       .filter(Boolean)
