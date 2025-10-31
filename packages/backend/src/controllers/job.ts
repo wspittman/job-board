@@ -6,6 +6,7 @@ import { db } from "../db/db.ts";
 import type { Filters } from "../models/clientModels.ts";
 import type { CompanyKey, Job, JobKey, Location } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
+import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { metadataJobExecutor } from "./metadata.ts";
@@ -47,6 +48,25 @@ export async function getJobs(filterInput: Filters) {
  */
 export async function removeJob(key: JobKey) {
   return db.job.remove(key);
+}
+
+/**
+ * Retrieves the application redirect URL for a given job
+ * @param key - Job identifier containing id and companyId
+ * @returns URL to redirect the user to for job application
+ */
+export async function getApplyRedirectUrl(key: JobKey): Promise<string> {
+  const job = await db.job.get(key);
+
+  if (!job) {
+    throw new AppError("Job not found", 404);
+  }
+
+  const redirectUrl = new URL(job.applyUrl);
+  redirectUrl.searchParams.set("utm_source", "betterjobboard.net");
+  redirectUrl.searchParams.set("utm_medium", "apply");
+
+  return redirectUrl.toString();
 }
 
 /**

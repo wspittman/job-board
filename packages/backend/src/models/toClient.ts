@@ -12,7 +12,6 @@ export const toClientJob = ({
   title,
   description,
   postTS,
-  applyUrl,
   companyName,
   presence,
   primaryLocation,
@@ -20,6 +19,9 @@ export const toClientJob = ({
   requiredExperience,
   summary,
 }: Job): ClientJob => {
+  const encodeId = encodeURIComponent(id);
+  const encodeCompanyId = encodeURIComponent(companyId);
+  const applyUrl = `/job/apply?id=${encodeId}&companyId=${encodeCompanyId}`;
   return {
     id,
     companyId,

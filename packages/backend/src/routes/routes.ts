@@ -6,7 +6,7 @@ import {
   refreshJobs,
   removeCompany,
 } from "../controllers/company.ts";
-import { getJobs, removeJob } from "../controllers/job.ts";
+import { getApplyRedirectUrl, getJobs, removeJob } from "../controllers/job.ts";
 import { getMetadata } from "../controllers/metadata.ts";
 import { adminOnly } from "../middleware/auth.ts";
 import {
@@ -16,7 +16,11 @@ import {
   useJobKey,
   useRefreshJobsOptions,
 } from "../middleware/inputValidators.ts";
-import { asyncRoute, jsonRoute } from "../middleware/wrappers.ts";
+import {
+  asyncRoute,
+  jsonRoute,
+  redirectRoute,
+} from "../middleware/wrappers.ts";
 import { toClientJobs } from "../models/toClient.ts";
 
 export const router = express.Router();
@@ -37,6 +41,7 @@ router.put("/company", jsonRoute(addCompany, useCompanyKey));
 router.put("/companies", adminOnly, jsonRoute(addCompanies, useCompanyKeys));
 router.delete("/company", adminOnly, jsonRoute(removeCompany, useCompanyKey));
 
+router.get("/job/apply", redirectRoute(getApplyRedirectUrl, useJobKey));
 router.get("/jobs", jsonRoute(getJobs, useFilters, toClientJobs));
 router.delete("/job", adminOnly, jsonRoute(removeJob, useJobKey));
 

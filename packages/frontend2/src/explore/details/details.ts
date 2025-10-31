@@ -1,3 +1,4 @@
+import { API_URL } from "../../api/api.ts";
 import type { JobModel } from "../../api/apiTypes.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
 import { DetailEmbed } from "./detail-embed.ts";
@@ -40,7 +41,7 @@ export class Details extends ComponentBase {
     });
 
     this.#detailEmbed.description = description;
-    this.#applyLink.href = applyUrl;
+    this.#applyLink.href = API_URL + applyUrl;
     this.#applyLink.setAttribute(
       "aria-label",
       `Apply for ${title} position at ${company}`
