@@ -3,6 +3,7 @@
   /* Palette */
   --palette-primary: 256 60%;
   --palette-secondary: 218 60%;
+  --palette-error: 356 60%;
 
   --primary-light: hsl(var(--palette-primary) 60%);
   --primary-main: hsl(var(--palette-primary) 50%);
@@ -14,9 +15,12 @@
   --secondary-main: hsl(var(--palette-secondary) 50%);
   --secondary-dark: hsl(var(--palette-secondary) 40%);
 
+  --error-main: hsl(var(--palette-error) 70%);
+
   --text-default: hsl(0 0% 10%);
   --text-muted: hsl(0 0% 10% / 0.7);
   --text-contrast: hsl(0 0% 100%);
+  --text-error: hsl(var(--palette-error) 30%);
 
   --bg-default: hsl(0 0% 98%);
   --bg-surface: hsl(0 0% 100%);
@@ -24,6 +28,7 @@
   --bg-border: hsl(0 0% 0% / 0.2);
   --bg-active: hsl(0 0% 0% / 0.1);
   --bg-hover: hsl(0 0% 0% / 0.05);
+  --bg-error: hsl(var(--palette-error) 95%);
 
   --primary-gradient-bg: linear-gradient(
     135deg,

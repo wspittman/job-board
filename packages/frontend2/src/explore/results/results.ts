@@ -83,7 +83,7 @@ export class Results extends ComponentBase {
     errorCard.setAttribute("role", "alert");
 
     const titleEl = document.createElement("strong");
-    titleEl.textContent = "Well that's not better!";
+    titleEl.textContent = "⚠️ Well that's not better!";
     const messageEl = document.createElement("span");
     messageEl.textContent = message;
 
@@ -103,10 +103,6 @@ export class Results extends ComponentBase {
 
   #getInfoCard(jobCount?: number): JobCard {
     const [title, company, summary] = infoMessage(jobCount);
-    return this.#createInfoCard(title, company, summary);
-  }
-
-  #createInfoCard(title: string, company: string, summary: string): JobCard {
     const card = document.createElement("explore-job-card");
     card.init({ job: { title, company, facets: { summary } } as JobModel });
     return card;
