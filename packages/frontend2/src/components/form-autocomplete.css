@@ -1,0 +1,40 @@
+.intake-wrap {
+  position: relative;
+  padding: 0 var(--space-md);
+}
+
+.intake {
+  padding: var(--space-md) var(--space-md) var(--space-sm);
+}
+
+.options {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: var(--space-xs) 0;
+  list-style: none;
+  border: 1px solid var(--bg-border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  box-shadow: 0 12px 32px hsl(0 0% 0% / 0.12);
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.options[hidden] {
+  display: none;
+}
+
+.option {
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  font-size: var(--size-sm);
+}
+
+.option:hover,
+.option.active {
+  background: var(--bg-hover);
+}
