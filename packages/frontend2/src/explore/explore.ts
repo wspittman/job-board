@@ -67,7 +67,6 @@ async function onFilterChange(filters: FilterModel) {
       "Unable to load job data. Please try again later."
     );
     jobDeselect();
-    console.error("Failed to load jobs", error);
   }
 }
 
