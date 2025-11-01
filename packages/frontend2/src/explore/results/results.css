@@ -3,3 +3,17 @@
   gap: var(--space-md);
   grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
 }
+
+.error-card {
+  display: inherit;
+  background: var(--bg-error);
+  padding: var(--space-md);
+  border: 1px solid var(--error-main);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  color: var(--text-error);
+
+  & h3 {
+    color: inherit;
+  }
+}

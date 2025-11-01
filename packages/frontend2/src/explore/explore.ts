@@ -40,26 +40,36 @@ async function onFilterChange(filters: FilterModel) {
     return;
   }
 
-  const jobs = await api.fetchJobs(filters);
+  try {
+    const jobs = await api.fetchJobs(filters);
 
-  if (requestId !== lastRequestId) {
-    return;
-  }
+    if (requestId !== lastRequestId) {
+      return;
+    }
 
-  if (!jobs.length) {
-    panes.results.jobs = [];
+    if (!jobs.length) {
+      panes.results.jobs = [];
+      jobDeselect();
+      return;
+    }
+
+    jobMap.clear();
+    for (const job of jobs) {
+      jobMap.set(job.id, job);
+    }
+
+    panes.results.jobs = jobs;
+    panes.details.job = jobMap.get(jobs[0]!.id);
+    panes.details.toggleAttribute("empty", false);
+  } catch (error) {
+    if (requestId !== lastRequestId) {
+      return;
+    }
+
+    jobMap.clear();
+    panes.results.showError("Unable to load job data. Please try again later.");
     jobDeselect();
-    return;
   }
-
-  jobMap.clear();
-  for (const job of jobs) {
-    jobMap.set(job.id, job);
-  }
-
-  panes.results.jobs = jobs;
-  panes.details.job = jobMap.get(jobs[0]!.id);
-  panes.details.toggleAttribute("empty", false);
 }
 
 function jobDeselect() {
