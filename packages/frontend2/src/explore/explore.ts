@@ -15,14 +15,18 @@ actionButton.addEventListener("click", onActionClick);
 const initialFilters = FilterModel.fromUrlSearchParams(
   new URLSearchParams(location.search)
 );
-const exploreFilters = document.querySelector("explore-filters")!;
-exploreFilters.init({ onChange: onFilterChange, initialFilters });
 
-const exploreResults = document.querySelector("explore-results")!;
-exploreResults.init({ onSelect: onJobSelect });
+const panes = {
+  filters: document.querySelector("explore-filters")!,
+  results: document.querySelector("explore-results")!,
+  details: document.querySelector("explore-details")!,
+};
+type Pane = keyof typeof panes;
 
-const exploreDetails = document.querySelector("explore-details")!;
+panes.filters.init({ onChange: onFilterChange, initialFilters });
+panes.results.init({ onSelect: onJobSelect });
 
+let activePane: Pane = "results";
 const jobMap = new Map<string, JobModel>();
 let lastRequestId = 0;
 
@@ -31,7 +35,7 @@ async function onFilterChange(filters: FilterModel) {
   const requestId = ++lastRequestId;
 
   if (filters.isEmpty()) {
-    exploreResults.jobs = undefined;
+    panes.results.jobs = undefined;
     jobDeselect();
     return;
   }
@@ -44,7 +48,7 @@ async function onFilterChange(filters: FilterModel) {
     }
 
     if (!jobs.length) {
-      exploreResults.jobs = [];
+      panes.results.jobs = [];
       jobDeselect();
       return;
     }
@@ -54,44 +58,33 @@ async function onFilterChange(filters: FilterModel) {
       jobMap.set(job.id, job);
     }
 
-    exploreResults.jobs = jobs;
-    exploreDetails.job = jobMap.get(jobs[0]!.id);
-    exploreDetails.toggleAttribute("empty", false);
+    panes.results.jobs = jobs;
+    panes.details.job = jobMap.get(jobs[0]!.id);
+    panes.details.toggleAttribute("empty", false);
   } catch (error) {
     if (requestId !== lastRequestId) {
       return;
     }
 
     jobMap.clear();
-    exploreResults.showError(
-      "Unable to load job data. Please try again later."
-    );
+    panes.results.showError("Unable to load job data. Please try again later.");
     jobDeselect();
   }
 }
 
 function jobDeselect() {
-  exploreDetails.job = undefined;
-  exploreDetails.toggleAttribute("empty", true);
+  panes.details.job = undefined;
+  panes.details.toggleAttribute("empty", true);
 }
 
 function onJobSelect(jobId: string) {
-  exploreDetails.job = jobMap.get(jobId);
-  actionButton.toggleAttribute("close", true);
-  actionButton.textContent = "Close";
-  activeDetails();
+  panes.details.job = jobMap.get(jobId);
+  setActivePane("details");
 }
 
 function onActionClick() {
-  const openFilters = actionButton.toggleAttribute("close");
-
-  if (openFilters) {
-    actionButton.textContent = "Close";
-    activeFilters();
-  } else {
-    actionButton.textContent = "Show Filters";
-    activeResults();
-  }
+  const nextPane = activePane === "results" ? "filters" : "results";
+  setActivePane(nextPane);
 }
 
 function updateQueryString(filters: FilterModel) {
@@ -100,23 +93,19 @@ function updateQueryString(filters: FilterModel) {
   history.replaceState({}, "", newUrl);
 }
 
-function activeFilters() {
-  exploreFilters.toggleAttribute("inactive", false);
-  exploreResults.toggleAttribute("inactive", true);
-  exploreDetails.toggleAttribute("inactive", true);
+function setActivePane(nextPane: Pane) {
+  for (const [pane, element] of Object.entries(panes)) {
+    element.toggleAttribute("inactive", pane !== nextPane);
+  }
+
+  const isResultsPane = nextPane === "results";
+  const buttonLabel = isResultsPane ? "Show Filters" : "Close";
+
+  actionButton.toggleAttribute("close", !isResultsPane);
+  actionButton.textContent = buttonLabel;
+
+  activePane = nextPane;
 }
 
-function activeResults() {
-  exploreFilters.toggleAttribute("inactive", true);
-  exploreResults.toggleAttribute("inactive", false);
-  exploreDetails.toggleAttribute("inactive", true);
-}
-
-function activeDetails() {
-  exploreFilters.toggleAttribute("inactive", true);
-  exploreResults.toggleAttribute("inactive", true);
-  exploreDetails.toggleAttribute("inactive", false);
-}
-
-activeResults();
+setActivePane("results");
 jobDeselect();

@@ -1,6 +1,7 @@
 .list {
   display: grid;
   gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
 }
 
 .error-card {

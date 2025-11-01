@@ -1,4 +1,6 @@
 .container {
+  display: flex;
+  flex-direction: column;
   background: var(--bg-surface);
   padding: var(--space-md);
   border: 1px solid transparent;
@@ -7,6 +9,7 @@
   cursor: pointer;
   color: var(--text-default);
   line-height: 1.6;
+  height: 100%;
 
   &:hover,
   &:focus-visible {

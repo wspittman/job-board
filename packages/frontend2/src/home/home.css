@@ -116,6 +116,8 @@
 
 .chip-list {
   margin: var(--space-lg);
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
