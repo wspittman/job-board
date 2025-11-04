@@ -33,6 +33,11 @@ export class FormCombobox extends FormElement {
     this.#menu.init(options, (option) => this.#selectOption(option));
   }
 
+  override set value(value: unknown) {
+    const option = this.#menu.optionFromValue(String(value ?? ""));
+    this.#selectOption(option);
+  }
+
   protected override getFormValue() {
     return this.#formValue;
   }
@@ -56,7 +61,7 @@ export class FormCombobox extends FormElement {
   #selectOption(option?: FormOption) {
     if (!option) return;
     this.#formValue = String(option.value ?? "");
-    this.value = option.label;
+    super.value = option.label;
     const input = this.intake as HTMLInputElement;
     input.setSelectionRange(input.value.length, input.value.length);
     input.focus();
@@ -164,6 +169,10 @@ class MenuEl {
   close() {
     this.#isOpen = false;
     this.element.hidden = true;
+  }
+
+  optionFromValue(value: string): FormOption | undefined {
+    return this.#options[value];
   }
 
   #moveActiveIndex(delta: number) {

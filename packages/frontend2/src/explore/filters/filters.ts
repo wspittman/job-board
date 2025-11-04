@@ -84,6 +84,7 @@ export class Filters extends ComponentBase {
   #debounceTimer: number | undefined;
   #onChange?: (filters: FilterModel) => void;
   #isCollapsed = false;
+  #initialFilters: FilterModel | undefined;
 
   constructor() {
     super(html, cssSheet);
@@ -99,15 +100,7 @@ export class Filters extends ComponentBase {
 
   init({ onChange, initialFilters }: Props) {
     this.#onChange = onChange;
-
-    if (initialFilters && !initialFilters.isEmpty()) {
-      for (const [key, value] of initialFilters.toEntries()) {
-        const input = this.#inputs.get(key);
-        if (input) {
-          input.value = value ?? "";
-        }
-      }
-    }
+    this.#initialFilters = initialFilters;
   }
 
   protected override async onLoad() {
@@ -128,6 +121,15 @@ export class Filters extends ComponentBase {
       });
     } catch (err) {
       // ignore
+    }
+
+    if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
+      for (const [key, value] of this.#initialFilters.toEntries()) {
+        const input = this.#inputs.get(key);
+        if (input) {
+          input.value = value ?? "";
+        }
+      }
     }
   }
 
