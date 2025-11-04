@@ -1,29 +1,25 @@
 import { ComponentBase } from "./componentBase";
-import { FormElement, type FormElementProps } from "./form-element";
+import {
+  FormElement,
+  type FormElementProps,
+  type FormOption,
+} from "./form-element";
+
 import css from "./form-select.css?raw";
-
 const cssSheet = ComponentBase.createCSSSheet(css);
-
-interface OptionDefinition {
-  label: string;
-  value: unknown;
-}
-
-export interface FormSelectProps extends FormElementProps {
-  options: OptionDefinition[];
-}
+const tag = "jb-form-select";
 
 export class FormSelect extends FormElement {
   constructor() {
     super("select", cssSheet);
   }
 
-  override init({ options, ...rest }: FormSelectProps) {
+  override init({ options = [], ...rest }: FormElementProps) {
     super.init(rest);
     this.#setOptions(options);
   }
 
-  #setOptions(options: OptionDefinition[]) {
+  #setOptions(options: FormOption[]) {
     const optionEls = options.map(({ label, value }) => {
       const option = document.createElement("option");
       option.textContent = label;
@@ -35,10 +31,10 @@ export class FormSelect extends FormElement {
   }
 }
 
-ComponentBase.register("jb-form-select", FormSelect);
+ComponentBase.register(tag, FormSelect);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "jb-form-select": FormSelect;
+    [tag]: FormSelect;
   }
 }

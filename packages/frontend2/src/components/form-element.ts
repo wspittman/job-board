@@ -4,10 +4,22 @@ import html from "./form-element.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
+export interface FormOption {
+  label: string;
+  value: unknown;
+}
+
 export interface FormElementProps {
   label: string;
   name: string;
   onChange?: () => void;
+
+  // For input
+  prefix?: string;
+  suffix?: string;
+
+  // For select and combobox
+  options?: FormOption[];
 
   // editable
   value?: unknown;
@@ -30,10 +42,16 @@ export abstract class FormElement extends ComponentBase {
     this.intake = document.createElement(intakeType);
     this.intake.id = "intake";
     this.intake.className = "intake";
+
+    if (intakeType === "input") {
+      this.intake.setAttribute("type", "text");
+      this.intake.setAttribute("placeholder", " ");
+    }
+
     this.getEl("intake-wrap")!.prepend(this.intake);
 
     // Keep the external form value attribute in sync with the internal input value
-    const update = () => this.#syncAttribute();
+    const update = () => this.onInput();
     this.intake.addEventListener("input", update);
     this.intake.addEventListener("change", update);
   }
@@ -50,10 +68,19 @@ export abstract class FormElement extends ComponentBase {
     this.#syncAttribute();
   }
 
+  protected getFormValue() {
+    return this.intake.value;
+  }
+
+  protected onInput() {
+    this.#syncAttribute();
+  }
+
   #syncAttribute() {
     this.intake.classList.toggle("has-value", !!this.intake.value);
-    this.setAttribute("value", this.intake.value);
-    this.#internals.setFormValue(this.intake.value);
+    const formValue = this.getFormValue();
+    this.setAttribute("value", formValue);
+    this.#internals.setFormValue(formValue);
     this.#onChange?.();
   }
 }

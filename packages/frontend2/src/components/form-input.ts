@@ -1,22 +1,16 @@
 import { ComponentBase } from "./componentBase";
 import { FormElement, type FormElementProps } from "./form-element";
+
 import css from "./form-input.css?raw";
-
 const cssSheet = ComponentBase.createCSSSheet(css);
-
-export interface FormInputProps extends FormElementProps {
-  prefix?: string;
-  suffix?: string;
-}
+const tag = "jb-form-input";
 
 export class FormInput extends FormElement {
   constructor() {
     super("input", cssSheet);
-    this.intake.setAttribute("type", "text");
-    this.intake.setAttribute("placeholder", " ");
   }
 
-  override init({ prefix, suffix, ...rest }: FormInputProps) {
+  override init({ prefix, suffix, ...rest }: FormElementProps) {
     super.init(rest);
     this.#createAdornment(true, prefix);
     this.#createAdornment(false, suffix);
@@ -33,10 +27,10 @@ export class FormInput extends FormElement {
   }
 }
 
-ComponentBase.register("jb-form-input", FormInput);
+ComponentBase.register(tag, FormInput);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "jb-form-input": FormInput;
+    [tag]: FormInput;
   }
 }
