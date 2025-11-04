@@ -60,8 +60,7 @@ async function onFilterChange(filters: FilterModel) {
     }
 
     panes.results.jobs = jobs;
-    panes.details.job = jobMap.get(jobs[0]!.id);
-    panes.details.toggleAttribute("empty", false);
+    setDetailsJob(jobMap.get(jobs[0]!.id));
   } catch (error) {
     if (requestId !== lastRequestId) {
       return;
@@ -73,14 +72,13 @@ async function onFilterChange(filters: FilterModel) {
   }
 }
 
-function jobDeselect() {
-  panes.details.job = undefined;
-  panes.details.toggleAttribute("empty", true);
+function onJobSelect(jobId: string) {
+  setDetailsJob(jobMap.get(jobId));
+  setActivePane("details");
 }
 
-function onJobSelect(jobId: string) {
-  panes.details.job = jobMap.get(jobId);
-  setActivePane("details");
+function jobDeselect() {
+  setDetailsJob(undefined);
 }
 
 function onActionClick() {
@@ -106,6 +104,15 @@ function setActivePane(nextPane: Pane) {
   actionButton.textContent = buttonLabel;
 
   activePane = nextPane;
+}
+
+function setDetailsJob(job: JobModel | undefined) {
+  panes.details.job = job;
+  panes.details.toggleAttribute("empty", !job);
+
+  if (job) {
+    panes.details.scrollTop = 0;
+  }
 }
 
 setActivePane("results");
