@@ -1,16 +1,20 @@
-import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import "../../components/chip";
-import { ComponentBase } from "../../components/componentBase";
-import type { FormElement } from "../../components/form-element";
+import "../../components/form-combobox";
 import "../../components/form-input";
-import type { FormInputProps } from "../../components/form-input";
 import "../../components/form-select";
-import type { FormSelectProps } from "../../components/form-select";
+
+import { api } from "../../api/api";
+import { FilterModel, type FilterModelKey } from "../../api/filterModel";
+import { ComponentBase } from "../../components/componentBase";
+import type {
+  FormElement,
+  FormElementProps,
+} from "../../components/form-element";
+
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
-
-const tag = "explore-filters";
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "explore-filters";
 const DEBOUNCE_DELAY = 500;
 
 interface Props {
@@ -18,22 +22,23 @@ interface Props {
   onChange?: (filters: FilterModel) => void;
 }
 
-interface FormInputDef extends FormInputProps {
-  type: "input";
+interface FormElementDef extends FormElementProps {
+  type: "jb-form-input" | "jb-form-select" | "jb-form-combobox";
 }
 
-interface FormSelectDef extends FormSelectProps {
-  type: "select";
-}
-
-const filterDefs: (FormInputDef | FormSelectDef)[] = [
+const filterDefs: FormElementDef[] = [
   {
-    type: "input",
+    type: "jb-form-input",
     name: "title",
     label: "Title",
   },
   {
-    type: "select",
+    type: "jb-form-combobox",
+    name: "companyId",
+    label: "Company",
+  },
+  {
+    type: "jb-form-select",
     name: "isRemote",
     label: "Remote",
     options: [
@@ -43,26 +48,26 @@ const filterDefs: (FormInputDef | FormSelectDef)[] = [
     ],
   },
   {
-    type: "input",
+    type: "jb-form-input",
     name: "location",
     label: "Location",
     prefix: "Working from",
   },
   {
-    type: "input",
+    type: "jb-form-input",
     name: "minSalary",
     label: "Minimum Salary",
     prefix: "$",
   },
   {
-    type: "input",
+    type: "jb-form-input",
     name: "maxExperience",
     label: "Required Experience",
     prefix: "I have at least",
     suffix: "years experience",
   },
   {
-    type: "input",
+    type: "jb-form-input",
     name: "daysSince",
     label: "Posted Since",
     suffix: "days ago",
@@ -105,6 +110,27 @@ export class Filters extends ComponentBase {
     }
   }
 
+  protected override async onLoad() {
+    try {
+      const data = await api.fetchMetadata();
+      if (!this.isConnected) return;
+
+      const def = filterDefs.find((def) => def.name === "companyId");
+      if (!def) return;
+
+      this.#inputs.get("companyId")?.init({
+        ...def,
+        options: data.companyNames.map(([value, label]) => ({
+          label,
+          value,
+        })),
+        onChange: () => this.#debounceOnChange(),
+      });
+    } catch (err) {
+      // ignore
+    }
+  }
+
   #appendInputs(): void {
     const onChange = () => this.#debounceOnChange();
     const fragment = document.createDocumentFragment();
@@ -116,15 +142,11 @@ export class Filters extends ComponentBase {
     this.#form.append(fragment);
   }
 
-  #createFromFilterDef(def: FormInputDef | FormSelectDef): FormElement {
-    if (def.type === "select") {
-      const el = document.createElement("jb-form-select");
+  #createFromFilterDef(def: FormElementDef): FormElement {
+    const el = document.createElement(def.type);
+    if (def.name != "companyId") {
       el.init(def);
-      return el;
     }
-
-    const el = document.createElement("jb-form-input");
-    el.init(def);
     return el;
   }
 
