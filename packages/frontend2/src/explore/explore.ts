@@ -41,6 +41,7 @@ async function onFilterChange(filters: FilterModel) {
   }
 
   try {
+    panes.results.showLoading();
     const jobs = await api.fetchJobs(filters);
 
     if (requestId !== lastRequestId) {

@@ -10,7 +10,8 @@ type Message =
   | "NoMatches"
   | "PartialMatches"
   | "AllMatches"
-  | "Error";
+  | "Error"
+  | "Loading";
 
 interface Props {
   message?: Message;
@@ -43,6 +44,7 @@ const messageContent: Record<Message, [string, string, string]> = {
     "",
     "Unable to load job data. Please try again later.",
   ],
+  Loading: ["Loading...", "", "Please wait while we load your jobs."],
 };
 
 function countToMessage(count: number = -1): Message {
@@ -79,6 +81,13 @@ export class MessageCard extends ComponentBase {
     if (message === "Error") {
       element.getEl("container")!.classList.add("error-card");
       element.setAttribute("role", "alert");
+    }
+
+    if (message === "Loading") {
+      element.setAttribute("role", "status");
+      const subtitle = element.getEl("subtitle")!;
+      subtitle.classList.add("spinner");
+      subtitle.setAttribute("aria-hidden", "true");
     }
 
     return element;

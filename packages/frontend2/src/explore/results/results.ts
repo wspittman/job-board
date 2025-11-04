@@ -49,6 +49,11 @@ export class Results extends ComponentBase {
     this.#list.replaceChildren(MessageCard.create({ message: "Error" }));
   }
 
+  showLoading() {
+    this.#jobs = [];
+    this.#list.replaceChildren(MessageCard.create({ message: "Loading" }));
+  }
+
   #selectCard(selectedId: string) {
     if (!selectedId) return;
     this.#onSelect?.(selectedId);
