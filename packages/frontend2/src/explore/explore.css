@@ -6,6 +6,17 @@
   gap: var(--space-md);
 }
 
+.noscript-message {
+  max-width: 720px;
+  background: var(--bg-error);
+  color: var(--text-error);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--bg-border);
+  border-radius: var(--radius);
+  justify-self: center;
+  text-align: center;
+}
+
 .explore-layout {
   display: flex;
   gap: var(--space-md);
