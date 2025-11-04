@@ -67,7 +67,7 @@ async function onFilterChange(filters: FilterModel) {
     }
 
     jobMap.clear();
-    panes.results.showError("Unable to load job data. Please try again later.");
+    panes.results.showError();
     jobDeselect();
   }
 }

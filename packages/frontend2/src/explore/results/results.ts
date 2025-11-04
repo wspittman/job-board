@@ -2,6 +2,7 @@ import type { JobModel } from "../../api/apiTypes";
 import { ComponentBase } from "../../components/componentBase";
 import type { JobCard } from "./job-card";
 import "./job-card.ts";
+import { MessageCard } from "./message-card.ts";
 import css from "./results.css?raw";
 import html from "./results.html?raw";
 
@@ -10,35 +11,6 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 
 interface Props {
   onSelect?: (jobId: string) => void;
-}
-
-function infoMessage(jobCount?: number): [string, string, string] {
-  switch (jobCount ?? -1) {
-    case -1:
-      return [
-        "Add Filters To Begin",
-        "Try to have fun with it!",
-        "As you apply filters, jobs will begin appearing here. We'll return the first 24 matches we find for your filter set. You can always adjust your filters until you have a great set of matches.",
-      ];
-    case 0:
-      return [
-        "No Matches Found",
-        "Try adjusting your filters.",
-        "You may need to loosen your filters to find matches. Or maybe we don't have good jobs posted for you yet. =(",
-      ];
-    case 24:
-      return [
-        "24 Matches Shown",
-        "More are available!",
-        "By adjusting your filters you can narrow down the results until you have only the best matches for you.",
-      ];
-    default:
-      return [
-        "All Matches Shown",
-        "Are these great matches?",
-        "If these are great matches, bookmark this page to rerun the search later. New jobs are being posted every day! If the matches aren't quite right, try adjusting your filters until they are.",
-      ];
-  }
 }
 
 export class Results extends ComponentBase {
@@ -69,28 +41,14 @@ export class Results extends ComponentBase {
       fragment.appendChild(card);
     });
 
-    fragment.appendChild(this.#getInfoCard(value?.length));
+    fragment.appendChild(MessageCard.create({ count: value?.length }));
 
     this.#list.replaceChildren(fragment);
   }
 
-  showError(message: string) {
+  showError() {
     this.#jobs = [];
-    const fragment = document.createDocumentFragment();
-
-    const errorCard = document.createElement("div");
-    errorCard.className = "error-card";
-    errorCard.setAttribute("role", "alert");
-
-    const titleEl = document.createElement("strong");
-    titleEl.textContent = "⚠️ Well that's not better!";
-    const messageEl = document.createElement("span");
-    messageEl.textContent = message;
-
-    errorCard.append(titleEl, messageEl);
-    fragment.appendChild(errorCard);
-
-    this.#list.replaceChildren(fragment);
+    this.#list.replaceChildren(MessageCard.create({ message: "Error" }));
   }
 
   #selectCard(selectedId: string) {
@@ -99,13 +57,6 @@ export class Results extends ComponentBase {
     this.#jobs.forEach(([id, card]) => {
       card.isSelected = id === selectedId;
     });
-  }
-
-  #getInfoCard(jobCount?: number): JobCard {
-    const [title, company, summary] = infoMessage(jobCount);
-    const card = document.createElement("explore-job-card");
-    card.init({ job: { title, company, facets: { summary } } as JobModel });
-    return card;
   }
 }
 

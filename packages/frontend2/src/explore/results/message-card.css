@@ -1,0 +1,21 @@
+.container {
+  background: var(--bg-surface);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-soft);
+  border-radius: var(--radius);
+}
+
+.subtitle {
+  color: var(--primary-dark);
+  margin-bottom: var(--space-sm);
+}
+
+.error-card {
+  background: var(--bg-error);
+  border: 1px solid var(--error-main);
+  color: var(--text-error);
+
+  & h3 {
+    color: inherit;
+  }
+}
