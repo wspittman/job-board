@@ -2,11 +2,11 @@ import { API_URL } from "../../api/api.ts";
 import type { JobModel } from "../../api/apiTypes.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
 import { DetailEmbed } from "./detail-embed.ts";
+
 import css from "./details.css?raw";
 import html from "./details.html?raw";
-
-const tag = "explore-details";
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "explore-details";
 
 export class Details extends ComponentBase {
   readonly #applyLink: HTMLAnchorElement;

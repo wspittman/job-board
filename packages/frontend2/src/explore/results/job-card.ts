@@ -1,10 +1,11 @@
 import type { JobModel } from "../../api/apiTypes.ts";
-import "../../components/chip.ts";
+import { Chip } from "../../components/chip.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
+
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
-
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "explore-job-card";
 
 interface Props {
   job: JobModel;
@@ -21,7 +22,9 @@ export class JobCard extends ComponentBase {
     super(html, cssSheet);
   }
 
-  init({ job, onClick, isSelected }: Props) {
+  static create({ job, onClick, isSelected }: Props) {
+    const element = document.createElement(tag);
+
     const { title, company, isRemote, location, postTS, facets } = job ?? {};
     const { salary, experience, summary } = facets ?? {};
 
@@ -31,7 +34,7 @@ export class JobCard extends ComponentBase {
     const showRecencyChip = postDays < 30;
     const recencyChipText = postDays < 7 ? "New" : "Recent";
 
-    this.setManyTexts({
+    element.setManyTexts({
       title,
       company,
       location,
@@ -41,15 +44,17 @@ export class JobCard extends ComponentBase {
       summary,
     });
 
-    this.#createChips([
+    element.#createChips([
       [!!isRemote, "Remote"],
       [showRecencyChip, recencyChipText],
     ]);
 
     const realOnClick = onClick ? () => onClick(job.id) : undefined;
-    this.setOnClick("container", realOnClick);
+    element.setOnClick("container", realOnClick);
 
-    this.isSelected = !!isSelected;
+    element.isSelected = !!isSelected;
+
+    return element;
   }
 
   set isSelected(value: boolean) {
@@ -66,23 +71,23 @@ export class JobCard extends ComponentBase {
   #createChips(pairs: [boolean, string][]) {
     const chipsEl = this.getEl("chips");
     if (chipsEl) {
-      chipsEl.innerHTML = "";
+      const fragment = document.createDocumentFragment();
 
       for (const [condition, label] of pairs) {
         if (condition) {
-          const chip = document.createElement("jb-chip");
-          chip.init({ label });
-          chipsEl.appendChild(chip);
+          fragment.appendChild(Chip.create({ label }));
         }
       }
+
+      chipsEl.replaceChildren(fragment);
     }
   }
 }
 
-ComponentBase.register("explore-job-card", JobCard);
+ComponentBase.register(tag, JobCard);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "explore-job-card": JobCard;
+    [tag]: JobCard;
   }
 }

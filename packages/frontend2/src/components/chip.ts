@@ -1,8 +1,9 @@
-import css from "./chip.css?raw";
-import html from "./chip.html?raw";
 import { ComponentBase } from "./componentBase";
 
+import css from "./chip.css?raw";
+import html from "./chip.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "jb-chip";
 
 interface Props {
   label: string;
@@ -15,28 +16,31 @@ export class Chip extends ComponentBase {
     super(html, cssSheet);
   }
 
-  init({ label, onDelete, filled }: Props) {
-    this.setText("label", label);
+  static create({ label, onDelete, filled }: Props) {
+    const element = document.createElement(tag);
+    element.setText("label", label);
 
     if (filled) {
-      this.getEl("container")!.classList.add("filled");
+      element.getEl("container")!.classList.add("filled");
     }
 
     if (onDelete) {
-      const deleteBtn = this.getEl<HTMLButtonElement>("delete")!;
+      const deleteBtn = element.getEl<HTMLButtonElement>("delete")!;
       deleteBtn.style.display = "inline-flex";
       deleteBtn.onclick = () => {
-        this.hide();
+        element.hide();
         onDelete();
       };
     }
+
+    return element;
   }
 }
 
-ComponentBase.register("jb-chip", Chip);
+ComponentBase.register(tag, Chip);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "jb-chip": Chip;
+    [tag]: Chip;
   }
 }

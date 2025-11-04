@@ -1,10 +1,10 @@
-import "../../components/chip";
 import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
 
 import { api } from "../../api/api";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
+import { Chip } from "../../components/chip";
 import { ComponentBase } from "../../components/componentBase";
 import type {
   FormElement,
@@ -176,13 +176,13 @@ export class Filters extends ComponentBase {
     const entries = filters.toFriendlyStrings();
 
     for (const [key, label] of entries) {
-      const chip = document.createElement("jb-chip");
-      chip.init({
-        label,
-        onDelete: () => (this.#inputs.get(key)!.value = ""),
-        filled: true,
-      });
-      fragment.appendChild(chip);
+      fragment.appendChild(
+        Chip.create({
+          label,
+          onDelete: () => (this.#inputs.get(key)!.value = ""),
+          filled: true,
+        })
+      );
     }
 
     this.#chips.replaceChildren(fragment);

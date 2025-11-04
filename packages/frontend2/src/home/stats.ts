@@ -1,9 +1,10 @@
 import { api } from "../api/api.ts";
 import { ComponentBase } from "../components/componentBase.ts";
+
 import css from "./stats.css?raw";
 import html from "./stats.html?raw";
-
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "home-stats";
 
 class Stats extends ComponentBase {
   constructor() {
@@ -24,10 +25,10 @@ class Stats extends ComponentBase {
   }
 }
 
-ComponentBase.register("home-stats", Stats);
+ComponentBase.register(tag, Stats);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "home-stats": Stats;
+    [tag]: Stats;
   }
 }

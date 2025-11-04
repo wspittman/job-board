@@ -1,13 +1,12 @@
 import type { JobModel } from "../../api/apiTypes";
 import { ComponentBase } from "../../components/componentBase";
-import type { JobCard } from "./job-card";
-import "./job-card.ts";
+import { JobCard } from "./job-card";
 import { MessageCard } from "./message-card.ts";
+
 import css from "./results.css?raw";
 import html from "./results.html?raw";
-
-const tag = "explore-results";
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "explore-results";
 
 interface Props {
   onSelect?: (jobId: string) => void;
@@ -35,8 +34,7 @@ export class Results extends ComponentBase {
 
     value?.forEach((job, index) => {
       const isSelected = index === 0;
-      const card = document.createElement("explore-job-card");
-      card.init({ job, isSelected, onClick });
+      const card = JobCard.create({ job, isSelected, onClick });
       this.#jobs.push([job.id, card]);
       fragment.appendChild(card);
     });
