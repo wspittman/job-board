@@ -1,4 +1,5 @@
 import express from "express";
+import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { access, constants } from "node:fs/promises";
 import path from "node:path";
@@ -11,6 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.use(helmet());
 const port = process.env.PORT || 8080;
 
 // Get backend URL from environment variable
