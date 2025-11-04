@@ -21,9 +21,6 @@
 }
 
 .faq-item {
-  border-radius: var(--radius);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-soft);
   overflow: hidden;
 
   & summary {
