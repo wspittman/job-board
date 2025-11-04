@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   max-width: none;
+  height: calc(100vh - var(--space-xl));
   padding: var(--space-md);
   gap: var(--space-md);
 }
@@ -19,17 +20,22 @@
 
 .explore-layout {
   display: flex;
+  height: 100%;
   gap: var(--space-md);
   align-items: flex-start;
 }
 
 explore-filters {
   flex-basis: min-content;
+  height: 100%;
+  overflow: auto;
 }
 
 explore-results,
 explore-details {
   flex: 2;
+  height: 100%;
+  overflow: auto;
 }
 
 .action-button {
@@ -41,8 +47,15 @@ explore-details[empty] {
 }
 
 @media (max-width: 900px) {
+  .explore-layout {
+    height: calc(100% - var(--space-xl));
+  }
+
   .action-button {
     display: inline-flex;
+    padding: var(--space-sm) var(--space-md);
+    justify-content: center;
+    margin: calc(0px - var(--space-sm)) 0;
   }
 
   explore-filters {
