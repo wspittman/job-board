@@ -68,7 +68,7 @@ const filterDefs: FormElementDef[] = [
     type: "jb-form-input",
     name: "maxExperience",
     label: "Required Experience",
-    prefix: "I have at least",
+    prefix: "I have",
     suffix: "years experience",
     validation: {
       type: "int",

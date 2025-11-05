@@ -26,7 +26,8 @@
 }
 
 explore-filters {
-  flex-basis: min-content;
+  flex-basis: max-content;
+  max-width: 25%;
   height: 100%;
   overflow: auto;
 }
@@ -60,6 +61,7 @@ explore-details[empty] {
 
   explore-filters {
     flex: 2;
+    max-width: none;
   }
 
   explore-filters[inactive],

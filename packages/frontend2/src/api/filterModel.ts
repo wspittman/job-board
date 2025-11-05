@@ -52,11 +52,11 @@ export class FilterModel {
         case "location":
           return [key, `Location: ${value}`];
         case "daysSince":
-          return [key, `Posted: Within ${String(value).toLocaleString()} days`];
+          return [key, `Posted: Within ${Number(value).toLocaleString()} days`];
         case "maxExperience":
-          return [key, `Experience: I have ${value} years`];
+          return [key, `Experience: ${Number(value).toLocaleString()} years`];
         case "minSalary":
-          return [key, `Salary: At least $${String(value).toLocaleString()}`];
+          return [key, `Salary: $${Number(value).toLocaleString()}`];
         default:
           return [key, `${key}: ${value}`];
       }
