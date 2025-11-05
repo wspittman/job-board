@@ -18,7 +18,7 @@ export interface FormElementProps {
   prefix?: string;
   suffix?: string;
   validation?: {
-    type: "numeric";
+    type: "int";
     min?: number;
     max?: number;
   };

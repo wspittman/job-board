@@ -59,9 +59,9 @@ const filterDefs: FormElementDef[] = [
     label: "Minimum Salary",
     prefix: "$",
     validation: {
-      type: "numeric",
+      type: "int",
       min: 0,
-      max: 10_000_000,
+      max: 9_999_999,
     },
   },
   {
@@ -71,9 +71,9 @@ const filterDefs: FormElementDef[] = [
     prefix: "I have at least",
     suffix: "years experience",
     validation: {
-      type: "numeric",
+      type: "int",
       min: 0,
-      max: 100,
+      max: 99,
     },
   },
   {
@@ -82,9 +82,9 @@ const filterDefs: FormElementDef[] = [
     label: "Posted Since",
     suffix: "days ago",
     validation: {
-      type: "numeric",
+      type: "int",
       min: 1,
-      max: 365,
+      max: 999,
     },
   },
 ];

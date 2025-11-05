@@ -15,27 +15,24 @@ export class FormInput extends FormElement {
   override init({ prefix, suffix, validation, ...rest }: FormElementProps) {
     super.init(rest);
     this.#validation = validation;
-    this.intake.inputMode = "";
-    if (this.#validation?.type === "numeric") {
+
+    if (this.#validation?.type === "int") {
       this.intake.inputMode = "numeric";
     }
+
     this.#createAdornment(true, prefix);
     this.#createAdornment(false, suffix);
   }
 
   override set value(value: unknown) {
-    const next = this.#validation?.type === "numeric"
-      ? this.#sanitizeNumeric(String(value ?? ""))
-      : String(value ?? "");
-    super.value = next;
+    super.value = this.#validate(value);
   }
 
   protected override onInput() {
-    if (this.#validation?.type === "numeric") {
-      const sanitized = this.#sanitizeNumeric(this.intake.value);
-      if (sanitized !== this.intake.value) {
-        this.intake.value = sanitized;
-      }
+    const next = this.#validate(this.intake.value);
+    if (next !== this.intake.value) {
+      this.intake.value = next;
+      return;
     }
     super.onInput();
   }
@@ -50,22 +47,26 @@ export class FormInput extends FormElement {
     this.intake.insertAdjacentElement(pos, el);
   }
 
-  #sanitizeNumeric(value: string): string {
-    const digitsOnly = value.replace(/\D+/g, "");
-    if (!digitsOnly) return "";
-
-    let num = Number.parseInt(digitsOnly, 10);
-    if (Number.isNaN(num)) {
-      return "";
+  #validate(value: unknown): string {
+    if (this.#validation?.type === "int") {
+      return this.#intOnly(value);
     }
+    return String(value ?? "");
+  }
+
+  #intOnly(value: unknown): string {
+    const prevVal = this.getAttribute("value") ?? "";
+    const val = String(value ?? "").trim();
+
+    if (val === "") return val;
+    if (!/^-?\d+$/.test(val)) return prevVal;
+
+    let num = Number.parseInt(val, 10);
+    if (Number.isNaN(num)) return prevVal;
 
     const { min, max } = this.#validation ?? {};
-    if (typeof min === "number") {
-      num = Math.max(num, min);
-    }
-    if (typeof max === "number") {
-      num = Math.min(num, max);
-    }
+    if (min != null && num < min) return prevVal;
+    if (max != null && num > max) return prevVal;
 
     return String(num);
   }
