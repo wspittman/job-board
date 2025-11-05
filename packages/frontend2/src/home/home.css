@@ -118,38 +118,12 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-md);
-  color: var(--text-contrast);
-}
 
-.chip {
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius);
-  background: var(--secondary-gradient-btn);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none;
-
-  &:hover,
-  &:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: var(--space-xs);
-    box-shadow: var(--shadow-focus);
+  & .abtn {
+    background: var(--secondary-gradient-btn);
   }
 }
 
-.cta-button {
-  display: inline-flex;
+.embiggen {
   padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius);
-  background: var(--primary-gradient-btn);
-  color: var(--text-contrast);
-  font-size: var(--size-sm);
-  text-decoration: none;
-
-  &:hover,
-  &:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: var(--space-xs);
-    box-shadow: var(--shadow-focus);
-    color: var(--text-contrast);
-  }
 }

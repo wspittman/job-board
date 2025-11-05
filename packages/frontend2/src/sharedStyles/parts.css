@@ -32,6 +32,23 @@ button,
   border-radius: var(--radius);
 }
 
+.abtn {
+  display: inline-flex;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  background: var(--primary-gradient-btn);
+  color: var(--text-contrast);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: var(--space-xs);
+    box-shadow: var(--shadow-focus);
+    color: var(--text-contrast);
+  }
+}
+
 .card {
   background: var(--bg-surface);
   border-radius: var(--radius);
