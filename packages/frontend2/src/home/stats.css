@@ -10,7 +10,6 @@
 }
 
 .stat-card {
-  padding: var(--space-md);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--space-lg);

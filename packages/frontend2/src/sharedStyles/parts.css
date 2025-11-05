@@ -36,8 +36,5 @@ button,
   background: var(--bg-surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
-}
-
-.card--padded {
   padding: var(--space-lg);
 }
