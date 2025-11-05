@@ -1,4 +1,5 @@
 import type { FilterModelApi } from "./apiTypes";
+import { metadataModel } from "./metadataModel";
 
 export type FilterModelKey = keyof FilterModelApi;
 
@@ -32,13 +33,18 @@ export class FilterModel {
     return params;
   }
 
-  toFriendlyStrings(): [FilterModelKey, string][] {
+  async toFriendlyStrings(): Promise<[FilterModelKey, string][]> {
     const entries = this.toEntries();
+
+    let company = this.#filters.companyId;
+    if (!isEmpty(company)) {
+      company = await metadataModel.getCompanyFriendlyName(company);
+    }
 
     return entries.map(([key, value]) => {
       switch (key) {
         case "companyId":
-          return [key, `Company: ${value}`];
+          return [key, `Company: ${company}`];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":

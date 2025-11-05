@@ -1,4 +1,4 @@
-import { api } from "../api/api.ts";
+import { metadataModel } from "../api/metadataModel.ts";
 import { ComponentBase } from "../components/componentBase.ts";
 
 import css from "./stats.css?raw";
@@ -13,11 +13,11 @@ class Stats extends ComponentBase {
 
   override async onLoad() {
     try {
-      const data = await api.fetchMetadata();
+      const { jobCount, companyCount } = await metadataModel.getCountStrings();
       if (!this.isConnected) return;
 
-      this.setText("job-count", data.jobCount.toLocaleString());
-      this.setText("company-count", data.companyCount.toLocaleString());
+      this.setText("job-count", jobCount);
+      this.setText("company-count", companyCount);
       this.show();
     } catch (err) {
       // ignore

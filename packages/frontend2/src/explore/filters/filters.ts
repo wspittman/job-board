@@ -2,8 +2,8 @@ import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
 
-import { api } from "../../api/api";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
+import { metadataModel } from "../../api/metadataModel";
 import { Chip } from "../../components/chip";
 import { ComponentBase } from "../../components/componentBase";
 import type {
@@ -120,7 +120,7 @@ export class Filters extends ComponentBase {
 
   protected override async onLoad() {
     try {
-      const data = await api.fetchMetadata();
+      const options = await metadataModel.getCompanyFormOptions();
       if (!this.isConnected) return;
 
       const def = filterDefs.find((def) => def.name === "companyId");
@@ -128,10 +128,7 @@ export class Filters extends ComponentBase {
 
       this.#inputs.get("companyId")?.init({
         ...def,
-        options: data.companyNames.map(([value, label]) => ({
-          label,
-          value,
-        })),
+        options,
         onChange: () => this.#debounceOnChange(),
       });
     } catch (err) {
@@ -186,9 +183,9 @@ export class Filters extends ComponentBase {
     return FilterModel.fromFormData(formData);
   }
 
-  #renderChips(filters: FilterModel): void {
+  async #renderChips(filters: FilterModel): Promise<void> {
     const fragment = document.createDocumentFragment();
-    const entries = filters.toFriendlyStrings();
+    const entries = await filters.toFriendlyStrings();
 
     for (const [key, label] of entries) {
       fragment.appendChild(

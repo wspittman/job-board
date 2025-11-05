@@ -1,4 +1,4 @@
-export interface MetadataModel {
+export interface MetadataModelApi {
   companyCount: number;
   companyNames: [string, string][];
   jobCount: number;

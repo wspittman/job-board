@@ -1,5 +1,5 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
-import type { JobModel, MetadataModel } from "./apiTypes";
+import type { JobModel, MetadataModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 
 const viteApiUrl = import.meta.env["VITE_API_URL"];
@@ -21,7 +21,7 @@ class APIConnector {
   public async fetchMetadata() {
     return await qc.fetchQuery({
       queryKey: ["metadata"],
-      queryFn: () => this.httpCall<MetadataModel>("metadata"),
+      queryFn: () => this.httpCall<MetadataModelApi>("metadata"),
     });
   }
 

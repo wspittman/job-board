@@ -1,12 +1,9 @@
-import { api } from "../api/api";
+import { metadataModel } from "../api/metadataModel";
 import "../sharedStyles/all.css";
 import "./faq.css";
 
 try {
-  const data = await api.fetchMetadata();
-  const lastRefreshed = `Last refreshed: ${new Date(
-    data.timestamp
-  ).toLocaleString()}`;
+  const lastRefreshed = `Last refreshed: ${await metadataModel.getTimestampString()}`;
 
   const els = document.querySelectorAll<HTMLElement>(".faq-note");
   for (const el of els) {
