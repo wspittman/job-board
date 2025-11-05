@@ -33,13 +33,14 @@ export class JobCard extends ComponentBase {
     const postedSuffix = postDays ? "days ago" : "";
     const showRecencyChip = postDays < 30;
     const recencyChipText = postDays < 7 ? "New" : "Recent";
+    const hasExperience = experience != null;
 
     element.setManyTexts({
       title,
       company,
       location,
       salary: salary?.toLocaleString(),
-      experience: experience ? `${experience} years experience` : "",
+      experience: hasExperience ? `${experience} years experience` : "",
       "posted-date": `${postedText} ${postedSuffix}`.trim(),
       summary,
     });
