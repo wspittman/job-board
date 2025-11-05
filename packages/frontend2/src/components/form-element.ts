@@ -17,6 +17,11 @@ export interface FormElementProps {
   // For input
   prefix?: string;
   suffix?: string;
+  validation?: {
+    type: "int";
+    min?: number;
+    max?: number;
+  };
 
   // For select and combobox
   options?: FormOption[];

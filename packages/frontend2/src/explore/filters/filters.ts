@@ -58,6 +58,11 @@ const filterDefs: FormElementDef[] = [
     name: "minSalary",
     label: "Minimum Salary",
     prefix: "$",
+    validation: {
+      type: "int",
+      min: 0,
+      max: 9_999_999,
+    },
   },
   {
     type: "jb-form-input",
@@ -65,12 +70,22 @@ const filterDefs: FormElementDef[] = [
     label: "Required Experience",
     prefix: "I have at least",
     suffix: "years experience",
+    validation: {
+      type: "int",
+      min: 0,
+      max: 99,
+    },
   },
   {
     type: "jb-form-input",
     name: "daysSince",
     label: "Posted Since",
     suffix: "days ago",
+    validation: {
+      type: "int",
+      min: 1,
+      max: 999,
+    },
   },
 ];
 
