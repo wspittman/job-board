@@ -31,3 +31,10 @@ button,
 .btn {
   border-radius: var(--radius);
 }
+
+.card {
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: var(--space-lg);
+}

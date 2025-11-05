@@ -107,10 +107,6 @@
 
 .hm-search-card {
   margin: var(--space-xl) auto;
-  padding: var(--space-xl);
-  background: var(--bg-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
   text-align: center;
 }
 

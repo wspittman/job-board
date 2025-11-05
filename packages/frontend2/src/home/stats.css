@@ -10,10 +10,6 @@
 }
 
 .stat-card {
-  padding: var(--space-md);
-  border-radius: var(--radius);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-soft);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--space-lg);

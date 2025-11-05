@@ -1,10 +1,8 @@
 .container {
   display: flex;
   flex-direction: column;
-  background: var(--bg-surface);
   padding: var(--space-md);
   border: 1px solid transparent;
-  box-shadow: var(--shadow-soft);
   text-align: left;
   cursor: pointer;
   color: var(--text-default);
