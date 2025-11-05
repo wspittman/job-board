@@ -55,8 +55,6 @@
   appearance: none;
   border: none;
   background: none;
-  /*height: var(--space-md);
-  padding: var(--space-md) var(--space-sm);*/
 
   &:focus {
     outline: none;
