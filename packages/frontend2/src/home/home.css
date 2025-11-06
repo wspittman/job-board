@@ -91,17 +91,12 @@
   flex: 1 1 320px;
 }
 
-.hm-hero-title {
-  font-size: var(--h1-size);
-  color: var(--primary-dark);
-
-  & span {
-    display: block;
-  }
+.hm-hero-title span {
+  display: block;
 }
 
 .hm-hero-subtitle {
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-lg);
   color: var(--text-muted);
 }
 
