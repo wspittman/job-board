@@ -30,6 +30,10 @@ let activePane: Pane = "results";
 const jobMap = new Map<string, JobModel>();
 let lastRequestId = 0;
 
+/**
+ * Handles filter updates by syncing the URL, fetching jobs, and updating the UI panels.
+ * @param filters - The current set of filters emitted by the filters pane.
+ */
 async function onFilterChange(filters: FilterModel) {
   updateQueryString(filters);
   const requestId = ++lastRequestId;
@@ -73,27 +77,45 @@ async function onFilterChange(filters: FilterModel) {
   }
 }
 
+/**
+ * Clears the active job selection and marks the details pane as empty.
+ */
 function jobDeselect() {
   panes.details.job = undefined;
   panes.details.toggleAttribute("empty", true);
 }
 
+/**
+ * Sets the selected job in the details pane and focuses the details view.
+ * @param jobId - Identifier of the job chosen from the results list.
+ */
 function onJobSelect(jobId: string) {
   panes.details.job = jobMap.get(jobId);
   setActivePane("details");
 }
 
+/**
+ * Toggles between the filters and results panes when the primary action button is pressed.
+ */
 function onActionClick() {
   const nextPane = activePane === "results" ? "filters" : "results";
   setActivePane(nextPane);
 }
 
+/**
+ * Updates the browser query string to reflect the current filters without reloading the page.
+ * @param filters - Filter set to serialize into the URL.
+ */
 function updateQueryString(filters: FilterModel) {
   const query = filters.toUrlSearchParams().toString();
   const newUrl = query ? `${location.pathname}?${query}` : location.pathname;
   history.replaceState({}, "", newUrl);
 }
 
+/**
+ * Applies the active pane state by toggling attributes and updating the action button label.
+ * @param nextPane - The pane identifier that should become active.
+ */
 function setActivePane(nextPane: Pane) {
   for (const [pane, element] of Object.entries(panes)) {
     element.toggleAttribute("inactive", pane !== nextPane);

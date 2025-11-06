@@ -89,6 +89,9 @@ const filterDefs: FormElementDef[] = [
   },
 ];
 
+/**
+ * Custom element that manages the filters pane, exposing user selections via callbacks.
+ */
 export class Filters extends ComponentBase {
   readonly #container: HTMLElement;
   readonly #toggle: HTMLButtonElement;
@@ -101,6 +104,9 @@ export class Filters extends ComponentBase {
   #isCollapsed = false;
   #initialFilters: FilterModel | undefined;
 
+  /**
+   * Sets up the filters pane structure, event handlers, and form inputs.
+   */
   constructor() {
     super(html, cssSheet);
     this.#container = this.getEl("container")!;
@@ -113,11 +119,19 @@ export class Filters extends ComponentBase {
     this.#appendInputs();
   }
 
+  /**
+   * Initializes the component with callbacks and optional preset filters.
+   * @param onChange - Callback fired after debounced filter updates.
+   * @param initialFilters - Filters to preload into the form inputs.
+   */
   init({ onChange, initialFilters }: Props) {
     this.#onChange = onChange;
     this.#initialFilters = initialFilters;
   }
 
+  /**
+   * Loads dynamic metadata and applies any initial filters once the component is connected.
+   */
   protected override async onLoad() {
     try {
       const options = await metadataModel.getCompanyFormOptions();

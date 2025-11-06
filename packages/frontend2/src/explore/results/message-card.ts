@@ -60,11 +60,23 @@ function countToMessage(count: number = -1): Message {
   }
 }
 
+/**
+ * Custom element used to show contextual messages in the results list.
+ */
 export class MessageCard extends ComponentBase {
+  /**
+   * Creates a message card with its template and styles applied.
+   */
   constructor() {
     super(html, cssSheet);
   }
 
+  /**
+   * Factory helper that configures a message card for the requested state.
+   * @param message - Optional explicit message variant to render.
+   * @param count - Number of jobs returned, used when deriving the message variant.
+   * @returns A configured message card element ready for insertion in the DOM.
+   */
   static create({ message, count }: Props) {
     if (!message) {
       message = countToMessage(count);

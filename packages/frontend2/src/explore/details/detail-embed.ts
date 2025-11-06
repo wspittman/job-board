@@ -5,11 +5,21 @@ const cssSheet = ComponentBase.createCSSSheet(
   "* { font: 14px/1.5 system-ui, sans-serif; }"
 );
 
+/**
+ * Lightweight container for rendering sanitized job descriptions.
+ */
 export class DetailEmbed extends ComponentBase {
+  /**
+   * Initializes the embed with minimal styling and markup.
+   */
   constructor() {
     super(html, cssSheet, { omitPartsCss: true });
   }
 
+  /**
+   * Replaces the inner HTML content with the provided job description.
+   * @param descriptionHtml - Pre-formatted HTML for the job description.
+   */
   set description(descriptionHtml: string) {
     this.getEl("content")!.innerHTML = descriptionHtml;
   }

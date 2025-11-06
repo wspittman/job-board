@@ -15,13 +15,26 @@ interface Props {
   isSelected?: boolean;
 }
 
+/**
+ * Custom element that renders a concise summary of a job posting.
+ */
 export class JobCard extends ComponentBase {
   #isSelected = false;
 
+  /**
+   * Applies the job card template and default styles to the element instance.
+   */
   constructor() {
     super(html, cssSheet);
   }
 
+  /**
+   * Factory helper that builds a job card element populated with job details.
+   * @param job - Job information to display.
+   * @param onClick - Optional click handler invoked with the job ID.
+   * @param isSelected - Whether the card should start in the selected state.
+   * @returns A fully configured job card element.
+   */
   static create({ job, onClick, isSelected }: Props) {
     const element = document.createElement(tag);
 
@@ -58,6 +71,10 @@ export class JobCard extends ComponentBase {
     return element;
   }
 
+  /**
+   * Updates the selected state styling and accessibility attributes for the card.
+   * @param value - Whether the card should appear selected.
+   */
   set isSelected(value: boolean) {
     if (this.#isSelected === value) return;
     this.#isSelected = value;
