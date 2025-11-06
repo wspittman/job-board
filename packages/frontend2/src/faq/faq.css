@@ -16,7 +16,7 @@
 .faq-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
 }
 
 .faq-item {
@@ -39,7 +39,7 @@
 
     &:focus-visible {
       outline: none;
-      box-shadow: var(--shadow-focus);
+      border: var(--primary-dark) 1px solid;
     }
 
     &::after {
