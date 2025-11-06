@@ -3,25 +3,47 @@ import { metadataModel } from "./metadataModel";
 
 export type FilterModelKey = keyof FilterModelApi;
 
+/**
+ * Represents the filter criteria for job searches.
+ * Provides methods for converting between form data, URL search parameters, and friendly string representations.
+ */
 export class FilterModel {
   readonly #filters: FilterModelApi = {};
 
+  /**
+   * Creates a FilterModel instance from a FormData object.
+   * @param formData - The FormData object.
+   * @returns A new FilterModel instance.
+   */
   static fromFormData(formData: FormData): FilterModel {
     const model = new FilterModel();
     model.#fromFormData(formData);
     return model;
   }
 
+  /**
+   * Creates a FilterModel instance from URLSearchParams.
+   * @param params - The URLSearchParams object.
+   * @returns A new FilterModel instance.
+   */
   static fromUrlSearchParams(params: URLSearchParams): FilterModel {
     const model = new FilterModel();
     model.#fromUrlSearchParams(params);
     return model;
   }
 
+  /**
+   * Checks if the filter model is empty (contains no active filters).
+   * @returns True if the filter model is empty, false otherwise.
+   */
   isEmpty(): boolean {
     return Object.values(this.#filters).every(isEmpty);
   }
 
+  /**
+   * Converts the filter model to URLSearchParams.
+   * @returns A URLSearchParams object representing the filters.
+   */
   toUrlSearchParams(): URLSearchParams {
     const entries = this.toEntries();
     const params = new URLSearchParams();
@@ -33,6 +55,11 @@ export class FilterModel {
     return params;
   }
 
+  /**
+   * Converts the filter model to an array of friendly string representations.
+   * E.g., ['companyId', 'Company: Google'], ['isRemote', 'Remote'].
+   * @returns The array of key-friendly string pairs.
+   */
   async toFriendlyStrings(): Promise<[FilterModelKey, string][]> {
     const entries = this.toEntries();
 
@@ -63,6 +90,10 @@ export class FilterModel {
     });
   }
 
+  /**
+   * Converts the filter model to an array of key-value pairs, excluding empty values.
+   * @returns The array of key-value pairs.
+   */
   toEntries(): [FilterModelKey, unknown][] {
     return Object.entries(this.#filters).filter(([, v]) => !isEmpty(v)) as [
       FilterModelKey,

@@ -60,7 +60,7 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 
 ### Comments
 
-Use JSDoc comments for all public APIs and complex logic. This helps with code readability and provides useful information for developers using the code. Go light on comments otherwise. Never put comments at the end of lines.
+Use JSDoc comments for all public APIs and complex logic. This helps with code readability and provides useful information for developers using the code. Go light on comments otherwise. Never put comments at the end of lines. When writing @returns comments for async functions, prefer to describe the resolved value rather than the promise itself.
 
 ### Dependencies
 
