@@ -59,14 +59,11 @@ export class FormInput extends FormElement {
     const val = String(value ?? "").trim();
 
     if (val === "") return val;
-    if (!/^-?\d+$/.test(val)) return prevVal;
+    if (!/^\d+$/.test(val)) return prevVal;
 
+    const { min = 0, max = Number.MAX_SAFE_INTEGER } = this.#validation ?? {};
     let num = Number.parseInt(val, 10);
-    if (Number.isNaN(num)) return prevVal;
-
-    const { min, max } = this.#validation ?? {};
-    if (min != null && num < min) return prevVal;
-    if (max != null && num > max) return prevVal;
+    if (Number.isNaN(num) || num < min || num > max) return prevVal;
 
     return String(num);
   }
