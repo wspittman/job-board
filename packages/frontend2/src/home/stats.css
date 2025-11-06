@@ -4,8 +4,8 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 
   & svg {
-    width: var(--space-xl);
-    height: auto;
+    height: 70%;
+    width: auto;
   }
 }
 
@@ -17,8 +17,8 @@
 }
 
 .stat-icon {
-  width: var(--space-xxl);
-  height: var(--space-xxl);
+  height: 100%;
+  aspect-ratio: 1;
   border-radius: var(--radius);
   background: var(--primary-gradient-bg);
   display: grid;

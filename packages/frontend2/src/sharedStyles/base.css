@@ -68,12 +68,11 @@
   --heading-line-height: 1.2;
 
   /* Spacing */
-  --space-xs: calc(var(--space-sm) / 2);
-  --space-sm: 8px;
-  --space-md: calc(var(--space-sm) * 2);
-  --space-lg: calc(var(--space-sm) * 3);
-  --space-xl: calc(var(--space-sm) * 6);
-  --space-xxl: calc(var(--space-sm) * 9);
+  --space-xs: clamp(0.125rem, 0.25vw, 0.25rem);
+  --space-sm: clamp(0.25rem, 0.5vw, 0.5rem);
+  --space-md: clamp(0.75rem, 1vw, 1rem);
+  --space-lg: clamp(1.25rem, 1.75vw, 1.5rem);
+  --space-xl: clamp(2rem, 4vw, 3rem);
 
   /* Shapes */
   --radius: 8px;
