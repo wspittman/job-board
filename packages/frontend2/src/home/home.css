@@ -5,6 +5,7 @@
   justify-content: center;
   gap: var(--space-lg);
   text-align: center;
+  padding: var(--space-md) 0 0;
 }
 
 .hm-hero-visual {
@@ -66,7 +67,7 @@
   inset: 0;
   border-radius: 32% 68% 52% 48% / 45% 39% 61% 55%;
   background: linear-gradient(
-    140deg,
+    135deg,
     var(--secondary-dark),
     hsl(var(--palette-secondary) 70%) 35%,
     hsl(var(--palette-primary) 65%) 65%,
