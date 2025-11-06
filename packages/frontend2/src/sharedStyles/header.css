@@ -72,6 +72,7 @@
 /* Hamburger, Toggle, and Backdrop */
 
 .menu-toggle {
+  display: none;
   opacity: 0;
   width: 1px;
   height: 1px;
@@ -168,6 +169,10 @@
 /* Mobile Nav */
 
 @media (max-width: 600px) {
+  .menu-toggle {
+    display: block;
+  }
+
   .nav {
     display: none;
     position: absolute;
