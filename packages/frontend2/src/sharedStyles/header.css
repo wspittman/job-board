@@ -72,7 +72,10 @@
 /* Hamburger, Toggle, and Backdrop */
 
 .menu-toggle {
-  display: none;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
 }
 
 .hamburger {
@@ -83,16 +86,16 @@
   border-radius: var(--radius);
   transition: background-color 200ms ease-in-out;
 
-  &:hover {
-    background: var(--primary-dark);
+  & svg {
+    position: absolute;
+    height: inherit;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    will-change: opacity, transform;
   }
 }
 
-.hamburger svg {
-  position: absolute;
-  height: inherit;
-  transition: opacity 0.22s ease, transform 0.22s ease;
-  will-change: opacity, transform;
+.menu-toggle:focus-visible ~ .hamburger svg {
+  background: var(--primary-dark);
 }
 
 /* start state */
