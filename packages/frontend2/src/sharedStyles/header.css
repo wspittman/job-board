@@ -5,7 +5,7 @@
   z-index: 1100;
   padding: 0 var(--space-lg);
   gap: var(--space-md);
-  height: var(--space-xl);
+  height: 3rem;
   background: var(--primary-main);
   color: var(--text-contrast);
   align-items: center;
@@ -134,7 +134,7 @@
 .menu-backdrop {
   display: none;
   position: fixed;
-  top: var(--space-xl);
+  top: 3rem;
   left: 0;
   right: 0;
   bottom: 0;
