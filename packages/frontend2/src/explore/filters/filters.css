@@ -3,6 +3,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--space-sm);
+  gap: var(--space-md);
 }
 
 .heading {
@@ -32,13 +33,13 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: var(--space-xs);
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-lg);
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-lg);
 }
 
 @media (min-width: 901px) {

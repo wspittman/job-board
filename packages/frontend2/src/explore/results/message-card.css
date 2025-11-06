@@ -5,9 +5,13 @@
   border-radius: var(--radius);
 }
 
+.title {
+  margin-bottom: var(--space-sm);
+}
+
 .subtitle {
   color: var(--primary-dark);
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-md);
 }
 
 .error-card {

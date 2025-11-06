@@ -27,7 +27,7 @@
 
 explore-filters {
   flex-basis: max-content;
-  max-width: 25%;
+  max-width: max(20%, 300px);
   height: 100%;
   overflow: auto;
 }

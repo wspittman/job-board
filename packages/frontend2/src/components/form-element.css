@@ -6,7 +6,7 @@
     font-size: var(--font-size-xxs);
     transform: translate(
       calc(var(--space-md) - 3px),
-      calc(0px - var(--space-sm))
+      calc(3px - var(--space-md))
     );
   }
 
@@ -36,7 +36,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 
-  transform: translate(var(--space-md), calc(var(--space-sm) * 1.4));
+  transform: translate(var(--space-md), calc(var(--space-md) * 1.5));
 
   transition: color 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,
     transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,

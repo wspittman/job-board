@@ -13,7 +13,7 @@
 }
 
 .intake {
-  padding: var(--space-md) var(--space-sm) var(--space-sm);
+  padding: var(--space-lg) 0;
 }
 
 .options {
