@@ -5,13 +5,24 @@ import css from "./form-input.css?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "jb-form-input";
 
+/**
+ * Custom form element that wraps a text input with adornments and validation.
+ * Extends {@link FormElement} to provide numeric validation and prefix/suffix rendering.
+ */
 export class FormInput extends FormElement {
   #validation?: FormElementProps["validation"];
 
+  /**
+   * Creates an instance of the input element with associated styles.
+   */
   constructor() {
     super("input", cssSheet);
   }
 
+  /**
+   * Initializes the input with adornments and optional validation rules.
+   * @param props - The configuration options for the input component
+   */
   override init({ prefix, suffix, validation, ...rest }: FormElementProps) {
     super.init(rest);
     this.#validation = validation;
@@ -24,10 +35,17 @@ export class FormInput extends FormElement {
     this.#createAdornment(false, suffix);
   }
 
+  /**
+   * Applies validation before storing the provided value.
+   * @param value - The new value to assign to the input
+   */
   override set value(value: unknown) {
     super.value = this.#validate(value);
   }
 
+  /**
+   * Ensures runtime input remains valid and propagates updates when appropriate.
+   */
   protected override onInput() {
     const next = this.#validate(this.intake.value);
     if (next !== this.intake.value) {
