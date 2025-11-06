@@ -29,7 +29,7 @@
     align-items: center;
     cursor: pointer;
     padding: var(--space-sm) var(--space-md);
-    font-size: var(--size-md);
+    font-size: var(--font-size-md);
     font-weight: 600;
     color: var(--primary-main);
     transition: background-color 200ms ease-in-out;
@@ -45,7 +45,7 @@
 
     &::after {
       content: "\203A";
-      font-size: var(--size-lg);
+      font-size: var(--font-size-lg);
       margin-left: auto;
       color: var(--primary-main);
       transition: transform 200ms ease-in-out;
@@ -72,7 +72,7 @@
 .faq-note {
   display: none; /* Hidden by default, "block" when populated */
   color: var(--text-muted);
-  font-size: calc(var(--size-sm) * 0.9);
+  font-size: calc(var(--font-size-sm) * 0.9);
 }
 
 @media (max-width: 600px) {

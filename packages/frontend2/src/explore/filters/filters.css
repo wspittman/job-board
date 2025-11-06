@@ -16,7 +16,7 @@
   padding: 0 var(--space-sm);
   border: none;
   background: none;
-  font-size: var(--size-lg);
+  font-size: var(--font-size-lg);
   color: var(--primary-main);
   cursor: pointer;
 

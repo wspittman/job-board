@@ -62,7 +62,7 @@
 }
 
 .brand {
-  font-size: var(--size-md);
+  font-size: var(--font-size-md);
 }
 
 .spacer {

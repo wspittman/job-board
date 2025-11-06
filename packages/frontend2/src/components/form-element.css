@@ -3,7 +3,7 @@
 
   &:focus-within .label,
   &:has(.has-value) .label {
-    font-size: var(--size-xxs);
+    font-size: var(--font-size-xxs);
     transform: translate(
       calc(var(--space-md) - 3px),
       calc(0px - var(--space-sm))
@@ -30,7 +30,7 @@
   position: absolute;
   max-width: 90%;
 
-  font-size: var(--size-xs);
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -75,7 +75,7 @@
   pointer-events: none;
   visibility: hidden;
   height: var(--space-sm);
-  font-size: var(--size-xxs);
+  font-size: var(--font-size-xxs);
   max-width: 0.01px;
   transition: max-width 50ms cubic-bezier(0, 0, 0.2, 1) 0ms;
 }

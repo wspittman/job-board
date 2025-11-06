@@ -27,10 +27,10 @@
 }
 
 .stat-value {
-  font-size: var(--size-lg);
+  font-size: var(--font-size-lg);
   color: var(--primary-main);
 }
 
 .stat-label {
-  font-size: var(--size-sm);
+  font-size: var(--font-size-sm);
 }

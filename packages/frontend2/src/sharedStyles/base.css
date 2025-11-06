@@ -59,11 +59,11 @@
   --h2-size: clamp(1.75rem, 1.75vw, 2.5rem);
   --h3-size: clamp(1.25rem, 1.25vw, 1.75rem);
 
-  --size-lg: clamp(1.5rem, 2.5vw, 2rem);
-  --size-md: clamp(1rem, 2vw, 1.5rem);
-  --size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
-  --size-xs: clamp(0.8rem, 1.25vw, 1rem);
-  --size-xxs: clamp(0.6rem, 0.8vw, 0.75rem);
+  --font-size-lg: clamp(1.5rem, 2.5vw, 2rem);
+  --font-size-md: clamp(1rem, 2vw, 1.5rem);
+  --font-size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
+  --font-size-xs: clamp(0.8rem, 1.25vw, 1rem);
+  --font-size-xxs: clamp(0.6rem, 0.8vw, 0.75rem);
 
   --heading-line-height: 1.2;
 
@@ -88,7 +88,7 @@ body {
   background: var(--bg-default);
   color: var(--text-default);
   font-family: var(--fonts);
-  font-size: var(--size-sm);
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

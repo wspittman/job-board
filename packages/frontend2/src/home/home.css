@@ -101,7 +101,7 @@
 }
 
 .hm-hero-subtitle {
-  font-size: var(--size-md);
+  font-size: var(--font-size-md);
   color: var(--text-muted);
 }
 

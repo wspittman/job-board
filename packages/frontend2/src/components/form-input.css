@@ -7,7 +7,7 @@
 }
 
 .adornment {
-  font-size: var(--size-xs);
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   white-space: nowrap;
   padding: var(--space-sm) 0 0;
