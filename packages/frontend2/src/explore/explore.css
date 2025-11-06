@@ -55,8 +55,15 @@ explore-details[empty] {
   .action-button {
     display: inline-flex;
     padding: var(--space-sm) var(--space-md);
+    background: var(--secondary-gradient-btn);
+    color: var(--text-contrast);
     justify-content: center;
     margin: calc(0px - var(--space-sm)) 0;
+
+    &:hover,
+    &:focus-visible {
+      box-shadow: var(--shadow-focus);
+    }
   }
 
   explore-filters {
