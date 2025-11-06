@@ -9,11 +9,22 @@ import css from "./form-select.css?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "jb-form-select";
 
+/**
+ * Custom element that wraps a native select input with shared form styling.
+ * Allows declarative option initialization while leveraging the base form logic.
+ */
 export class FormSelect extends FormElement {
+  /**
+   * Creates a select-backed form element with shared styles.
+   */
   constructor() {
     super("select", cssSheet);
   }
 
+  /**
+   * Hydrates the select element with options and initializes shared state.
+   * @param props - The configuration payload for the select component
+   */
   override init({ options = [], ...rest }: FormElementProps) {
     super.init(rest);
     this.#setOptions(options);

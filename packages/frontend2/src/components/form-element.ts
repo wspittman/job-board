@@ -30,6 +30,10 @@ export interface FormElementProps {
   value?: unknown;
 }
 
+/**
+ * Shared base class for form-associated custom elements that wrap native inputs.
+ * Handles label rendering, attribute synchronization, and form value management.
+ */
 export abstract class FormElement extends ComponentBase {
   static formAssociated = true;
 
@@ -37,10 +41,19 @@ export abstract class FormElement extends ComponentBase {
   #internals = this.attachInternals();
   #onChange?: () => void;
 
+  /**
+   * Returns the list of attributes that trigger attributeChangedCallback.
+   * Ensures name and value stay in sync between internal and external state.
+   */
   static get observedAttributes() {
     return ["name", "value"];
   }
 
+  /**
+   * Constructs a form element wrapper with the specified input type and styles.
+   * @param intakeType - The native element type to create within the component
+   * @param css - The component-specific stylesheet to adopt
+   */
   constructor(intakeType: "input" | "select", css: CSSStyleSheet) {
     super(html, [cssSheet, css]);
 
@@ -61,6 +74,10 @@ export abstract class FormElement extends ComponentBase {
     this.intake.addEventListener("change", update);
   }
 
+  /**
+   * Initializes the component's public state and wiring.
+   * @param props - Incoming configuration values for the element
+   */
   init({ label, name, onChange, value }: FormElementProps) {
     this.#onChange = onChange;
     this.setManyTexts({ label, legend: label });
@@ -68,15 +85,26 @@ export abstract class FormElement extends ComponentBase {
     this.value = value;
   }
 
+  /**
+   * Updates the externally visible value while keeping form internals aligned.
+   * @param value - The new value to display within the intake element
+   */
   set value(value: unknown) {
     this.intake.value = String(value ?? "");
     this.#syncAttribute();
   }
 
+  /**
+   * Retrieves the value that should be submitted with the form.
+   * Subclasses may override to provide custom representations.
+   */
   protected getFormValue() {
     return this.intake.value;
   }
 
+  /**
+   * Handles native input/change events by syncing state back to attributes.
+   */
   protected onInput() {
     this.#syncAttribute();
   }

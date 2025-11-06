@@ -9,10 +9,17 @@ import css from "./form-combobox.css?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "jb-form-combobox";
 
+/**
+ * Custom element that combines text input filtering with selectable options.
+ * Provides an accessible combobox experience backed by {@link FormElement} features.
+ */
 export class FormCombobox extends FormElement {
   readonly #menu: MenuEl;
   #formValue: string = "";
 
+  /**
+   * Initializes the combobox with menu behavior and keyboard interactions.
+   */
   constructor() {
     super("input", cssSheet);
     this.intake.setAttribute("autocomplete", "off");
@@ -28,20 +35,34 @@ export class FormCombobox extends FormElement {
     );
   }
 
+  /**
+   * Configures the combobox options and shared form state.
+   * @param props - Incoming configuration for the combobox element
+   */
   override init({ options = [], ...rest }: FormElementProps) {
     super.init(rest);
     this.#menu.init(options, (option) => this.#selectOption(option));
   }
 
+  /**
+   * Selects an option based on the provided value.
+   * @param value - The form value to search for among options
+   */
   override set value(value: unknown) {
     const option = this.#menu.optionFromValue(String(value ?? ""));
     this.#selectOption(option);
   }
 
+  /**
+   * Retrieves the value that should be submitted with the parent form.
+   */
   protected override getFormValue() {
     return this.#formValue;
   }
 
+  /**
+   * Handles user input by filtering options and reopening the menu.
+   */
   protected override onInput() {
     this.#formValue = "";
     this.intake.classList.toggle("has-value", !!this.intake.value);
@@ -70,6 +91,9 @@ export class FormCombobox extends FormElement {
   }
 }
 
+/**
+ * Helper class that manages the combobox options list and interactions.
+ */
 class MenuEl {
   readonly element: HTMLUListElement;
   readonly #options: Record<string, OptionEl> = {};
@@ -80,6 +104,9 @@ class MenuEl {
   #isOpen = false;
   #onSelect?: (option?: OptionEl) => void;
 
+  /**
+   * Creates the DOM structure and sets up event listeners for the menu list.
+   */
   constructor() {
     this.element = document.createElement("ul");
     this.element.className = "options";
@@ -96,6 +123,11 @@ class MenuEl {
     this.close();
   }
 
+  /**
+   * Prepares menu options and assigns the selection callback.
+   * @param options - List of selectable form options
+   * @param onSelect - Handler triggered when an option is chosen
+   */
   init(options: FormOption[], onSelect: (option?: OptionEl) => void) {
     this.#onSelect = onSelect;
     options
@@ -108,6 +140,10 @@ class MenuEl {
     this.close();
   }
 
+  /**
+   * Filters visible options based on the supplied query string.
+   * @param query - The user-entered text to match against option labels
+   */
   filter(query: string) {
     const trimmed = query.trim().toLowerCase();
 
@@ -130,6 +166,10 @@ class MenuEl {
     this.#render();
   }
 
+  /**
+   * Handles keyboard navigation and selection within the menu.
+   * @param event - The keyboard event emitted from the input element
+   */
   handleKeydown(event: KeyboardEvent) {
     if (!["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(event.key)) {
       return;
@@ -164,16 +204,26 @@ class MenuEl {
     }
   }
 
+  /**
+   * Makes the option list visible.
+   */
   open() {
     this.#isOpen = true;
     this.element.hidden = false;
   }
 
+  /**
+   * Hides the option list.
+   */
   close() {
     this.#isOpen = false;
     this.element.hidden = true;
   }
 
+  /**
+   * Retrieves an option by its form value.
+   * @param value - The form value associated with the option
+   */
   optionFromValue(value: string): FormOption | undefined {
     return this.#options[value];
   }
@@ -223,12 +273,19 @@ class MenuEl {
   }
 }
 
+/**
+ * Wrapper for individual menu options that tracks metadata and DOM state.
+ */
 class OptionEl {
   readonly label: string;
   readonly value: string;
   readonly compareLabel: string;
   readonly element: HTMLLIElement;
 
+  /**
+   * Creates a list item representing a selectable option.
+   * @param option - Source option metadata from the combobox props
+   */
   constructor({ label, value }: FormOption) {
     this.label = label;
     this.value = String(value ?? "");
@@ -241,10 +298,18 @@ class OptionEl {
     this.element.setAttribute("role", "option");
   }
 
+  /**
+   * Toggles the visual active state of the option.
+   * @param val - Whether the option should be marked as active
+   */
   set active(val: boolean) {
     this.element.classList.toggle("active", val);
   }
 
+  /**
+   * Reads the stored value identifier from a list element.
+   * @param el - The list element representing an option
+   */
   static valueFromLI(el: HTMLLIElement): string {
     return el.dataset["value"] ?? "";
   }
