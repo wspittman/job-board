@@ -1,7 +1,15 @@
-.row {
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
   margin-bottom: var(--space-md);
 }
 
@@ -10,7 +18,12 @@
 }
 
 .meta {
-  color: var(--text-muted);
   display: flex;
+  align-items: center;
   gap: var(--space-sm);
+  color: var(--text-muted);
+
+  &:has(span:empty) {
+    display: none;
+  }
 }

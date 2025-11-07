@@ -32,7 +32,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   margin-bottom: var(--space-lg);
 }
 
