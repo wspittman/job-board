@@ -29,13 +29,17 @@ export class Details extends ComponentBase {
   #render() {
     if (!this.#job) return;
 
-    const { title, company, location, postTS, description, applyUrl } =
+    const { title, company, location, postTS, description, applyUrl, facets } =
       this.#job;
+    const { salary, experience } = facets ?? {};
     const postDate = new Date(postTS).toLocaleDateString();
+    const hasExperience = experience != null;
 
     this.setManyTexts({
       heading: title,
       company,
+      salary: salary?.toLocaleString(),
+      experience: hasExperience ? `${experience} years experience` : "",
       location,
       "posted-date": postDate,
     });
