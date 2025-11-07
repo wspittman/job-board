@@ -8,17 +8,27 @@ import html from "./details.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "explore-details";
 
+/**
+ * Custom element that displays detailed information for a selected job.
+ */
 export class Details extends ComponentBase {
   readonly #applyLink: HTMLAnchorElement;
   readonly #detailEmbed: DetailEmbed;
   #job?: JobModel;
 
+  /**
+   * Creates a details panel and wires up references to internal elements.
+   */
   constructor() {
     super(html, cssSheet);
     this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
     this.#detailEmbed = this.getEl<DetailEmbed>("description")!;
   }
 
+  /**
+   * Updates the job being displayed and re-renders the panel contents.
+   * @param value - The job to render, or undefined to clear the panel.
+   */
   set job(value: JobModel | undefined) {
     if (this.#job?.id === value?.id) return;
 
