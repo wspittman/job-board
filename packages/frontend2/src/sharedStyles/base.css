@@ -73,6 +73,7 @@
   --space-md: clamp(0.75rem, 1vw, 1rem);
   --space-lg: clamp(1.25rem, 1.75vw, 1.5rem);
   --space-xl: clamp(2rem, 4vw, 3rem);
+  --header-height: 3rem;
 
   /* Shapes */
   --radius: 8px;

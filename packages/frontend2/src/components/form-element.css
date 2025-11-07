@@ -5,8 +5,8 @@
   &:has(.has-value) .label {
     font-size: var(--font-size-xxs);
     transform: translate(
-      calc(var(--space-md) - 3px),
-      calc(3px - var(--space-md))
+      calc(2 * var(--space-sm) - 1px),
+      calc(var(--space-xs) - var(--space-md))
     );
   }
 

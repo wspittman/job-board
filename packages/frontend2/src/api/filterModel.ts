@@ -110,13 +110,13 @@ export class FilterModel {
   }
 
   #fromGeneric(get: (key: string) => string | null | undefined): void {
+    this.#filters.title = normString(get("title"));
     this.#filters.companyId = normString(get("companyId"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
-    this.#filters.title = normString(get("title"));
     this.#filters.location = normString(get("location"));
-    this.#filters.daysSince = normNumber(get("daysSince"));
-    this.#filters.maxExperience = normNumber(get("maxExperience"));
     this.#filters.minSalary = normNumber(get("minSalary"));
+    this.#filters.maxExperience = normNumber(get("maxExperience"));
+    this.#filters.daysSince = normNumber(get("daysSince"));
   }
 }
 
