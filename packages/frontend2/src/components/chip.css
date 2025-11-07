@@ -1,15 +1,17 @@
 .container {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   color: var(--primary-dark);
-  padding: 0 var(--space-xs);
+  padding: 0 var(--space-sm);
   border: 1px solid var(--primary-dark);
   border-radius: var(--radius);
+  font-size: var(--font-size-xs);
 
   &.filled {
     background: var(--secondary-main);
     color: var(--text-contrast);
+    border: 1px solid var(--secondary-dark);
 
     & .delete:focus-visible {
       outline: 2px solid var(--text-contrast);

@@ -1,5 +1,5 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
-import type { JobModel, MetadataModel } from "./apiTypes";
+import type { JobModel, MetadataModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 
 const viteApiUrl = import.meta.env["VITE_API_URL"];
@@ -17,14 +17,27 @@ const qc = new QueryClient({
   queryCache: new QueryCache(),
 });
 
+/**
+ * Handles API requests and data fetching for the frontend application.
+ * Uses TanStack Query for caching and deduplication of requests.
+ */
 class APIConnector {
-  public async fetchMetadata() {
+  /**
+   * Fetches metadata from the API.
+   * @returns The metadata information.
+   */
+  public async fetchMetadata(): Promise<MetadataModelApi> {
     return await qc.fetchQuery({
       queryKey: ["metadata"],
-      queryFn: () => this.httpCall<MetadataModel>("metadata"),
+      queryFn: () => this.httpCall<MetadataModelApi>("metadata"),
     });
   }
 
+  /**
+   * Fetches job listings based on the provided filters.
+   * @param filters - The filters to apply to the job search.
+   * @returns The list of job models matching the filters.
+   */
   public async fetchJobs(filters: FilterModel): Promise<JobModel[]> {
     if (filters.isEmpty()) return [];
 
@@ -35,6 +48,11 @@ class APIConnector {
     });
   }
 
+  /**
+   * Makes an HTTP call to the API.
+   * @param url - The URL endpoint to call.
+   * @returns The response data as type T.
+   */
   protected async httpCall<T>(url: string): Promise<T> {
     const trimmedUrl = url.replace(/^\/+/, "");
 

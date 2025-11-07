@@ -11,27 +11,24 @@
   max-width: 720px;
   margin: 0 auto;
   color: var(--text-muted);
-  font-size: 1.05rem;
 }
 
 .faq-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
 }
 
 .faq-item {
-  border-radius: var(--radius);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-soft);
   overflow: hidden;
+  padding: 0;
 
   & summary {
     display: flex;
     align-items: center;
     cursor: pointer;
     padding: var(--space-sm) var(--space-md);
-    font-size: var(--size-md);
+    font-size: var(--font-size-md);
     font-weight: 600;
     color: var(--primary-main);
     transition: background-color 200ms ease-in-out;
@@ -42,12 +39,12 @@
 
     &:focus-visible {
       outline: none;
-      box-shadow: var(--shadow-focus);
+      border: var(--primary-dark) 1px solid;
     }
 
     &::after {
       content: "\203A";
-      font-size: var(--size-lg);
+      font-size: var(--font-size-lg);
       margin-left: auto;
       color: var(--primary-main);
       transition: transform 200ms ease-in-out;
@@ -74,7 +71,7 @@
 .faq-note {
   display: none; /* Hidden by default, "block" when populated */
   color: var(--text-muted);
-  font-size: calc(var(--size-sm) * 0.9);
+  font-size: var(--font-size-xs);
 }
 
 @media (max-width: 600px) {

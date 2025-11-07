@@ -3,6 +3,7 @@
   /* Palette */
   --palette-primary: 256 60%;
   --palette-secondary: 218 60%;
+  --palette-error: 356 60%;
 
   --primary-light: hsl(var(--palette-primary) 60%);
   --primary-main: hsl(var(--palette-primary) 50%);
@@ -14,9 +15,12 @@
   --secondary-main: hsl(var(--palette-secondary) 50%);
   --secondary-dark: hsl(var(--palette-secondary) 40%);
 
+  --error-main: hsl(var(--palette-error) 70%);
+
   --text-default: hsl(0 0% 10%);
   --text-muted: hsl(0 0% 10% / 0.7);
   --text-contrast: hsl(0 0% 100%);
+  --text-error: hsl(var(--palette-error) 30%);
 
   --bg-default: hsl(0 0% 98%);
   --bg-surface: hsl(0 0% 100%);
@@ -24,6 +28,7 @@
   --bg-border: hsl(0 0% 0% / 0.2);
   --bg-active: hsl(0 0% 0% / 0.1);
   --bg-hover: hsl(0 0% 0% / 0.05);
+  --bg-error: hsl(var(--palette-error) 95%);
 
   --primary-gradient-bg: linear-gradient(
     135deg,
@@ -50,25 +55,25 @@
   /* Typography */
   --fonts: "Inter Variable", "Roboto", "Helvetica", "Arial", sans-serif;
 
-  --h1-size: clamp(2.75rem, 4vw, 3.5rem);
-  --h2-size: clamp(1.75rem, 1.75vw, 2.5rem);
-  --h3-size: clamp(1.25rem, 1.25vw, 1.75rem);
+  --h1-size: clamp(1.875rem, 5vw, 2.5rem);
+  --h2-size: clamp(1.5rem, 3vw, 1.875rem);
+  --h3-size: clamp(1.25rem, 2vw, 1.5rem);
 
-  --size-lg: clamp(1.5rem, 2.5vw, 2rem);
-  --size-md: clamp(1rem, 2vw, 1.5rem);
-  --size-sm: clamp(0.9rem, 1.5vw, 1.2rem);
-  --size-xs: clamp(0.8rem, 1.25vw, 1rem);
-  --size-xxs: clamp(0.6rem, 0.8vw, 0.75rem);
+  --font-size-lg: clamp(1.375rem, 1.75vw, 1.5rem);
+  --font-size-md: clamp(1.25rem, 1.5vw, 1.375rem);
+  --font-size-sm: clamp(1.125rem, 1.25vw, 1.25rem);
+  --font-size-xs: clamp(1rem, 1vw, 1.125rem);
+  --font-size-xxs: clamp(0.875rem, 1vw, 1rem);
 
   --heading-line-height: 1.2;
 
   /* Spacing */
-  --space-xs: calc(var(--space-sm) / 2);
-  --space-sm: 8px;
-  --space-md: calc(var(--space-sm) * 2);
-  --space-lg: calc(var(--space-sm) * 3);
-  --space-xl: calc(var(--space-sm) * 6);
-  --space-xxl: calc(var(--space-sm) * 9);
+  --space-xs: clamp(0.125rem, 0.25vw, 0.25rem);
+  --space-sm: clamp(0.25rem, 0.5vw, 0.5rem);
+  --space-md: clamp(0.75rem, 1vw, 1rem);
+  --space-lg: clamp(1.25rem, 1.75vw, 1.5rem);
+  --space-xl: clamp(2rem, 4vw, 3rem);
+  --header-height: 3rem;
 
   /* Shapes */
   --radius: 8px;
@@ -83,7 +88,7 @@ body {
   background: var(--bg-default);
   color: var(--text-default);
   font-family: var(--fonts);
-  font-size: var(--size-sm);
+  font-size: var(--font-size-sm);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

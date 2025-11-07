@@ -1,26 +1,49 @@
 import type { FilterModelApi } from "./apiTypes";
+import { metadataModel } from "./metadataModel";
 
 export type FilterModelKey = keyof FilterModelApi;
 
+/**
+ * Represents the filter criteria for job searches.
+ * Provides methods for converting between form data, URL search parameters, and friendly string representations.
+ */
 export class FilterModel {
   readonly #filters: FilterModelApi = {};
 
+  /**
+   * Creates a FilterModel instance from a FormData object.
+   * @param formData - The FormData object.
+   * @returns A new FilterModel instance.
+   */
   static fromFormData(formData: FormData): FilterModel {
     const model = new FilterModel();
     model.#fromFormData(formData);
     return model;
   }
 
+  /**
+   * Creates a FilterModel instance from URLSearchParams.
+   * @param params - The URLSearchParams object.
+   * @returns A new FilterModel instance.
+   */
   static fromUrlSearchParams(params: URLSearchParams): FilterModel {
     const model = new FilterModel();
     model.#fromUrlSearchParams(params);
     return model;
   }
 
+  /**
+   * Checks if the filter model is empty (contains no active filters).
+   * @returns True if the filter model is empty, false otherwise.
+   */
   isEmpty(): boolean {
     return Object.values(this.#filters).every(isEmpty);
   }
 
+  /**
+   * Converts the filter model to URLSearchParams.
+   * @returns A URLSearchParams object representing the filters.
+   */
   toUrlSearchParams(): URLSearchParams {
     const entries = this.toEntries();
     const params = new URLSearchParams();
@@ -32,13 +55,23 @@ export class FilterModel {
     return params;
   }
 
-  toFriendlyStrings(): [FilterModelKey, string][] {
+  /**
+   * Converts the filter model to an array of friendly string representations.
+   * E.g., ['companyId', 'Company: Google'], ['isRemote', 'Remote'].
+   * @returns The array of key-friendly string pairs.
+   */
+  async toFriendlyStrings(): Promise<[FilterModelKey, string][]> {
     const entries = this.toEntries();
+
+    let company = this.#filters.companyId;
+    if (!isEmpty(company)) {
+      company = await metadataModel.getCompanyFriendlyName(company);
+    }
 
     return entries.map(([key, value]) => {
       switch (key) {
         case "companyId":
-          return [key, `Company: ${value}`];
+          return [key, `Company: ${company}`];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
@@ -46,17 +79,21 @@ export class FilterModel {
         case "location":
           return [key, `Location: ${value}`];
         case "daysSince":
-          return [key, `Posted: Within ${String(value).toLocaleString()} days`];
+          return [key, `Posted: Within ${Number(value).toLocaleString()} days`];
         case "maxExperience":
-          return [key, `Experience: I have ${value} years`];
+          return [key, `Experience: ${Number(value).toLocaleString()} years`];
         case "minSalary":
-          return [key, `Salary: At least $${String(value).toLocaleString()}`];
+          return [key, `Salary: $${Number(value).toLocaleString()}`];
         default:
           return [key, `${key}: ${value}`];
       }
     });
   }
 
+  /**
+   * Converts the filter model to an array of key-value pairs, excluding empty values.
+   * @returns The array of key-value pairs.
+   */
   toEntries(): [FilterModelKey, unknown][] {
     return Object.entries(this.#filters).filter(([, v]) => !isEmpty(v)) as [
       FilterModelKey,
@@ -73,13 +110,13 @@ export class FilterModel {
   }
 
   #fromGeneric(get: (key: string) => string | null | undefined): void {
+    this.#filters.title = normString(get("title"));
     this.#filters.companyId = normString(get("companyId"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
-    this.#filters.title = normString(get("title"));
     this.#filters.location = normString(get("location"));
-    this.#filters.daysSince = normNumber(get("daysSince"));
-    this.#filters.maxExperience = normNumber(get("maxExperience"));
     this.#filters.minSalary = normNumber(get("minSalary"));
+    this.#filters.maxExperience = normNumber(get("maxExperience"));
+    this.#filters.daysSince = normNumber(get("daysSince"));
   }
 }
 

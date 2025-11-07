@@ -1,25 +1,58 @@
 import { ComponentBase } from "./componentBase";
 import { FormElement, type FormElementProps } from "./form-element";
+
 import css from "./form-input.css?raw";
-
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "jb-form-input";
 
-export interface FormInputProps extends FormElementProps {
-  prefix?: string;
-  suffix?: string;
-}
-
+/**
+ * Custom form element that wraps a text input with adornments and validation.
+ * Extends {@link FormElement} to provide numeric validation and prefix/suffix rendering.
+ */
 export class FormInput extends FormElement {
+  #validation?: FormElementProps["validation"];
+
+  /**
+   * Creates an instance of the input element with associated styles.
+   */
   constructor() {
     super("input", cssSheet);
-    this.intake.setAttribute("type", "text");
-    this.intake.setAttribute("placeholder", " ");
   }
 
-  override init({ prefix, suffix, ...rest }: FormInputProps) {
+  /**
+   * Initializes the input with adornments and optional validation rules.
+   * @param props - The configuration options for the input component
+   */
+  override init({ prefix, suffix, validation, ...rest }: FormElementProps) {
     super.init(rest);
+    this.#validation = validation;
+
+    if (this.#validation?.type === "int") {
+      this.intake.inputMode = "numeric";
+    }
+
     this.#createAdornment(true, prefix);
     this.#createAdornment(false, suffix);
+  }
+
+  /**
+   * Applies validation before storing the provided value.
+   * @param value - The new value to assign to the input
+   */
+  override set value(value: unknown) {
+    super.value = this.#validate(value);
+  }
+
+  /**
+   * Ensures runtime input remains valid and propagates updates when appropriate.
+   */
+  protected override onInput() {
+    const next = this.#validate(this.intake.value);
+    if (next !== this.intake.value) {
+      this.intake.value = next;
+      return;
+    }
+    super.onInput();
   }
 
   #createAdornment(isPrefix: boolean, text?: string) {
@@ -31,12 +64,33 @@ export class FormInput extends FormElement {
     el.textContent = text;
     this.intake.insertAdjacentElement(pos, el);
   }
+
+  #validate(value: unknown): string {
+    if (this.#validation?.type === "int") {
+      return this.#intOnly(value);
+    }
+    return String(value ?? "");
+  }
+
+  #intOnly(value: unknown): string {
+    const prevVal = this.getAttribute("value") ?? "";
+    const val = String(value ?? "").trim();
+
+    if (val === "") return val;
+    if (!/^\d+$/.test(val)) return prevVal;
+
+    const { min = 0, max = Number.MAX_SAFE_INTEGER } = this.#validation ?? {};
+    let num = Number.parseInt(val, 10);
+    if (Number.isNaN(num) || num < min || num > max) return prevVal;
+
+    return String(num);
+  }
 }
 
-ComponentBase.register("jb-form-input", FormInput);
+ComponentBase.register(tag, FormInput);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "jb-form-input": FormInput;
+    [tag]: FormInput;
   }
 }

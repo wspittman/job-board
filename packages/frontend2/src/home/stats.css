@@ -4,16 +4,12 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 
   & svg {
-    width: var(--space-xl);
-    height: auto;
+    height: 70%;
+    width: auto;
   }
 }
 
 .stat-card {
-  padding: var(--space-md);
-  border-radius: var(--radius);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-soft);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--space-lg);
@@ -21,8 +17,8 @@
 }
 
 .stat-icon {
-  width: var(--space-xxl);
-  height: var(--space-xxl);
+  height: 100%;
+  aspect-ratio: 1;
   border-radius: var(--radius);
   background: var(--primary-gradient-bg);
   display: grid;
@@ -31,10 +27,10 @@
 }
 
 .stat-value {
-  font-size: var(--size-lg);
+  font-size: var(--font-size-lg);
   color: var(--primary-main);
 }
 
 .stat-label {
-  font-size: var(--size-sm);
+  font-size: var(--font-size-sm);
 }

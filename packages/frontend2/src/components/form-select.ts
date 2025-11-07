@@ -1,29 +1,36 @@
 import { ComponentBase } from "./componentBase";
-import { FormElement, type FormElementProps } from "./form-element";
+import {
+  FormElement,
+  type FormElementProps,
+  type FormOption,
+} from "./form-element";
+
 import css from "./form-select.css?raw";
-
 const cssSheet = ComponentBase.createCSSSheet(css);
+const tag = "jb-form-select";
 
-interface OptionDefinition {
-  label: string;
-  value: unknown;
-}
-
-export interface FormSelectProps extends FormElementProps {
-  options: OptionDefinition[];
-}
-
+/**
+ * Custom element that wraps a native select input with shared form styling.
+ * Allows declarative option initialization while leveraging the base form logic.
+ */
 export class FormSelect extends FormElement {
+  /**
+   * Creates a select-backed form element with shared styles.
+   */
   constructor() {
     super("select", cssSheet);
   }
 
-  override init({ options, ...rest }: FormSelectProps) {
+  /**
+   * Hydrates the select element with options and initializes shared state.
+   * @param props - The configuration payload for the select component
+   */
+  override init({ options = [], ...rest }: FormElementProps) {
     super.init(rest);
     this.#setOptions(options);
   }
 
-  #setOptions(options: OptionDefinition[]) {
+  #setOptions(options: FormOption[]) {
     const optionEls = options.map(({ label, value }) => {
       const option = document.createElement("option");
       option.textContent = label;
@@ -35,10 +42,10 @@ export class FormSelect extends FormElement {
   }
 }
 
-ComponentBase.register("jb-form-select", FormSelect);
+ComponentBase.register(tag, FormSelect);
 
 declare global {
   interface HTMLElementTagNameMap {
-    "jb-form-select": FormSelect;
+    [tag]: FormSelect;
   }
 }

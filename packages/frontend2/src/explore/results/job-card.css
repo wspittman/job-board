@@ -1,12 +1,14 @@
 .container {
-  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
   padding: var(--space-md);
   border: 1px solid transparent;
-  box-shadow: var(--shadow-soft);
   text-align: left;
   cursor: pointer;
   color: var(--text-default);
   line-height: 1.6;
+  height: 100%;
+  width: 100%;
 
   &:hover,
   &:focus-visible {
@@ -38,11 +40,12 @@
   padding: 0 var(--space-xs);
   border: 1px solid var(--primary-dark);
   border-radius: var(--radius);
-  font-size: var(--size-xs);
+  font-size: var(--font-size-xs);
 }
 
 .meta {
   display: flex;
+  align-items: center;
   gap: var(--space-xs);
 
   &:has(span:empty) {

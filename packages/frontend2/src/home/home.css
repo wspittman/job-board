@@ -5,6 +5,7 @@
   justify-content: center;
   gap: var(--space-lg);
   text-align: center;
+  padding: var(--space-md) 0 0;
 }
 
 .hm-hero-visual {
@@ -66,7 +67,7 @@
   inset: 0;
   border-radius: 32% 68% 52% 48% / 45% 39% 61% 55%;
   background: linear-gradient(
-    140deg,
+    135deg,
     var(--secondary-dark),
     hsl(var(--palette-secondary) 70%) 35%,
     hsl(var(--palette-primary) 65%) 65%,
@@ -91,67 +92,34 @@
   flex: 1 1 320px;
 }
 
-.hm-hero-title {
-  font-size: var(--h1-size);
-  color: var(--primary-dark);
-
-  & span {
-    display: block;
-  }
+.hm-hero-title span {
+  display: block;
 }
 
 .hm-hero-subtitle {
-  font-size: var(--size-md);
+  font-size: var(--font-size-lg);
   color: var(--text-muted);
 }
 
 .hm-search-card {
   margin: var(--space-xl) auto;
-  padding: var(--space-xl);
-  background: var(--bg-surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
   text-align: center;
 }
 
 .chip-list {
   margin: var(--space-lg);
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-md);
-  color: var(--text-contrast);
-}
 
-.chip {
-  padding: var(--space-sm) var(--space-md);
-  border-radius: var(--radius);
-  background: var(--secondary-gradient-btn);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  text-decoration: none;
-
-  &:hover,
-  &:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: var(--space-xs);
-    box-shadow: var(--shadow-focus);
+  & .abtn {
+    background: var(--secondary-gradient-btn);
   }
 }
 
-.cta-button {
-  display: inline-flex;
+.embiggen {
   padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius);
-  background: var(--primary-gradient-btn);
-  color: var(--text-contrast);
-  font-size: var(--size-sm);
-  text-decoration: none;
-
-  &:hover,
-  &:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: var(--space-xs);
-    box-shadow: var(--shadow-focus);
-    color: var(--text-contrast);
-  }
 }

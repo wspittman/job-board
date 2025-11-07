@@ -14,7 +14,8 @@
     "@tanstack/query-core": "5.90.2",
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.3",
-    "modern-normalize": "^3.0.1"
+    "modern-normalize": "^3.0.1",
+    "helmet": "^8.0.0"
   },
   "devDependencies": {
     "lucide-static": "^0.545.0",

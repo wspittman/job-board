@@ -1,0 +1,41 @@
+.container {
+  background: var(--bg-surface);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-soft);
+  border-radius: var(--radius);
+}
+
+.title {
+  margin-bottom: var(--space-sm);
+}
+
+.subtitle {
+  color: var(--primary-dark);
+  margin-bottom: var(--space-md);
+}
+
+.error-card {
+  background: var(--bg-error);
+  border: 1px solid var(--error-main);
+  color: var(--text-error);
+
+  & h3 {
+    color: inherit;
+  }
+}
+
+.spinner {
+  display: block;
+  width: var(--space-lg);
+  height: var(--space-lg);
+  border: 0.2rem solid var(--bg-border);
+  border-top-color: var(--primary-main);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
