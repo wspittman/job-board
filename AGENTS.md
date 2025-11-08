@@ -1,6 +1,6 @@
 # Project Overview
 
-This is a web application for a job board. It is a monorepo with multiple workspaces that cover the public web experience, a replacement frontend that is under active development, operational tooling, evaluation scripts, and the Node.js/Express backend API.
+This is a web application for a job board. It is a monorepo with multiple workspaces that cover the public web experience, a legacy frontend that is being deprecated, operational tooling, evaluation scripts, and the Node.js/Express backend API.
 
 ## Workspaces
 
@@ -8,11 +8,11 @@ This is a web application for a job board. It is a monorepo with multiple worksp
   - `npm run start:backend` to run `tsx watch src/app.ts` for development.
   - `npm run build --workspace=backend` / `npm run start --workspace=backend` for production artifacts under `dist/`.
   - Environment is configured through `.env`; see `packages/backend/src/config.ts` for variables such as `DATABASE_URL`, `LLM_MODEL`, and `APPLICATIONINSIGHTS_CONNECTION_STRING`.
-- **`packages/frontend`** – Current Vite-powered React application that uses Material-UI, React Router, and TanStack Query.
+- **`packages/frontend`** – Current Vite-powered React application that uses vanilla HTML/CSS/JS with TanStack Query.
   - `npm run start:frontend` (alias of `npm run dev --workspace=frontend`) runs Vite with HMR.
   - `npm run build --workspace=frontend` emits assets to `packages/frontend/dist/` and `npm run preview --workspace=frontend` serves them.
   - Production hosting relies on `server.js`; set `API_URL` and optional `PORT`.
-- **`packages/frontend2`** – Next-generation Vite React frontend with similar API expectations to the current app.
+- **`packages/frontend2`** – Legacy Vite React frontend with similar API expectations to the current app.
   - Change into the workspace or use `--workspace=frontend2` scripts (`dev`, `build`, `preview`, `start`).
   - Shares the same `API_URL`/`PORT` environment variables as `frontend`.
 - **`packages/admin`** – TypeScript CLI for administrative operations.
@@ -53,9 +53,8 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 
 - The project uses a monorepo structure with workspaces for the frontend and backend.
 - The backend is written in TypeScript and uses Express.js.
-- The frontend is a React application built with Vite.
+- The frontend is a vanilla HTML/CSS/JS application built with Vite.
 - API routes are defined in `packages/backend/src/routes/routes.ts`.
-- The frontend uses Material-UI for UI components.
 - The project uses `eslint` for linting.
 
 ### Comments

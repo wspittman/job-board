@@ -1,7 +1,46 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    // [Node Only] Don't allow non-JS constructs, including JSX
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+
+    // Perf improvements
+    "incremental": true,
+    "skipLibCheck": true,
+
+    // Strict typechecking, a combination of (at least)
+    // - noImplicitAny
+    // - strictNullChecks
+    // - strictFunctionTypes
+    // - strictBindCallApply
+    // - strictPropertyInitialization
+    // - noImplicitThis
+    // - alwaysStrict
+    // - useUnknownInCatchVariables
+    "strict": true,
+
+    // Code Quality
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noImplicitOverride": true,
+    "allowUnreachableCode": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    // Record treats accessed values as potentially undefined
+    "noUncheckedIndexedAccess": true
+  },
+  "include": ["src", "plugins"]
 }
