@@ -28,7 +28,7 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 
 ## Prerequisites
 
-- Node.js >=22.0.0
+- Node.js >=24.0.0
 - Azure CosmosDB Emulator or an Azure CosmosDB account
 
 ## Installation

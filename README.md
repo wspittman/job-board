@@ -34,7 +34,7 @@ The monorepo uses npm workspaces. Each package ships its own README with deeper 
 
 ## Prerequisites
 
-- [Node.js 22+](https://nodejs.org/en/download/)
+- [Node.js 24+](https://nodejs.org/en/download/)
 - [Azure CosmosDB Emulator](https://learn.microsoft.com/en-us/azure/cosmos-db/local-emulator) or [Azure CosmosDB Account](https://azure.microsoft.com/en-us/services/cosmos-db/)
 
 Install workspace dependencies once from the repository root:
