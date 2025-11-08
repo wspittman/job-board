@@ -24,13 +24,13 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
 
 The monorepo uses npm workspaces. Each package ships its own README with deeper setup instructions; the summaries below highlight the role of every workspace.
 
-| Package                                              | Description                                                                                                                                                                 |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`packages/backend`](packages/backend/README.md)     | Express 5 + TypeScript API service that connects to Azure Cosmos DB, integrates with ATS providers, and exposes REST routes under `/api`.                                   |
-| [`packages/frontend`](packages/frontend/README.md)   | Current production React frontend built with Vite and Material UI. Proxies API calls to the backend during development and ships an Express wrapper for production hosting. |
-| [`packages/frontend2`](packages/frontend2/README.md) | Next-generation frontend that shares the Vite toolchain but experiments with a refreshed UI architecture.                                                                   |
-| [`packages/admin`](packages/admin/README.md)         | TypeScript CLI for administrative actions such as importing companies from supported ATS providers or deleting job posts.                                                   |
-| [`packages/evals`](packages/evals/README.md)         | Local evaluation harness that exercises the backend LLM extraction logic against curated scenarios and produces reports.                                                    |
+| Package                                              | Description                                                                                                                                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`packages/backend`](packages/backend/README.md)     | Express 5 + TypeScript API service that connects to Azure Cosmos DB, integrates with ATS providers, and exposes REST routes under `/api`.                                 |
+| [`packages/frontend`](packages/frontend/README.md)   | Current production vanilla HTML/CSS/JS frontend built with Vite. Proxies API calls to the backend during development and ships an Express wrapper for production hosting. |
+| [`packages/frontend2`](packages/frontend2/README.md) | Legacy React/MUI frontend built with Vite                                                                                                                                 |
+| [`packages/admin`](packages/admin/README.md)         | TypeScript CLI for administrative actions such as importing companies from supported ATS providers or deleting job posts.                                                 |
+| [`packages/evals`](packages/evals/README.md)         | Local evaluation harness that exercises the backend LLM extraction logic against curated scenarios and produces reports.                                                  |
 
 ## Prerequisites
 
@@ -65,14 +65,14 @@ Workspaces require their own .env files. Review package READMEs for specific var
 
 Most scripts are exposed through the root `package.json`:
 
-| Task                                              | Command                               |
-| ------------------------------------------------- | ------------------------------------- |
-| Start the backend API in watch mode               | `npm run start:backend`               |
-| Launch the current frontend (packages/frontend)   | `npm run start:frontend`              |
-| Launch the next-gen frontend (packages/frontend2) | `npm run start:frontend2`             |
-| Build the backend for production                  | `npm run build --workspace=backend`   |
-| Build the current frontend                        | `npm run build --workspace=frontend`  |
-| Build the next-gen frontend                       | `npm run build --workspace=frontend2` |
+| Task                                            | Command                               |
+| ----------------------------------------------- | ------------------------------------- |
+| Start the backend API in watch mode             | `npm run start:backend`               |
+| Launch the current frontend (packages/frontend) | `npm run start:frontend`              |
+| Launch the legacy frontend (packages/frontend2) | `npm run start:frontend2`             |
+| Build the backend for production                | `npm run build --workspace=backend`   |
+| Build the current frontend                      | `npm run build --workspace=frontend`  |
+| Build the legacy frontend                       | `npm run build --workspace=frontend2` |
 
 Refer to each package README for additional scripts such as previews, linting, or production
 server wrappers.

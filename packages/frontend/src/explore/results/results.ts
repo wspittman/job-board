@@ -1,6 +1,6 @@
-import type { JobModel } from "../../api/apiTypes";
-import { ComponentBase } from "../../components/componentBase";
-import { JobCard } from "./job-card";
+import type { JobModel } from "../../api/apiTypes.ts";
+import { ComponentBase } from "../../components/componentBase.ts";
+import { JobCard } from "./job-card.ts";
 import { MessageCard } from "./message-card.ts";
 
 import css from "./results.css?raw";

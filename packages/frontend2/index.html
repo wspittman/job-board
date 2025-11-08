@@ -1,2 +1,49 @@
-<!-- @include: ./src/home/home.html -->
-<script type="module" src="./src/home/home.ts"></script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Better Job Board</title>
+    <meta
+      name="description"
+      content="The better job board with smarter search – no account needed."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://betterjobboard.net/" />
+
+    <!-- SEO directives -->
+    <meta name="robots" content="index, nofollow" />
+
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Better Job Board" />
+    <meta
+      property="og:description"
+      content="The better job board with smarter search – no account needed."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://betterjobboard.net/" />
+    <meta property="og:image" content="/og-image.jpg" />
+
+    <!-- Twitter Card tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Better Job Board" />
+    <meta
+      name="twitter:description"
+      content="The better job board with smarter search – no account needed."
+    />
+    <meta name="twitter:image" content="/og-image.jpg" />
+
+    <!-- Mobile browser theme -->
+    <meta name="theme-color" content="#6036c6" />
+
+    <!-- Keywords (optional, but can help with some search engines) -->
+    <meta
+      name="keywords"
+      content="jobs, career, employment, job search, job board"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

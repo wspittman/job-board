@@ -1,10 +1,22 @@
-import react from "@vitejs/plugin-react";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import { htmlPartials } from "./plugins/htmlPartials.ts";
+import { inlineLucideIcons } from "./plugins/inlineLucideIcons.ts";
 
-// https://vitejs.dev/config/
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
-  plugins: [react()],
+  appType: "mpa",
+  plugins: [htmlPartials(), inlineLucideIcons()],
   build: {
-    sourcemap: true,
+    rollupOptions: {
+      input: {
+        index: resolve(__dirname, "index.html"),
+        faq: resolve(__dirname, "faq.html"),
+        404: resolve(__dirname, "404.html"),
+        explore: resolve(__dirname, "explore.html"),
+      },
+    },
   },
 });

@@ -1,18 +1,13 @@
 import express from "express";
-import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { access, constants } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const ALLOWED_PAGES = ["index", "faq", "404", "explore"];
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Get current directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(helmet());
 const port = process.env.PORT || 8080;
 
 // Get backend URL from environment variable
@@ -52,22 +47,9 @@ app.use((req, res, next) => {
 // Serve static files
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("/:page", async (req, res, next) => {
-  try {
-    let { page = "index" } = req.params;
-    page = page.trim().toLowerCase();
-
-    if (ALLOWED_PAGES.includes(page)) {
-      const htmlFilePath = path.join(__dirname, "dist", `${page}.html`);
-
-      // Check if the file exists
-      await access(htmlFilePath, constants.F_OK);
-      res.sendFile(htmlFilePath);
-      return;
-    }
-  } catch (_) {}
-
-  res.sendFile(path.join(__dirname, "dist", "404.html"));
+// Handle client-side routing
+app.get("/{*splat}", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 app.listen(port, () => {
