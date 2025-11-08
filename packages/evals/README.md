@@ -6,7 +6,7 @@ curated ground truth data.
 
 ## Prerequisites
 
-- Node.js 22 or newer (the repository root manages the toolchain).
+- Node.js 24 or newer (the repository root manages the toolchain).
 - Project dependencies installed from the monorepo root with `npm install`.
 - A `.env` file in the repository root that provides the backend configuration, including
   `OPENAI_API_KEY`, the target `LLM_MODEL`, and optional `LLM_REASONING_EFFORT`.
