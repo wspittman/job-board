@@ -58,17 +58,53 @@ app.get("/:page", async (req, res, next) => {
     page = page.trim().toLowerCase();
 
     if (ALLOWED_PAGES.includes(page)) {
-      const htmlFilePath = path.join(__dirname, "dist", `${page}.html`);
-
-      // Check if the file exists
-      await access(htmlFilePath, constants.F_OK);
-      res.sendFile(htmlFilePath);
+      serveCompressedFile(`${page}.html`, req, res);
       return;
     }
   } catch (_) {}
 
-  res.sendFile(path.join(__dirname, "dist", "404.html"));
+  serveCompressedFile("404.html", req, res);
 });
+
+async function serveCompressedFile(file, req, res) {
+  const base = path.join(__dirname, "dist", file); //req.path
+
+  if (!(await exists(base))) {
+    // Problem with 404 page -> send generic 404 response
+    if (base.includes("404.html")) {
+      res.status(404).send("Not Found");
+      return;
+    }
+
+    await serveCompressedFile("404.html", req, res);
+    return;
+  }
+
+  const accept = req.header("Accept-Encoding") ?? "";
+  res.set("Vary", "Accept-Encoding");
+
+  if (await sendIf(res, accept, base, "br")) return;
+  if (await sendIf(res, accept, base, "gzip", "gz")) return;
+  res.sendFile(base);
+}
+
+async function sendIf(res, accept, base, name, extname = name) {
+  if (accept.includes(name) && (await exists(`${base}.${extname}`))) {
+    res.type(path.extname(base));
+    res.setHeader("Content-Encoding", name);
+    res.sendFile(`${base}.${extname}`);
+    return true;
+  }
+  return false;
+}
+
+async function exists(path) {
+  try {
+    await access(path, constants.F_OK);
+    return true;
+  } catch {}
+  return false;
+}
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
