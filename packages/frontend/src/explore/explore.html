@@ -1,28 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <!-- @include: ../partials/head.html -->
-    <title>Explore | Better Job Board</title>
-    <meta name="robots" content="noindex, follow" />
-    <link rel="canonical" href="https://betterjobboard.net/explore" />
-  </head>
-  <body>
-    <!-- @include: ../partials/header.html -->
-    <main class="explore-page">
-      <noscript>
-        <div class="noscript-message" role="alert">
-          JavaScript is required to search job posts. Please enable JavaScript
-          in your browser to use the explore page.
-        </div>
-      </noscript>
-      <button id="action-button" type="button" class="action-button">
-        Show Filters
-      </button>
-      <div class="explore-layout">
-        <explore-filters></explore-filters>
-        <explore-results></explore-results>
-        <explore-details></explore-details>
-      </div>
-    </main>
-  </body>
-</html>
+<!-- @include: ../partials/header.html -->
+<main class="explore-page">
+  <noscript>
+    <div class="noscript-message" role="alert">
+      JavaScript is required to search job posts. Please enable JavaScript in
+      your browser to use the explore page.
+    </div>
+  </noscript>
+  <button id="action-button" type="button" class="action-button">
+    Show Filters
+  </button>
+  <div class="explore-layout">
+    <explore-filters></explore-filters>
+    <explore-results></explore-results>
+    <explore-details></explore-details>
+  </div>
+</main>

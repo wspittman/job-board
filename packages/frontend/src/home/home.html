@@ -1,71 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <!-- @include: ../partials/head.html -->
-    <title>Better Job Board</title>
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://betterjobboard.net/" />
-  </head>
-  <body>
-    <!-- @include: ../partials/header.html -->
+<!-- @include: ../partials/header.html -->
+<main class="hm-page">
+  <section class="hm-hero">
+    <div class="hm-hero-visual" aria-hidden="true">
+      <div class="hm-hero-ring"></div>
+      <svg data-icon="RANDOM-TRI"></svg>
+      <svg data-icon="funnel"></svg>
+      <svg data-icon="dollar-sign"></svg>
+      <svg data-icon="smile"></svg>
+      <svg data-icon="party-popper"></svg>
+    </div>
+    <div class="hm-hero-content">
+      <h1 class="hm-hero-title">
+        Stop scrolling.
+        <span>Start finding.</span>
+      </h1>
+      <p class="hm-hero-subtitle">
+        The better job board with smarter search – no account needed.
+      </p>
+    </div>
+  </section>
 
-    <main class="hm-page">
-      <section class="hm-hero">
-        <div class="hm-hero-visual" aria-hidden="true">
-          <div class="hm-hero-ring"></div>
-          <svg data-icon="RANDOM-TRI"></svg>
-          <svg data-icon="funnel"></svg>
-          <svg data-icon="dollar-sign"></svg>
-          <svg data-icon="smile"></svg>
-          <svg data-icon="party-popper"></svg>
-        </div>
-        <div class="hm-hero-content">
-          <h1 class="hm-hero-title">
-            Stop scrolling.
-            <span>Start finding.</span>
-          </h1>
-          <p class="hm-hero-subtitle">
-            The better job board with smarter search – no account needed.
-          </p>
-        </div>
-      </section>
+  <section class="hm-search-card card" aria-labelledby="example-searches">
+    <h2 id="example-searches">Start from an example search</h2>
+    <ul class="chip-list">
+      <li>
+        <a class="abtn" href="/explore?title=intern+">Internships</a>
+      </li>
+      <li>
+        <a
+          class="abtn"
+          href="/explore?isRemote=true&amp;title=Staff+Software+Engineer&amp;location=USA"
+        >
+          Remote Staff Software Engineer, USA-based
+        </a>
+      </li>
+      <li>
+        <a
+          class="abtn"
+          href="/explore?isRemote=false&amp;title=Sales&amp;location=New+York"
+        >
+          Sales in New York
+        </a>
+      </li>
+      <li>
+        <a
+          class="abtn"
+          href="/explore?isRemote=true&amp;daysSince=7&amp;minSalary=100000"
+        >
+          6-figure remote roles posted this week
+        </a>
+      </li>
+    </ul>
+    <h2>Or start from scratch</h2>
+    <a class="abtn embiggen" href="/explore">Explore</a>
+  </section>
 
-      <section class="hm-search-card card" aria-labelledby="example-searches">
-        <h2 id="example-searches">Start from an example search</h2>
-        <ul class="chip-list">
-          <li>
-            <a class="abtn" href="/explore?title=intern+">Internships</a>
-          </li>
-          <li>
-            <a
-              class="abtn"
-              href="/explore?isRemote=true&amp;title=Staff+Software+Engineer&amp;location=USA"
-            >
-              Remote Staff Software Engineer, USA-based
-            </a>
-          </li>
-          <li>
-            <a
-              class="abtn"
-              href="/explore?isRemote=false&amp;title=Sales&amp;location=New+York"
-            >
-              Sales in New York
-            </a>
-          </li>
-          <li>
-            <a
-              class="abtn"
-              href="/explore?isRemote=true&amp;daysSince=7&amp;minSalary=100000"
-            >
-              6-figure remote roles posted this week
-            </a>
-          </li>
-        </ul>
-        <h2>Or start from scratch</h2>
-        <a class="abtn embiggen" href="/explore">Explore</a>
-      </section>
-
-      <home-stats style="display: none"></home-stats>
-    </main>
-  </body>
-</html>
+  <home-stats style="display: none"></home-stats>
+</main>
