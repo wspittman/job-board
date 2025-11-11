@@ -85,12 +85,13 @@ app.use(
 );
 
 function getUrlParts(req) {
-  const urlPath = req.url.toLowerCase();
+  const url = URL.parse(req.url.toLowerCase(), "http://does.not.matter");
 
-  if (!URL.canParse(urlPath, "http://does.not.matter")) {
+  if (!url) {
     return URL_PARTS_404;
   }
 
+  const urlPath = url.pathname;
   const dir = dirnameURL(urlPath);
   const ext = extnameURL(urlPath) || ".html";
   const base = basenameURL(urlPath, ext) || "index";
