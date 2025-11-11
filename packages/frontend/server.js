@@ -2,21 +2,34 @@ import express from "express";
 import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { access, constants } from "node:fs/promises";
-import path from "node:path";
+import { dirname as dirnameFS, join as joinFS } from "node:path";
+import {
+  basename as basenameURL,
+  dirname as dirnameURL,
+  extname as extnameURL,
+  join as joinURL,
+} from "node:path/posix";
 import { fileURLToPath } from "node:url";
 
-const ALLOWED_PAGES = ["index", "faq", "404", "explore"];
+const PAGES = ["index", "faq", "404", "explore"];
+const URL_PARTS_404 = { dir: "/", base: "404", ext: ".html" };
+
+const MAL_PATTERN = [
+  /\/wp-admin/i,
+  /\/wp-includes/i,
+  /\.php$/i,
+  /\.git\/config/i,
+];
 
 // Get current directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dist = joinFS(dirnameFS(__filename), "dist");
+
+const port = process.env.PORT || 8080;
+const API_URL = process.env.API_URL || "http://localhost:3000/api";
 
 const app = express();
 app.use(helmet());
-const port = process.env.PORT || 8080;
-
-// Get backend URL from environment variable
-const API_URL = process.env.API_URL || "http://localhost:3000/api";
 
 // API proxy middleware
 app.use(
@@ -32,78 +45,101 @@ app.use(
   })
 );
 
-// Malicious request patterns
-const maliciousPatterns = [
-  /\/wp-admin/i,
-  /\/wp-includes/i,
-  /\.php$/i,
-  /\.git\/config/i,
-];
-
 // Middleware to check for malicious requests
 app.use((req, res, next) => {
-  if (maliciousPatterns.some((pattern) => pattern.test(req.path))) {
-    console.log(`Blocked malicious request to: ${req.path}`);
+  if (MAL_PATTERN.some((pattern) => pattern.test(req.path))) {
     return res.status(404).send("Not Found");
   }
+
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    return res.status(405).send("Method Not Allowed");
+  }
+
+  next();
+});
+
+// Middleware to handle URL rewriting and compression
+app.use(async (req, res, next) => {
+  const encodings = getEncodings(req);
+  const urlParts = getUrlParts(req);
+  req._urlParts = urlParts;
+  req.url = await getCompressionUrl(urlParts, encodings);
   next();
 });
 
 // Serve static files
-app.use(express.static(path.join(__dirname, "dist")));
+app.use(
+  express.static(__dist, {
+    setHeaders(res) {
+      const { ext, compEnc } = res.req?._urlParts ?? {};
 
-app.get("/:page", async (req, res, next) => {
-  try {
-    let { page = "index" } = req.params;
-    page = page.trim().toLowerCase();
+      if (!compEnc) {
+        return;
+      }
 
-    if (ALLOWED_PAGES.includes(page)) {
-      serveCompressedFile(`${page}.html`, req, res);
-      return;
-    }
-  } catch (_) {}
+      res.type(ext);
+      res.setHeader("Vary", "Accept-Encoding");
+      res.setHeader("Content-Encoding", compEnc);
+    },
+  })
+);
 
-  serveCompressedFile("404.html", req, res);
-});
+function getUrlParts(req) {
+  const urlPath = req.url.toLowerCase();
 
-async function serveCompressedFile(file, req, res) {
-  const base = path.join(__dirname, "dist", file); //req.path
-
-  if (!(await exists(base))) {
-    // Problem with 404 page -> send generic 404 response
-    if (base.includes("404.html")) {
-      res.status(404).send("Not Found");
-      return;
-    }
-
-    await serveCompressedFile("404.html", req, res);
-    return;
+  if (!URL.canParse(urlPath, "http://does.not.matter")) {
+    return URL_PARTS_404;
   }
 
-  const accept = req.header("Accept-Encoding") ?? "";
-  res.set("Vary", "Accept-Encoding");
+  const dir = dirnameURL(urlPath);
+  const ext = extnameURL(urlPath) || ".html";
+  const base = basenameURL(urlPath, ext) || "index";
 
-  if (await sendIf(res, accept, base, "br")) return;
-  if (await sendIf(res, accept, base, "gzip", "gz")) return;
-  res.sendFile(base);
-}
-
-async function sendIf(res, accept, base, name, extname = name) {
-  if (accept.includes(name) && (await exists(`${base}.${extname}`))) {
-    res.type(path.extname(base));
-    res.setHeader("Content-Encoding", name);
-    res.sendFile(`${base}.${extname}`);
-    return true;
+  if (ext === ".html" && (dir !== "/" || !PAGES.includes(base))) {
+    return URL_PARTS_404;
   }
-  return false;
+
+  return { dir, base, ext };
 }
 
-async function exists(path) {
-  try {
-    await access(path, constants.F_OK);
-    return true;
-  } catch {}
-  return false;
+async function getCompressionUrl(url, { useBrotli, useGzip }) {
+  const { base, ext, dir } = url;
+  const filePath = joinFS(__dist, dir, `${base}${ext}`);
+  const urlPath = joinURL(dir, `${base}${ext}`);
+
+  if (useBrotli && (await fileExists(filePath + ".br"))) {
+    url.compEnc = "br";
+    return urlPath + ".br";
+  }
+
+  if (useGzip && (await fileExists(filePath + ".gz"))) {
+    url.compEnc = "gzip";
+    return urlPath + ".gz";
+  }
+
+  if (await fileExists(filePath)) {
+    return urlPath;
+  }
+
+  return joinURL("/", "404.html");
+}
+
+function getEncodings(req) {
+  const encodings = (req.header("Accept-Encoding") ?? "")
+    .toLowerCase()
+    .split(",")
+    .map((s) => s.trim());
+
+  return {
+    useBrotli: encodings.includes("br"),
+    useGzip: encodings.includes("gzip"),
+  };
+}
+
+async function fileExists(x) {
+  return access(x, constants.F_OK)
+    .then(() => true)
+    .catch(() => false);
 }
 
 app.listen(port, () => {
