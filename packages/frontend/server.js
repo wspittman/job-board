@@ -1,3 +1,4 @@
+import compression from "compression";
 import express from "express";
 import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -31,21 +32,7 @@ const API_URL = process.env.API_URL || "http://localhost:3000/api";
 const app = express();
 app.use(helmet());
 
-// API proxy middleware
-app.use(
-  "/api",
-  createProxyMiddleware({
-    target: API_URL,
-    changeOrigin: true,
-    // Handle proxy errors
-    onError: (err, req, res) => {
-      console.error("Proxy Error:", err);
-      res.status(500).json({ error: "Proxy Error" });
-    },
-  })
-);
-
-// Middleware to check for malicious requests
+// Refuse malicious requests
 app.use((req, res, next) => {
   if (MAL_PATTERN.some((pattern) => pattern.test(req.path))) {
     return res.status(404).send("Not Found");
@@ -57,6 +44,36 @@ app.use((req, res, next) => {
 
   next();
 });
+
+// Compress only sizable, JSON payloads (ie. API responses)
+app.use(
+  compression({
+    threshold: 1024,
+    filter: (req, res) => {
+      const type = res.getHeader("Content-Type")?.toString() || "";
+      if (!type.includes("application/json")) return false;
+      return compression.filter(req, res);
+    },
+  })
+);
+
+// API proxy middleware
+app.use(
+  "/api",
+  createProxyMiddleware({
+    target: API_URL,
+    changeOrigin: true,
+    onProxyRes: (_proxyRes, _req, res) => {
+      // Avoid stale Content-Length after compression
+      res.removeHeader("Content-Length");
+    },
+    // Handle proxy errors
+    onError: (err, req, res) => {
+      console.error("Proxy Error:", err);
+      res.status(500).json({ error: "Proxy Error" });
+    },
+  })
+);
 
 // Middleware to handle URL rewriting and compression
 app.use(async (req, res, next) => {

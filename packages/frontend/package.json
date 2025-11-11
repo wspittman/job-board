@@ -15,11 +15,13 @@
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.3",
     "modern-normalize": "^3.0.1",
-    "helmet": "^8.0.0"
+    "helmet": "^8.0.0",
+    "compression": "^1.8.1"
   },
   "devDependencies": {
     "lucide-static": "^0.545.0",
     "@types/express": "^5.0.1",
+    "@types/compression": "^1.8.1",
     "typescript": "~5.9.3",
     "vite": "^7.1.7",
     "vite-plugin-compression2": "^2.3.1"
