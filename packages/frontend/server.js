@@ -67,6 +67,8 @@ app.use(
       proxyRes: (_proxyRes, _req, res) => {
         // Avoid stale Content-Length after compression
         res.removeHeader("Content-Length");
+        // Cache API responses for 1 hour
+        res.setHeader("Cache-Control", "public, max-age=3600");
       },
       // Handle proxy errors
       error: (_err, _req, res) => {
@@ -89,15 +91,25 @@ app.use(async (req, res, next) => {
 app.use(
   express.static(__dist, {
     setHeaders(res) {
-      const { ext, compEnc } = res.req?._urlParts ?? {};
+      const { ext, compEnc, dir } = res.req?._urlParts ?? {};
 
-      if (!compEnc) {
+      if (ext) {
+        res.type(ext);
+      }
+
+      if (compEnc) {
+        res.setHeader("Vary", "Accept-Encoding");
+        res.setHeader("Content-Encoding", compEnc);
+      }
+
+      if (dir?.startsWith("/assets")) {
+        // Cache hashed assets for 1 year
+        res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
         return;
       }
 
-      res.type(ext);
-      res.setHeader("Vary", "Accept-Encoding");
-      res.setHeader("Content-Encoding", compEnc);
+      // Cache other prebuilt files for 1 day
+      res.setHeader("Cache-Control", "public, max-age=86400");
     },
   })
 );
