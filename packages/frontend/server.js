@@ -63,14 +63,15 @@ app.use(
   createProxyMiddleware({
     target: API_URL,
     changeOrigin: true,
-    onProxyRes: (_proxyRes, _req, res) => {
-      // Avoid stale Content-Length after compression
-      res.removeHeader("Content-Length");
-    },
-    // Handle proxy errors
-    onError: (err, req, res) => {
-      console.error("Proxy Error:", err);
-      res.status(500).json({ error: "Proxy Error" });
+    on: {
+      proxyRes: (_proxyRes, _req, res) => {
+        // Avoid stale Content-Length after compression
+        res.removeHeader("Content-Length");
+      },
+      // Handle proxy errors
+      error: (_err, _req, res) => {
+        res.status(502).json({ error: "Service Unavailable" });
+      },
     },
   })
 );
