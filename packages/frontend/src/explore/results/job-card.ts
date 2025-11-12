@@ -42,7 +42,7 @@ export class JobCard extends ComponentBase {
     const { salary, experience, summary } = facets ?? {};
 
     const postDays = Math.floor((Date.now() - postTS) / (1000 * 60 * 60 * 24));
-    const postedText = !Number.isNaN(postDays) ? postDays || "today" : "";
+    const postedText = !Number.isNaN(postDays) ? postDays || "Today" : "";
     const postedSuffix = postDays ? "days ago" : "";
     const showRecencyChip = postDays < 30;
     const recencyChipText = postDays < 7 ? "New" : "Recent";
