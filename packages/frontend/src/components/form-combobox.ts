@@ -84,9 +84,6 @@ export class FormCombobox extends FormElement {
     const { label, value } = option ?? {};
     this.#formValue = String(value ?? "");
     super.value = label;
-    const input = this.intake as HTMLInputElement;
-    input.setSelectionRange(input.value.length, input.value.length);
-    input.focus();
     this.#menu.close();
   }
 }
