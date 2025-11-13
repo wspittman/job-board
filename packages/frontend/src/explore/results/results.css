@@ -1,5 +1,5 @@
 .list {
   display: grid;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
 }
