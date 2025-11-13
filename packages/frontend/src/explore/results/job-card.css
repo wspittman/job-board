@@ -1,14 +1,14 @@
 .container {
   display: flex;
   flex-direction: column;
-  padding: var(--space-md);
-  border: 1px solid transparent;
-  text-align: left;
-  cursor: pointer;
-  color: var(--text-default);
-  line-height: 1.6;
   height: 100%;
   width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid transparent;
+  color: var(--text-default);
+  text-align: left;
+  line-height: 1.6;
+  cursor: pointer;
 
   &:hover,
   &:focus-visible {
@@ -23,32 +23,24 @@
   }
 }
 
+.title {
+  color: var(--primary-dark);
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
 .company {
   color: var(--primary-dark);
-  margin-bottom: var(--space-sm);
 }
 
-.row {
+.chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   margin-bottom: var(--space-sm);
-}
-
-.chip {
-  color: var(--primary-dark);
-  padding: 0 var(--space-xs);
-  border: 1px solid var(--primary-dark);
-  border-radius: var(--radius);
   font-size: var(--font-size-xs);
 }
 
-.meta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-
-  &:has(span:empty) {
-    display: none;
-  }
+.summary {
+  font-size: var(--font-size-xxs);
 }
