@@ -20,6 +20,7 @@ const MAX_SALARY = 10000000;
  */
 export function useFilters({
   companyId,
+  jobId,
   isRemote,
   title,
   location,
@@ -31,6 +32,10 @@ export function useFilters({
 
   if (companyId && companyId.length <= MAX_ID_LENGTH) {
     filters.companyId = companyId;
+  }
+
+  if (jobId && jobId.length <= MAX_ID_LENGTH) {
+    filters.jobId = jobId;
   }
 
   if (isRemote != null) {

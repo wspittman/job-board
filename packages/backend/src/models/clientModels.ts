@@ -5,6 +5,7 @@ import type { CompanyKey } from "./models.ts";
 export interface Filters {
   // Exact Match
   companyId?: string;
+  jobId?: string;
   isRemote?: boolean;
   // Substring Match
   title?: string;
