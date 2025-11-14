@@ -6,12 +6,17 @@
 }
 
 .title {
-  margin-bottom: var(--space-sm);
+  color: var(--primary-dark);
+  font-size: var(--font-size-md);
+  font-weight: 600;
 }
 
 .subtitle {
   color: var(--primary-dark);
-  margin-bottom: var(--space-md);
+}
+
+.message {
+  font-size: var(--font-size-xxs);
 }
 
 .error-card {
