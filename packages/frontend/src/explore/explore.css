@@ -79,3 +79,13 @@ explore-details[empty] {
     display: none;
   }
 }
+
+@media (min-width: 901px) and (orientation: landscape) {
+  .explore-page {
+    padding: var(--space-sm);
+  }
+
+  .explore-layout {
+    gap: var(--space-sm);
+  }
+}

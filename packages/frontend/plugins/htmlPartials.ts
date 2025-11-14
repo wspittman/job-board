@@ -2,6 +2,11 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { Plugin } from "vite";
 
+const INCLUDE_PATTERN = new RegExp(
+  String.raw`^(\s*)<!--\s*@include:\s*([^\s]+)\s*-->`,
+  "gm"
+);
+
 /**
  * A Vite plugin to include HTML partials using `<!-- @include: path/to/file.html -->` syntax.
  *
@@ -12,58 +17,6 @@ import type { Plugin } from "vite";
  * - Indentation of the include directive is preserved in the output.
  */
 export function htmlPartials(): Plugin {
-  const includeRE = /^(\s*)<!--\s*@include:\s*([^\s]+)\s*-->/gm;
-
-  async function injectSection(
-    path: string,
-    indentation: string,
-    seen: Set<string>
-  ): Promise<string> {
-    const file = (await readFile(path, "utf8")).replace(/\r?\n/g, "\n");
-    const expandedContent = await expand(file, path, new Set(seen).add(path));
-
-    return expandedContent
-      .split("\n")
-      .map((line) => (line ? indentation + line : line))
-      .join("\n");
-  }
-
-  async function expand(
-    html: string,
-    fromFile: string,
-    seen = new Set<string>()
-  ): Promise<string> {
-    const dir = dirname(fromFile);
-    const matches = [...html.matchAll(includeRE)];
-
-    if (matches.length === 0) {
-      return html;
-    }
-
-    const parts: (string | Promise<string>)[] = [];
-    let lastIndex = 0;
-
-    for (const match of matches) {
-      const [fullMatch, indentation, relPath] = match;
-      const offset = match.index;
-
-      parts.push(html.slice(lastIndex, offset));
-      lastIndex = offset + fullMatch.length;
-
-      const absPath = resolve(dir, relPath!);
-      if (seen.has(absPath)) {
-        throw new Error(`Circular include detected: ${absPath}`);
-      }
-
-      parts.push(injectSection(absPath, indentation ?? "", seen));
-    }
-
-    parts.push(html.slice(lastIndex));
-
-    const resolvedParts = await Promise.all(parts);
-    return resolvedParts.join("");
-  }
-
   return {
     name: "html-partials",
     enforce: "pre",
@@ -73,4 +26,57 @@ export function htmlPartials(): Plugin {
       return expand(html, ctx.filename);
     },
   };
+}
+
+async function expand(
+  html: string,
+  fromFile: string,
+  seen = new Set<string>()
+): Promise<string> {
+  // Normalize line endings
+  html = html.replaceAll(/\r/g, "").replaceAll(/\n+/g, "\n");
+
+  const matches = [...html.matchAll(INCLUDE_PATTERN)];
+
+  if (!matches.length) {
+    return html;
+  }
+
+  const dir = dirname(fromFile);
+  const parts: (string | Promise<string>)[] = [];
+  let lastIndex = 0;
+
+  for (const match of matches) {
+    const [fullMatch, indentation, relPath] = match;
+    const offset = match.index;
+
+    parts.push(html.slice(lastIndex, offset));
+    lastIndex = offset + fullMatch.length;
+
+    const absPath = resolve(dir, relPath!);
+    if (seen.has(absPath)) {
+      throw new Error(`Circular include detected: ${absPath}`);
+    }
+
+    parts.push(injectSection(absPath, indentation ?? "", seen));
+  }
+
+  parts.push(html.slice(lastIndex));
+
+  const resolvedParts = await Promise.all(parts);
+  return resolvedParts.join("");
+}
+
+async function injectSection(
+  path: string,
+  indentation: string,
+  seen: Set<string>
+): Promise<string> {
+  const file = await readFile(path, "utf8");
+  const expandedContent = await expand(file, path, new Set(seen).add(path));
+
+  return expandedContent
+    .split("\n")
+    .map((line) => (line ? indentation + line : line))
+    .join("\n");
 }

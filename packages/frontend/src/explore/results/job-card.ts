@@ -42,25 +42,24 @@ export class JobCard extends ComponentBase {
     const { salary, experience, summary } = facets ?? {};
 
     const postDays = Math.floor((Date.now() - postTS) / (1000 * 60 * 60 * 24));
-    const postedText = !Number.isNaN(postDays) ? postDays || "today" : "";
-    const postedSuffix = postDays ? "days ago" : "";
     const showRecencyChip = postDays < 30;
     const recencyChipText = postDays < 7 ? "New" : "Recent";
-    const hasExperience = experience != null;
+    const loc = isRemote ? "Remote" : location;
+    const postedText = !Number.isNaN(postDays) ? postDays || "Today" : "";
+    const postedSuffix = postDays ? "days ago" : "";
 
     element.setManyTexts({
       title,
       company,
-      location,
-      salary: salary?.toLocaleString(),
-      experience: hasExperience ? `${experience} years experience` : "",
-      "posted-date": `${postedText} ${postedSuffix}`.trim(),
       summary,
     });
 
     element.#createChips([
-      [!!isRemote, "Remote"],
       [showRecencyChip, recencyChipText],
+      [loc, loc],
+      [salary, `$${salary?.toLocaleString()}`],
+      [experience != null, `${experience} yrs exp`],
+      [postTS, `${postedText} ${postedSuffix}`.trim()],
     ]);
 
     const realOnClick = onClick ? () => onClick(job.id) : undefined;
@@ -86,13 +85,13 @@ export class JobCard extends ComponentBase {
     }
   }
 
-  #createChips(pairs: [boolean, string][]) {
+  #createChips(pairs: [unknown, string][]) {
     const chipsEl = this.getEl("chips");
     if (chipsEl) {
       const fragment = document.createDocumentFragment();
 
       for (const [condition, label] of pairs) {
-        if (condition) {
+        if (!!condition) {
           fragment.appendChild(Chip.create({ label }));
         }
       }

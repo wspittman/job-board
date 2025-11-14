@@ -32,6 +32,7 @@ export class Details extends ComponentBase {
   set job(value: JobModel | undefined) {
     if (this.#job?.id === value?.id) return;
 
+    requestAnimationFrame(() => (this.scrollTop = 0));
     this.#job = value;
     this.#render();
   }
