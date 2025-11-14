@@ -13,7 +13,6 @@ import {
 import { fileURLToPath } from "node:url";
 
 const PAGES = ["index", "faq", "404", "explore"];
-const URL_PARTS_404 = { dir: "/", base: "404", ext: ".html" };
 
 const MAL_PATTERN = [
   /\/wp-admin/i,
@@ -81,7 +80,16 @@ app.use(
 // Middleware to handle URL rewriting and compression
 app.use(async (req, res, next) => {
   const encodings = getEncodings(req);
-  const urlParts = getUrlParts(req);
+  const urlParts = await getUrlParts(req);
+
+  if (urlParts?.["404"]) {
+    if (urlParts["404"] === "hard") {
+      return res.status(404).send("Not Found");
+    } else {
+      return res.redirect("/404");
+    }
+  }
+
   req._urlParts = urlParts;
   req.url = await getCompressionUrl(urlParts, encodings);
   next();
@@ -114,23 +122,28 @@ app.use(
   })
 );
 
-function getUrlParts(req) {
+async function getUrlParts(req) {
   const url = URL.parse(req.url.toLowerCase(), "http://does.not.matter");
 
-  if (!url) {
-    return URL_PARTS_404;
-  }
+  if (!url) return { 404: "hard" };
 
   const urlPath = url.pathname;
   const dir = dirnameURL(urlPath);
   const ext = extnameURL(urlPath) || ".html";
   const base = basenameURL(urlPath, ext) || "index";
+  const isHtml = ext === ".html";
 
-  if (ext === ".html" && (dir !== "/" || !PAGES.includes(base))) {
-    return URL_PARTS_404;
+  if (isHtml) {
+    const isRootPage = dir === "/" && PAGES.includes(base);
+    return isRootPage ? { dir, base, ext } : { 404: "soft" };
   }
 
-  return { dir, base, ext };
+  const filePath = joinFS(__dist, dir, `${base}${ext}`);
+  if (await fileExists(filePath)) {
+    return { dir, base, ext };
+  }
+
+  return { 404: "hard" };
 }
 
 async function getCompressionUrl(url, { useBrotli, useGzip }) {
@@ -148,11 +161,7 @@ async function getCompressionUrl(url, { useBrotli, useGzip }) {
     return urlPath + ".gz";
   }
 
-  if (await fileExists(filePath)) {
-    return urlPath;
-  }
-
-  return joinURL("/", "404.html");
+  return urlPath;
 }
 
 function getEncodings(req) {
