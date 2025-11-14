@@ -69,3 +69,9 @@
     }
   }
 }
+
+@media (min-width: 901px) and (orientation: landscape) {
+  .container {
+    padding: var(--space-md);
+  }
+}
