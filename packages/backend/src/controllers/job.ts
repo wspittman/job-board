@@ -31,6 +31,17 @@ export async function getJobs(filterInput: Filters) {
     return [];
   }
 
+  if (filterInput.companyId && filterInput.jobId) {
+    const job = await db.job.get({
+      id: filterInput.jobId,
+      companyId: filterInput.companyId,
+    });
+
+    const result = job ? [job] : [];
+    logProperty("GetJobs_Count", result.length);
+    return result;
+  }
+
   const filters: EnhancedFilters = {
     ...filterInput,
     location: await llm.extractLocation(filterInput.location ?? ""),
