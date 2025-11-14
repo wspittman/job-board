@@ -3,10 +3,11 @@
 }
 
 .intake {
-  padding: var(--space-lg) var(--space-md);
+  padding: var(--space-lg) 0;
 }
 
 .adornment {
+  padding-right: var(--space-md);
   font-size: var(--font-size-xs);
   color: var(--text-muted);
   white-space: nowrap;
