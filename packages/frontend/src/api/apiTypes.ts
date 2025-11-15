@@ -5,7 +5,7 @@ export interface MetadataModelApi {
   timestamp: number;
 }
 
-export interface JobModel {
+export interface JobModelApi {
   id: string;
   companyId: string;
   company: string;

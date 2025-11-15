@@ -1,4 +1,4 @@
-import type { JobModel } from "../../api/apiTypes.ts";
+import type { JobModel } from "../../api/jobModel.ts";
 import { Chip } from "../../components/chip.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
 
@@ -19,7 +19,46 @@ interface Props {
  * Custom element that renders a concise summary of a job posting.
  */
 export class JobCard extends ComponentBase {
+  /**
+   * Factory helper that builds a job card element populated with job details.
+   * @param job - Job information to display.
+   * @param onClick - Optional click handler invoked with the job ID.
+   * @param isSelected - Whether the card should start in the selected state.
+   * @returns A fully configured job card element.
+   */
+  static async create({ job, onClick, isSelected }: Props) {
+    const element = document.createElement(tag);
+
+    const {
+      title,
+      company,
+      recent,
+      location,
+      postDays,
+      summary,
+      salary,
+      experience,
+    } = await job.getDisplayStrings();
+
+    element.setManyTexts({
+      title,
+      company,
+      summary,
+    });
+
+    element.#createChips([recent, location, salary, experience, postDays]);
+
+    const realOnClick = onClick ? () => onClick(job.id) : undefined;
+    element.setOnClick("container", realOnClick);
+
+    element.isSelected = !!isSelected;
+    element.#jobId = job.id;
+
+    return element;
+  }
+
   #isSelected = false;
+  #jobId = "";
 
   /**
    * Applies the job card template and default styles to the element instance.
@@ -28,46 +67,8 @@ export class JobCard extends ComponentBase {
     super(html, cssSheet);
   }
 
-  /**
-   * Factory helper that builds a job card element populated with job details.
-   * @param job - Job information to display.
-   * @param onClick - Optional click handler invoked with the job ID.
-   * @param isSelected - Whether the card should start in the selected state.
-   * @returns A fully configured job card element.
-   */
-  static create({ job, onClick, isSelected }: Props) {
-    const element = document.createElement(tag);
-
-    const { title, company, isRemote, location, postTS, facets } = job ?? {};
-    const { salary, experience, summary } = facets ?? {};
-
-    const postDays = Math.floor((Date.now() - postTS) / (1000 * 60 * 60 * 24));
-    const showRecencyChip = postDays < 30;
-    const recencyChipText = postDays < 7 ? "New" : "Recent";
-    const loc = isRemote ? "Remote" : location;
-    const postedText = !Number.isNaN(postDays) ? postDays || "Today" : "";
-    const postedSuffix = postDays ? "days ago" : "";
-
-    element.setManyTexts({
-      title,
-      company,
-      summary,
-    });
-
-    element.#createChips([
-      [showRecencyChip, recencyChipText],
-      [loc, loc],
-      [salary, `$${salary?.toLocaleString()}`],
-      [experience != null, `${experience} yrs exp`],
-      [postTS, `${postedText} ${postedSuffix}`.trim()],
-    ]);
-
-    const realOnClick = onClick ? () => onClick(job.id) : undefined;
-    element.setOnClick("container", realOnClick);
-
-    element.isSelected = !!isSelected;
-
-    return element;
+  get jobId() {
+    return this.#jobId;
   }
 
   /**
@@ -85,13 +86,13 @@ export class JobCard extends ComponentBase {
     }
   }
 
-  #createChips(pairs: [unknown, string][]) {
+  #createChips(labels: (string | undefined)[]) {
     const chipsEl = this.getEl("chips");
     if (chipsEl) {
       const fragment = document.createDocumentFragment();
 
-      for (const [condition, label] of pairs) {
-        if (!!condition) {
+      for (const label of labels) {
+        if (label) {
           fragment.appendChild(Chip.create({ label }));
         }
       }

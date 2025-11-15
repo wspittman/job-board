@@ -1,5 +1,4 @@
-import { API_URL } from "../../api/api.ts";
-import type { JobModel } from "../../api/apiTypes.ts";
+import type { JobModel } from "../../api/jobModel.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
 import { DetailEmbed } from "./detail-embed.ts";
 
@@ -29,34 +28,31 @@ export class Details extends ComponentBase {
    * Updates the job being displayed and re-renders the panel contents.
    * @param value - The job to render, or undefined to clear the panel.
    */
-  set job(value: JobModel | undefined) {
+  async updateJob(value: JobModel | undefined) {
     if (this.#job?.id === value?.id) return;
 
     requestAnimationFrame(() => (this.scrollTop = 0));
     this.#job = value;
-    this.#render();
+    await this.#render();
   }
 
-  #render() {
+  async #render() {
     if (!this.#job) return;
 
-    const { title, company, location, postTS, description, applyUrl, facets } =
-      this.#job;
-    const { salary, experience } = facets ?? {};
-    const postDate = new Date(postTS).toLocaleDateString();
-    const hasExperience = experience != null;
+    const { title, company, location, salary, experience, postDate } =
+      await this.#job.getDisplayStrings();
 
     this.setManyTexts({
       heading: title,
       company,
-      salary: salary?.toLocaleString(),
-      experience: hasExperience ? `${experience} years experience` : "",
+      salary,
+      experience,
       location,
       "posted-date": postDate,
     });
 
-    this.#detailEmbed.description = description;
-    this.#applyLink.href = API_URL + applyUrl;
+    this.#detailEmbed.description = this.#job.description;
+    this.#applyLink.href = this.#job.applyUrl;
     this.#applyLink.setAttribute(
       "aria-label",
       `Apply for ${title} position at ${company}`
