@@ -36,11 +36,16 @@ export class JobModel {
     const { salary, experience, summary } = facets ?? {};
     const companyFriendly = await metadataModel.getCompanyFriendlyName(company);
 
+    const locBreak = location.lastIndexOf(",");
+    const locationShort =
+      locBreak === -1 ? location : location.slice(0, locBreak);
+
     return {
       title,
       company: companyFriendly ?? company,
       summary,
       location: isRemote ? "Remote" : location,
+      locationShort: isRemote ? "Remote" : locationShort,
       salary: salary ? `$${salary.toLocaleString()}` : undefined,
       experience: experience != null ? `${experience} yrs exp` : undefined,
       postDays: this.tsToDaysString(postTS),

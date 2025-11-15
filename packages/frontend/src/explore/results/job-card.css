@@ -27,6 +27,7 @@
   color: var(--primary-dark);
   font-size: var(--font-size-md);
   font-weight: 600;
+  line-height: var(--heading-line-height);
 }
 
 .company {
@@ -37,7 +38,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
-  margin-bottom: var(--space-sm);
+  margin: var(--space-sm) 0;
   font-size: var(--font-size-xs);
 }
 

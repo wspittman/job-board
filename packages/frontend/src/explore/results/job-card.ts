@@ -29,8 +29,15 @@ export class JobCard extends ComponentBase {
   static async create({ job, onClick, isSelected }: Props) {
     const element = document.createElement(tag);
 
-    const { title, company, location, postDays, summary, salary, experience } =
-      await job.getDisplayStrings();
+    const {
+      title,
+      company,
+      locationShort,
+      postDays,
+      summary,
+      salary,
+      experience,
+    } = await job.getDisplayStrings();
 
     element.setManyTexts({
       title,
@@ -40,10 +47,10 @@ export class JobCard extends ComponentBase {
 
     const chips = [salary, experience];
 
-    if (location === "Remote") {
-      chips.unshift(location);
+    if (locationShort === "Remote") {
+      chips.unshift(locationShort);
     } else {
-      chips.push(location);
+      chips.push(locationShort);
     }
 
     if (postDays.endsWith("days ago")) {
