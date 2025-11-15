@@ -29,16 +29,8 @@ export class JobCard extends ComponentBase {
   static async create({ job, onClick, isSelected }: Props) {
     const element = document.createElement(tag);
 
-    const {
-      title,
-      company,
-      recent,
-      location,
-      postDays,
-      summary,
-      salary,
-      experience,
-    } = await job.getDisplayStrings();
+    const { title, company, location, postDays, summary, salary, experience } =
+      await job.getDisplayStrings();
 
     element.setManyTexts({
       title,
@@ -46,7 +38,21 @@ export class JobCard extends ComponentBase {
       summary,
     });
 
-    element.#createChips([recent, location, salary, experience, postDays]);
+    const chips = [salary, experience];
+
+    if (location === "Remote") {
+      chips.unshift(location);
+    } else {
+      chips.push(location);
+    }
+
+    if (postDays.endsWith("days ago")) {
+      chips.push(postDays);
+    } else {
+      chips.unshift(postDays);
+    }
+
+    element.#createChips(chips);
 
     const realOnClick = onClick ? () => onClick(job.id) : undefined;
     element.setOnClick("container", realOnClick);

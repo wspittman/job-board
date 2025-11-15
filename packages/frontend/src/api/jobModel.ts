@@ -34,22 +34,25 @@ export class JobModel {
   async getDisplayStrings() {
     const { title, company, isRemote, location, postTS, facets } = this.#job;
     const { salary, experience, summary } = facets ?? {};
-
     const companyFriendly = await metadataModel.getCompanyFriendlyName(company);
-
-    const postDays = Math.floor((Date.now() - postTS) / MS_PER_DAY);
-    const recent = postDays < 7 ? "New" : "Recent";
 
     return {
       title,
       company: companyFriendly ?? company,
       summary,
-      recent: postDays < 30 ? recent : undefined,
       location: isRemote ? "Remote" : location,
       salary: salary ? `$${salary.toLocaleString()}` : undefined,
       experience: experience != null ? `${experience} yrs exp` : undefined,
-      postDays: `${postDays} days ago`,
+      postDays: this.tsToDaysString(postTS),
       postDate: new Date(postTS).toLocaleDateString(),
     };
+  }
+
+  tsToDaysString(ts: number): string {
+    const days = Math.floor((Date.now() - ts) / MS_PER_DAY);
+    if (days === 0) return "Just Posted";
+    if (days < 7) return "New";
+    if (days < 30) return "Recent";
+    return `${days} days ago`;
   }
 }
