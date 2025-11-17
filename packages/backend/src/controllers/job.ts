@@ -31,14 +31,20 @@ export async function getJobs(filterInput: Filters) {
     return [];
   }
 
-  if (filterInput.companyId && filterInput.jobId) {
+  if (filterInput.jobId) {
+    const { jobId, companyId } = filterInput;
+    if (!companyId) return [];
+
     const job = await db.job.get({
-      id: filterInput.jobId,
-      companyId: filterInput.companyId,
+      id: jobId,
+      companyId,
     });
 
     const result = job ? [job] : [];
-    logProperty("GetJobs_Count", result.length);
+    logProperty(
+      "GetJobs_Id",
+      `${companyId}_${jobId}_${job ? "Found" : "NotFound"}`
+    );
     return result;
   }
 
