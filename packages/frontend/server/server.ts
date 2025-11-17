@@ -43,9 +43,17 @@ declare global {
 const PAGES = new Set(["index", "faq", "404", "explore"]);
 
 const MAL_PATTERN = [
+  // File Endings
+  /\.env$/i,
+  /\.php$/i,
+  /\.php7$/i,
+
+  // WordPress Paths
   /\/wp-admin/i,
   /\/wp-includes/i,
-  /\.php$/i,
+  /\/wp-content/i,
+
+  // Other
   /\.git\/config/i,
 ];
 
@@ -66,7 +74,7 @@ app.use(helmet());
 // Refuse malicious requests
 app.use((req, res, next) => {
   if (MAL_PATTERN.some((pattern) => pattern.test(req.path))) {
-    res.status(404).send("Not Found");
+    res.status(403).send("Forbidden");
     return;
   }
 
