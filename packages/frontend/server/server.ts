@@ -1,4 +1,5 @@
 import compression from "compression";
+import type { NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -12,7 +13,34 @@ import {
 } from "node:path/posix";
 import { fileURLToPath } from "node:url";
 
-const PAGES = ["index", "faq", "404", "explore"];
+// #region Types
+
+type T404 = "404_soft" | "404_hard";
+
+interface UrlParts {
+  dir: string;
+  base: string;
+  ext: string;
+  compEnc?: "br" | "gzip";
+}
+
+interface Encodings {
+  useBrotli: boolean;
+  useGzip: boolean;
+}
+
+declare global {
+  namespace Express {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+    interface Request {
+      _urlParts?: UrlParts;
+    }
+  }
+}
+
+// #endregion
+
+const PAGES = new Set(["index", "faq", "404", "explore"]);
 
 const MAL_PATTERN = [
   /\/wp-admin/i,
@@ -21,12 +49,16 @@ const MAL_PATTERN = [
   /\.git\/config/i,
 ];
 
+function isExpressResponse(res: unknown): res is Response {
+  return typeof (res as Response).status === "function";
+}
+
 // Get current directory path for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dist = joinFS(dirnameFS(__filename), "dist");
 
-const port = process.env.PORT || 8080;
-const API_URL = process.env.API_URL || "http://localhost:3000/api";
+const port = parseInt(process.env["PORT"] || "8080", 10);
+const API_URL = process.env["API_URL"] || "http://localhost:3000/api";
 
 const app = express();
 app.use(helmet());
@@ -34,11 +66,13 @@ app.use(helmet());
 // Refuse malicious requests
 app.use((req, res, next) => {
   if (MAL_PATTERN.some((pattern) => pattern.test(req.path))) {
-    return res.status(404).send("Not Found");
+    res.status(404).send("Not Found");
+    return;
   }
 
   if (req.method !== "GET" && req.method !== "HEAD") {
-    return res.status(405).send("Method Not Allowed");
+    res.status(405).send("Method Not Allowed");
+    return;
   }
 
   next();
@@ -71,7 +105,9 @@ app.use(
       },
       // Handle proxy errors
       error: (_err, _req, res) => {
-        res.status(502).json({ error: "Service Unavailable" });
+        if (isExpressResponse(res)) {
+          res.status(502).json({ error: "Service Unavailable" });
+        }
       },
     },
   })
@@ -82,12 +118,10 @@ app.use(async (req, res, next) => {
   const encodings = getEncodings(req);
   const urlParts = await getUrlParts(req);
 
-  if (urlParts?.["404"]) {
-    if (urlParts["404"] === "hard") {
-      return res.status(404).send("Not Found");
-    } else {
-      return res.redirect("/404");
-    }
+  if (urlParts === "404_hard") {
+    return res.status(404).send("Not Found");
+  } else if (urlParts === "404_soft") {
+    return res.redirect("/404");
   }
 
   req._urlParts = urlParts;
@@ -99,7 +133,7 @@ app.use(async (req, res, next) => {
 app.use(
   express.static(__dist, {
     setHeaders(res) {
-      const { ext, compEnc, dir } = res.req?._urlParts ?? {};
+      const { ext, compEnc, dir } = res.req._urlParts ?? {};
 
       if (ext) {
         res.type(ext);
@@ -122,49 +156,19 @@ app.use(
   })
 );
 
-async function getUrlParts(req) {
-  const url = URL.parse(req.url.toLowerCase(), "http://does.not.matter");
+// Global error handler
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
 
-  if (!url) return { 404: "hard" };
+  res.status(statusCode).json({
+    status: "error",
+    statusCode,
+    message,
+  });
+});
 
-  const urlPath = url.pathname;
-  const dir = dirnameURL(urlPath);
-  const ext = extnameURL(urlPath) || ".html";
-  const base = basenameURL(urlPath, ext) || "index";
-  const isHtml = ext === ".html";
-
-  if (isHtml) {
-    const isRootPage = dir === "/" && PAGES.includes(base);
-    return isRootPage ? { dir, base, ext } : { 404: "soft" };
-  }
-
-  const filePath = joinFS(__dist, dir, `${base}${ext}`);
-  if (await fileExists(filePath)) {
-    return { dir, base, ext };
-  }
-
-  return { 404: "hard" };
-}
-
-async function getCompressionUrl(url, { useBrotli, useGzip }) {
-  const { base, ext, dir } = url;
-  const filePath = joinFS(__dist, dir, `${base}${ext}`);
-  const urlPath = joinURL(dir, `${base}${ext}`);
-
-  if (useBrotli && (await fileExists(filePath + ".br"))) {
-    url.compEnc = "br";
-    return urlPath + ".br";
-  }
-
-  if (useGzip && (await fileExists(filePath + ".gz"))) {
-    url.compEnc = "gzip";
-    return urlPath + ".gz";
-  }
-
-  return urlPath;
-}
-
-function getEncodings(req) {
+function getEncodings(req: Request): Encodings {
   const encodings = (req.header("Accept-Encoding") ?? "")
     .toLowerCase()
     .split(",")
@@ -176,8 +180,53 @@ function getEncodings(req) {
   };
 }
 
-async function fileExists(x) {
-  return access(x, constants.F_OK)
+async function getUrlParts(req: Request): Promise<UrlParts | T404> {
+  const url = URL.parse(req.url.toLowerCase(), "http://does.not.matter");
+
+  if (!url) return "404_hard";
+
+  const urlPath = url.pathname;
+  const dir = dirnameURL(urlPath);
+  const ext = extnameURL(urlPath) || ".html";
+  const base = basenameURL(urlPath, ext) || "index";
+  const isHtml = ext === ".html";
+
+  if (isHtml) {
+    const isRootPage = dir === "/" && PAGES.has(base);
+    return isRootPage ? { dir, base, ext } : "404_soft";
+  }
+
+  const filePath = joinFS(__dist, dir, `${base}${ext}`);
+  if (await fileExists(filePath)) {
+    return { dir, base, ext };
+  }
+
+  return "404_hard";
+}
+
+async function getCompressionUrl(
+  urlParts: UrlParts,
+  { useBrotli, useGzip }: Encodings
+) {
+  const { base, ext, dir } = urlParts;
+  const filePath = joinFS(__dist, dir, `${base}${ext}`);
+  const urlPath = joinURL(dir, `${base}${ext}`);
+
+  if (useBrotli && (await fileExists(filePath + ".br"))) {
+    urlParts.compEnc = "br";
+    return urlPath + ".br";
+  }
+
+  if (useGzip && (await fileExists(filePath + ".gz"))) {
+    urlParts.compEnc = "gzip";
+    return urlPath + ".gz";
+  }
+
+  return urlPath;
+}
+
+async function fileExists(filePath: string): Promise<boolean> {
+  return access(filePath, constants.F_OK)
     .then(() => true)
     .catch(() => false);
 }

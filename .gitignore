@@ -23,6 +23,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+deploy
 node_modules
 dist
 dist-ssr
