@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
-    "@tanstack/query-core": "5.90.2",
+    "@tanstack/query-core": "^5.90.2",
     "express": "^5.1.0",
     "http-proxy-middleware": "^3.0.3",
     "modern-normalize": "^3.0.1",
@@ -19,7 +19,7 @@
     "compression": "^1.8.1"
   },
   "devDependencies": {
-    "lucide-static": "^0.545.0",
+    "lucide-static": "^0.554.0",
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.1",
     "@types/node": "^24.10.0",
