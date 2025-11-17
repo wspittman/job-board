@@ -12,9 +12,6 @@ This is a web application for a job board. It is a monorepo with multiple worksp
   - `npm run start:frontend` (alias of `npm run dev --workspace=frontend`) runs Vite with HMR.
   - `npm run build --workspace=frontend` emits assets to `packages/frontend/dist/` and `npm run preview --workspace=frontend` serves them.
   - Production hosting relies on `server.js`; set `API_URL` and optional `PORT`.
-- **`packages/frontend2`** – Legacy Vite React frontend with similar API expectations to the current app.
-  - Change into the workspace or use `--workspace=frontend2` scripts (`dev`, `build`, `preview`, `start`).
-  - Shares the same `API_URL`/`PORT` environment variables as `frontend`.
 - **`packages/admin`** – TypeScript CLI for administrative operations.
   - Execute with `npm run admin -- <command> [args]` from the repo root.
   - Requires `.env` values `ADMIN_API_BASE_URL` (trailing slash) and `ADMIN_API_TOKEN`.
