@@ -52,8 +52,10 @@ export class Results extends ComponentBase {
     );
 
     const displayCards: Node[] = [...this.cards];
-    if (!isSavedJob || !value?.length) {
+    if (!isSavedJob) {
       displayCards.push(MessageCard.create({ count: value?.length }));
+    } else if (!value?.length) {
+      displayCards.push(MessageCard.create({ message: "NoSavedJob" }));
     }
 
     this.#list.replaceChildren(...displayCards);

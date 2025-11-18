@@ -11,7 +11,8 @@ type Message =
   | "PartialMatches"
   | "AllMatches"
   | "Error"
-  | "Loading";
+  | "Loading"
+  | "NoSavedJob";
 
 interface Props {
   message?: Message;
@@ -45,6 +46,11 @@ const messageContent: Record<Message, [string, string, string]> = {
     "Unable to load job data. Please try again later.",
   ],
   Loading: ["Loading...", "", "Please wait while we load your jobs."],
+  NoSavedJob: [
+    "Saved Job Not Found",
+    "It may have been removed.",
+    "Check the url or use the filters to find other jobs.",
+  ],
 };
 
 function countToMessage(count: number = -1): Message {

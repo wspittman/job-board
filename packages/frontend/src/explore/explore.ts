@@ -52,7 +52,7 @@ async function onFilterChange(filters: FilterModel) {
     }
 
     if (!jobs.length) {
-      await panes.results.updateJobs([]);
+      await panes.results.updateJobs([], filters.isSavedJob());
       await jobDeselect();
       return;
     }
