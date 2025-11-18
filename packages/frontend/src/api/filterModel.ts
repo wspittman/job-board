@@ -40,6 +40,10 @@ export class FilterModel {
     return Object.values(this.#filters).every(isEmpty);
   }
 
+  /**
+   * Checks if the filter model represents a saved job (both companyId and jobId are set).
+   * @returns True if the filter model represents a saved job, false otherwise.
+   */
   isSavedJob(): boolean {
     return !isEmpty(this.#filters.jobId) && !isEmpty(this.#filters.companyId);
   }

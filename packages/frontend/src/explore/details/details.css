@@ -5,6 +5,18 @@
   margin-bottom: var(--space-md);
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.copy {
+  padding: var(--space-xs);
+  background: var(--secondary-gradient-btn);
+  color: var(--text-contrast);
+}
+
 .row {
   display: flex;
   justify-content: space-between;
@@ -31,5 +43,11 @@
 @media (min-width: 901px) and (orientation: landscape) {
   .container {
     padding: var(--space-md);
+  }
+}
+
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column-reverse;
   }
 }

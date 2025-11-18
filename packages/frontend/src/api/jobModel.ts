@@ -31,6 +31,11 @@ export class JobModel {
     return API_URL + this.#job.applyUrl;
   }
 
+  get bookmarkUrl(): string {
+    const base = `${location.origin}${location.pathname}`;
+    return `${base}?companyId=${this.#job.companyId}&jobId=${this.#job.id}`;
+  }
+
   async getDisplayStrings() {
     const { title, company, isRemote, location, postTS, facets } = this.#job;
     const { salary, experience, summary } = facets ?? {};

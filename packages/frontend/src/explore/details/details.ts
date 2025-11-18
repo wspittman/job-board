@@ -11,6 +11,7 @@ const tag = "explore-details";
  * Custom element that displays detailed information for a selected job.
  */
 export class Details extends ComponentBase {
+  readonly #copyButton: HTMLButtonElement;
   readonly #applyLink: HTMLAnchorElement;
   readonly #detailEmbed: DetailEmbed;
   #job?: JobModel;
@@ -20,8 +21,10 @@ export class Details extends ComponentBase {
    */
   constructor() {
     super(html, cssSheet);
+    this.#copyButton = this.getEl<HTMLButtonElement>("copy")!;
     this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
     this.#detailEmbed = this.getEl<DetailEmbed>("description")!;
+    this.#copyButton.addEventListener("click", () => this.#copyJobLink());
   }
 
   /**
@@ -57,6 +60,16 @@ export class Details extends ComponentBase {
       "aria-label",
       `Apply for ${title} position at ${company}`
     );
+  }
+
+  async #copyJobLink(): Promise<void> {
+    if (!this.#job) return;
+
+    try {
+      await navigator.clipboard.writeText(this.#job.bookmarkUrl);
+    } catch {
+      console.warn("Failed to copy job link to clipboard");
+    }
   }
 }
 
