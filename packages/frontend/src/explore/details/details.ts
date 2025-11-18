@@ -7,6 +7,13 @@ import html from "./details.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "explore-details";
 
+type CopyButtonState = "idle" | "copied" | "error";
+const copyButtonAriaText: Record<CopyButtonState, string> = {
+  idle: "Copy job link to clipboard",
+  copied: "Link copied to clipboard",
+  error: "Failed to copy link",
+};
+
 /**
  * Custom element that displays detailed information for a selected job.
  */
@@ -15,6 +22,7 @@ export class Details extends ComponentBase {
   readonly #applyLink: HTMLAnchorElement;
   readonly #detailEmbed: DetailEmbed;
   #job?: JobModel;
+  #copyResetHandle?: number;
 
   /**
    * Creates a details panel and wires up references to internal elements.
@@ -67,9 +75,26 @@ export class Details extends ComponentBase {
 
     try {
       await navigator.clipboard.writeText(this.#job.bookmarkUrl);
+      this.#setCopyButtonState("copied");
     } catch {
-      console.warn("Failed to copy job link to clipboard");
+      this.#setCopyButtonState("error");
     }
+  }
+
+  #setCopyButtonState(state: "idle" | "copied" | "error"): void {
+    if (this.#copyResetHandle) {
+      window.clearTimeout(this.#copyResetHandle);
+      this.#copyResetHandle = undefined;
+    }
+
+    this.#copyButton.dataset["status"] = state;
+    this.#copyButton.setAttribute("aria-label", copyButtonAriaText[state]);
+
+    const timeout = window.setTimeout(
+      () => this.#setCopyButtonState("idle"),
+      2000
+    );
+    this.#copyResetHandle = timeout;
   }
 }
 

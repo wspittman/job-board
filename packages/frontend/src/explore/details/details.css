@@ -14,7 +14,34 @@
 .copy {
   padding: var(--space-xs);
   background: var(--secondary-gradient-btn);
-  color: var(--text-contrast);
+
+  & svg {
+    display: none;
+  }
+
+  & .lucide-clipboard {
+    color: var(--text-contrast);
+  }
+
+  & .lucide-clipboard-check {
+    color: var(--success-main);
+  }
+
+  & .lucide-clipboard-x {
+    color: var(--error-main);
+  }
+
+  &[data-status="idle"] .lucide-clipboard {
+    display: inline;
+  }
+
+  &[data-status="copied"] .lucide-clipboard-check {
+    display: inline;
+  }
+
+  &[data-status="error"] .lucide-clipboard-x {
+    display: inline;
+  }
 }
 
 .row {
