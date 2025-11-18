@@ -40,6 +40,10 @@ explore-details {
   overflow: auto;
 }
 
+explore-results[smallen] {
+  flex: 1;
+}
+
 .action-button {
   display: none;
 }

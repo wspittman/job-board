@@ -44,6 +44,8 @@ async function onFilterChange(filters: FilterModel) {
   }
 
   try {
+    const isSavedJob = filters.isSavedJob();
+    panes.results.toggleAttribute("smallen", isSavedJob);
     panes.results.showLoading();
     const jobs = await JobModel.search(filters);
 
@@ -52,7 +54,7 @@ async function onFilterChange(filters: FilterModel) {
     }
 
     if (!jobs.length) {
-      await panes.results.updateJobs([], filters.isSavedJob());
+      await panes.results.updateJobs([], isSavedJob);
       await jobDeselect();
       return;
     }
@@ -62,7 +64,7 @@ async function onFilterChange(filters: FilterModel) {
       jobMap.set(job.id, job);
     }
 
-    await panes.results.updateJobs(jobs, filters.isSavedJob());
+    await panes.results.updateJobs(jobs, isSavedJob);
     await panes.details.updateJob(jobMap.get(jobs[0]!.id));
     panes.details.toggleAttribute("empty", false);
   } catch (error) {
