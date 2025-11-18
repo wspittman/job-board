@@ -62,7 +62,7 @@ async function onFilterChange(filters: FilterModel) {
       jobMap.set(job.id, job);
     }
 
-    await panes.results.updateJobs(jobs);
+    await panes.results.updateJobs(jobs, filters.isSavedJob());
     await panes.details.updateJob(jobMap.get(jobs[0]!.id));
     panes.details.toggleAttribute("empty", false);
   } catch (error) {

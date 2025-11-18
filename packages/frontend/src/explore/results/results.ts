@@ -41,7 +41,7 @@ export class Results extends ComponentBase {
    * Rebuilds the job list display from the provided dataset.
    * @param value - Array of job models to render, or undefined to clear the list.
    */
-  async updateJobs(value: JobModel[] | undefined) {
+  async updateJobs(value: JobModel[] | undefined, isSavedJob = false) {
     const onClick = (id: string) => this.#selectCard(id);
 
     this.cards = await Promise.all(
@@ -51,10 +51,12 @@ export class Results extends ComponentBase {
       })
     );
 
-    this.#list.replaceChildren(
-      ...this.cards,
-      MessageCard.create({ count: value?.length })
-    );
+    const displayCards: Node[] = [...this.cards];
+    if (!isSavedJob || !value?.length) {
+      displayCards.push(MessageCard.create({ count: value?.length }));
+    }
+
+    this.#list.replaceChildren(...displayCards);
   }
 
   /**
