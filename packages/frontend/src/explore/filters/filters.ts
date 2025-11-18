@@ -134,7 +134,7 @@ export class Filters extends ComponentBase {
     this.#onChange = onChange;
     this.#initialFilters = initialFilters;
 
-    if (this.#initialFilters?.isSavedJob()) {
+    if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
       this.#setCollapsed(true);
     }
   }
