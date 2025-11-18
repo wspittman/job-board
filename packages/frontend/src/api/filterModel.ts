@@ -40,6 +40,10 @@ export class FilterModel {
     return Object.values(this.#filters).every(isEmpty);
   }
 
+  isSavedJob(): boolean {
+    return !isEmpty(this.#filters.jobId) && !isEmpty(this.#filters.companyId);
+  }
+
   /**
    * Converts the filter model to URLSearchParams.
    * @returns A URLSearchParams object representing the filters.
@@ -62,6 +66,10 @@ export class FilterModel {
    */
   async toFriendlyStrings(): Promise<[FilterModelKey, string][]> {
     const entries = this.toEntries();
+
+    if (this.isSavedJob()) {
+      return [["jobId", `Saved Job`]];
+    }
 
     let company = this.#filters.companyId;
     if (!isEmpty(company)) {
@@ -117,6 +125,9 @@ export class FilterModel {
     this.#filters.minSalary = normNumber(get("minSalary"));
     this.#filters.maxExperience = normNumber(get("maxExperience"));
     this.#filters.daysSince = normNumber(get("daysSince"));
+    this.#filters.jobId = !isEmpty(this.#filters.companyId)
+      ? normString(get("jobId"))
+      : undefined;
   }
 }
 

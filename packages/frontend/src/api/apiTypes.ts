@@ -27,6 +27,7 @@ export interface JobModelApi {
 export interface FilterModelApi {
   // Exact Match
   companyId?: string;
+  jobId?: string;
   isRemote?: boolean;
   // Substring Match
   title?: string;

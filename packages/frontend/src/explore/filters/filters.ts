@@ -87,6 +87,12 @@ const filterDefs: FormElementDef[] = [
       max: 999,
     },
   },
+  {
+    // Hidden via CSS
+    type: "jb-form-input",
+    name: "jobId",
+    label: "Job ID",
+  },
 ];
 
 /**
@@ -127,6 +133,10 @@ export class Filters extends ComponentBase {
   init({ onChange, initialFilters }: Props) {
     this.#onChange = onChange;
     this.#initialFilters = initialFilters;
+
+    if (this.#initialFilters?.isSavedJob()) {
+      this.#setCollapsed(true);
+    }
   }
 
   /**
