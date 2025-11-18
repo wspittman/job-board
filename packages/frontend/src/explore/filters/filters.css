@@ -19,7 +19,6 @@
   background: none;
   font-size: var(--font-size-lg);
   color: var(--primary-main);
-  cursor: pointer;
 
   &:focus-visible,
   &:hover {

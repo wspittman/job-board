@@ -8,7 +8,6 @@
   color: var(--text-default);
   text-align: left;
   line-height: 1.6;
-  cursor: pointer;
 
   &:hover,
   &:focus-visible {
