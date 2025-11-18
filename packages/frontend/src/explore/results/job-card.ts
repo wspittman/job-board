@@ -1,6 +1,6 @@
 import type { JobModel } from "../../api/jobModel.ts";
-import { Chip } from "../../components/chip.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
+import { JobChips } from "../../components/job-chips.ts";
 
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
@@ -29,37 +29,15 @@ export class JobCard extends ComponentBase {
   static async create({ job, onClick, isSelected }: Props) {
     const element = document.createElement(tag);
 
-    const {
-      title,
-      company,
-      locationShort,
-      postDays,
-      summary,
-      salary,
-      experience,
-    } = await job.getDisplayStrings();
+    element.getEl<JobChips>("chips")?.init({ job, useShort: true });
+
+    const { title, company, summary } = await job.getDisplayStrings();
 
     element.setManyTexts({
       title,
       company,
       summary,
     });
-
-    const chips = [salary, experience];
-
-    if (locationShort === "Remote") {
-      chips.unshift(locationShort);
-    } else {
-      chips.push(locationShort);
-    }
-
-    if (postDays.endsWith("days ago")) {
-      chips.push(postDays);
-    } else {
-      chips.unshift(postDays);
-    }
-
-    element.#createChips(chips);
 
     const realOnClick = onClick ? () => onClick(job.id) : undefined;
     element.setOnClick("container", realOnClick);
@@ -96,21 +74,6 @@ export class JobCard extends ComponentBase {
     if (el) {
       el.classList.toggle("is-selected", this.#isSelected);
       el.setAttribute("aria-pressed", String(this.#isSelected));
-    }
-  }
-
-  #createChips(labels: (string | undefined)[]) {
-    const chipsEl = this.getEl("chips");
-    if (chipsEl) {
-      const fragment = document.createDocumentFragment();
-
-      for (const label of labels) {
-        if (label) {
-          fragment.appendChild(Chip.create({ label }));
-        }
-      }
-
-      chipsEl.replaceChildren(fragment);
     }
   }
 }

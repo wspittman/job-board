@@ -36,29 +36,42 @@ export class JobModel {
     return `${base}?companyId=${this.#job.companyId}&jobId=${this.#job.id}`;
   }
 
-  async getDisplayStrings() {
+  async getDisplayStrings(useShort = false) {
     const { title, company, isRemote, location, postTS, facets } = this.#job;
     const { salary, experience, summary } = facets ?? {};
     const companyFriendly = await metadataModel.getCompanyFriendlyName(company);
 
-    const locBreak = location.lastIndexOf(",");
-    const locationShort =
-      locBreak === -1 ? location : location.slice(0, locBreak);
+    let loc = location;
+    if (isRemote) {
+      loc = "Remote";
+    } else if (useShort) {
+      const locBreak = loc.lastIndexOf(",");
+      loc = locBreak === -1 ? loc : loc.slice(0, locBreak);
+    }
+
+    let exp: string | undefined = undefined;
+    if (experience != null) {
+      exp = useShort
+        ? `${experience} yrs exp`
+        : `${experience} years experience required`;
+    }
+
+    const post = useShort
+      ? this.#tsToDaysString(postTS)
+      : new Date(postTS).toLocaleDateString();
 
     return {
       title,
       company: companyFriendly ?? company,
       summary,
-      location: isRemote ? "Remote" : location,
-      locationShort: isRemote ? "Remote" : locationShort,
+      location: loc,
       salary: salary ? `$${salary.toLocaleString()}` : undefined,
-      experience: experience != null ? `${experience} yrs exp` : undefined,
-      postDays: this.tsToDaysString(postTS),
-      postDate: new Date(postTS).toLocaleDateString(),
+      experience: exp,
+      post,
     };
   }
 
-  tsToDaysString(ts: number): string {
+  #tsToDaysString(ts: number): string {
     const days = Math.floor((Date.now() - ts) / MS_PER_DAY);
     if (days === 0) return "Just Posted";
     if (days < 7) return "New";

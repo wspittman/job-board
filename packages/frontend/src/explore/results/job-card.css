@@ -34,11 +34,7 @@
 }
 
 .chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  margin: var(--space-sm) 0;
-  font-size: var(--font-size-xs);
+  margin: var(--space-xs) 0;
 }
 
 .summary {

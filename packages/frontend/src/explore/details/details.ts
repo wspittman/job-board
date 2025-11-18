@@ -1,5 +1,6 @@
 import type { JobModel } from "../../api/jobModel.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
+import { JobChips } from "../../components/job-chips.ts";
 import { DetailEmbed } from "./detail-embed.ts";
 
 import css from "./details.css?raw";
@@ -20,6 +21,7 @@ const copyButtonAriaText: Record<CopyButtonState, string> = {
 export class Details extends ComponentBase {
   readonly #copyButton: HTMLButtonElement;
   readonly #applyLink: HTMLAnchorElement;
+  readonly #jobChips: JobChips;
   readonly #detailEmbed: DetailEmbed;
   #job?: JobModel;
   #copyResetHandle?: number;
@@ -31,6 +33,7 @@ export class Details extends ComponentBase {
     super(html, cssSheet);
     this.#copyButton = this.getEl<HTMLButtonElement>("copy")!;
     this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
+    this.#jobChips = this.getEl<JobChips>("chips")!;
     this.#detailEmbed = this.getEl<DetailEmbed>("description")!;
     this.#copyButton.addEventListener("click", () => this.#copyJobLink());
   }
@@ -50,18 +53,10 @@ export class Details extends ComponentBase {
   async #render() {
     if (!this.#job) return;
 
-    const { title, company, location, salary, experience, postDate } =
-      await this.#job.getDisplayStrings();
+    const { title, company } = await this.#job.getDisplayStrings();
+    this.setManyTexts({ title, company });
 
-    this.setManyTexts({
-      heading: title,
-      company,
-      salary,
-      experience,
-      location,
-      "posted-date": postDate,
-    });
-
+    await this.#jobChips.init({ job: this.#job });
     this.#detailEmbed.description = this.#job.description;
     this.#applyLink.href = this.#job.applyUrl;
     this.#applyLink.setAttribute(
