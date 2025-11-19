@@ -8,6 +8,7 @@ import {
   LLM_REASONING_EFFORT,
 } from "./src/portal/pFuncs.ts";
 import { Run } from "./src/types/types.ts";
+import { embedCache } from "./src/utils/embedCache.ts";
 import { readSources, writeObj } from "./src/utils/fileUtils.ts";
 
 subscribeAsyncLogging({
@@ -86,6 +87,7 @@ async function run() {
   }
 
   await runEval({ runName, dataModel, llmModel, llmReasoningEffort });
+  await embedCache.saveCache();
 }
 
 run().catch((err) => {

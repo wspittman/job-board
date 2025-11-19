@@ -27,3 +27,44 @@ export function cost(
     8
   );
 }
+
+/**
+ * Calculates the cosine similarity between two vectors.
+ * @param vecA The first vector.
+ * @param vecB The second vector.
+ * @returns The cosine similarity score, a value between -1 and 1 (typically 0 to 1 for positive embeddings).
+ */
+export function cosineSimilarity(vecA: number[], vecB: number[]): number {
+  const dotProduct = vecA.reduce(
+    (sum, val, i) => sum + val * (vecB[i] ?? 0),
+    0
+  );
+  const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val ** 2, 0));
+  const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val ** 2, 0));
+
+  return dotProduct / (magnitudeA * magnitudeB);
+}
+
+/**
+ * Computes the centroid (average vector) of a list of vectors.
+ * @param vecList List of vectors (arrays of numbers).
+ * @returns The centroid vector.
+ */
+export function computeCentroid(vecList: number[][]): number[] {
+  if (!vecList.length) return [];
+
+  const dim = vecList[0]!.length;
+  const centroid = new Array<number>(dim).fill(0);
+
+  for (const emb of vecList) {
+    for (let i = 0; i < dim; i++) {
+      centroid[i]! += emb[i]!;
+    }
+  }
+
+  for (let i = 0; i < dim; i++) {
+    centroid[i]! /= vecList.length;
+  }
+
+  return centroid;
+}

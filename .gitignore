@@ -10,6 +10,7 @@ packages/evals/input/
 packages/evals/ground/
 packages/evals/outcome/
 packages/evals/report/
+packages/evals/cache/
 
 # TypeScript cache
 *.tsbuildinfo
