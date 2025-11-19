@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "eval": "tsx --env-file=.env ./eval.ts",
-    "fetch-input": "tsx --env-file=.env ./fetchInput.ts"
+    "fetch-input": "tsx --env-file=.env ./fetchInput.ts",
+    "playground": "tsx --env-file=.env ./playground.ts"
   },
   "dependencies": {
     "dry-utils-async": "^0.3.1",

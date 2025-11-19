@@ -46,6 +46,14 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 }
 
 /**
+ * Calculates the cosine distance between a vector and a list of vectors.
+ * Cosine distance is defined as (1 - cosine similarity).
+ */
+export function cosineDistanceAll(vec: number[], vecAr: number[][]): number[] {
+  return vecAr.map((v) => 1 - cosineSimilarity(vec, v));
+}
+
+/**
  * Computes the centroid (average vector) of a list of vectors.
  * @param vecList List of vectors (arrays of numbers).
  * @returns The centroid vector.
