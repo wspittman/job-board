@@ -6,7 +6,8 @@
     "start": "node dist/app.js",
     "dev": "tsx watch --env-file=./.env ./src/app.ts",
     "build": "tsc",
-    "test": "bash -lc 'shopt -s globstar; node --import tsx --import ./tests/setup.ts --test tests/**/*.test.ts'"
+    "pretest": "tsc --noEmit",
+    "test": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts"
   },
   "dependencies": {
     "applicationinsights": "^2.9.5",
