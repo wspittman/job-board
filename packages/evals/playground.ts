@@ -1,25 +1,25 @@
+import { Bag } from "./src/types/types.ts";
 import { embedCache } from "./src/utils/embedCache.ts";
 import { readObj, writeObj } from "./src/utils/fileUtils.ts";
 import {
-  computeCentroid,
+  computeClusters,
   cosineDistanceAll,
-  cosineSimilarity,
   truncate,
 } from "./src/utils/mathUtils.ts";
 
-interface GeneralInterestInput {
+interface GeneralInterest {
   train: string[];
   testPos: string[];
   testNeg: string[];
 }
 
+type VEC = number[];
+
+const GI_FILE = "general_interest";
+
 async function readInput() {
   const { train, testPos, testNeg } =
-    (await readObj<GeneralInterestInput>(
-      "Input",
-      "playground",
-      "general_interest_titles"
-    )) ?? {};
+    (await readObj<GeneralInterest>("Input", "playground", GI_FILE)) ?? {};
 
   if (!train?.length || !testPos?.length || !testNeg?.length) {
     return undefined;
@@ -28,7 +28,7 @@ async function readInput() {
   return { train, testPos, testNeg };
 }
 
-async function embedInput({ train, testPos, testNeg }: GeneralInterestInput) {
+async function embedInput({ train, testPos, testNeg }: GeneralInterest) {
   const embeddings = await embedCache.getEmbeddings("centroid", [
     ...train,
     ...testPos,
@@ -46,26 +46,26 @@ async function embedInput({ train, testPos, testNeg }: GeneralInterestInput) {
   };
 }
 
-/**
- * Embeds a list of texts, computes the centroid, and measures distance from centroid.
- * `distanceFromCentroid` is defined as (1 - cosineSimilarity(embedding, centroid)).
- */
-async function getCentroidDistances(texts: string[]) {
-  const embeddings = await embedCache.getEmbeddings("centroid", texts);
+// Given a list of vectors and a clustering map, group the vectors by cluster.
+function groupByCluster(texts: string[], vecAr: VEC[], clusters: number[]) {
+  const groups: { texts: string[]; vecs: VEC[] }[] = [];
 
-  if (!embeddings) {
-    throw new Error("Unexpected embeddings result");
+  for (let i = 0; i < clusters.length; i++) {
+    const cN = clusters[i];
+    groups[cN] ??= { texts: [], vecs: [] };
+    groups[cN].texts.push(texts[i]);
+    groups[cN].vecs.push(vecAr[i]);
   }
 
-  const centroid = computeCentroid(embeddings);
+  return groups;
+}
 
-  const distances = embeddings.map((embedding, index) => {
-    const similarity = cosineSimilarity(embedding, centroid);
-    const distance = 1 - similarity;
-    return { text: texts[index], distance };
+// Given a list of vectors and a list of potential centroids, return the distances to the closest centroid.
+function closestDistances(vecs: VEC[], centroids: VEC[]): number[] {
+  return vecs.map((vec) => {
+    const distances = cosineDistanceAll(vec, centroids);
+    return Math.min(...distances);
   });
-
-  return { distances, centroid };
 }
 
 function stats(distances: number[]) {
@@ -93,35 +93,52 @@ async function run() {
   }
 
   const { train, testPos, testNeg } = embeddings;
+  const { clusters, centroids } = computeClusters(train, 5);
+  const trainClusters = groupByCluster(input.train, train, clusters);
 
-  const centroid = computeCentroid(train);
-  const trainDistances = cosineDistanceAll(centroid, train);
-  const posDistances = cosineDistanceAll(centroid, testPos);
-  const negDistances = cosineDistanceAll(centroid, testNeg);
-  const trainStats = stats(trainDistances);
+  // Get the distances and stats for each cluster.
+  const clusterData = trainClusters.map(({ texts, vecs }, i) => {
+    const cDistances = cosineDistanceAll(centroids[i], vecs);
+    const cStats = stats(cDistances);
+    return { texts, cDistances, cStats };
+  });
+
+  // For testPos/testNeg, get the lowest distance from each vector to any centroid and get stats on that.
+  const posDistances = closestDistances(testPos, centroids);
+  const negDistances = closestDistances(testNeg, centroids);
   const posStats = stats(posDistances);
   const negStats = stats(negDistances);
 
-  console.log("Training Distances", trainStats);
+  clusterData.forEach((cs, i) =>
+    console.log(`Cluster${i} Distances:`, cs.cStats)
+  );
   console.log("Pos Test Distances", posStats);
   console.log("Neg Test Distances", negStats);
 
   const sew = (t: string[], d: number[]) =>
-    t.map((text, i) => ({ text, distance: d[i] }));
+    t
+      .map((text, i) => ({ text, distance: truncate(d[i]) }))
+      .sort((a, b) => a.distance - b.distance);
 
   await writeObj(
     {
-      trainStats,
+      ...clusterData.reduce((acc, cd, i) => {
+        acc[`c${i}_Stats`] = cd.cStats;
+        return acc;
+      }, {} as Bag),
       posStats,
       negStats,
-      train: sew(input.train, trainDistances),
+      ...clusterData.reduce((acc, cd, i) => {
+        acc[`c${i}`] = sew(cd.texts, cd.cDistances);
+        return acc;
+      }, {} as Bag),
       testPos: sew(input.testPos, posDistances),
       testNeg: sew(input.testNeg, negDistances),
-      centroid,
+      centroids,
     },
     "Outcome",
     "playground",
-    "general_interest_titles"
+    GI_FILE
   );
 
   await embedCache.saveCache();

@@ -1,3 +1,4 @@
+import { kmeans } from "ml-kmeans";
 import type { NumBag } from "../types/types.ts";
 
 export function addNumBags<T extends NumBag>(acc: T, b: T): T {
@@ -54,25 +55,14 @@ export function cosineDistanceAll(vec: number[], vecAr: number[][]): number[] {
 }
 
 /**
- * Computes the centroid (average vector) of a list of vectors.
+ * Computes the kmeans clusters of a list of vectors.
  * @param vecList List of vectors (arrays of numbers).
+ * @param k Number of clusters to compute.
  * @returns The centroid vector.
  */
-export function computeCentroid(vecList: number[][]): number[] {
-  if (!vecList.length) return [];
+export function computeClusters(vecList: number[][], k: number) {
+  if (!vecList.length) return { clusters: [], centroids: [] };
 
-  const dim = vecList[0]!.length;
-  const centroid = new Array<number>(dim).fill(0);
-
-  for (const emb of vecList) {
-    for (let i = 0; i < dim; i++) {
-      centroid[i]! += emb[i]!;
-    }
-  }
-
-  for (let i = 0; i < dim; i++) {
-    centroid[i]! /= vecList.length;
-  }
-
-  return centroid;
+  const { clusters, centroids } = kmeans(vecList, k, {});
+  return { clusters, centroids };
 }
