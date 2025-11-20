@@ -39,7 +39,7 @@ Configuration is handled in `src/config.ts`. Defaults exist for local developmen
 | `GREENHOUSE_URL` / `LEVER_URL`          | Base URLs for ATS integrations fetched by the data ingestion jobs.                                |
 | `LLM_MODEL` / `LLM_REASONING_EFFORT`    | OpenAI model identifier and optional reasoning setting used by AI-powered features.               |
 | `OPENAI_API_KEY`                        | Consumed implicitly by the OpenAI SDK when AI features are enabled.                               |
-| `ADMIN_TOKEN`                           | Required shared secret protecting administrative endpoints (minimum 16 characters).                                                |
+| `ADMIN_TOKEN`                           | Required shared secret protecting administrative endpoints (minimum 16 characters).               |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Connection string for Application Insights telemetry collection.                                  |
 | `ENABLE_VERBOSE_BLOB_LOGGING`           | Enables expanded telemetry payload logging when set to `true`.                                    |
 
@@ -66,6 +66,11 @@ packages/backend/
 - `npm run dev --workspace=backend` – Start the service with automatic reloads via `tsx watch`.
 - `npm run build --workspace=backend` – Compile TypeScript to JavaScript in `dist/`.
 - `npm run start --workspace=backend` – Run the compiled server from `dist/app.js`.
+- `npm run test --workspace=backend` – Execute the Node test runner with `tsx` so TypeScript specs run without precompiling.
+
+## Testing Notes
+
+The backend test suite runs directly against TypeScript sources using `node --import tsx --import ./test/setup.ts --test test/**/*.test.ts`. The shared `test/setup.ts` file stubs telemetry startup, database connections, and `app.listen` to prevent network calls or other side effects during testing.
 
 ## Troubleshooting
 

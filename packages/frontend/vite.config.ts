@@ -23,6 +23,7 @@ export default defineConfig({
     }),
   ],
   build: {
+    outDir: "deploy/dist",
     rollupOptions: {
       input: {
         index: resolve(__dirname, "index.html"),

@@ -2,8 +2,9 @@
   display: flex;
   flex-direction: column;
   max-width: none;
-  height: calc(100vh - var(--header-height));
+  height: calc(100dvh - var(--header-height));
   padding: var(--space-md);
+  padding-bottom: max(var(--space-md), env(safe-area-inset-bottom, 0px));
   gap: var(--space-md);
 }
 
@@ -37,6 +38,10 @@ explore-details {
   flex: 2;
   height: 100%;
   overflow: auto;
+}
+
+explore-results[smallen] {
+  flex: 1;
 }
 
 .action-button {

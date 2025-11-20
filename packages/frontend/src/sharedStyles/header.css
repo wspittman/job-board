@@ -196,7 +196,7 @@
   }
 
   .nav-link {
-    padding: var(--space-sm);
+    padding: var(--space-md);
     border-radius: var(--radius);
     transition: background-color 150ms ease-in-out;
     text-decoration: none;
@@ -220,7 +220,7 @@
 
   .gh-btn {
     align-items: center;
-    padding: var(--space-sm);
+    padding: var(--space-md);
     gap: var(--space-sm);
     border-radius: var(--radius);
     text-decoration: none;

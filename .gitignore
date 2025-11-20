@@ -10,6 +10,7 @@ packages/evals/input/
 packages/evals/ground/
 packages/evals/outcome/
 packages/evals/report/
+packages/evals/cache/
 
 # TypeScript cache
 *.tsbuildinfo
@@ -23,6 +24,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+deploy
 node_modules
 dist
 dist-ssr

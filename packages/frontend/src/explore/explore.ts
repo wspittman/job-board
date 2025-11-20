@@ -5,9 +5,8 @@ import "./details/details.ts";
 import "./filters/filters.ts";
 import "./results/results.ts";
 
-import { api } from "../api/api.ts";
-import type { JobModel } from "../api/apiTypes.ts";
 import { FilterModel } from "../api/filterModel.ts";
+import { JobModel } from "../api/jobModel.ts";
 
 const actionButton = document.getElementById("action-button")!;
 actionButton.addEventListener("click", onActionClick);
@@ -39,22 +38,24 @@ async function onFilterChange(filters: FilterModel) {
   const requestId = ++lastRequestId;
 
   if (filters.isEmpty()) {
-    panes.results.jobs = undefined;
-    jobDeselect();
+    await panes.results.updateJobs(undefined);
+    await jobDeselect();
     return;
   }
 
   try {
+    const isSavedJob = filters.isSavedJob();
+    panes.results.toggleAttribute("smallen", isSavedJob);
     panes.results.showLoading();
-    const jobs = await api.fetchJobs(filters);
+    const jobs = await JobModel.search(filters);
 
     if (requestId !== lastRequestId) {
       return;
     }
 
     if (!jobs.length) {
-      panes.results.jobs = [];
-      jobDeselect();
+      await panes.results.updateJobs([], isSavedJob);
+      await jobDeselect();
       return;
     }
 
@@ -63,8 +64,8 @@ async function onFilterChange(filters: FilterModel) {
       jobMap.set(job.id, job);
     }
 
-    panes.results.jobs = jobs;
-    panes.details.job = jobMap.get(jobs[0]!.id);
+    await panes.results.updateJobs(jobs, isSavedJob);
+    await panes.details.updateJob(jobMap.get(jobs[0]!.id));
     panes.details.toggleAttribute("empty", false);
   } catch (error) {
     if (requestId !== lastRequestId) {
@@ -73,15 +74,15 @@ async function onFilterChange(filters: FilterModel) {
 
     jobMap.clear();
     panes.results.showError();
-    jobDeselect();
+    await jobDeselect();
   }
 }
 
 /**
  * Clears the active job selection and marks the details pane as empty.
  */
-function jobDeselect() {
-  panes.details.job = undefined;
+async function jobDeselect() {
+  await panes.details.updateJob(undefined);
   panes.details.toggleAttribute("empty", true);
 }
 
@@ -89,8 +90,8 @@ function jobDeselect() {
  * Sets the selected job in the details pane and focuses the details view.
  * @param jobId - Identifier of the job chosen from the results list.
  */
-function onJobSelect(jobId: string) {
-  panes.details.job = jobMap.get(jobId);
+async function onJobSelect(jobId: string) {
+  await panes.details.updateJob(jobMap.get(jobId));
   setActivePane("details");
 }
 

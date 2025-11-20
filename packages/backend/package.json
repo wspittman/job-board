@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "tsx watch --env-file=./.env ./src/app.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "pretest": "tsc --noEmit",
+    "test": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts"
   },
   "dependencies": {
     "applicationinsights": "^2.9.5",

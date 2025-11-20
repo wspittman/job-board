@@ -5,7 +5,7 @@ export interface MetadataModelApi {
   timestamp: number;
 }
 
-export interface JobModel {
+export interface JobModelApi {
   id: string;
   companyId: string;
   company: string;
@@ -27,6 +27,7 @@ export interface JobModel {
 export interface FilterModelApi {
   // Exact Match
   companyId?: string;
+  jobId?: string;
   isRemote?: boolean;
   // Substring Match
   title?: string;

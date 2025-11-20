@@ -47,9 +47,8 @@ jobs:
       - name: Prepare production bundle
         run: |
           mkdir deploy
-          cp -r packages/frontend/dist deploy/
+          cp -r packages/frontend/deploy/* deploy/
           cp packages/frontend/package.json deploy/
-          cp packages/frontend/server.js deploy/
           cp package-lock.json deploy/
           cd deploy
           npm ci --omit=dev

@@ -1,5 +1,6 @@
-import { embed } from "dry-utils-openai";
 import type { Bag } from "../types/types.ts";
+import { embedCache } from "../utils/embedCache.ts";
+import { cosineSimilarity } from "../utils/mathUtils.ts";
 
 interface CheckIn {
   prop: string;
@@ -133,8 +134,11 @@ export async function similar(input: CheckIn): Promise<CheckOut> {
   if (undef) return undef;
 
   const { actual, expected } = input;
-  const actualEmb = await getEmbedding(String(actual));
-  const expectedEmb = await getEmbedding(String(expected));
+  const [actualEmb = [], expectedEmb = []] =
+    (await embedCache.getEmbeddings("similar", [
+      String(actual),
+      String(expected),
+    ])) ?? [];
 
   // If either embedding failed, return 0 similarity.
   const eitherFails = !actualEmb.length || !expectedEmb.length;
@@ -202,40 +206,6 @@ function isEqualCaseInsensitive(a: unknown, b: unknown): boolean {
   const aStr = typeof a === "string" ? a.toLowerCase() : a;
   const bStr = typeof b === "string" ? b.toLowerCase() : b;
   return aStr === bStr;
-}
-
-/**
- * Fetches text embeddings.
- * TODO: Implement caching for embeddings to reduce API calls and costs.
- * @param input The string to get an embedding for.
- * @returns An array of numbers representing the embedding, or an empty array on failure.
- */
-async function getEmbedding(input: string): Promise<number[]> {
-  const { embeddings, error } = await embed("eval_check", input);
-
-  if (error) {
-    console.error("Error calling embeddings API:", error);
-    return [];
-  }
-
-  return embeddings?.[0] ?? [];
-}
-
-/**
- * Calculates the cosine similarity between two vectors.
- * @param vecA The first vector.
- * @param vecB The second vector.
- * @returns The cosine similarity score, a value between -1 and 1 (typically 0 to 1 for positive embeddings).
- */
-function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  const dotProduct = vecA.reduce(
-    (sum, val, i) => sum + val * (vecB[i] ?? 0),
-    0
-  );
-  const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val ** 2, 0));
-  const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val ** 2, 0));
-
-  return dotProduct / (magnitudeA * magnitudeB);
 }
 
 // #endregion

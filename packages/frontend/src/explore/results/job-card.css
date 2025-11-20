@@ -8,7 +8,6 @@
   color: var(--text-default);
   text-align: left;
   line-height: 1.6;
-  cursor: pointer;
 
   &:hover,
   &:focus-visible {
@@ -27,6 +26,7 @@
   color: var(--primary-dark);
   font-size: var(--font-size-md);
   font-weight: 600;
+  line-height: var(--heading-line-height);
 }
 
 .company {
@@ -34,11 +34,7 @@
 }
 
 .chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-sm);
-  font-size: var(--font-size-xs);
+  margin: var(--space-xs) 0;
 }
 
 .summary {

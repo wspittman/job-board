@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import type { DataModel } from "../portal/pTypes.ts";
 import type { Bag, Source } from "../types/types.ts";
 
-type Role = "Input" | "Outcome" | "Ground" | "Report";
+type Role = "Input" | "Outcome" | "Ground" | "Report" | "Cache";
+type SubRole = DataModel | "playground" | "";
 
 // Base directory for all evaluation-related files.
 const __filename = fileURLToPath(import.meta.url);
@@ -12,18 +13,18 @@ const __dirname = path.dirname(__filename);
 const basePath = path.join(__dirname, "../..");
 
 // Constructs a file path for a given action, role, and optional name.
-const getPath = (role: Role, dataModel: DataModel, name = "") =>
-  path.join(basePath, role.toLowerCase(), dataModel, name);
+const getPath = (role: Role, subRole: SubRole, name = "") =>
+  path.join(basePath, role.toLowerCase(), subRole, name);
 
 /**
  * Reads all source files for a given action and baseline model.
  * Source files consist of an input file, a ground truth file, and optionally a baseline outcome file.
  */
-export async function readSources(dataModel: DataModel): Promise<Source[]> {
-  const names = await readdir(getPath("Input", dataModel));
+export async function readSources(subRole: SubRole): Promise<Source[]> {
+  const names = await readdir(getPath("Input", subRole));
   // Read all sources in parallel and filter out any undefined results (e.g., due to missing files).
   return (
-    await Promise.all(names.map((name) => readSource(dataModel, name)))
+    await Promise.all(names.map((name) => readSource(subRole, name)))
   ).filter((x) => !!x);
 }
 
@@ -32,12 +33,11 @@ export async function readSources(dataModel: DataModel): Promise<Source[]> {
  * Returns undefined if any of the required files are missing.
  */
 async function readSource(
-  dataModel: DataModel,
+  subRole: SubRole,
   sourceName: string
 ): Promise<Source | undefined> {
-  const input = await readObj<Bag>("Input", dataModel, sourceName);
-  const ground = await readObj<Bag>("Ground", dataModel, sourceName);
-
+  const input = await readObj<Bag>("Input", subRole, sourceName);
+  const ground = await readObj<Bag>("Ground", subRole, sourceName);
   // If any essential part of the source is missing, warn and return undefined.
   if (!input || !ground) {
     console.warn(`Missing a file for source: ${sourceName}`);
@@ -53,10 +53,14 @@ async function readSource(
  */
 export async function readObj<T>(
   role: Role,
-  dataModel: DataModel,
+  subRole: SubRole,
   name: string
 ): Promise<T | undefined> {
-  const filePath = getPath(role, dataModel, name);
+  let filePath = getPath(role, subRole, name);
+
+  if (!filePath.endsWith(".json")) {
+    filePath += ".json";
+  }
 
   try {
     const file = await readFile(filePath, "utf-8");
@@ -73,11 +77,11 @@ export async function readObj<T>(
 export async function writeObj(
   obj: object,
   role: Role,
-  dataModel: DataModel,
+  subRole: SubRole,
   ...keys: string[]
 ): Promise<void> {
   const markedObj = { evalTS: new Date().toISOString(), ...obj };
-  const dir = getPath(role, dataModel);
+  const dir = getPath(role, subRole);
   let filePath = path.join(dir, keys.filter(Boolean).join("_"));
 
   if (!filePath.endsWith(".json")) {

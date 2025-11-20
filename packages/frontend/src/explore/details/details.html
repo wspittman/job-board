@@ -1,31 +1,26 @@
 <section class="container card" aria-labelledby="heading">
   <div class="header">
-    <h2 class="title" id="heading">Select a role to preview the details</h2>
-    <a id="apply" class="abtn" target="_blank" rel="noopener noreferrer"
-      >Apply</a
-    >
-  </div>
-  <div class="row">
-    <div class="meta">
-      <svg data-icon="building-2" aria-hidden="true"></svg>
-      <span id="company"></span>
+    <div>
+      <h2 id="title" class="title"></h2>
+      <p id="company" class="company">Owner</p>
     </div>
-    <div class="meta">
-      <svg data-icon="map-pin" aria-hidden="true"></svg>
-      <span id="location"></span>
-    </div>
-    <div class="meta">
-      <svg data-icon="dollar-sign" aria-hidden="true"></svg>
-      <span id="salary"></span>
-    </div>
-    <div class="meta">
-      <svg data-icon="briefcase" aria-hidden="true"></svg>
-      <span id="experience"></span>
-    </div>
-    <div class="meta">
-      <svg data-icon="calendar" aria-hidden="true"></svg>
-      <span id="posted-date"></span>
+    <div class="actions">
+      <button
+        id="copy"
+        class="copy"
+        type="button"
+        aria-label="Copy job link to clipboard"
+        data-status="idle"
+      >
+        <svg data-icon="clipboard" aria-hidden="true"></svg>
+        <svg data-icon="clipboard-check" aria-hidden="true"></svg>
+        <svg data-icon="clipboard-x" aria-hidden="true"></svg>
+      </button>
+      <a id="apply" class="abtn" target="_blank" rel="noopener noreferrer"
+        >Apply</a
+      >
     </div>
   </div>
+  <jb-job-chips id="chips"></jb-job-chips>
   <explore-detail-embed id="description"></explore-detail-embed>
 </section>

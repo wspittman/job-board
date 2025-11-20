@@ -2,34 +2,65 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .title {
   color: var(--primary-dark);
+  margin: 0;
 }
 
-.meta {
+.company {
+  color: var(--primary-dark);
+}
+
+.actions {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
-  color: var(--text-muted);
+}
 
-  &:has(span:empty) {
+.copy {
+  padding: var(--space-xs);
+  background: var(--secondary-gradient-btn);
+
+  & svg {
     display: none;
+  }
+
+  & .lucide-clipboard {
+    color: var(--text-contrast);
+  }
+
+  & .lucide-clipboard-check {
+    color: var(--success-main);
+  }
+
+  & .lucide-clipboard-x {
+    color: var(--error-main);
+  }
+
+  &[data-status="idle"] .lucide-clipboard {
+    display: inline;
+  }
+
+  &[data-status="copied"] .lucide-clipboard-check {
+    display: inline;
+  }
+
+  &[data-status="error"] .lucide-clipboard-x {
+    display: inline;
   }
 }
 
 @media (min-width: 901px) and (orientation: landscape) {
   .container {
     padding: var(--space-md);
+  }
+}
+
+@media (max-width: 600px) {
+  .actions {
+    flex-direction: column-reverse;
   }
 }

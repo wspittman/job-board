@@ -1,4 +1,4 @@
-import type { JobModel } from "../../api/apiTypes.ts";
+import type { JobModel } from "../../api/jobModel.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
 import { JobCard } from "./job-card.ts";
 import { MessageCard } from "./message-card.ts";
@@ -17,7 +17,7 @@ interface Props {
  */
 export class Results extends ComponentBase {
   #list: HTMLElement;
-  #jobs: [string, JobCard][] = [];
+  cards: JobCard[] = [];
   #onSelect?: (jobId: string) => void;
 
   /**
@@ -32,37 +32,40 @@ export class Results extends ComponentBase {
    * Sets up the selection callback and resets the results list.
    * @param onSelect - Handler invoked when a job card is selected.
    */
-  init({ onSelect }: Props) {
+  async init({ onSelect }: Props) {
     this.#onSelect = onSelect;
-    this.jobs = undefined;
+    await this.updateJobs(undefined);
   }
 
   /**
    * Rebuilds the job list display from the provided dataset.
    * @param value - Array of job models to render, or undefined to clear the list.
    */
-  set jobs(value: JobModel[] | undefined) {
-    this.#jobs = [];
-    const fragment = document.createDocumentFragment();
+  async updateJobs(value: JobModel[] | undefined, isSavedJob = false) {
     const onClick = (id: string) => this.#selectCard(id);
 
-    value?.forEach((job, index) => {
-      const isSelected = index === 0;
-      const card = JobCard.create({ job, isSelected, onClick });
-      this.#jobs.push([job.id, card]);
-      fragment.appendChild(card);
-    });
+    this.cards = await Promise.all(
+      (value ?? []).map((job, index) => {
+        const isSelected = index === 0;
+        return JobCard.create({ job, isSelected, onClick });
+      })
+    );
 
-    fragment.appendChild(MessageCard.create({ count: value?.length }));
+    const displayCards: Node[] = [...this.cards];
+    if (!isSavedJob) {
+      displayCards.push(MessageCard.create({ count: value?.length }));
+    } else if (!value?.length) {
+      displayCards.push(MessageCard.create({ message: "NoSavedJob" }));
+    }
 
-    this.#list.replaceChildren(fragment);
+    this.#list.replaceChildren(...displayCards);
   }
 
   /**
    * Replaces the list with an error message when job loading fails.
    */
   showError() {
-    this.#jobs = [];
+    this.cards = [];
     this.#list.replaceChildren(MessageCard.create({ message: "Error" }));
   }
 
@@ -70,15 +73,15 @@ export class Results extends ComponentBase {
    * Displays a loading state while job results are being fetched.
    */
   showLoading() {
-    this.#jobs = [];
+    this.cards = [];
     this.#list.replaceChildren(MessageCard.create({ message: "Loading" }));
   }
 
   #selectCard(selectedId: string) {
     if (!selectedId) return;
     this.#onSelect?.(selectedId);
-    this.#jobs.forEach(([id, card]) => {
-      card.isSelected = id === selectedId;
+    this.cards.forEach((card) => {
+      card.isSelected = card.jobId === selectedId;
     });
   }
 }

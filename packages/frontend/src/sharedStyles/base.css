@@ -4,6 +4,7 @@
   --palette-primary: 256 60%;
   --palette-secondary: 218 60%;
   --palette-error: 356 60%;
+  --palette-success: 142 60%;
 
   --primary-light: hsl(var(--palette-primary) 60%);
   --primary-main: hsl(var(--palette-primary) 50%);
@@ -16,6 +17,7 @@
   --secondary-dark: hsl(var(--palette-secondary) 40%);
 
   --error-main: hsl(var(--palette-error) 70%);
+  --success-main: hsl(var(--palette-success) 70%);
 
   --text-default: hsl(0 0% 10%);
   --text-muted: hsl(0 0% 10% / 0.7);
