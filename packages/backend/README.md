@@ -66,6 +66,11 @@ packages/backend/
 - `npm run dev --workspace=backend` – Start the service with automatic reloads via `tsx watch`.
 - `npm run build --workspace=backend` – Compile TypeScript to JavaScript in `dist/`.
 - `npm run start --workspace=backend` – Run the compiled server from `dist/app.js`.
+- `npm run test --workspace=backend` – Execute the Node test runner with `tsx` so TypeScript specs run without precompiling.
+
+## Testing Notes
+
+The backend test suite runs directly against TypeScript sources using `node --import tsx --import ./tests/setup.ts --test tests/**/*.test.ts` (with `globstar` enabled). The shared `tests/setup.ts` file stubs telemetry startup, database connections, and `app.listen` to prevent network calls or other side effects during testing.
 
 ## Troubleshooting
 
