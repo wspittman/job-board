@@ -96,8 +96,18 @@ export async function refreshJobsForCompany(
 ) {
   logProperty("Input", key);
   const companyId = key.id;
-  const currentIds = await getJobIds(companyId, key.replaceJobsOlderThan);
-  const [add, remove, ignore] = await getAtsJobs(key, currentIds);
+  const [company, currentIds] = await Promise.all([
+    db.company.get(key),
+    getJobIds(companyId, key.replaceJobsOlderThan),
+  ]);
+
+  if (!company) {
+    logProperty("CompanyNotFound", companyId);
+    return;
+  }
+
+  const { ignoreJobIds, name, stage, size } = company;
+  const [add, remove, ignore] = await getAtsJobs(key, currentIds, ignoreJobIds);
 
   logProperty("Ignored", ignore);
 
@@ -108,15 +118,11 @@ export async function refreshJobsForCompany(
   }
 
   if (add.length) {
-    const company = await db.company.get(key);
-
-    if (!company) return;
-
     add.forEach(({ item }) => {
-      item.companyName = company.name;
+      item.companyName = name;
 
-      if (company.stage) item.companyStage = company.stage;
-      if (company.size) item.companySize = company.size;
+      if (stage) item.companyStage = stage;
+      if (size) item.companySize = size;
     });
 
     jobInfoQueue.add(add.map((job) => [key, job]));
@@ -135,22 +141,26 @@ async function getJobIds(companyId: string, cutoffMS?: number) {
   return pairs.filter(({ _ts }) => _ts >= cutoff).map(({ id }) => id);
 }
 
-async function getAtsJobs(key: CompanyKey, currentIds: string[]) {
+async function getAtsJobs(
+  key: CompanyKey,
+  currentIds: string[],
+  ignoreIds: string[] = []
+) {
   // If there are no current jobs, assume newly added company and get full job data for all jobs
   const getFullJobInfo = !currentIds.length;
   let atsJobs = await ats.getJobs(key, getFullJobInfo);
 
   // Create sets for faster comparisons
   const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
-  const currentIdSet = new Set(currentIds);
+  const ignoreIdSet = new Set([...currentIds, ...ignoreIds]);
 
-  // Any ATS job not in the current set needs to be added
-  let add = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
+  // Any ATS job not in the ignore set needs to be added
+  let add = atsJobs.filter(({ item: { id } }) => !ignoreIdSet.has(id));
 
   // Any jobs in the current set but not in the ATS need to be removed
   const remove = currentIds.filter((id) => !jobIdSet.has(id));
 
-  // If job is in both ATS and DB should be ignored
+  // The difference between the ATS job set and the add set is the ignored jobs
   const ignore = jobIdSet.size - add.length;
 
   // Get the full job data for all jobs if
@@ -164,7 +174,7 @@ async function getAtsJobs(key: CompanyKey, currentIds: string[]) {
     !atsJobs[0]?.context
   ) {
     atsJobs = await ats.getJobs(key, true);
-    add = atsJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
+    add = atsJobs.filter(({ item: { id } }) => !ignoreIdSet.has(id));
   }
 
   return [add, remove, ignore] as const;
@@ -175,6 +185,15 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
 
   if (await llm.isGeneralApplication(job.item.title)) {
     logProperty("Skipped_GeneralApplication", job.item.title);
+
+    // Add to company ignore list to prevent future processing
+    const company = await db.company.get(companyKey);
+    if (company) {
+      company.ignoreJobIds ??= [];
+      company.ignoreJobIds.push(job.item.id);
+      await db.company.upsert(company);
+    }
+
     return;
   }
 
