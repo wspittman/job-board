@@ -254,8 +254,7 @@ export const ExtractionJob = z
       "Third person, present tense.",
       "Use active voice and specific technologies/skills.",
       "Do not repeat the company or job title.",
-      "No marketing fluff. No internal reasoning.",
-      "If no useful job details are present, return ''."
+      "No marketing fluff. No internal reasoning."
     ),
   })
   .describe(

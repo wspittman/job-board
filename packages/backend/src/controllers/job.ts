@@ -173,6 +173,11 @@ async function getAtsJobs(key: CompanyKey, currentIds: string[]) {
 async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   logProperty("Input", { ...companyKey, jobId: job.item.id });
 
+  if (await llm.isGeneralApplication(job.item.title)) {
+    logProperty("Skipped_GeneralApplication", job.item.title);
+    return;
+  }
+
   if (!job.context) {
     job = await ats.getJob(companyKey, job.item);
   }
