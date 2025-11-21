@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && tsc -p server/tsconfig.json && vite build",
     "preview": "vite preview",
-    "start": "node deploy/server.js",
-    "start:local": "node server.js"
+    "start": "node server.js",
+    "start:local": "node deploy/server.js"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",
