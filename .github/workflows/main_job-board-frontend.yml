@@ -9,6 +9,12 @@ on:
     paths:
       - "packages/frontend/**"
   workflow_dispatch:
+    inputs:
+      clean:
+        description: "Run clean deploy?"
+        required: true
+        type: boolean
+        default: false
 
 # Prevent overlapping runs, last one wins
 concurrency:
@@ -96,4 +102,4 @@ jobs:
         with:
           app-name: better-job-board
           package: release.zip
-          # clean: true
+          clean: ${{ github.event_name == 'workflow_dispatch' && inputs.clean || false }}
