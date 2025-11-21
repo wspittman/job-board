@@ -19,6 +19,7 @@ export class Results extends ComponentBase {
   #list: HTMLElement;
   cards: JobCard[] = [];
   #onSelect?: (jobId: string) => void;
+  #selectedId?: string;
 
   /**
    * Initializes the results list container and associated template.
@@ -34,6 +35,7 @@ export class Results extends ComponentBase {
    */
   async init({ onSelect }: Props) {
     this.#onSelect = onSelect;
+    this.#selectedId = undefined;
     await this.updateJobs(undefined);
   }
 
@@ -42,11 +44,17 @@ export class Results extends ComponentBase {
    * @param value - Array of job models to render, or undefined to clear the list.
    */
   async updateJobs(value: JobModel[] | undefined, isSavedJob = false) {
+    const hasJobs = Boolean(value?.length);
+    const selectedId = hasJobs
+      ? this.#selectedId ?? value?.[0]?.id
+      : undefined;
+    this.#selectedId = selectedId;
+
     const onClick = (id: string) => this.#selectCard(id);
 
     this.cards = await Promise.all(
-      (value ?? []).map((job, index) => {
-        const isSelected = index === 0;
+      (value ?? []).map((job) => {
+        const isSelected = job.id === selectedId;
         return JobCard.create({ job, isSelected, onClick });
       })
     );
@@ -66,6 +74,7 @@ export class Results extends ComponentBase {
    */
   showError() {
     this.cards = [];
+    this.#selectedId = undefined;
     this.#list.replaceChildren(MessageCard.create({ message: "Error" }));
   }
 
@@ -74,11 +83,13 @@ export class Results extends ComponentBase {
    */
   showLoading() {
     this.cards = [];
+    this.#selectedId = undefined;
     this.#list.replaceChildren(MessageCard.create({ message: "Loading" }));
   }
 
   #selectCard(selectedId: string) {
     if (!selectedId) return;
+    this.#selectedId = selectedId;
     this.#onSelect?.(selectedId);
     this.cards.forEach((card) => {
       card.isSelected = card.jobId === selectedId;
