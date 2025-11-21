@@ -71,7 +71,6 @@ export abstract class FormElement extends ComponentBase {
     // Keep the external form value attribute in sync with the internal input value
     const update = () => this.onInput();
     this.intake.addEventListener("input", update);
-    this.intake.addEventListener("change", update);
   }
 
   /**
