@@ -6,7 +6,7 @@ import { logProperty } from "../utils/telemetry.ts";
 
 // Z Helpers
 type Z<T> = z.ZodType<T>;
-const zArray = <T>(zt: Z<T>) => z.array(zt).min(1).max(50);
+const zArray = <T>(zt: Z<T>) => z.array(zt).nonempty().max(50);
 const soft = <T>(zt: Z<T>) => zt.optional().catch(undefined);
 const coerceString = <T>(zt: Z<T>) => soft(z.preprocess(String, zt));
 const coerceInt = <T>(zt: Z<T>) =>
@@ -19,8 +19,8 @@ const coerceInt = <T>(zt: Z<T>) =>
 
 // Basic Schema Components
 const AtsSchema = z.enum(["greenhouse", "lever"] as const);
-const IdSchema = z.string().min(1).max(100);
-const SearchSchema = z.string().min(3).max(100);
+const IdSchema = z.string().trim().nonempty().max(100);
+const SearchSchema = z.string().trim().min(3).max(100);
 const TimestampSchema = z
   .number()
   .min(new Date("2024-01-01").getTime())
@@ -45,9 +45,9 @@ const FiltersSchema = z.object({
   isRemote: coerceString(z.stringbool()),
   title: soft(SearchSchema),
   location: soft(SearchSchema),
-  daysSince: coerceInt(z.int().min(1).max(365)),
-  maxExperience: coerceInt(z.int().min(0).max(100)),
-  minSalary: coerceInt(z.int().min(1).max(10_000_000)),
+  daysSince: coerceInt(z.int().positive().max(365)),
+  maxExperience: coerceInt(z.int().nonnegative().max(100)),
+  minSalary: coerceInt(z.int().positive().max(10_000_000)),
 });
 
 /**
