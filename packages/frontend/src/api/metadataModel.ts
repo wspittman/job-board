@@ -35,7 +35,12 @@ class MetadataModel {
    */
   async getCompanyFormOptions(): Promise<FormOption[]> {
     const { companyNames } = await this.#fetch();
-    return companyNames.map(([value, label]) => ({ value, label }));
+    return [
+      { value: "", label: "Any" },
+      ...companyNames
+        .map(([value, label]) => ({ value, label }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    ];
   }
 
   /**

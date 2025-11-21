@@ -127,12 +127,10 @@ class MenuEl {
    */
   init(options: FormOption[], onSelect: (option?: OptionEl) => void) {
     this.#onSelect = onSelect;
-    options
-      .sort((a, b) => a.label.localeCompare(b.label))
-      .forEach((opt) => {
-        const optionEl = new OptionEl(opt);
-        this.#options[optionEl.value] = optionEl;
-      });
+    options.forEach((opt) => {
+      const optionEl = new OptionEl(opt);
+      this.#options[optionEl.value] = optionEl;
+    });
     this.#clearFilter();
     this.close();
   }
