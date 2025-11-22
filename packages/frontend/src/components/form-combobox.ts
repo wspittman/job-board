@@ -93,9 +93,10 @@ export class FormCombobox extends FormElement {
  */
 class MenuEl {
   readonly element: HTMLUListElement;
-  readonly #options: Record<string, OptionEl> = {};
+  readonly #options: Map<string, OptionEl> = new Map();
   readonly #emptyOption: OptionEl;
 
+  #rawOptions: OptionEl[] = [];
   #filteredOptions: OptionEl[] = [];
   #activeIndex = -1;
   #isOpen = false;
@@ -115,7 +116,6 @@ class MenuEl {
     this.element.addEventListener("click", (event) => this.#onClick(event));
 
     this.#emptyOption = new OptionEl({ label: "No options", value: "" });
-    this.#emptyOption.element.classList.add("empty");
 
     this.close();
   }
@@ -129,8 +129,9 @@ class MenuEl {
     this.#onSelect = onSelect;
     options.forEach((opt) => {
       const optionEl = new OptionEl(opt);
-      this.#options[optionEl.value] = optionEl;
+      this.#options.set(optionEl.value, optionEl);
     });
+    this.#rawOptions = Array.from(this.#options.values());
     this.#clearFilter();
     this.close();
   }
@@ -148,7 +149,7 @@ class MenuEl {
     }
 
     const oldActive = this.#filteredOptions[this.#activeIndex];
-    this.#filteredOptions = Object.values(this.#options).filter((x) =>
+    this.#filteredOptions = this.#rawOptions.filter((x) =>
       x.compareLabel.includes(trimmed)
     );
 
@@ -173,12 +174,10 @@ class MenuEl {
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
-        this.open();
         this.#moveActiveIndex(1);
         break;
       case "ArrowUp":
         event.preventDefault();
-        this.open();
         this.#moveActiveIndex(-1);
         break;
       case "Enter":
@@ -220,10 +219,15 @@ class MenuEl {
    * @param value - The form value associated with the option
    */
   optionFromValue(value: string): FormOption | undefined {
-    return this.#options[value];
+    return this.#options.get(value);
   }
 
   #moveActiveIndex(delta: number) {
+    if (!this.#isOpen) {
+      this.open();
+      return;
+    }
+
     const length = this.#filteredOptions.length;
 
     if (!length) {
@@ -243,7 +247,7 @@ class MenuEl {
   }
 
   #clearFilter() {
-    this.#filteredOptions = Object.values(this.#options);
+    this.#filteredOptions = this.#rawOptions;
     this.#activeIndex = -1;
     this.#render();
   }
@@ -264,7 +268,7 @@ class MenuEl {
   #onClick({ target }: PointerEvent) {
     if (!this.#onSelect) return;
     const value = OptionEl.valueFromLI(target as HTMLLIElement);
-    this.#onSelect(this.#options[value]);
+    this.#onSelect(this.#options.get(value));
   }
 }
 
