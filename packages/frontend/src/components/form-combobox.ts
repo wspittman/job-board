@@ -204,6 +204,11 @@ class MenuEl {
   open() {
     this.#isOpen = true;
     this.element.hidden = false;
+
+    if (this.#activeIndex < 0 && this.#filteredOptions.length) {
+      this.#activeIndex = 0;
+    }
+    this.#applyActiveState();
   }
 
   /**
@@ -236,19 +241,11 @@ class MenuEl {
     }
 
     this.#activeIndex = (this.#activeIndex + delta + length) % length;
-
-    this.#filteredOptions.forEach((item, idx) => {
-      const isActive = idx === this.#activeIndex;
-      item.active = isActive;
-      if (isActive) {
-        item.element.scrollIntoView({ block: "nearest" });
-      }
-    });
+    this.#applyActiveState();
   }
 
   #clearFilter() {
     this.#filteredOptions = this.#rawOptions;
-    this.#activeIndex = -1;
     this.#render();
   }
 
@@ -263,6 +260,16 @@ class MenuEl {
     }
 
     this.open();
+  }
+
+  #applyActiveState() {
+    this.#filteredOptions.forEach((item, idx) => {
+      const isActive = idx === this.#activeIndex;
+      item.active = isActive;
+      if (isActive) {
+        item.element.scrollIntoView({ block: "nearest" });
+      }
+    });
   }
 
   #onClick({ target }: PointerEvent) {
