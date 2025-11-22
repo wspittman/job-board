@@ -1,3 +1,13 @@
+.container {
+  &:has(.has-value) .intake {
+    color: var(--text-default);
+  }
+
+  & option {
+    color: var(--text-default);
+  }
+}
+
 .intake-wrap::after {
   content: "";
   position: absolute;
@@ -10,4 +20,5 @@
 
 .intake {
   padding: var(--space-lg) var(--space-md);
+  color: transparent;
 }

@@ -42,7 +42,6 @@ const filterDefs: FormElementDef[] = [
     name: "isRemote",
     label: "Remote",
     options: [
-      { label: "Any", value: "" },
       { label: "Remote", value: "true" },
       { label: "In-Person / Hybrid", value: "false" },
     ],

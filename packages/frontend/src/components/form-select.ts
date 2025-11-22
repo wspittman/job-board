@@ -27,7 +27,7 @@ export class FormSelect extends FormElement {
    */
   override init({ options = [], ...rest }: FormElementProps) {
     super.init(rest);
-    this.#setOptions(options);
+    this.#setOptions([{ label: "Any", value: "" }, ...options]);
   }
 
   #setOptions(options: FormOption[]) {
