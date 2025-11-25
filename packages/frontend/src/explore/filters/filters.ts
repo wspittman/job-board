@@ -2,7 +2,11 @@ import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
 
-import { FilterModel, type FilterModelKey } from "../../api/filterModel";
+import {
+  FilterModel,
+  workTimeBasisOptions,
+  type FilterModelKey,
+} from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
 import { Chip } from "../../components/chip";
 import { ComponentBase } from "../../components/componentBase";
@@ -26,13 +30,6 @@ interface FormElementDef extends FormElementProps {
   type: "jb-form-input" | "jb-form-select" | "jb-form-combobox";
 }
 
-const workTimeBasisOptions: FormElementDef["options"] = [
-  { label: "Full-time", value: "full_time" },
-  { label: "Part-time", value: "part_time" },
-  { label: "Variable", value: "variable" },
-  { label: "Per diem", value: "per_diem" },
-];
-
 const filterDefs: Record<string, FormElementDef[]> = {
   "The Work": [
     {
@@ -41,15 +38,18 @@ const filterDefs: Record<string, FormElementDef[]> = {
       label: "Title",
     },
     {
-      type: "jb-form-select",
-      name: "workTimeBasis",
-      label: "Hours / Schedule",
-      options: workTimeBasisOptions,
-    },
-    {
       type: "jb-form-combobox",
       name: "companyId",
       label: "Company",
+    },
+    {
+      type: "jb-form-select",
+      name: "workTimeBasis",
+      label: "Hours",
+      options: Object.entries(workTimeBasisOptions).map(([value, label]) => ({
+        label,
+        value,
+      })),
     },
   ],
   Other: [

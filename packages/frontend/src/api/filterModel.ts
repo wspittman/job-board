@@ -1,22 +1,13 @@
-import type { FilterModelApi, WorkTimeBasis } from "./apiTypes";
+import type { FilterModelApi } from "./apiTypes";
 import { metadataModel } from "./metadataModel";
 
 export type FilterModelKey = keyof FilterModelApi;
 
-const WORK_TIME_BASIS_VALUES: WorkTimeBasis[] = [
-  "full_time",
-  "part_time",
-  "variable",
-  "per_diem",
-  "",
-];
-
-const WORK_TIME_BASIS_LABELS: Record<WorkTimeBasis, string> = {
-  full_time: "Work Time: Full-time",
-  part_time: "Work Time: Part-time",
-  variable: "Work Time: Variable hours",
-  per_diem: "Work Time: Per diem",
-  "": "Work Time: Any",
+type WorkTimeBasis = NonNullable<FilterModelApi["workTimeBasis"]>;
+export const workTimeBasisOptions: Record<WorkTimeBasis, string> = {
+  full_time: "Full-time",
+  part_time: "Part-time",
+  per_diem: "Per diem",
 };
 
 /**
@@ -101,8 +92,8 @@ export class FilterModel {
         case "companyId":
           return [key, `Company: ${company}`];
         case "workTimeBasis": {
-          const label = WORK_TIME_BASIS_LABELS[value as WorkTimeBasis];
-          return [key, label ?? `Work Time: ${value}`];
+          const label = workTimeBasisOptions[value as WorkTimeBasis];
+          return [key, label ?? String(value)];
         }
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
@@ -166,11 +157,10 @@ const normString = (value?: string | null): string | undefined => {
 const normWorkTimeBasis = (
   value?: string | null
 ): WorkTimeBasis | undefined => {
-  const trimmed = value?.trim();
+  const trimmed = value?.trim() as WorkTimeBasis;
   if (isEmpty(trimmed)) return undefined;
-
-  return WORK_TIME_BASIS_VALUES.includes(trimmed as WorkTimeBasis)
-    ? (trimmed as WorkTimeBasis)
+  return Object.keys(workTimeBasisOptions).includes(trimmed)
+    ? trimmed
     : undefined;
 };
 
