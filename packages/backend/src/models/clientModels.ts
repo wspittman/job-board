@@ -1,3 +1,4 @@
+import type { WorkTimeBasis } from "./enums.ts";
 import type { CompanyKey } from "./models.ts";
 
 // #region Input Models
@@ -7,6 +8,7 @@ export interface Filters {
   companyId?: string;
   jobId?: string;
   isRemote?: boolean;
+  workTimeBasis?: WorkTimeBasis;
   // Substring Match
   title?: string;
   location?: string;
@@ -43,6 +45,7 @@ export interface ClientJob {
   postTS: number;
   applyUrl: string;
   isRemote: boolean;
+  workTimeBasis: WorkTimeBasis;
   location: string;
   facets: {
     summary?: string;
