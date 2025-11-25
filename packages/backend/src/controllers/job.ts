@@ -221,6 +221,7 @@ async function readJobsByFilters({
   maxExperience,
   minSalary,
   isRemote,
+  workTimeBasis,
 }: EnhancedFilters) {
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
@@ -236,6 +237,10 @@ async function readJobsByFilters({
     } else {
       query.where(['(c.presence = "onsite" OR c.presence = "hybrid")']);
     }
+  }
+
+  if (workTimeBasis) {
+    query.whereCondition("workTimeBasis", "=", workTimeBasis);
   }
 
   if (daysSince) {

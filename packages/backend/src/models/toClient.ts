@@ -18,6 +18,7 @@ export const toClientJob = ({
   salaryRange,
   requiredExperience,
   summary,
+  workTimeBasis,
 }: Job): ClientJob => {
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
@@ -31,6 +32,7 @@ export const toClientJob = ({
     postTS,
     applyUrl,
     isRemote: presence === "remote",
+    workTimeBasis: workTimeBasis ?? "",
     location: primaryLocation ? normalizedLocation(primaryLocation) : "",
     facets: {
       summary: summary ?? undefined,
