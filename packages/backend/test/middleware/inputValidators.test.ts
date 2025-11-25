@@ -165,6 +165,11 @@ suite("useFilters", () => {
     { isRemote: "FALSE" },
     { isRemote: 0 },
     { isRemote: 1 },
+    { workTimeBasis: "full_time" },
+    { workTimeBasis: "part_time" },
+    { workTimeBasis: "variable" },
+    { workTimeBasis: "per_diem" },
+    { workTimeBasis: "" },
     { title: SEARCH_TERM },
     { location: SEARCH_TERM },
     { daysSince: "30" },
@@ -176,6 +181,7 @@ suite("useFilters", () => {
     {
       companyId,
       isRemote: "true",
+      workTimeBasis: "full_time",
       title: SEARCH_TERM,
       location: SEARCH_TERM,
       daysSince: "30",
@@ -214,6 +220,9 @@ suite("useFilters", () => {
 
   const invalidCases = [
     { companyId: ID_INVALID_LENGTH },
+    { workTimeBasis: "invalid_value" },
+    { workTimeBasis: "fulltime" },
+    { workTimeBasis: 123 },
     { title: SEARCH_TOO_SHORT },
     { title: SEARCH_TOO_LONG },
     { location: SEARCH_TOO_SHORT },
