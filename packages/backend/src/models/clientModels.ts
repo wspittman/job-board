@@ -31,9 +31,8 @@ export interface RefreshJobsOptions {
 // #region Output Models
 
 /**
- * Prior to the DB model changes, these were equivalent to the DB models.
- * Now, they are set to what the DB models _used to be_.
- * This is to avoid changing the client models in the frontend for now.
+ * This is shaped by the legacy DB models, to avoid changing the frontend too much too fast.
+ * They are gradually being updated.
  */
 
 export interface ClientJob {

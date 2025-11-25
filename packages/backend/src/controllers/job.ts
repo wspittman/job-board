@@ -239,6 +239,10 @@ async function readJobsByFilters({
     }
   }
 
+  if (workTimeBasis) {
+    query.whereCondition("workTimeBasis", "=", workTimeBasis);
+  }
+
   if (daysSince) {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
@@ -255,10 +259,6 @@ async function readJobsByFilters({
 
   if (title) {
     query.whereCondition("title", "CONTAINS", title);
-  }
-
-  if (workTimeBasis) {
-    query.whereCondition("workTimeBasis", "=", workTimeBasis);
   }
 
   if (location) {

@@ -44,7 +44,7 @@ const FiltersSchema = z.object({
   companyId: coerceString(IdSchema),
   jobId: coerceString(IdSchema),
   isRemote: coerceString(z.stringbool()),
-  workTimeBasis: coerceString(WorkTimeBasis),
+  workTimeBasis: soft(WorkTimeBasis),
   title: soft(SearchSchema),
   location: soft(SearchSchema),
   daysSince: coerceInt(z.int().positive().max(365)),
