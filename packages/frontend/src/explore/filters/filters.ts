@@ -26,81 +26,77 @@ interface FormElementDef extends FormElementProps {
   type: "jb-form-input" | "jb-form-select" | "jb-form-combobox";
 }
 
-const filterDefs: FormElementDef[] = [
-  {
-    type: "jb-form-input",
-    name: "title",
-    label: "Title",
-  },
-  {
-    type: "jb-form-combobox",
-    name: "companyId",
-    label: "Company",
-  },
-  {
-    type: "jb-form-select",
-    name: "isRemote",
-    label: "Remote",
-    options: [
-      { label: "Remote", value: "true" },
-      { label: "In-Person / Hybrid", value: "false" },
-    ],
-  },
-  {
-    type: "jb-form-input",
-    name: "location",
-    label: "Location",
-    prefix: "Working from",
-  },
-  {
-    type: "jb-form-input",
-    name: "minSalary",
-    label: "Minimum Salary",
-    prefix: "$",
-    validation: {
-      type: "int",
-      min: 0,
-      max: 9_999_999,
+const filterDefs: Record<string, FormElementDef[]> = {
+  "The Work": [
+    {
+      type: "jb-form-input",
+      name: "title",
+      label: "Title",
     },
-  },
-  {
-    type: "jb-form-input",
-    name: "maxExperience",
-    label: "Required Experience",
-    prefix: "I have",
-    suffix: "years experience",
-    validation: {
-      type: "int",
-      min: 0,
-      max: 99,
+    {
+      type: "jb-form-combobox",
+      name: "companyId",
+      label: "Company",
     },
-  },
-  {
-    type: "jb-form-input",
-    name: "daysSince",
-    label: "Posted Since",
-    suffix: "days ago",
-    validation: {
-      type: "int",
-      min: 1,
-      max: 999,
+  ],
+  Other: [
+    {
+      type: "jb-form-select",
+      name: "isRemote",
+      label: "Remote",
+      options: [
+        { label: "Remote", value: "true" },
+        { label: "In-Person / Hybrid", value: "false" },
+      ],
     },
-  },
-  {
-    // Hidden via CSS
-    type: "jb-form-input",
-    name: "jobId",
-    label: "Job ID",
-  },
-];
-
-const filterGroups: { label: string; names: FilterModelKey[] }[] = [
-  { label: "The Work", names: ["title", "companyId"] },
-  {
-    label: "Other",
-    names: ["isRemote", "location", "minSalary", "maxExperience", "daysSince", "jobId"],
-  },
-];
+    {
+      type: "jb-form-input",
+      name: "location",
+      label: "Location",
+      prefix: "Working from",
+    },
+    {
+      type: "jb-form-input",
+      name: "minSalary",
+      label: "Minimum Salary",
+      prefix: "$",
+      validation: {
+        type: "int",
+        min: 0,
+        max: 9_999_999,
+      },
+    },
+    {
+      type: "jb-form-input",
+      name: "maxExperience",
+      label: "Required Experience",
+      prefix: "I have",
+      suffix: "years experience",
+      validation: {
+        type: "int",
+        min: 0,
+        max: 99,
+      },
+    },
+    {
+      type: "jb-form-input",
+      name: "daysSince",
+      label: "Posted Since",
+      suffix: "days ago",
+      validation: {
+        type: "int",
+        min: 1,
+        max: 999,
+      },
+    },
+    {
+      // Hidden via CSS
+      type: "jb-form-input",
+      name: "jobId",
+      label: "Job ID",
+    },
+  ],
+} as const;
 
 /**
  * Custom element that manages the filters pane, exposing user selections via callbacks.
@@ -154,7 +150,9 @@ export class Filters extends ComponentBase {
       const options = await metadataModel.getCompanyFormOptions();
       if (!this.isConnected) return;
 
-      const def = filterDefs.find((def) => def.name === "companyId");
+      const def = filterDefs["The Work"]?.find(
+        (def) => def.name === "companyId"
+      );
       if (!def) return;
 
       this.#inputs.get("companyId")?.init({
@@ -179,26 +177,22 @@ export class Filters extends ComponentBase {
   #appendInputs(): void {
     const onChange = () => this.#debounceOnChange();
     const fragment = document.createDocumentFragment();
-    const defsByName = new Map(filterDefs.map((def) => [def.name, def] as const));
 
-    for (const group of filterGroups) {
+    for (const [groupLabel, defs] of Object.entries(filterDefs)) {
       const section = document.createElement("section");
       section.className = "group";
 
       const heading = document.createElement("p");
       heading.className = "group-label";
-      heading.textContent = group.label;
+      heading.textContent = groupLabel;
 
       const fields = document.createElement("div");
       fields.className = "group-fields";
 
-      for (const name of group.names) {
-        const props = defsByName.get(name);
-        if (!props) continue;
-
+      for (const props of defs) {
         const el = this.#createFromFilterDef({ ...props, onChange });
         fields.append(el);
-        this.#inputs.set(name as FilterModelKey, el);
+        this.#inputs.set(props.name as FilterModelKey, el);
       }
 
       section.append(heading, fields);
