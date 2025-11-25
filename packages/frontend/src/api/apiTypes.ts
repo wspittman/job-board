@@ -1,3 +1,10 @@
+export type WorkTimeBasis =
+  | "full_time"
+  | "part_time"
+  | "variable"
+  | "per_diem"
+  | "";
+
 export interface MetadataModelApi {
   companyCount: number;
   companyNames: [string, string][];
@@ -15,6 +22,7 @@ export interface JobModelApi {
   applyUrl: string;
   // Extracted values with fallbacks
   isRemote: boolean;
+  workTimeBasis: WorkTimeBasis;
   location: string;
   // Facets extracted from the job description
   facets?: {
@@ -29,6 +37,7 @@ export interface FilterModelApi {
   companyId?: string;
   jobId?: string;
   isRemote?: boolean;
+  workTimeBasis?: WorkTimeBasis;
   // Substring Match
   title?: string;
   location?: string;

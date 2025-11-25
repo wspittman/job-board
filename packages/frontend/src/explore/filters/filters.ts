@@ -26,12 +26,25 @@ interface FormElementDef extends FormElementProps {
   type: "jb-form-input" | "jb-form-select" | "jb-form-combobox";
 }
 
+const workTimeBasisOptions: FormElementDef["options"] = [
+  { label: "Full-time", value: "full_time" },
+  { label: "Part-time", value: "part_time" },
+  { label: "Variable", value: "variable" },
+  { label: "Per diem", value: "per_diem" },
+];
+
 const filterDefs: Record<string, FormElementDef[]> = {
   "The Work": [
     {
       type: "jb-form-input",
       name: "title",
       label: "Title",
+    },
+    {
+      type: "jb-form-select",
+      name: "workTimeBasis",
+      label: "Hours / Schedule",
+      options: workTimeBasisOptions,
     },
     {
       type: "jb-form-combobox",
