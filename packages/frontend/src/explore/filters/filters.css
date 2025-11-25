@@ -46,6 +46,30 @@
   }
 }
 
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius);
+  border: 1px solid var(--bg-border);
+  background: var(--bg-surface);
+}
+
+.group-label {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-xxs);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.group-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
 @media (min-width: 901px) {
   .toggle {
     display: inline-flex;

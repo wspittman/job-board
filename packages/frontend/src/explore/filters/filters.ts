@@ -94,6 +94,14 @@ const filterDefs: FormElementDef[] = [
   },
 ];
 
+const filterGroups: { label: string; names: FilterModelKey[] }[] = [
+  { label: "The Work", names: ["title", "companyId"] },
+  {
+    label: "Other",
+    names: ["isRemote", "location", "minSalary", "maxExperience", "daysSince", "jobId"],
+  },
+];
+
 /**
  * Custom element that manages the filters pane, exposing user selections via callbacks.
  */
@@ -171,10 +179,30 @@ export class Filters extends ComponentBase {
   #appendInputs(): void {
     const onChange = () => this.#debounceOnChange();
     const fragment = document.createDocumentFragment();
-    for (const props of filterDefs) {
-      const el = this.#createFromFilterDef({ ...props, onChange });
-      fragment.append(el);
-      this.#inputs.set(props.name as FilterModelKey, el);
+    const defsByName = new Map(filterDefs.map((def) => [def.name, def] as const));
+
+    for (const group of filterGroups) {
+      const section = document.createElement("section");
+      section.className = "group";
+
+      const heading = document.createElement("p");
+      heading.className = "group-label";
+      heading.textContent = group.label;
+
+      const fields = document.createElement("div");
+      fields.className = "group-fields";
+
+      for (const name of group.names) {
+        const props = defsByName.get(name);
+        if (!props) continue;
+
+        const el = this.#createFromFilterDef({ ...props, onChange });
+        fields.append(el);
+        this.#inputs.set(name as FilterModelKey, el);
+      }
+
+      section.append(heading, fields);
+      fragment.append(section);
     }
     this.#form.append(fragment);
   }
