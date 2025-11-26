@@ -53,7 +53,7 @@ export class Details extends ComponentBase {
   async #render() {
     if (!this.#job) return;
 
-    const { title, company } = await this.#job.getDisplayStrings();
+    const { title, company } = await this.#job.getDisplayDetail();
     this.setManyTexts({ title, company });
 
     await this.#jobChips.init({ job: this.#job });

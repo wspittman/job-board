@@ -157,7 +157,7 @@
   display: none;
 }
 
-.gh-btn {
+.ext-link {
   display: inline-flex;
   border-radius: 999px;
 
@@ -218,7 +218,7 @@
     margin: var(--space-sm);
   }
 
-  .gh-btn {
+  .ext-link {
     align-items: center;
     padding: var(--space-md);
     gap: var(--space-sm);
@@ -226,16 +226,24 @@
     text-decoration: none;
     transition: background-color 150ms ease-in-out;
 
-    &::before {
-      content: "View on GitHub";
-    }
-
     &:hover {
       background: var(--bg-hover);
     }
 
     &:active {
       background: var(--bg-active);
+    }
+  }
+
+  .bsky-btn {
+    &::before {
+      content: "Follow on Bluesky";
+    }
+  }
+
+  .gh-btn {
+    &::before {
+      content: "View on GitHub";
     }
   }
 }

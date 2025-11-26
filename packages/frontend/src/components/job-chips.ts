@@ -32,11 +32,9 @@ export class JobChips extends ComponentBase {
   async init({ job, useShort }: Props) {
     const element = this.getEl<HTMLDivElement>("container")!;
 
-    const { location, post, salary, experience } = await job.getDisplayStrings(
-      useShort
-    );
+    const { location, post, ...rest } = await job.getDisplayFacets(useShort);
 
-    const labels = [salary, experience];
+    const labels = Object.values(rest);
     this.#pend(labels, location, location === "Remote");
     this.#pend(labels, post, useShort && !post.endsWith("days ago"));
 

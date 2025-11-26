@@ -1,84 +1,63 @@
+import { z } from "dry-utils-openai";
 import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
-import type { ATS, CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
+import { WorkTimeBasis } from "../models/enums.ts";
+import type { CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
-const MAX_ID_LENGTH = 100;
-const MAX_ARRAY_LENGTH = 50;
-const MIN_SEARCH_LENGTH = 3;
-const MAX_SEARCH_LENGTH = 100;
-const MIN_DAYS = 1;
-const MAX_DAYS = 365;
-const MIN_EXPERIENCE = 0;
-const MAX_EXPERIENCE = 100;
-const MIN_SALARY = 1;
-const MAX_SALARY = 10000000;
+// Z Helpers
+type Z<T> = z.ZodType<T>;
+const zArray = <T>(zt: Z<T>) => z.array(zt).nonempty().max(50);
+const soft = <T>(zt: Z<T>) => zt.optional().catch(undefined);
+const coerceString = <T>(zt: Z<T>) => soft(z.preprocess(String, zt));
+const coerceInt = <T>(zt: Z<T>) =>
+  soft(
+    z.preprocess(
+      (val) => (typeof val === "string" ? parseInt(val, 10) : val),
+      zt
+    )
+  );
+
+// Basic Schema Components
+const AtsSchema = z.enum(["greenhouse", "lever"] as const);
+const IdSchema = z.string().trim().nonempty().max(100);
+const SearchSchema = z.string().trim().min(3).max(100);
+const TimestampSchema = z
+  .number()
+  .min(new Date("2024-01-01").getTime())
+  .refine((val) => val <= Date.now(), {
+    message: "Timestamp cannot be in the future",
+  });
+
+// Key Schemas
+const CompanyKeySchema = z.object({ id: IdSchema, ats: AtsSchema });
+const CompanyKeysSchema = z.object({ ids: zArray(IdSchema), ats: AtsSchema });
+const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
+
+const RefreshJobsOptionsSchema = z.strictObject({
+  ats: AtsSchema.optional(),
+  companyId: IdSchema.optional(),
+  replaceJobsOlderThan: TimestampSchema.optional(),
+});
+
+const FiltersSchema = z.object({
+  companyId: coerceString(IdSchema),
+  jobId: coerceString(IdSchema),
+  isRemote: coerceString(z.stringbool()),
+  workTimeBasis: soft(WorkTimeBasis),
+  title: soft(SearchSchema),
+  location: soft(SearchSchema),
+  daysSince: coerceInt(z.int().positive().max(365)),
+  maxExperience: coerceInt(z.int().nonnegative().max(100)),
+  minSalary: coerceInt(z.int().positive().max(10_000_000)),
+});
 
 /**
  * Validate search filter options
  * @returns Validated Filters
  */
-export function useFilters({
-  companyId,
-  jobId,
-  isRemote,
-  title,
-  location,
-  daysSince,
-  maxExperience,
-  minSalary,
-}: any = {}): Filters {
-  const filters: Filters = {};
-
-  if (companyId && companyId.length <= MAX_ID_LENGTH) {
-    filters.companyId = companyId;
-  }
-
-  if (jobId && jobId.length <= MAX_ID_LENGTH) {
-    filters.jobId = jobId;
-  }
-
-  if (isRemote != null) {
-    filters.isRemote = String(isRemote).toLowerCase() === "true";
-  }
-
-  if (title?.length >= MIN_SEARCH_LENGTH && title.length <= MAX_SEARCH_LENGTH) {
-    filters.title = title;
-  }
-
-  if (
-    location?.length >= MIN_SEARCH_LENGTH &&
-    location.length <= MAX_SEARCH_LENGTH
-  ) {
-    filters.location = location;
-  }
-
-  if (daysSince) {
-    const value = parseInt(daysSince);
-
-    if (Number.isFinite(value) && value >= MIN_DAYS && value <= MAX_DAYS) {
-      filters.daysSince = value;
-    }
-  }
-
-  if (maxExperience != null) {
-    const value = parseInt(maxExperience);
-    if (
-      Number.isFinite(value) &&
-      value >= MIN_EXPERIENCE &&
-      value <= MAX_EXPERIENCE
-    ) {
-      filters.maxExperience = value;
-    }
-  }
-
-  if (minSalary) {
-    const value = parseInt(minSalary);
-    if (Number.isFinite(value) && value >= MIN_SALARY && value <= MAX_SALARY) {
-      filters.minSalary = value;
-    }
-  }
-
+export function useFilters(input: unknown): Filters {
+  const filters = stripObj(zParse(FiltersSchema, input));
   logProperty("Input_Filters", filters);
   return filters;
 }
@@ -88,11 +67,8 @@ export function useFilters({
  * @returns Validated CompanyKey
  * @throws AppError if validation fails
  */
-export function useCompanyKey({ id, ats }: any = {}): CompanyKey {
-  const companyKey = {
-    id: validateId("id", id),
-    ats: validateAts("ats", ats),
-  };
+export function useCompanyKey(input: unknown): CompanyKey {
+  const companyKey = zParse(CompanyKeySchema, input);
   logProperty("Input_CompanyKey", companyKey);
   return companyKey;
 }
@@ -102,11 +78,8 @@ export function useCompanyKey({ id, ats }: any = {}): CompanyKey {
  * @returns Validated CompanyKeys
  * @throws AppError if validation fails
  */
-export function useCompanyKeys({ ids, ats }: any = {}): CompanyKeys {
-  const companyKeys = {
-    ids: validateIds("ids", ids),
-    ats: validateAts("ats", ats),
-  };
+export function useCompanyKeys(input: unknown): CompanyKeys {
+  const companyKeys = zParse(CompanyKeysSchema, input);
   logProperty("Input_CompanyKeys", companyKeys);
   return companyKeys;
 }
@@ -116,11 +89,8 @@ export function useCompanyKeys({ ids, ats }: any = {}): CompanyKeys {
  * @returns Validated JobKey
  * @throws AppError if validation fails
  */
-export function useJobKey({ id, companyId }: any = {}): JobKey {
-  const jobKey = {
-    id: validateId("id", id),
-    companyId: validateId("companyId", companyId),
-  };
+export function useJobKey(input: unknown): JobKey {
+  const jobKey = zParse(JobKeySchema, input);
   logProperty("Input_JobKey", jobKey);
   return jobKey;
 }
@@ -130,118 +100,48 @@ export function useJobKey({ id, companyId }: any = {}): JobKey {
  * @returns Validated RefreshJobsOptions
  * @throws AppError if validation fails
  */
-export function useRefreshJobsOptions({
-  ats,
-  companyId,
-  replaceJobsOlderThan,
-  ...rest
-}: any = {}): RefreshJobsOptions {
-  const options: RefreshJobsOptions = {};
-
-  if (Object.keys(rest).length) {
-    throw new AppError("Unknown options");
+export function useRefreshJobsOptions(input: unknown): RefreshJobsOptions {
+  // Manually pre-process "now" -> Date.now()
+  if (
+    typeof input === "object" &&
+    !!input &&
+    "replaceJobsOlderThan" in input &&
+    input.replaceJobsOlderThan === "now"
+  ) {
+    input.replaceJobsOlderThan = Date.now();
   }
 
-  if (ats) {
-    options.ats = validateAts("ats", ats);
-  }
-
-  if (companyId) {
-    options.companyId = validateId("companyId", companyId);
-  }
+  const options = zParse(RefreshJobsOptionsSchema, input);
 
   if (options.companyId && !options.ats) {
     throw new AppError("ats field is required when using companyId");
-  }
-
-  if (replaceJobsOlderThan === "now") {
-    options.replaceJobsOlderThan = Date.now();
-  } else if (replaceJobsOlderThan) {
-    options.replaceJobsOlderThan = validateTimestamp(
-      "replaceJobsOlderThan",
-      replaceJobsOlderThan,
-      new Date("2024-01-01").getTime(),
-      Date.now()
-    );
   }
 
   logProperty("Input_RefreshJobsOptions", options);
   return options;
 }
 
-function validateId(field: string, id: unknown): string {
-  if (!id) {
-    throw new AppError(`${field} field is required`);
+/**
+ * Parse and validate data using a Zod schema
+ * @param zt - Zod schema to use for validation
+ * @param data - Data to validate
+ * @returns Validated data
+ * @throws AppError if validation fails
+ */
+function zParse<T>(zt: Z<T>, data: unknown): T {
+  const result = zt.safeParse(data);
+  if (!result.success) {
+    const { path, message } = result.error.issues[0] ?? {};
+    throw new AppError(`${path?.join(".")} field is invalid: ${message}`);
   }
-
-  if (typeof id !== "string") {
-    throw new AppError(`${field} field is invalid`);
-  }
-
-  if (id.length > MAX_ID_LENGTH) {
-    throw new AppError(`${field} field is too long`);
-  }
-
-  return id;
+  return result.data;
 }
 
-function validateIds(field: string, ids: unknown): string[] {
-  if (!ids) {
-    throw new AppError(`${field} field is required`);
-  }
-
-  if (!Array.isArray(ids)) {
-    throw new AppError(`${field} field is invalid`);
-  }
-
-  if (!ids.length) {
-    throw new AppError(`${field} field is empty`);
-  }
-
-  if (ids.length > MAX_ARRAY_LENGTH) {
-    throw new AppError(`${field} field has too many items`);
-  }
-
-  return ids.map((id, i) => validateId(field + i, id));
-}
-
-function validateAts(field: string, ats: unknown): ATS {
-  if (!ats) {
-    throw new AppError(`${field} field is required`);
-  }
-
-  if (ats !== "greenhouse" && ats !== "lever") {
-    throw new AppError(`${field} field is invalid`);
-  }
-
-  return ats;
-}
-
-function validateTimestamp(
-  field: string,
-  timestamp: unknown,
-  min?: number,
-  max?: number
-): number {
-  if (!timestamp) {
-    throw new AppError(`${field} field is required`);
-  }
-
-  if (typeof timestamp !== "number") {
-    throw new AppError(`${field} field is invalid`);
-  }
-
-  if (!Number.isFinite(timestamp)) {
-    throw new AppError(`${field} field is invalid`);
-  }
-
-  if (min && timestamp < min) {
-    throw new AppError(`${field} field is too low`);
-  }
-
-  if (max && timestamp > max) {
-    throw new AppError(`${field} field is too high`);
-  }
-
-  return timestamp;
+/**
+ * Remove properties with null or undefined values from an object
+ */
+function stripObj<T extends Record<string, unknown>>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, val]) => val != null)
+  ) as T;
 }

@@ -141,7 +141,7 @@ app.use(async (req, res, next) => {
 app.use(
   express.static(__dist, {
     setHeaders(res) {
-      const { ext, compEnc, dir } = res.req._urlParts ?? {};
+      const { ext, compEnc, dir, base } = res.req._urlParts ?? {};
 
       if (ext) {
         res.type(ext);
@@ -155,6 +155,12 @@ app.use(
       if (dir?.startsWith("/assets")) {
         // Cache hashed assets for 1 year
         res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        return;
+      }
+
+      if (base && ["favicon", "og-image", "robots", "sitemap"].includes(base)) {
+        // Cache site metadata files for 1 week
+        res.setHeader("Cache-Control", "public, max-age=604800");
         return;
       }
 

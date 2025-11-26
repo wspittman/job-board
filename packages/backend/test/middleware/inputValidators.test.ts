@@ -6,13 +6,7 @@ import {
   useFilters,
   useJobKey,
   useRefreshJobsOptions,
-} from "../src/middleware/inputValidators";
-
-/*
-We are waiting on Azure to support Node.js 22 to add proper test scripting.
-For now this can be run locally by short circuiting telemetry.getContext() and then running
-node --import tsx --test tests\inputValidators.test.ts
-*/
+} from "../../src/middleware/inputValidators";
 
 // Simple valid keys
 const ats = "lever";
@@ -169,7 +163,13 @@ suite("useFilters", () => {
     { isRemote: "TRUE" },
     { isRemote: "false" },
     { isRemote: "FALSE" },
-    { isRemote: 123 },
+    { isRemote: 0 },
+    { isRemote: 1 },
+    { workTimeBasis: "full_time" },
+    { workTimeBasis: "part_time" },
+    { workTimeBasis: "variable" },
+    { workTimeBasis: "per_diem" },
+    { workTimeBasis: "" },
     { title: SEARCH_TERM },
     { location: SEARCH_TERM },
     { daysSince: "30" },
@@ -181,6 +181,7 @@ suite("useFilters", () => {
     {
       companyId,
       isRemote: "true",
+      workTimeBasis: "full_time",
       title: SEARCH_TERM,
       location: SEARCH_TERM,
       daysSince: "30",
@@ -191,7 +192,11 @@ suite("useFilters", () => {
 
   function coerceBool(key: string, val?: unknown) {
     if (val == null) return {};
-    return { [key]: String(val).toLowerCase() === "true" };
+    const str = String(val).toLowerCase();
+    const hasTrue = ["true", "1", "yes", "on", "y", "enabled"].includes(str);
+    const hasFalse = ["false", "0", "no", "off", "n", "disabled"].includes(str);
+    if (!hasTrue && !hasFalse) return {};
+    return { [key]: hasTrue };
   }
 
   function coerceInt(key: string, val?: string | number) {
@@ -215,6 +220,9 @@ suite("useFilters", () => {
 
   const invalidCases = [
     { companyId: ID_INVALID_LENGTH },
+    { workTimeBasis: "invalid_value" },
+    { workTimeBasis: "fulltime" },
+    { workTimeBasis: 123 },
     { title: SEARCH_TOO_SHORT },
     { title: SEARCH_TOO_LONG },
     { location: SEARCH_TOO_SHORT },

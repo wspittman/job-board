@@ -31,7 +31,7 @@ export class JobCard extends ComponentBase {
 
     element.getEl<JobChips>("chips")?.init({ job, useShort: true });
 
-    const { title, company, summary } = await job.getDisplayStrings();
+    const { title, company, summary } = await job.getDisplayDetail();
 
     element.setManyTexts({
       title,

@@ -103,6 +103,7 @@ export const WorkTimeBasis = z
       "Examples:",
       "'FT', '40 hrs/wk' → full_time;",
       "'PT', '20 hrs/wk' → part_time;",
+      "'Independent Contractor - paid per game covered' → per_diem;",
       "'as-needed/on-call' → variable or per_diem (choose per_diem if day/shift-based pay).",
     ].join(" ")
   );
