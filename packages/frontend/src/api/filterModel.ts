@@ -1,14 +1,8 @@
+import { toWorkTimeBasis, toWorkTimeBasisLabel } from "./apiEnums";
 import type { FilterModelApi } from "./apiTypes";
 import { metadataModel } from "./metadataModel";
 
 export type FilterModelKey = keyof FilterModelApi;
-
-type WorkTimeBasis = NonNullable<FilterModelApi["workTimeBasis"]>;
-export const workTimeBasisOptions: Record<WorkTimeBasis, string> = {
-  full_time: "Full-time",
-  part_time: "Part-time",
-  per_diem: "Per diem",
-};
 
 /**
  * Represents the filter criteria for job searches.
@@ -91,10 +85,8 @@ export class FilterModel {
       switch (key) {
         case "companyId":
           return [key, `Company: ${company}`];
-        case "workTimeBasis": {
-          const label = workTimeBasisOptions[value as WorkTimeBasis];
-          return [key, label ?? String(value)];
-        }
+        case "workTimeBasis":
+          return [key, toWorkTimeBasisLabel(value)];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
@@ -135,7 +127,7 @@ export class FilterModel {
   #fromGeneric(get: (key: string) => string | null | undefined): void {
     this.#filters.title = normString(get("title"));
     this.#filters.companyId = normString(get("companyId"));
-    this.#filters.workTimeBasis = normWorkTimeBasis(get("workTimeBasis"));
+    this.#filters.workTimeBasis = toWorkTimeBasis(get("workTimeBasis"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
     this.#filters.location = normString(get("location"));
     this.#filters.minSalary = normNumber(get("minSalary"));
@@ -152,16 +144,6 @@ const isEmpty = (v: unknown) => v == undefined || v === "";
 const normString = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return isEmpty(trimmed) || trimmed.length < 3 ? undefined : trimmed;
-};
-
-const normWorkTimeBasis = (
-  value?: string | null
-): WorkTimeBasis | undefined => {
-  const trimmed = value?.trim() as WorkTimeBasis;
-  if (isEmpty(trimmed)) return undefined;
-  return Object.keys(workTimeBasisOptions).includes(trimmed)
-    ? trimmed
-    : undefined;
 };
 
 const normNumber = (value?: string | null): number | undefined => {

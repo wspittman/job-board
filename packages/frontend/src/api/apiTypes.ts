@@ -1,3 +1,5 @@
+import type { WorkTimeBasis } from "./apiEnums";
+
 export interface MetadataModelApi {
   companyCount: number;
   companyNames: [string, string][];
@@ -30,7 +32,7 @@ export interface FilterModelApi {
   companyId?: string;
   jobId?: string;
   isRemote?: boolean;
-  workTimeBasis?: "full_time" | "part_time" | "per_diem";
+  workTimeBasis?: WorkTimeBasis;
   // Substring Match
   title?: string;
   location?: string;

@@ -2,11 +2,8 @@ import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
 
-import {
-  FilterModel,
-  workTimeBasisOptions,
-  type FilterModelKey,
-} from "../../api/filterModel";
+import { workTimeBasisOptions } from "../../api/apiEnums";
+import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
 import { Chip } from "../../components/chip";
 import { ComponentBase } from "../../components/componentBase";
@@ -46,10 +43,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-select",
       name: "workTimeBasis",
       label: "Hours",
-      options: Object.entries(workTimeBasisOptions).map(([value, label]) => ({
-        label,
-        value,
-      })),
+      options: workTimeBasisOptions,
     },
   ],
   Other: [

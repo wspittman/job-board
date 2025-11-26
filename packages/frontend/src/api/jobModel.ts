@@ -1,4 +1,5 @@
 import { api, API_URL } from "./api";
+import { toWorkTimeBasisLabel } from "./apiEnums";
 import type { JobModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 import { metadataModel } from "./metadataModel";
@@ -36,10 +37,21 @@ export class JobModel {
     return `${base}?companyId=${this.#job.companyId}&jobId=${this.#job.id}`;
   }
 
-  async getDisplayStrings(useShort = false) {
-    const { title, company, isRemote, location, postTS, facets } = this.#job;
-    const { salary, experience, summary } = facets ?? {};
+  async getDisplayDetail() {
+    const { title, company, facets } = this.#job;
+    const { summary } = facets ?? {};
     const companyFriendly = await metadataModel.getCompanyFriendlyName(company);
+
+    return {
+      title,
+      company: companyFriendly ?? company,
+      summary,
+    };
+  }
+
+  async getDisplayFacets(useShort = false) {
+    const { isRemote, location, postTS, facets, workTimeBasis } = this.#job;
+    const { salary, experience } = facets ?? {};
 
     let loc = location;
     if (isRemote) {
@@ -61,13 +73,11 @@ export class JobModel {
       : new Date(postTS).toLocaleDateString();
 
     return {
-      title,
-      company: companyFriendly ?? company,
-      summary,
       location: loc,
       salary: salary ? `$${salary.toLocaleString()}` : undefined,
       experience: exp,
       post,
+      workTimeBasis: toWorkTimeBasisLabel(workTimeBasis),
     };
   }
 
