@@ -25,7 +25,7 @@ type Pane = keyof typeof panes;
 panes.filters.init({ onChange: onFilterChange, initialFilters });
 panes.results.init({ onSelect: onJobSelect });
 
-let activePane: Pane = "results";
+let activePane: Pane = initialFilters.isEmpty() ? "filters" : "results";
 const jobMap = new Map<string, JobModel>();
 let lastRequestId = 0;
 
@@ -131,5 +131,5 @@ function setActivePane(nextPane: Pane) {
   activePane = nextPane;
 }
 
-setActivePane("results");
+setActivePane(activePane);
 jobDeselect();
