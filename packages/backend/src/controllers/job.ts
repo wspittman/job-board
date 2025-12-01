@@ -15,11 +15,9 @@ type EnhancedFilters = Omit<Filters, "location"> & {
   location?: Location;
 };
 
-const jobInfoQueue = new AsyncQueue(
-  "RefreshJobInfo",
-  refreshJobInfo,
-  metadataJobExecutor
-);
+const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
+  onComplete: metadataJobExecutor,
+});
 
 /**
  * Retrieves jobs matching the specified filters

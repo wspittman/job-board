@@ -1,5 +1,12 @@
+import { setTimeout } from "node:timers/promises";
 import { AsyncExecutor } from "./asyncExecutor.ts";
 import { logError, logProperty, withAsyncContext } from "./telemetry.ts";
+
+interface Options {
+  onComplete?: AsyncExecutor;
+  concurrentLimit?: number;
+  taskDelayMs?: number;
+}
 
 class Node<T> {
   public value: T;
@@ -22,25 +29,25 @@ export class AsyncQueue<T> {
   protected name: string;
   protected fn: (task: T) => Promise<void>;
   protected onComplete?: AsyncExecutor;
-  protected batchSize: number;
+  protected concurrentLimit: number;
+  protected taskDelayMs: number;
 
   /**
    * Creates a new AsyncQueue instance.
    * @param name - The name of the queue for context tracking
    * @param fn - The async function to process each task
-   * @param onComplete - Optional executor to run on task completion
-   * @param batchSize - Maximum number of concurrent tasks (default: 5)
+   * @param options - Configuration options for the queue
    */
   constructor(
     name: string,
     fn: (task: T) => Promise<void>,
-    onComplete?: AsyncExecutor,
-    batchSize = 5
+    { concurrentLimit = 5, taskDelayMs = 0, onComplete }: Options = {}
   ) {
     this.name = name;
     this.fn = fn;
     this.onComplete = onComplete;
-    this.batchSize = batchSize;
+    this.concurrentLimit = concurrentLimit;
+    this.taskDelayMs = taskDelayMs;
   }
 
   /**
@@ -55,7 +62,7 @@ export class AsyncQueue<T> {
 
   private begin() {
     // If there are no tasks or the batch is full, return
-    if (!this.head || this.active >= this.batchSize) return;
+    if (!this.head || this.active >= this.concurrentLimit) return;
 
     this.runTask(this.dequeue());
     this.begin();
@@ -98,7 +105,7 @@ export class AsyncQueue<T> {
       logError(error);
     } finally {
       this.active--;
-      this.begin();
+      setTimeout(this.taskDelayMs, () => this.begin());
     }
   }
 }
