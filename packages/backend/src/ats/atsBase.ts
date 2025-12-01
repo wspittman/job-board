@@ -65,7 +65,7 @@ export abstract class ATSBase {
 
     try {
       const response = await fetch(`${this.baseUrl}/${id}/${url}`, {
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(15_000),
       });
 
       const { status, statusText, ok } = response;
