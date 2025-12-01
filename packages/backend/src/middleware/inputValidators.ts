@@ -128,7 +128,7 @@ export function useRefreshJobsOptions(input: unknown): RefreshJobsOptions {
  * @returns Validated data
  * @throws AppError if validation fails
  */
-function zParse<T>(zt: Z<T>, data: unknown): T {
+function zParse<T>(zt: Z<T>, data: unknown = {}): T {
   const result = zt.safeParse(data);
   if (!result.success) {
     const { path, message } = result.error.issues[0] ?? {};
