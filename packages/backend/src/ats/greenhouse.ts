@@ -132,7 +132,7 @@ export class Greenhouse extends ATSBase {
       companyId: companyId,
 
       // Basic
-      title,
+      title: title?.trim(),
       description: "",
       postTS: new Date(updated_at).getTime(),
       applyUrl: absolute_url,
