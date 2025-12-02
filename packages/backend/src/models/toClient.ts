@@ -2,8 +2,6 @@ import { normalizedLocation } from "../utils/location.ts";
 import type { ClientJob } from "./clientModels.ts";
 import type { Job } from "./models.ts";
 
-// This file is going to get a lot more interesting later on
-
 export const toClientJobs = (jobs: Job[]): ClientJob[] => jobs.map(toClientJob);
 
 export const toClientJob = ({
@@ -19,6 +17,7 @@ export const toClientJob = ({
   requiredExperience,
   summary,
   workTimeBasis,
+  jobFamily,
 }: Job): ClientJob => {
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
@@ -33,6 +32,7 @@ export const toClientJob = ({
     applyUrl,
     isRemote: presence === "remote",
     workTimeBasis: workTimeBasis ?? "",
+    jobFamily: jobFamily ?? "",
     location: primaryLocation ? normalizedLocation(primaryLocation) : "",
     facets: {
       summary: summary ?? undefined,
