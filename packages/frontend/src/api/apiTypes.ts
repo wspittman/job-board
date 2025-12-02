@@ -1,4 +1,4 @@
-import type { WorkTimeBasis } from "./apiEnums";
+import type { JobFamily, WorkTimeBasis } from "./apiEnums";
 
 export interface MetadataModelApi {
   companyCount: number;
@@ -15,11 +15,10 @@ export interface JobModelApi {
   description: string;
   postTS: number;
   applyUrl: string;
-  // Extracted values with fallbacks
   isRemote: boolean;
   workTimeBasis: string;
+  jobFamily: string;
   location: string;
-  // Facets extracted from the job description
   facets?: {
     summary?: string;
     salary?: number;
@@ -33,6 +32,7 @@ export interface FilterModelApi {
   jobId?: string;
   isRemote?: boolean;
   workTimeBasis?: WorkTimeBasis;
+  jobFamily?: JobFamily;
   // Substring Match
   title?: string;
   location?: string;

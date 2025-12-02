@@ -2,7 +2,7 @@ import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
 
-import { workTimeBasisOptions } from "../../api/apiEnums";
+import { jobFamilyOptions, workTimeBasisOptions } from "../../api/apiEnums";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
 import { Chip } from "../../components/chip";
@@ -44,6 +44,12 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "workTimeBasis",
       label: "Hours",
       options: workTimeBasisOptions,
+    },
+    {
+      type: "jb-form-select",
+      name: "jobFamily",
+      label: "Job Family",
+      options: jobFamilyOptions,
     },
   ],
   Other: [

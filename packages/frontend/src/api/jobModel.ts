@@ -1,5 +1,5 @@
 import { api, API_URL } from "./api";
-import { toWorkTimeBasisLabel } from "./apiEnums";
+import { toJobFamilyLabel, toWorkTimeBasisLabel } from "./apiEnums";
 import type { JobModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 import { metadataModel } from "./metadataModel";
@@ -50,7 +50,8 @@ export class JobModel {
   }
 
   async getDisplayFacets(useShort = false) {
-    const { isRemote, location, postTS, facets, workTimeBasis } = this.#job;
+    const { isRemote, location, postTS, facets, workTimeBasis, jobFamily } =
+      this.#job;
     const { salary, experience } = facets ?? {};
 
     let loc = location;
@@ -78,6 +79,7 @@ export class JobModel {
       experience: exp,
       post,
       workTimeBasis: toWorkTimeBasisLabel(workTimeBasis),
+      jobFamily: toJobFamilyLabel(jobFamily),
     };
   }
 
