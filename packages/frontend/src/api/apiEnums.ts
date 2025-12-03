@@ -1,7 +1,6 @@
 const workTimeBasis = {
   full_time: "Full-time",
   part_time: "Part-time",
-  per_diem: "Per diem",
 } as const;
 
 export type WorkTimeBasis = keyof typeof workTimeBasis;
