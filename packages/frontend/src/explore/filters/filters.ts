@@ -34,7 +34,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "title",
       label: "Title",
       tooltip:
-        "Search the job title text. This accepts partial matches, so 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
+        "A partial match search on job title text, so 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
     },
     {
       type: "jb-form-combobox",
@@ -51,6 +51,8 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-select",
       name: "jobFamily",
       label: "Job Family",
+      tooltip:
+        "A broad categorization of the job's primary function. Some jobs can be difficult to categorize, so leave this empty if your target role spans multiple functions.",
       options: jobFamilyOptions,
     },
   ],
@@ -74,6 +76,8 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-input",
       name: "minSalary",
       label: "Minimum Salary",
+      tooltip:
+        "Searches across both hourly and annual rates, and ignores currency symbols. We'll be working to improve controls here in the future.",
       prefix: "$",
       validation: {
         type: "int",
@@ -97,6 +101,9 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-input",
       name: "daysSince",
       label: "Posted Since",
+      tooltip:
+        "Filters to when jobs say they were posted, so '7' will show jobs posted in the last week. Some data sources do not provide posting dates, in which case we treat the date we first saw it as the posting date.",
+      prefix: "Posted within",
       suffix: "days ago",
       validation: {
         type: "int",
