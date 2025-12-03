@@ -33,6 +33,8 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-input",
       name: "title",
       label: "Title",
+      tooltip:
+        "Search the job title text. This accepts partial matches, so 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
     },
     {
       type: "jb-form-combobox",
