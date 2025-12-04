@@ -22,13 +22,13 @@ interface Props {
 const messageContent: Record<Message, [string, string, string]> = {
   AddFilters: [
     "Add Filters To Begin",
-    "Try to have fun with it!",
-    "As you apply filters, jobs will begin appearing here. We'll return the first 24 matches we find for your filter set. You can always adjust your filters until you have a great set of matches.",
+    "Start with a couple of filters to see tailored jobs",
+    "As you apply filters, we'll show the first 24 matching jobs. There are many filters, and you do not need to use every one. Instead, pick the ones that are most important to you. You can continue to adjust your filters until you have a great set of matches.",
   ],
   NoMatches: [
     "No Matches Found",
-    "Try adjusting your filters.",
-    "You may need to loosen your filters to find matches. Or maybe we don't have good jobs posted for you yet. =(",
+    "Let's widen the search and try again",
+    "Clear a few filters, broaden your salary or experience range, or try alternative titles (like 'talent' instead of 'recruiter'). If you are confident in your filters, we might not have good jobs posted for you today. New jobs are posted daily, so check back soon!",
   ],
   PartialMatches: [
     "24 Matches Shown",
