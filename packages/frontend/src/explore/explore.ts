@@ -8,12 +8,17 @@ import "./results/results.ts";
 import { FilterModel } from "../api/filterModel.ts";
 import { JobModel } from "../api/jobModel.ts";
 
+// Top-level state
+const jobMap = new Map<string, JobModel>();
+const urlParams = new URLSearchParams(location.search);
+const initialFilters = FilterModel.fromUrlSearchParams(urlParams);
+let activePane: Pane = initialFilters.isEmpty() ? "filters" : "results";
+let lastRequestId = 0;
+
+// #region Element references, initialization, and event handlers
+
 const actionButton = document.getElementById("action-button")!;
 actionButton.addEventListener("click", onActionClick);
-
-const initialFilters = FilterModel.fromUrlSearchParams(
-  new URLSearchParams(location.search)
-);
 
 const panes = {
   filters: document.querySelector("explore-filters")!,
@@ -25,9 +30,24 @@ type Pane = keyof typeof panes;
 panes.filters.init({ onChange: onFilterChange, initialFilters });
 panes.results.init({ onSelect: onJobSelect });
 
-let activePane: Pane = initialFilters.isEmpty() ? "filters" : "results";
-const jobMap = new Map<string, JobModel>();
-let lastRequestId = 0;
+/**
+ * Toggles between the filters and results panes when the primary action button is pressed.
+ */
+function onActionClick() {
+  const nextPane = activePane === "results" ? "filters" : "results";
+  setActivePane(nextPane);
+}
+
+/**
+ * Sets the selected job in the details pane and focuses the details view.
+ * @param jobId - Identifier of the job chosen from the results list.
+ */
+async function onJobSelect(jobId: string) {
+  await panes.details.updateJob(jobMap.get(jobId));
+  setActivePane("details");
+}
+
+// #endregion
 
 /**
  * Handles filter updates by syncing the URL, fetching jobs, and updating the UI panels.
@@ -38,8 +58,7 @@ async function onFilterChange(filters: FilterModel) {
   const requestId = ++lastRequestId;
 
   if (filters.isEmpty()) {
-    await panes.results.updateJobs(undefined);
-    await jobDeselect();
+    await setJobs();
     return;
   }
 
@@ -53,54 +72,15 @@ async function onFilterChange(filters: FilterModel) {
       return;
     }
 
-    if (!jobs.length) {
-      await panes.results.updateJobs([], isSavedJob);
-      await jobDeselect();
-      return;
-    }
-
-    jobMap.clear();
-    for (const job of jobs) {
-      jobMap.set(job.id, job);
-    }
-
-    await panes.results.updateJobs(jobs, isSavedJob);
-    await panes.details.updateJob(jobMap.get(jobs[0]!.id));
-    panes.details.toggleAttribute("empty", false);
+    await setJobs(jobs, isSavedJob);
   } catch (error) {
     if (requestId !== lastRequestId) {
       return;
     }
 
-    jobMap.clear();
+    await setJobs();
     panes.results.showError();
-    await jobDeselect();
   }
-}
-
-/**
- * Clears the active job selection and marks the details pane as empty.
- */
-async function jobDeselect() {
-  await panes.details.updateJob(undefined);
-  panes.details.toggleAttribute("empty", true);
-}
-
-/**
- * Sets the selected job in the details pane and focuses the details view.
- * @param jobId - Identifier of the job chosen from the results list.
- */
-async function onJobSelect(jobId: string) {
-  await panes.details.updateJob(jobMap.get(jobId));
-  setActivePane("details");
-}
-
-/**
- * Toggles between the filters and results panes when the primary action button is pressed.
- */
-function onActionClick() {
-  const nextPane = activePane === "results" ? "filters" : "results";
-  setActivePane(nextPane);
 }
 
 /**
@@ -113,6 +93,22 @@ function updateQueryString(filters: FilterModel) {
   history.replaceState({}, "", newUrl);
 }
 
+async function setJobs(jobs?: JobModel[], isSavedJob = false) {
+  jobMap.clear();
+  for (const job of jobs ?? []) {
+    jobMap.set(job.id, job);
+  }
+
+  const firstJob = jobs?.[0];
+
+  await Promise.all([
+    panes.results.updateJobs(jobs, isSavedJob),
+    panes.details.updateJob(firstJob),
+  ]);
+
+  panes.details.toggleAttribute("empty", !firstJob);
+}
+
 /**
  * Applies the active pane state by toggling attributes and updating the action button label.
  * @param nextPane - The pane identifier that should become active.
@@ -122,14 +118,20 @@ function setActivePane(nextPane: Pane) {
     element.toggleAttribute("inactive", pane !== nextPane);
   }
 
-  const isResultsPane = nextPane === "results";
-  const buttonLabel = isResultsPane ? "Show Filters" : "Close";
-
-  actionButton.toggleAttribute("close", !isResultsPane);
-  actionButton.textContent = buttonLabel;
-
   activePane = nextPane;
+  actionButton.textContent = getActionButtonLabel();
+}
+
+function getActionButtonLabel() {
+  switch (activePane) {
+    case "filters":
+      return "View Jobs";
+    case "results":
+      return "Show Filters";
+    case "details":
+      return "Back to Results";
+  }
 }
 
 setActivePane(activePane);
-jobDeselect();
+setJobs();
