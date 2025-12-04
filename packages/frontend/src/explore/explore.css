@@ -71,6 +71,12 @@ explore-details[empty] {
     &:focus-visible {
       box-shadow: var(--shadow-focus);
     }
+
+    &:disabled {
+      background: var(--secondary-disabled);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
   }
 
   explore-filters {

@@ -12,6 +12,7 @@
   --primary-soft: hsl(var(--palette-primary) 50% / 0.1);
   --primary-focus: hsl(var(--palette-primary) 50% / 0.2);
 
+  --secondary-disabled: hsl(var(--palette-secondary) 70%);
   --secondary-light: hsl(var(--palette-secondary) 60%);
   --secondary-main: hsl(var(--palette-secondary) 50%);
   --secondary-dark: hsl(var(--palette-secondary) 40%);

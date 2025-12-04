@@ -107,6 +107,7 @@ async function setJobs(jobs?: JobModel[], isSavedJob = false) {
   ]);
 
   panes.details.toggleAttribute("empty", !firstJob);
+  updateActionButton();
 }
 
 /**
@@ -119,13 +120,21 @@ function setActivePane(nextPane: Pane) {
   }
 
   activePane = nextPane;
+  updateActionButton();
+}
+
+function updateActionButton() {
   actionButton.textContent = getActionButtonLabel();
+  actionButton.toggleAttribute(
+    "disabled",
+    activePane === "filters" && !jobMap.size
+  );
 }
 
 function getActionButtonLabel() {
   switch (activePane) {
     case "filters":
-      return "View Jobs";
+      return `View ${jobMap.size} Jobs`;
     case "results":
       return "Show Filters";
     case "details":
