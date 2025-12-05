@@ -4,7 +4,7 @@ const workTimeBasis = {
 } as const;
 
 export type WorkTimeBasis = keyof typeof workTimeBasis;
-export const workTimeBasisOptions = Object.entries(workTimeBasis).map(toOption);
+export const workTimeBasisOptions = toOptions(workTimeBasis);
 export const toWorkTimeBasis = (value: unknown) => asEnum(workTimeBasis, value);
 export const toWorkTimeBasisLabel = (value: unknown) =>
   asLabel(workTimeBasis, value);
@@ -27,7 +27,7 @@ const jobFamily = {
 } as const;
 
 export type JobFamily = keyof typeof jobFamily;
-export const jobFamilyOptions = Object.entries(jobFamily).map(toOption);
+export const jobFamilyOptions = toOptions(jobFamily);
 export const toJobFamily = (value: unknown): JobFamily | undefined =>
   asEnum(jobFamily, value);
 export const toJobFamilyLabel = (value: unknown): string =>
@@ -46,6 +46,8 @@ function asLabel<T extends string>(obj: Enum<T>, value: unknown): string {
   return val ? obj[val] : String(value);
 }
 
-function toOption([value, label]: [string, string]) {
-  return { value, label };
+function toOptions<T extends string>(obj: Enum<T>) {
+  return Object.entries<string>(obj)
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }
