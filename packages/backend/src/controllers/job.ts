@@ -15,11 +15,9 @@ type EnhancedFilters = Omit<Filters, "location"> & {
   location?: Location;
 };
 
-const jobInfoQueue = new AsyncQueue(
-  "RefreshJobInfo",
-  refreshJobInfo,
-  metadataJobExecutor
-);
+const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
+  onComplete: metadataJobExecutor,
+});
 
 /**
  * Retrieves jobs matching the specified filters
@@ -222,6 +220,7 @@ async function readJobsByFilters({
   minSalary,
   isRemote,
   workTimeBasis,
+  jobFamily,
 }: EnhancedFilters) {
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
@@ -241,6 +240,10 @@ async function readJobsByFilters({
 
   if (workTimeBasis) {
     query.whereCondition("workTimeBasis", "=", workTimeBasis);
+  }
+
+  if (jobFamily) {
+    query.whereCondition("jobFamily", "=", jobFamily);
   }
 
   if (daysSince) {

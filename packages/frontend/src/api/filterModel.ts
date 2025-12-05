@@ -1,4 +1,9 @@
-import { toWorkTimeBasis, toWorkTimeBasisLabel } from "./apiEnums";
+import {
+  toJobFamily,
+  toJobFamilyLabel,
+  toWorkTimeBasis,
+  toWorkTimeBasisLabel,
+} from "./apiEnums";
 import type { FilterModelApi } from "./apiTypes";
 import { metadataModel } from "./metadataModel";
 
@@ -87,6 +92,8 @@ export class FilterModel {
           return [key, `Company: ${company}`];
         case "workTimeBasis":
           return [key, toWorkTimeBasisLabel(value)];
+        case "jobFamily":
+          return [key, toJobFamilyLabel(value)];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
@@ -128,6 +135,7 @@ export class FilterModel {
     this.#filters.title = normString(get("title"));
     this.#filters.companyId = normString(get("companyId"));
     this.#filters.workTimeBasis = toWorkTimeBasis(get("workTimeBasis"));
+    this.#filters.jobFamily = toJobFamily(get("jobFamily"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
     this.#filters.location = normString(get("location"));
     this.#filters.minSalary = normNumber(get("minSalary"));

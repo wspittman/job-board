@@ -12,6 +12,7 @@ export interface FormOption {
 export interface FormElementProps {
   label: string;
   name: string;
+  tooltip?: string;
   onChange?: () => void;
 
   // For input
@@ -77,11 +78,14 @@ export abstract class FormElement extends ComponentBase {
    * Initializes the component's public state and wiring.
    * @param props - Incoming configuration values for the element
    */
-  init({ label, name, onChange, value }: FormElementProps) {
+  init({ label, name, tooltip, onChange, value }: FormElementProps) {
     this.#onChange = onChange;
-    this.setManyTexts({ label, legend: label });
+    this.setManyTexts({ label, legend: label, tooltip });
     this.setAttribute("name", name);
     this.value = value;
+    if (tooltip) {
+      this.getEl("help")!.removeAttribute("hidden");
+    }
   }
 
   /**

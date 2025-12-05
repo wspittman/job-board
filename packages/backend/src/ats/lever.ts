@@ -140,7 +140,7 @@ export class Lever extends ATSBase {
       companyId: companyId,
 
       // Basic
-      title: text,
+      title: text?.trim(),
       description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),
       applyUrl,

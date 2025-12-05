@@ -221,12 +221,14 @@ export const JobFamily = z
     "finance",
     "hr",
     "legal",
+    "healthcare",
     "",
   ] as const)
   .describe(
     [
       "The job family/category.",
       "Map common roles to specific families.",
+      "'healthcare' covers any clinical roles that require specific medical qualifications/licensing.",
       "If the role spans multiple families, choose the primary one.",
       "If the role does not fit any family or is unclear, return ''.",
       "Examples:",
@@ -235,7 +237,11 @@ export const JobFamily = z
       "'This role is for a Recruiting Coordinator' → hr;",
       "'We need a cybersecurity analyst' → security;",
       "'Join our sales team as an Account Executive' → sales;",
+      "'We are looking for a seasoned VP of Business Development' → sales;",
+      "'We are looking for physicians' → healthcare;",
+      "'You’re a fully licensed ANCC board-certified Psychiatric Nurse Practitioner' → healthcare;",
       "'We need a background music composer' → '';",
+      "'We’re looking for a dogged, accountability-focused reporter' → '';",
     ].join(" ")
   );
 export type JobFamily = z.infer<typeof JobFamily>;

@@ -1,6 +1,6 @@
 import { z } from "dry-utils-openai";
 import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
-import { WorkTimeBasis } from "../models/enums.ts";
+import { JobFamily, WorkTimeBasis } from "../models/enums.ts";
 import type { CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { logProperty } from "../utils/telemetry.ts";
@@ -45,6 +45,7 @@ const FiltersSchema = z.object({
   jobId: coerceString(IdSchema),
   isRemote: coerceString(z.stringbool()),
   workTimeBasis: soft(WorkTimeBasis),
+  jobFamily: soft(JobFamily),
   title: soft(SearchSchema),
   location: soft(SearchSchema),
   daysSince: coerceInt(z.int().positive().max(365)),
@@ -128,7 +129,7 @@ export function useRefreshJobsOptions(input: unknown): RefreshJobsOptions {
  * @returns Validated data
  * @throws AppError if validation fails
  */
-function zParse<T>(zt: Z<T>, data: unknown): T {
+function zParse<T>(zt: Z<T>, data: unknown = {}): T {
   const result = zt.safeParse(data);
   if (!result.success) {
     const { path, message } = result.error.issues[0] ?? {};

@@ -13,13 +13,12 @@ import { metadataCompanyExecutor, metadataJobExecutor } from "./metadata.ts";
 const companyInfoQueue = new AsyncQueue(
   "RefreshCompanyInfo",
   refreshCompanyInfo,
-  metadataCompanyExecutor
+  { onComplete: metadataCompanyExecutor }
 );
 const companyJobQueue = new AsyncQueue(
   "RefreshJobsForCompany",
   refreshJobsForCompany,
-  metadataJobExecutor,
-  3
+  { onComplete: metadataJobExecutor, concurrentLimit: 3, taskDelayMs: 100 }
 );
 
 /**
