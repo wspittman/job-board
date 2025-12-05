@@ -56,6 +56,21 @@ const filterDefs: Record<string, FormElementDef[]> = {
       options: jobFamilyOptions,
     },
   ],
+  "The Compensation": [
+    {
+      type: "jb-form-input",
+      name: "minSalary",
+      label: "Minimum Salary",
+      tooltip:
+        "Searches across both hourly and annual rates, and ignores currency symbols. We'll be working to improve controls here in the future.",
+      prefix: "$",
+      validation: {
+        type: "int",
+        min: 0,
+        max: 9_999_999,
+      },
+    },
+  ],
   Other: [
     {
       type: "jb-form-select",
@@ -71,19 +86,6 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "location",
       label: "Location",
       prefix: "Working from",
-    },
-    {
-      type: "jb-form-input",
-      name: "minSalary",
-      label: "Minimum Salary",
-      tooltip:
-        "Searches across both hourly and annual rates, and ignores currency symbols. We'll be working to improve controls here in the future.",
-      prefix: "$",
-      validation: {
-        type: "int",
-        min: 0,
-        max: 9_999_999,
-      },
     },
     {
       type: "jb-form-input",
