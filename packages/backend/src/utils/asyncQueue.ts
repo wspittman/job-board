@@ -1,4 +1,4 @@
-import { setTimeout } from "node:timers/promises";
+import { setTimeout } from "node:timers";
 import { AsyncExecutor } from "./asyncExecutor.ts";
 import { logError, logProperty, withAsyncContext } from "./telemetry.ts";
 
@@ -105,7 +105,7 @@ export class AsyncQueue<T> {
       logError(error);
     } finally {
       this.active--;
-      setTimeout(this.taskDelayMs, () => this.begin());
+      setTimeout(() => this.begin(), this.taskDelayMs);
     }
   }
 }
