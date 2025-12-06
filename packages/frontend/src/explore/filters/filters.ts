@@ -104,7 +104,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "daysSince",
       label: "Posted Since",
       tooltip:
-        "Filters to when jobs say they were posted, so '7' will show jobs posted in the last week. Some data sources do not provide posting dates, in which case we treat the date we first saw it as the posting date.",
+        "Filters jobs to those posted within the specified number of days. Some data sources provide original date, some provide last updated date.",
       prefix: "Posted within",
       suffix: "days ago",
       validation: {
