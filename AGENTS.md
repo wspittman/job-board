@@ -62,6 +62,12 @@ Use JSDoc comments for all public APIs and complex logic. This helps with code r
 
 Avoid adding new dependencies and warn when you do.
 
+### Testing expectations
+
+- Backend code changes: run `npm test --workspace=backend` when feasible. No linting is currently enforced.
+- Frontend code changes: No testing or linting is currently enforced.
+- Docs-only changes do not require tests, but note that testing was skipped in your summary.
+
 ## Scratchpad
 
 Two directories are provided for ad-hoc experimentation by agents: `agent_notes` and `agent_scripts`.
