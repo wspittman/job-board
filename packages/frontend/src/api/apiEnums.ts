@@ -43,7 +43,7 @@ function asEnum<T extends string>(obj: Enum<T>, value: unknown): T | undefined {
 
 function asLabel<T extends string>(obj: Enum<T>, value: unknown): string {
   const val = asEnum(obj, value);
-  return val ? obj[val] : String(value);
+  return val ? obj[val] : "";
 }
 
 function toOptions<T extends string>(obj: Enum<T>) {
