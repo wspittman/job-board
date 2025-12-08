@@ -1,6 +1,8 @@
 # Job Board
 
-Caution: This project is in the early stages of development. It is not yet ready for production use. This README is likely out of date.
+Next-generation job board focused on the job seeker experience. The monorepo houses the Vite/Vanilla frontend, an Express 5 + TypeScript API, a TypeScript admin CLI, and an evaluation harness for the LLM-powered extraction logic.
+
+> Status: active development. Expect breaking changes as the product evolves.
 
 ## Problem Statement
 
@@ -20,27 +22,29 @@ Large Language Models (LLMs) offer a transformative solution to these long-stand
 
 Our aim is to create a next-generation job board that prioritizes the job seeker's experience while maintaining operational efficiency. By addressing the core issues of traditional platforms, we seek to transform how people discover and apply for jobs.
 
-## Repository Structure
+## At a Glance
 
-The monorepo uses npm workspaces. Each package ships its own README with deeper setup instructions; the summaries below highlight the role of every workspace.
+- **Workspaces**
+  - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
+  - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
+  - [`packages/admin`](packages/admin/README.md): TypeScript CLI for administrative operations such as adding/deleting companies from supported ATS providers.
+  - [`packages/evals`](packages/evals/README.md): Local evaluation harness that mirrors backend LLM extraction logic against curated datasets.
+- **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
+- **Install once from the repo root**: `npm install`
+- **Dev servers**: `npm run start:backend` and `npm run start:frontend`
 
-| Package                                            | Description                                                                                                                                                               |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`packages/backend`](packages/backend/README.md)   | Express 5 + TypeScript API service that connects to Azure Cosmos DB, integrates with ATS providers, and exposes REST routes under `/api`.                                 |
-| [`packages/frontend`](packages/frontend/README.md) | Current production vanilla HTML/CSS/JS frontend built with Vite. Proxies API calls to the backend during development and ships an Express wrapper for production hosting. |
-| [`packages/admin`](packages/admin/README.md)       | TypeScript CLI for administrative actions such as importing companies from supported ATS providers or deleting job posts.                                                 |
-| [`packages/evals`](packages/evals/README.md)       | Local evaluation harness that exercises the backend LLM extraction logic against curated scenarios and produces reports.                                                  |
+## Getting Started
 
-## Prerequisites
-
-- [Node.js 24+](https://nodejs.org/en/download/)
-- [Azure CosmosDB Emulator](https://learn.microsoft.com/en-us/azure/cosmos-db/local-emulator) or [Azure CosmosDB Account](https://azure.microsoft.com/en-us/services/cosmos-db/)
-
-Install workspace dependencies once from the repository root:
-
-```bash
-npm install
-```
+0. Prerequisites:
+   - [Node.js 24+](https://nodejs.org/en/download/)
+   - [Azure CosmosDB Emulator](https://learn.microsoft.com/en-us/azure/cosmos-db/local-emulator) or [Azure CosmosDB Account](https://azure.microsoft.com/en-us/services/cosmos-db/)
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Configure environment variables:
+   - Each workspace uses its own `.env` file. Consult the individual package READMEs for required keys (e.g., `DATABASE_URL`, `LLM_MODEL`, `ADMIN_API_BASE_URL`).
+   - For local Cosmos DB development, follow the instructions below to set up the emulator and export its certificate.
 
 ### Local CosmosDB Emulator
 
@@ -56,28 +60,23 @@ CosmosDB has a local emulator that you can use for development. These instructio
   - Base-64 encoded X.509 (.CER)
   - Save the file to `packages\backend\cosmosdbcert.cer`
 
-### Environment configuration
+## Common Scripts
 
-Workspaces require their own .env files. Review package READMEs for specific variables.
+Most commands are exposed via the root `package.json`:
 
-## Running the applications
+| Task                                | Command                              |
+| ----------------------------------- | ------------------------------------ |
+| Start the backend API in watch mode | `npm run start:backend`              |
+| Launch the frontend                 | `npm run start:frontend`             |
+| Build the backend for production    | `npm run build --workspace=backend`  |
+| Build the frontend for production   | `npm run build --workspace=frontend` |
 
-Most scripts are exposed through the root `package.json`:
+Refer to package-specific READMEs for additional scripts such as previews, linting, and
+production server wrappers.
 
-| Task                                            | Command                              |
-| ----------------------------------------------- | ------------------------------------ |
-| Start the backend API in watch mode             | `npm run start:backend`              |
-| Launch the current frontend (packages/frontend) | `npm run start:frontend`             |
-| Build the backend for production                | `npm run build --workspace=backend`  |
-| Build the current frontend                      | `npm run build --workspace=frontend` |
+## Admin CLI
 
-Refer to each package README for additional scripts such as previews, linting, or production
-server wrappers.
-
-## Administrative tooling
-
-The admin CLI provides scripted access to backend operations. Run commands from the repository
-root by prefixing them with the workspace script:
+The admin CLI provides scripted access to backend operations. Invoke it from the repo root as:
 
 ```bash
 npm run admin -- <command> [args]
@@ -96,21 +95,21 @@ input and ground-truth data under `packages/evals/`, run:
 npm run eval -- <dataModel> [runName]
 ```
 
-The script stores model outputs and metrics beside the source data, enabling reproducible
-experiments when tuning LLM configuration.
+Outputs are written beside the source data (inputs, ground truth, outcomes, and reports)
+to support reproducible experiments when tuning LLM configuration.
 
-## In-Progress Screenshots
+## Screenshots
 
-Screenshot of the current UI. We have a ways to go.
+UI Snapshots from December 8, 2025
 
 ### Home Page
 
-![Home page from 11/13/24](screenshots/InProgress_11_13_24_Home.png)
+![Home page from 12/8/25](screenshots/12_8_25_Home.png)
 
 ### Explore Page
 
-![Explore page from 11/13/24](screenshots/InProgress_11_13_24_Explore.png)
+![Explore page from 12/8/25](screenshots/12_8_25_Explore.png)
 
-### About Page
+### FAQ Page
 
-![About page from 11/13/24](screenshots/InProgress_11_13_24_About.png)
+![FAQ page from 12/8/25](screenshots/12_8_25_FAQ.png)

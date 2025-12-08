@@ -8,7 +8,7 @@ This is a web application for a job board. It is a monorepo with multiple worksp
   - `npm run start:backend` to run `tsx watch src/app.ts` for development.
   - `npm run build --workspace=backend` / `npm run start --workspace=backend` for production artifacts under `dist/`.
   - Environment is configured through `.env`; see `packages/backend/src/config.ts` for variables such as `DATABASE_URL`, `LLM_MODEL`, and `APPLICATIONINSIGHTS_CONNECTION_STRING`.
-- **`packages/frontend`** – Current Vite-powered React application that uses vanilla HTML/CSS/JS with TanStack Query.
+- **`packages/frontend`** – Current Vite-powered application that uses vanilla HTML/CSS/JS with TanStack Query.
   - `npm run start:frontend` (alias of `npm run dev --workspace=frontend`) runs Vite with HMR.
   - `npm run build --workspace=frontend` emits assets to `packages/frontend/dist/` and `npm run preview --workspace=frontend` serves them.
   - Production hosting relies on `server.js`; set `API_URL` and optional `PORT`.
