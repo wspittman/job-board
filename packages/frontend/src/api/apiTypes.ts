@@ -8,20 +8,27 @@ export interface MetadataModelApi {
 }
 
 export interface JobModelApi {
+  // Keys
   id: string;
   companyId: string;
-  company: string;
+
+  // The Work
   title: string;
+  company: string;
+  workTimeBasis?: WorkTimeBasis;
+  jobFamily?: JobFamily;
+
+  // The Compensation
+  minSalary?: number;
+
+  // Other
   description: string;
   postTS: number;
   applyUrl: string;
   isRemote: boolean;
-  workTimeBasis: string;
-  jobFamily: string;
   location: string;
   facets?: {
     summary?: string;
-    salary?: number;
     experience?: number;
   };
 }

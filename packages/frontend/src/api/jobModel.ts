@@ -50,9 +50,16 @@ export class JobModel {
   }
 
   async getDisplayFacets(useShort = false) {
-    const { isRemote, location, postTS, facets, workTimeBasis, jobFamily } =
-      this.#job;
-    const { salary, experience } = facets ?? {};
+    const {
+      isRemote,
+      location,
+      postTS,
+      facets,
+      workTimeBasis,
+      jobFamily,
+      minSalary,
+    } = this.#job;
+    const { experience } = facets ?? {};
 
     let loc = location;
     if (isRemote) {
@@ -75,7 +82,7 @@ export class JobModel {
 
     return {
       location: loc,
-      salary: salary ? `$${salary.toLocaleString()}` : undefined,
+      salary: minSalary ? `$${minSalary.toLocaleString()}` : undefined,
       experience: exp,
       post,
       workTimeBasis: toWorkTimeBasisLabel(workTimeBasis),

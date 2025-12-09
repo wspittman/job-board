@@ -3,6 +3,7 @@ import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
 import { JobFamily, WorkTimeBasis } from "../models/enums.ts";
 import type { CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
+import { stripObj } from "../utils/objUtils.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
 // Z Helpers
@@ -136,13 +137,4 @@ function zParse<T>(zt: Z<T>, data: unknown = {}): T {
     throw new AppError(`${path?.join(".")} field is invalid: ${message}`);
   }
   return result.data;
-}
-
-/**
- * Remove properties with null or undefined values from an object
- */
-function stripObj<T extends Record<string, unknown>>(obj: T): T {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, val]) => val != null)
-  ) as T;
 }

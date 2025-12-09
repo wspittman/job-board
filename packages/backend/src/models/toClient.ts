@@ -1,4 +1,5 @@
 import { normalizedLocation } from "../utils/location.ts";
+import { stripObj } from "../utils/objUtils.ts";
 import type { ClientJob } from "./clientModels.ts";
 import type { Job } from "./models.ts";
 
@@ -22,22 +23,30 @@ export const toClientJob = ({
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
   const applyUrl = `/job/apply?id=${encodeId}&companyId=${encodeCompanyId}`;
-  return {
+
+  return stripObj({
+    // Keys
     id,
     companyId,
-    company: companyName,
+
+    // The Work
     title,
+    company: companyName,
+    workTimeBasis,
+    jobFamily,
+
+    // The Compensation
+    minSalary: salaryRange?.min,
+
+    // Other
     description,
     postTS,
     applyUrl,
     isRemote: presence === "remote",
-    workTimeBasis: workTimeBasis ?? "",
-    jobFamily: jobFamily ?? "",
     location: primaryLocation ? normalizedLocation(primaryLocation) : "",
     facets: {
       summary: summary ?? undefined,
-      salary: salaryRange?.min ?? undefined,
       experience: requiredExperience ?? undefined,
     },
-  };
+  });
 };
