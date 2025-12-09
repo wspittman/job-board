@@ -1,6 +1,6 @@
 import { z } from "dry-utils-openai";
 import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
-import { JobFamily, WorkTimeBasis } from "../models/enums.ts";
+import { JobFamily, PayCadence, WorkTimeBasis } from "../models/enums.ts";
 import type { CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { stripObj } from "../utils/objUtils.ts";
@@ -47,6 +47,7 @@ const FiltersSchema = z.object({
   isRemote: coerceString(z.stringbool()),
   workTimeBasis: soft(WorkTimeBasis),
   jobFamily: soft(JobFamily),
+  payCadence: soft(PayCadence),
   title: soft(SearchSchema),
   location: soft(SearchSchema),
   daysSince: coerceInt(z.int().positive().max(365)),

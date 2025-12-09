@@ -37,6 +37,7 @@ export const toClientJob = ({
 
     // The Compensation
     minSalary: salaryRange?.min,
+    payCadence: salaryRange?.cadence,
 
     // Other
     description,

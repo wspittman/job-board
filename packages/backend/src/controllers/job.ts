@@ -225,10 +225,13 @@ async function readJobsByFilters({
   isRemote,
   workTimeBasis,
   jobFamily,
+  payCadence,
 }: EnhancedFilters) {
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
   const query = new Query();
+
+  // Exact Matches
 
   if (companyId) {
     query.whereCondition("companyId", "=", companyId);
@@ -250,6 +253,12 @@ async function readJobsByFilters({
     query.whereCondition("jobFamily", "=", jobFamily);
   }
 
+  if (payCadence) {
+    query.whereCondition("salaryRange.cadence", "=", payCadence);
+  }
+
+  // Range Matches
+
   if (daysSince) {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
@@ -263,6 +272,8 @@ async function readJobsByFilters({
   if (minSalary) {
     query.whereCondition("salaryRange.min", ">=", minSalary);
   }
+
+  // Substring Matches
 
   if (title) {
     query.whereCondition("title", "CONTAINS", title);
