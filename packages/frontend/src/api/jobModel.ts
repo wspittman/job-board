@@ -1,5 +1,9 @@
 import { api, API_URL } from "./api";
-import { toJobFamilyLabel, toWorkTimeBasisLabel } from "./apiEnums";
+import {
+  toJobFamilyLabel,
+  toPayCadenceLabel,
+  toWorkTimeBasisLabel,
+} from "./apiEnums";
 import type { JobModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 import { metadataModel } from "./metadataModel";
@@ -58,6 +62,7 @@ export class JobModel {
       workTimeBasis,
       jobFamily,
       minSalary,
+      payCadence,
     } = this.#job;
     const { experience } = facets ?? {};
 
@@ -80,9 +85,16 @@ export class JobModel {
       ? this.#tsToDaysString(postTS)
       : new Date(postTS).toLocaleDateString();
 
+    const compCurrency = "$";
+    const compMinSalary = minSalary?.toLocaleString();
+    const compCadence = toPayCadenceLabel(payCadence);
+    const comp = [compMinSalary ? compCurrency : "", compMinSalary, compCadence]
+      .filter(Boolean)
+      .join(" ");
+
     return {
       location: loc,
-      salary: minSalary ? `$${minSalary.toLocaleString()}` : undefined,
+      comp,
       experience: exp,
       post,
       workTimeBasis: toWorkTimeBasisLabel(workTimeBasis),

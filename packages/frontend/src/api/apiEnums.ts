@@ -33,6 +33,19 @@ export const toJobFamily = (value: unknown): JobFamily | undefined =>
 export const toJobFamilyLabel = (value: unknown): string =>
   asLabel(jobFamily, value);
 
+const payCadence = {
+  hourly: "Hourly",
+  salary: "Salary",
+  stipend: "Stipend",
+} as const;
+
+export type PayCadence = keyof typeof payCadence;
+export const payCadenceOptions = toOptions(payCadence);
+export const toPayCadence = (value: unknown): PayCadence | undefined =>
+  asEnum(payCadence, value);
+export const toPayCadenceLabel = (value: unknown): string =>
+  asLabel(payCadence, value);
+
 type Enum<T extends string> = Record<T, string>;
 
 function asEnum<T extends string>(obj: Enum<T>, value: unknown): T | undefined {

@@ -2,7 +2,11 @@ import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
 
-import { jobFamilyOptions, workTimeBasisOptions } from "../../api/apiEnums";
+import {
+  jobFamilyOptions,
+  payCadenceOptions,
+  workTimeBasisOptions,
+} from "../../api/apiEnums";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
 import { Chip } from "../../components/chip";
@@ -58,11 +62,17 @@ const filterDefs: Record<string, FormElementDef[]> = {
   ],
   "The Compensation": [
     {
+      type: "jb-form-select",
+      name: "payCadence",
+      label: "Paid by",
+      options: payCadenceOptions,
+    },
+    {
       type: "jb-form-input",
       name: "minSalary",
-      label: "Minimum Salary",
+      label: "Minimum Rate",
       tooltip:
-        "Searches across both hourly and annual rates, and ignores currency symbols. We'll be working to improve controls here in the future.",
+        "Ignores currency symbols. We'll be working to improve controls here in the future.",
       prefix: "$",
       validation: {
         type: "int",

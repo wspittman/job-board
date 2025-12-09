@@ -1,6 +1,8 @@
 import {
   toJobFamily,
   toJobFamilyLabel,
+  toPayCadence,
+  toPayCadenceLabel,
   toWorkTimeBasis,
   toWorkTimeBasisLabel,
 } from "./apiEnums";
@@ -94,6 +96,8 @@ export class FilterModel {
           return [key, toWorkTimeBasisLabel(value)];
         case "jobFamily":
           return [key, toJobFamilyLabel(value)];
+        case "payCadence":
+          return [key, `Paid by: ${toPayCadenceLabel(value)}`];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
@@ -105,7 +109,7 @@ export class FilterModel {
         case "maxExperience":
           return [key, `Experience: ${Number(value).toLocaleString()} years`];
         case "minSalary":
-          return [key, `Salary: $${Number(value).toLocaleString()}`];
+          return [key, `Pay Rate: $${Number(value).toLocaleString()}`];
         default:
           return [key, `${key}: ${value}`];
       }
@@ -136,6 +140,7 @@ export class FilterModel {
     this.#filters.companyId = normString(get("companyId"));
     this.#filters.workTimeBasis = toWorkTimeBasis(get("workTimeBasis"));
     this.#filters.jobFamily = toJobFamily(get("jobFamily"));
+    this.#filters.payCadence = toPayCadence(get("payCadence"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
     this.#filters.location = normString(get("location"));
     this.#filters.minSalary = normNumber(get("minSalary"));
