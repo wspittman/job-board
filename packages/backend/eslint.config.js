@@ -14,11 +14,12 @@ export default defineConfig(
     languageOptions: {
       parserOptions: {
         projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
   },
   {
     files: ["test/**/*.ts"],
     extends: [tseslint.configs.disableTypeChecked],
-  },
+  }
 );
