@@ -64,7 +64,7 @@ export class AsyncQueue<T> {
     // If there are no tasks or the batch is full, return
     if (!this.head || this.active >= this.concurrentLimit) return;
 
-    this.runTask(this.dequeue());
+    void this.runTask(this.dequeue());
     this.begin();
   }
 

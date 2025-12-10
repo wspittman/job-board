@@ -1,3 +1,4 @@
+import { clearTimeout, setTimeout } from "node:timers";
 import { withAsyncContext } from "./telemetry.ts";
 
 /**
@@ -32,7 +33,7 @@ export class AsyncExecutor {
     }
 
     this.timeoutId = setTimeout(() => {
-      withAsyncContext(this.name, async () => {
+      void withAsyncContext(this.name, async () => {
         await this.fn();
       });
       this.timeoutId = undefined;

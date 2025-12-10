@@ -11,7 +11,7 @@ export interface Context<T> {
 // LOL GPT-5 wrote this
 export type DeepPartialNullToUndef<T> =
   // keep functions
-  T extends (...args: any) => any
+  T extends (...args: unknown[]) => unknown
     ? T
     : // arrays
     T extends (infer U)[]

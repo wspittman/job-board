@@ -53,10 +53,7 @@ export class Lever extends ATSBase {
     super("lever", config.LEVER_URL);
   }
 
-  async getCompany(
-    { id }: CompanyKey,
-    _full?: boolean
-  ): Promise<Context<Company>> {
+  async getCompany({ id }: CompanyKey): Promise<Context<Company>> {
     const [exampleJob] = await this.fetchJobs(id, true);
     const company = this.formatCompany(id);
 
@@ -78,7 +75,7 @@ export class Lever extends ATSBase {
     };
   }
 
-  async getJobs({ id }: CompanyKey, _: boolean): Promise<Context<Job>[]> {
+  async getJobs({ id }: CompanyKey): Promise<Context<Job>[]> {
     const jobs = await this.fetchJobs(id);
     return jobs.map((job) => this.formatJob(id, job));
   }

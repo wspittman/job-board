@@ -11,6 +11,7 @@ export class AppError extends Error {
 
   toErrorList(): string[] {
     const errors: string[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let cur: unknown = this;
 
     while (cur) {
@@ -19,6 +20,7 @@ export class AppError extends Error {
         errors.push(`[${statusCode}] ${message}`);
         cur = innerError;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         errors.push(cur instanceof Error ? cur.message : String(cur));
         cur = undefined;
       }

@@ -34,16 +34,13 @@ export async function getCachedLocation(
   return undefined;
 }
 
-export async function setCachedLocation(
-  locationText: string,
-  location: Location
-) {
+export function setCachedLocation(locationText: string, location: Location) {
   try {
     const key = normalize(locationText);
     locationMemoryCache.set(key, location);
 
     // Don't await on cache insertion
-    db.locationCache.upsertItem({
+    void db.locationCache.upsertItem({
       id: key,
       pKey: key[0]!,
       ...location,

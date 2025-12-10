@@ -29,7 +29,7 @@ function isReasoningEffort(val: string): val is ReasoningEffort {
   return ["minimal", "low", "medium", "high"].includes(val as ReasoningEffort);
 }
 
-let llmReasoningEffort = prep("LLM_REASONING_EFFORT");
+const llmReasoningEffort = prep("LLM_REASONING_EFFORT");
 
 const adminToken = process.env["ADMIN_TOKEN"]?.trim();
 

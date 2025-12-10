@@ -88,9 +88,9 @@ function pathToLogName(path: string) {
 /**
  * Get the input from the request, optionally validating it.
  */
-function getInput<T>(req: Request, validator?: (input: unknown) => T) {
-  const rawInput = req.method === "GET" ? convertQuery(req) : req.body;
-  return validator ? validator(rawInput) : rawInput;
+function getInput<T>(req: Request, validator?: (input: unknown) => T): T {
+  const rawInput = req.method === "GET" ? convertQuery(req) : (req.body as T);
+  return validator ? validator(rawInput) : (rawInput as T);
 }
 
 /**
