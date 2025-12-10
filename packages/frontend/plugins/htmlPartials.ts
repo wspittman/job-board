@@ -4,7 +4,7 @@ import type { Plugin } from "vite";
 
 const INCLUDE_PATTERN = new RegExp(
   String.raw`^(\s*)<!--\s*@include:\s*([^\s]+)\s*-->`,
-  "gm"
+  "gm",
 );
 
 /**
@@ -31,7 +31,7 @@ export function htmlPartials(): Plugin {
 async function expand(
   html: string,
   fromFile: string,
-  seen = new Set<string>()
+  seen = new Set<string>(),
 ): Promise<string> {
   // Normalize line endings
   html = html.replaceAll(/\r/g, "").replaceAll(/\n+/g, "\n");
@@ -71,7 +71,7 @@ async function expand(
 async function injectSection(
   path: string,
   indentation: string,
-  seen: Set<string>
+  seen: Set<string>,
 ): Promise<string> {
   const file = await readFile(path, "utf8");
   const expandedContent = await expand(file, path, new Set(seen).add(path));

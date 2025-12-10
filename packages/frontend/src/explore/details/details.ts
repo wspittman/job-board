@@ -61,7 +61,7 @@ export class Details extends ComponentBase {
     this.#applyLink.href = this.#job.applyUrl;
     this.#applyLink.setAttribute(
       "aria-label",
-      `Apply for ${title} position at ${company}`
+      `Apply for ${title} position at ${company}`,
     );
   }
 
@@ -87,7 +87,7 @@ export class Details extends ComponentBase {
 
     const timeout = window.setTimeout(
       () => this.#setCopyButtonState("idle"),
-      2000
+      2000,
     );
     this.#copyResetHandle = timeout;
   }

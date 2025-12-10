@@ -70,7 +70,9 @@
   }
 
   .container {
-    transition: padding 150ms ease, width 150ms ease;
+    transition:
+      padding 150ms ease,
+      width 150ms ease;
 
     &.collapsed {
       padding: var(--space-md);

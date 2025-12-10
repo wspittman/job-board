@@ -32,7 +32,7 @@ export class FormCombobox extends FormElement {
     this.addEventListener("focusout", (event) => this.#handleFocusOut(event));
     this.intake.addEventListener("focus", () => this.#menu.open());
     this.intake.addEventListener("keydown", (event) =>
-      this.#menu.handleKeydown(event as KeyboardEvent)
+      this.#menu.handleKeydown(event as KeyboardEvent),
     );
   }
 
@@ -112,7 +112,7 @@ class MenuEl {
     this.element.setAttribute("role", "listbox");
 
     this.element.addEventListener("mousedown", (event) =>
-      event.preventDefault()
+      event.preventDefault(),
     );
     this.element.addEventListener("click", (event) => this.#onClick(event));
 
@@ -151,7 +151,7 @@ class MenuEl {
 
     const oldActive = this.#filteredOptions[this.#activeIndex];
     this.#filteredOptions = this.#rawOptions.filter((x) =>
-      x.compareLabel.includes(trimmed)
+      x.compareLabel.includes(trimmed),
     );
 
     if (oldActive) {

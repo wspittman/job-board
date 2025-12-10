@@ -185,7 +185,7 @@ export class Filters extends ComponentBase {
       if (!this.isConnected) return;
 
       const def = filterDefs["The Work"]?.find(
-        (def) => def.name === "companyId"
+        (def) => def.name === "companyId",
       );
       if (!def) return;
 
@@ -272,7 +272,7 @@ export class Filters extends ComponentBase {
           label,
           onDelete: () => (this.#inputs.get(key)!.value = ""),
           filled: true,
-        })
+        }),
       );
     }
 
@@ -290,7 +290,7 @@ export class Filters extends ComponentBase {
     this.#toggle.setAttribute("aria-expanded", String(!collapsed));
     this.#toggle.setAttribute(
       "aria-label",
-      collapsed ? "Expand filters panel" : "Collapse filters panel"
+      collapsed ? "Expand filters panel" : "Collapse filters panel",
     );
   }
 }

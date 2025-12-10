@@ -24,7 +24,7 @@ export abstract class ComponentBase extends HTMLElement {
   constructor(
     html: string,
     css: CSSStyleSheet | CSSStyleSheet[],
-    options: Options = {}
+    options: Options = {},
   ) {
     const cssSheets = Array.isArray(css) ? css : [css];
     const { omitPartsCss = false } = options;

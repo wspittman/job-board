@@ -92,7 +92,7 @@ app.use(
       if (!type.includes("application/json")) return false;
       return compression.filter(req, res);
     },
-  })
+  }),
 );
 
 // API proxy middleware
@@ -115,7 +115,7 @@ app.use(
         }
       },
     },
-  })
+  }),
 );
 
 // Middleware to handle URL rewriting and compression
@@ -164,7 +164,7 @@ app.use(
       // Cache other prebuilt files for 1 day
       res.setHeader("Cache-Control", "public, max-age=86400");
     },
-  })
+  }),
 );
 
 // Global error handler
@@ -220,7 +220,7 @@ async function getUrlParts(req: Request): Promise<UrlParts | T404> {
 
 async function getCompressionUrl(
   urlParts: UrlParts,
-  { useBrotli, useGzip }: Encodings
+  { useBrotli, useGzip }: Encodings,
 ) {
   const { base, ext, dir } = urlParts;
   const filePath = joinFS(__dist, dir, `${base}${ext}`);

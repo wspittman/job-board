@@ -125,7 +125,7 @@ function updateActionButton() {
   actionButton.textContent = getActionButtonLabel();
   actionButton.toggleAttribute(
     "disabled",
-    activePane === "filters" && !jobMap.size
+    activePane === "filters" && !jobMap.size,
   );
 }
 
