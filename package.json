@@ -11,7 +11,10 @@
     "eval-fetch-input": "npm run fetch-input --workspace=evals --",
     "admin": "npm run admin --workspace=admin",
     "clean": "git clean -fdx -- \":(glob)**/node_modules/**\" \":(glob)**/deploy/**\" \":(glob)**/dist/**\" \":(glob)**/*.tsbuildinfo\"",
-    "test": "npm run test --workspace=backend"
+    "test": "npm run test --workspace=backend",
+    "lint": "npm run lint --workspace=backend",
+    "format": "npm run format --workspace=backend",
+    "format:write": "npm run format:write --workspace=backend"
   },
   "private": true,
   "workspaces": [
