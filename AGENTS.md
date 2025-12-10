@@ -52,7 +52,9 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 - The backend is written in TypeScript and uses Express.js.
 - The frontend is a vanilla HTML/CSS/JS application built with Vite.
 - API routes are defined in `packages/backend/src/routes/routes.ts`.
-- The project uses `eslint` for linting.
+- The `backend` and `frontend` packages use `eslint` for linting.
+- The `backend` and `frontend` packages use `prettier` for code formatting.
+- Prefer running linting and formatting from the repo root via `npm run lint` and `npm run format` (or `npm run format:write` to apply fixes).
 
 ### Comments
 
@@ -64,8 +66,8 @@ Avoid adding new dependencies and warn when you do.
 
 ### Testing expectations
 
-- Backend code changes: run `npm test --workspace=backend` when feasible. No linting is currently enforced.
-- Frontend code changes: No testing or linting is currently enforced.
+- Backend code changes: run `npm test --workspace=backend` when feasible. Also run `npm run lint --workspace=backend` and `npm run format --workspace=backend` (or `npm run format:write --workspace=backend` to autofix) before committing.
+- Frontend code changes: run `npm run lint --workspace=frontend` and `npm run format --workspace=frontend` (or `npm run format:write --workspace=frontend` to autofix).
 - Docs-only changes do not require tests, but note that testing was skipped in your summary.
 
 ## Scratchpad
