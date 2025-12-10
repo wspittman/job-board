@@ -41,7 +41,7 @@ export async function getJobs(filterInput: Filters) {
     const result = job ? [job] : [];
     logProperty(
       "GetJobs_Id",
-      `${companyId}_${jobId}_${job ? "Found" : "NotFound"}`
+      `${companyId}_${jobId}_${job ? "Found" : "NotFound"}`,
     );
     return result;
   }
@@ -90,7 +90,7 @@ export async function getApplyRedirectUrl(key: JobKey): Promise<string> {
  * @returns Promise resolving when jobs are refreshed
  */
 export async function refreshJobsForCompany(
-  key: CompanyKey & { replaceJobsOlderThan?: number }
+  key: CompanyKey & { replaceJobsOlderThan?: number },
 ) {
   logProperty("Input", key);
   const companyId = key.id;
@@ -111,7 +111,7 @@ export async function refreshJobsForCompany(
 
   if (remove.length) {
     await batch("DeleteJob", remove, (id) =>
-      db.job.remove({ id, companyId: key.id })
+      db.job.remove({ id, companyId: key.id }),
     );
   }
 
@@ -142,7 +142,7 @@ async function getJobIds(companyId: string, cutoffMS?: number) {
 async function getAtsJobs(
   key: CompanyKey,
   currentIds: string[],
-  ignoreIds: string[] = []
+  ignoreIds: string[] = [],
 ) {
   // If there are no current jobs, assume newly added company and get full job data for all jobs
   const getFullJobInfo = !currentIds.length;

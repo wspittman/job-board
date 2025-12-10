@@ -24,7 +24,7 @@ export const CompanySizeBand = z
       "'We are a small team of 15 passionate individuals' → 11-50;",
       "'With over 100 employees, we are growing fast' → 51-200;",
       "'We are a small team of like-minded individuals' → '';",
-    ].join(" ")
+    ].join(" "),
   );
 export type CompanySizeBand = z.infer<typeof CompanySizeBand>;
 
@@ -57,7 +57,7 @@ export const CompanyStage = z
       "'We are a publicly traded company' → public;",
       "'We are a 501(c)(3) nonprofit organization' → nonprofit;",
       "'We are a fast-growing, venture-backed startup' → '';",
-    ].join(" ")
+    ].join(" "),
   );
 export type CompanyStage = z.infer<typeof CompanyStage>;
 
@@ -80,7 +80,7 @@ export const Presence = z
       "'Remote (US only)' → remote;",
       "'We offer flexible work arrangements including hybrid options' → hybrid;",
       "'Candidates must be willing to work at our headquarters' → onsite;",
-    ].join(" ")
+    ].join(" "),
   );
 export type Presence = z.infer<typeof Presence>;
 
@@ -105,7 +105,7 @@ export const WorkTimeBasis = z
       "'PT', '20 hrs/wk' → part_time;",
       "'Independent Contractor - paid per game covered' → per_diem;",
       "'as-needed/on-call' → variable or per_diem (choose per_diem if day/shift-based pay).",
-    ].join(" ")
+    ].join(" "),
   );
 export type WorkTimeBasis = z.infer<typeof WorkTimeBasis>;
 
@@ -134,7 +134,7 @@ export const EngagementType = z
       "'1099 contractor' → contractor;",
       "'through Adecco' → agency_temp;",
       "'summer internship' → internship.",
-    ].join(" ")
+    ].join(" "),
   );
 export type EngagementType = z.infer<typeof EngagementType>;
 
@@ -150,7 +150,7 @@ export const PayCadence = z
       "'The pay range is $100,000 to $120,000' → salary;",
       "'Pay rate is $20/hour' → hourly;",
       "'This is a paid internship with a stipend' → stipend;",
-    ].join(" ")
+    ].join(" "),
   );
 export type PayCadence = z.infer<typeof PayCadence>;
 
@@ -180,7 +180,7 @@ export const SeniorityLevel = z
       "'You will be managing a team of 5 engineers' → manager;",
       "'We need a director of marketing' → director+;",
       "'As the Head of Sales, you will lead our sales team' → director+;",
-    ].join(" ")
+    ].join(" "),
   );
 export type SeniorityLevel = z.infer<typeof SeniorityLevel>;
 
@@ -202,7 +202,7 @@ export const EducationLevel = z
       "'Bachelor's degree in Computer Science required' → bachelor;",
       "'Master's degree preferred, but Bachelor's is considered' → bachelor;",
       "'PhD in relevant field required' → doctorate;",
-    ].join(" ")
+    ].join(" "),
   );
 export type EducationLevel = z.infer<typeof EducationLevel>;
 
@@ -242,7 +242,7 @@ export const JobFamily = z
       "'You’re a fully licensed ANCC board-certified Psychiatric Nurse Practitioner' → healthcare;",
       "'We need a background music composer' → '';",
       "'We’re looking for a dogged, accountability-focused reporter' → '';",
-    ].join(" ")
+    ].join(" "),
   );
 export type JobFamily = z.infer<typeof JobFamily>;
 

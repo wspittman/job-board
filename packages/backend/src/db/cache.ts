@@ -7,7 +7,7 @@ import { LRUCache } from "./lruCache.ts";
 const locationMemoryCache = new LRUCache<string, Location>(1000);
 
 export async function getCachedLocation(
-  locationText: string
+  locationText: string,
 ): Promise<Location | undefined> {
   try {
     const key = normalize(locationText);

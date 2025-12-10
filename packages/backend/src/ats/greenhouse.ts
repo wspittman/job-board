@@ -59,7 +59,7 @@ export class Greenhouse extends ATSBase {
 
   async getCompany(
     { id }: CompanyKey,
-    full?: boolean
+    full?: boolean,
   ): Promise<Context<Company>> {
     const companyResult = await this.fetchCompany(id);
     const company = this.formatCompany(id, companyResult);
@@ -124,7 +124,7 @@ export class Greenhouse extends ATSBase {
 
   private formatJobBasic(
     companyId: string,
-    { id, title, updated_at, absolute_url }: JobResultBasic
+    { id, title, updated_at, absolute_url }: JobResultBasic,
   ): Context<Job> {
     const job: Job = {
       // Keys

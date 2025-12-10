@@ -30,7 +30,7 @@ export abstract class ATSBase {
    */
   abstract getCompany(
     key: CompanyKey,
-    full?: boolean
+    full?: boolean,
   ): Promise<Context<Company>>;
 
   /**
@@ -55,7 +55,7 @@ export abstract class ATSBase {
   protected async httpCall<T>(
     name: string,
     id: string,
-    url: string
+    url: string,
   ): Promise<T> {
     const start = Date.now();
     let logStatus: StatusResponse = {
@@ -116,7 +116,7 @@ function logAtsCall(
   ats: ATS,
   id: string,
   ms: number,
-  { status, statusText }: StatusResponse
+  { status, statusText }: StatusResponse,
 ) {
   try {
     const log: Bag = { name, ats, id, ms };

@@ -123,7 +123,7 @@ export class Lever extends ATSBase {
       country,
       workplaceType,
       salaryRange,
-    }: JobResult
+    }: JobResult,
   ): Context<Job> {
     const listHtml = lists
       .map(({ text, content }) => `<p>${text}</p><ul>${content}</ul>`)

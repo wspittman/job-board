@@ -8,6 +8,6 @@ import type { Bag } from "../types/types.ts";
  */
 export function stripObj<T extends Bag>(obj: T): T {
   return Object.fromEntries(
-    Object.entries(obj).filter(([, val]) => val != null)
+    Object.entries(obj).filter(([, val]) => val != null),
   ) as T;
 }

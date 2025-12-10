@@ -22,8 +22,7 @@ export interface CompanyKeys {
 }
 
 export interface Company
-  extends CompanyKey,
-    DeepPartialNullToUndef<ExtractionCompany> {
+  extends CompanyKey, DeepPartialNullToUndef<ExtractionCompany> {
   name: string;
   ignoreJobIds?: string[];
 }

@@ -80,7 +80,7 @@ const asyncLocalStorage = new AsyncLocalStorage<Bag>();
  */
 export function withAsyncContext(
   name: string,
-  fn: () => Promise<void>
+  fn: () => Promise<void>,
 ): Promise<void> {
   const start = Date.now();
   return asyncLocalStorage.run({}, async () => {
@@ -198,7 +198,7 @@ export function subscribeError({ tag, val }: LogSub): void {
  */
 export function createSubscribeAggregator(
   source: string,
-  callLimit: number
+  callLimit: number,
 ): (sub: AgSub) => void {
   return ({ tag, dense, metrics, blob }: AgSub) => {
     const ag = getSubContext<AgBag>(source, {
@@ -336,7 +336,7 @@ function devLog(data: object) {
         timestamp: new Date().toISOString(),
         ...data,
       },
-      { depth: null }
+      { depth: null },
     );
   }
 }

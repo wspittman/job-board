@@ -15,8 +15,8 @@ const coerceInt = <T>(zt: Z<T>) =>
   soft(
     z.preprocess(
       (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-      zt
-    )
+      zt,
+    ),
   );
 
 // Basic Schema Components

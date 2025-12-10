@@ -18,7 +18,7 @@ Format your response in JSON, adhering to the provided schema.`;
  * @returns True if extraction was successful, false otherwise
  */
 export async function fillCompanyInfo(
-  company: Context<Company>
+  company: Context<Company>,
 ): Promise<boolean> {
   const { content } = await jsonCompletion(
     "extractCompanyInfo",
@@ -29,7 +29,7 @@ export async function fillCompanyInfo(
       context: company.context,
       model: config.LLM_MODEL,
       reasoningEffort: config.LLM_REASONING_EFFORT,
-    }
+    },
   );
 
   if (content) {

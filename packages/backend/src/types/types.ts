@@ -14,20 +14,24 @@ export type DeepPartialNullToUndef<T> =
   T extends (...args: unknown[]) => unknown
     ? T
     : // arrays
-    T extends (infer U)[]
-    ? DeepPartialNullToUndef<U>[]
-    : // objects
-    T extends object
-    ? {
-        // optional properties
-        [K in keyof T]?: DeepPartialNullToUndef<NonNullable<T[K]>> | undefined;
-      }
-    : // primitives & unions: swap null with undefined
-    [T] extends [null]
-    ? undefined
-    : T extends null
-    ? undefined
-    : // distribute over unions so `X | null` -> `X | undefined`
-    T extends infer U
-    ? (U extends null ? never : U) | (undefined extends U ? undefined : never)
-    : never;
+      T extends (infer U)[]
+      ? DeepPartialNullToUndef<U>[]
+      : // objects
+        T extends object
+        ? {
+            // optional properties
+            [K in keyof T]?:
+              | DeepPartialNullToUndef<NonNullable<T[K]>>
+              | undefined;
+          }
+        : // primitives & unions: swap null with undefined
+          [T] extends [null]
+          ? undefined
+          : T extends null
+            ? undefined
+            : // distribute over unions so `X | null` -> `X | undefined`
+              T extends infer U
+              ?
+                  | (U extends null ? never : U)
+                  | (undefined extends U ? undefined : never)
+              : never;

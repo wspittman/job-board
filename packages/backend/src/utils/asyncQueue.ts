@@ -41,7 +41,7 @@ export class AsyncQueue<T> {
   constructor(
     name: string,
     fn: (task: T) => Promise<void>,
-    { concurrentLimit = 5, taskDelayMs = 0, onComplete }: Options = {}
+    { concurrentLimit = 5, taskDelayMs = 0, onComplete }: Options = {},
   ) {
     this.name = name;
     this.fn = fn;

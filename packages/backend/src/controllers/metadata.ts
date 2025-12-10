@@ -7,17 +7,17 @@ let cachedMetadata: Promise<ClientMetadata> | undefined;
 
 export const metadataCompanyExecutor = new AsyncExecutor(
   "RefreshMetadata",
-  refreshCompanyMetadata
+  refreshCompanyMetadata,
 );
 
 export const metadataJobExecutor = new AsyncExecutor(
   "RefreshMetadata",
-  refreshJobMetadata
+  refreshJobMetadata,
 );
 
 async function refreshCompanyMetadata() {
   const companies = await db.company.query<{ id: string; name: string }>(
-    "SELECT c.id, c.name FROM c"
+    "SELECT c.id, c.name FROM c",
   );
 
   await db.metadata.upsertItem({

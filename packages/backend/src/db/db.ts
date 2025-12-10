@@ -70,7 +70,7 @@ class JobContainer extends Container<Job> {
   async getIdsAndTimestamps(companyId: string) {
     return this.query<{ id: string; _ts: number }>(
       "SELECT c.id, c._ts FROM c",
-      { partitionKey: companyId }
+      { partitionKey: companyId },
     );
   }
 
@@ -162,7 +162,7 @@ class DB {
     });
 
     this._company = new CompanyContainer(
-      containers["company"] as Container<Company>
+      containers["company"] as Container<Company>,
     );
     this._job = new JobContainer(containers["job"] as Container<Job>);
     this._metadata = containers["metadata"] as Container<Metadata>;

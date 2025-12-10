@@ -27,14 +27,14 @@ export const router = express.Router();
 
 router.get(
   "/",
-  jsonRoute(() => Promise.resolve())
+  jsonRoute(() => Promise.resolve()),
 );
 
 router.post("/refresh/companies", adminOnly, asyncRoute(refreshCompanies));
 router.post(
   "/refresh/jobs",
   adminOnly,
-  asyncRoute(refreshJobs, useRefreshJobsOptions)
+  asyncRoute(refreshJobs, useRefreshJobsOptions),
 );
 
 router.put("/company", jsonRoute(addCompany, useCompanyKey));

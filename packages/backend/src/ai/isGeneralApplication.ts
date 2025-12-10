@@ -42,7 +42,7 @@ export async function isGeneralApplication(title: string): Promise<boolean> {
       // Always cheap model since this is a simple classification task
       model: "gpt-5-nano",
       reasoningEffort: "minimal",
-    }
+    },
   );
 
   return content?.result ?? false;
