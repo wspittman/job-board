@@ -1,5 +1,5 @@
 import compression from "compression";
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -29,12 +29,9 @@ interface Encodings {
   useGzip: boolean;
 }
 
-declare global {
-  namespace Express {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-    interface Request {
-      _urlParts?: UrlParts;
-    }
+declare module "express-serve-static-core" {
+  interface Request {
+    _urlParts?: UrlParts;
   }
 }
 
@@ -171,13 +168,16 @@ app.use(
 );
 
 // Global error handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+app.use((err: unknown, _req: Request, res: Response) => {
+  let message = "Internal Server Error";
 
-  res.status(statusCode).json({
+  if (err instanceof Error) {
+    message = err.message || message;
+  }
+
+  res.status(500).json({
     status: "error",
-    statusCode,
+    statusCode: 500,
     message,
   });
 });

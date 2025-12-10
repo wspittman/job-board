@@ -45,7 +45,7 @@ class MetadataModel {
    * @param companyId - The ID of the company.
    * @returns The friendly name of the company, or undefined if not found.
    */
-  async getCompanyFriendlyName(companyId: string): Promise<string | undefined> {
+  getCompanyFriendlyName(companyId: string): string | undefined {
     return this.#companyNameMap.get(companyId);
   }
 

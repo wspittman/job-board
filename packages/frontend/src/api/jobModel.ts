@@ -41,10 +41,10 @@ export class JobModel {
     return `${base}?companyId=${this.#job.companyId}&jobId=${this.#job.id}`;
   }
 
-  async getDisplayDetail() {
+  getDisplayDetail() {
     const { title, company, facets } = this.#job;
     const { summary } = facets ?? {};
-    const companyFriendly = await metadataModel.getCompanyFriendlyName(company);
+    const companyFriendly = metadataModel.getCompanyFriendlyName(company);
 
     return {
       title,
@@ -53,7 +53,7 @@ export class JobModel {
     };
   }
 
-  async getDisplayFacets(useShort = false) {
+  getDisplayFacets(useShort = false) {
     const {
       isRemote,
       location,

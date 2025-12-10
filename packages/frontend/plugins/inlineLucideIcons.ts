@@ -100,6 +100,7 @@ async function expand(html: string): Promise<string> {
 
   parts.push(html.slice(lastIndex));
 
+  // eslint-disable-next-line @typescript-eslint/await-thenable
   const resolvedParts = await Promise.all(parts);
   return resolvedParts.join("");
 }

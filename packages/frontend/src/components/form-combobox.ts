@@ -3,6 +3,7 @@ import {
   FormElement,
   type FormElementProps,
   type FormOption,
+  type FormValue,
 } from "./form-element";
 
 import css from "./form-combobox.css?raw";
@@ -48,7 +49,7 @@ export class FormCombobox extends FormElement {
    * Selects an option based on the provided value.
    * @param value - The form value to search for among options
    */
-  override set value(value: unknown) {
+  override set value(value: FormValue) {
     const option = this.#menu.optionFromValue(String(value ?? ""));
     this.#selectOption(option);
   }

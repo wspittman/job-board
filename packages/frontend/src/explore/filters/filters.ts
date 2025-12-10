@@ -24,7 +24,7 @@ const DEBOUNCE_DELAY = 500;
 
 interface Props {
   initialFilters?: FilterModel;
-  onChange?: (filters: FilterModel) => void;
+  onChange?: (filters: FilterModel) => Promise<void>;
 }
 
 interface FormElementDef extends FormElementProps {
@@ -143,7 +143,7 @@ export class Filters extends ComponentBase {
   readonly #inputs = new Map<FilterModelKey, FormElement>();
 
   #debounceTimer: number | undefined;
-  #onChange?: (filters: FilterModel) => void;
+  #onChange?: (filters: FilterModel) => Promise<void>;
   #isCollapsed = false;
   #initialFilters: FilterModel | undefined;
 
@@ -194,7 +194,7 @@ export class Filters extends ComponentBase {
         options,
         onChange: () => this.#debounceOnChange(),
       });
-    } catch (err) {
+    } catch {
       // ignore
     }
 
@@ -247,13 +247,13 @@ export class Filters extends ComponentBase {
     if (!this.#onChange) return;
 
     if (this.#debounceTimer) {
-      clearTimeout(this.#debounceTimer);
+      window.clearTimeout(this.#debounceTimer);
     }
 
     this.#debounceTimer = window.setTimeout(() => {
       const data = this.#getFilterData();
-      this.#onChange?.(data);
       this.#renderChips(data);
+      void this.#onChange?.(data);
     }, DEBOUNCE_DELAY);
   }
 
@@ -262,9 +262,9 @@ export class Filters extends ComponentBase {
     return FilterModel.fromFormData(formData);
   }
 
-  async #renderChips(filters: FilterModel): Promise<void> {
+  #renderChips(filters: FilterModel): void {
     const fragment = document.createDocumentFragment();
-    const entries = await filters.toFriendlyStrings();
+    const entries = filters.toFriendlyStrings();
 
     for (const [key, label] of entries) {
       fragment.appendChild(

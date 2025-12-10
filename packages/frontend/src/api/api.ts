@@ -1,7 +1,7 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
 import type { JobModelApi, MetadataModelApi } from "./apiTypes";
 
-const viteApiUrl = import.meta.env["VITE_API_URL"];
+const viteApiUrl = import.meta.env["VITE_API_URL"] as unknown;
 const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
 export const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
 

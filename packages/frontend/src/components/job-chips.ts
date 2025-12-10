@@ -29,10 +29,10 @@ export class JobChips extends ComponentBase {
    * @param useShort - Whether to use short labels.
    * @returns A fully configured job chips element.
    */
-  async init({ job, useShort }: Props) {
+  init({ job, useShort }: Props) {
     const element = this.getEl<HTMLDivElement>("container")!;
 
-    const { location, post, ...rest } = await job.getDisplayFacets(useShort);
+    const { location, post, ...rest } = job.getDisplayFacets(useShort);
 
     const labels = Object.values(rest);
     this.#pend(labels, location, location === "Remote");

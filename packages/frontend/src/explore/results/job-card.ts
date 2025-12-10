@@ -26,12 +26,12 @@ export class JobCard extends ComponentBase {
    * @param isSelected - Whether the card should start in the selected state.
    * @returns A fully configured job card element.
    */
-  static async create({ job, onClick, isSelected }: Props) {
+  static create({ job, onClick, isSelected }: Props) {
     const element = document.createElement(tag);
 
     element.getEl<JobChips>("chips")?.init({ job, useShort: true });
 
-    const { title, company, summary } = await job.getDisplayDetail();
+    const { title, company, summary } = job.getDisplayDetail();
 
     element.setManyTexts({
       title,

@@ -63,6 +63,7 @@ async function expand(
 
   parts.push(html.slice(lastIndex));
 
+  // eslint-disable-next-line @typescript-eslint/await-thenable
   const resolvedParts = await Promise.all(parts);
   return resolvedParts.join("");
 }

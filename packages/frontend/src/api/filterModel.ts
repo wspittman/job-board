@@ -10,6 +10,7 @@ import type { FilterModelApi } from "./apiTypes";
 import { metadataModel } from "./metadataModel";
 
 export type FilterModelKey = keyof FilterModelApi;
+type FilterModelValue = FilterModelApi[keyof FilterModelApi];
 
 /**
  * Represents the filter criteria for job searches.
@@ -76,7 +77,7 @@ export class FilterModel {
    * E.g., ['companyId', 'Company: Google'], ['isRemote', 'Remote'].
    * @returns The array of key-friendly string pairs.
    */
-  async toFriendlyStrings(): Promise<[FilterModelKey, string][]> {
+  toFriendlyStrings(): [FilterModelKey, string][] {
     const entries = this.toEntries();
 
     if (this.isSavedJob()) {
@@ -85,7 +86,7 @@ export class FilterModel {
 
     let company = this.#filters.companyId;
     if (!isEmpty(company)) {
-      company = await metadataModel.getCompanyFriendlyName(company);
+      company = metadataModel.getCompanyFriendlyName(company);
     }
 
     return entries.map(([key, value]) => {
@@ -120,15 +121,15 @@ export class FilterModel {
    * Converts the filter model to an array of key-value pairs, excluding empty values.
    * @returns The array of key-value pairs.
    */
-  toEntries(): [FilterModelKey, unknown][] {
+  toEntries(): [FilterModelKey, FilterModelValue][] {
     return Object.entries(this.#filters).filter(([, v]) => !isEmpty(v)) as [
       FilterModelKey,
-      unknown
+      FilterModelValue,
     ][];
   }
 
   #fromFormData(formData: FormData): void {
-    this.#fromGeneric((key) => formData.get(key)?.toString());
+    this.#fromGeneric((key) => formData.get(key) as string);
   }
 
   #fromUrlSearchParams(params: URLSearchParams): void {

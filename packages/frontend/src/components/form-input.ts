@@ -1,5 +1,9 @@
 import { ComponentBase } from "./componentBase";
-import { FormElement, type FormElementProps } from "./form-element";
+import {
+  FormElement,
+  type FormElementProps,
+  type FormValue,
+} from "./form-element";
 
 import css from "./form-input.css?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
@@ -39,7 +43,7 @@ export class FormInput extends FormElement {
    * Applies validation before storing the provided value.
    * @param value - The new value to assign to the input
    */
-  override set value(value: unknown) {
+  override set value(value: FormValue) {
     super.value = this.#validate(value);
   }
 
@@ -65,14 +69,14 @@ export class FormInput extends FormElement {
     this.intake.insertAdjacentElement(pos, el);
   }
 
-  #validate(value: unknown): string {
+  #validate(value: FormValue): string {
     if (this.#validation?.type === "int") {
       return this.#intOnly(value);
     }
     return String(value ?? "");
   }
 
-  #intOnly(value: unknown): string {
+  #intOnly(value: FormValue): string {
     const prevVal = this.getAttribute("value") ?? "";
     const val = String(value ?? "").trim();
 
@@ -80,7 +84,7 @@ export class FormInput extends FormElement {
     if (!/^\d+$/.test(val)) return prevVal;
 
     const { min = 0, max = Number.MAX_SAFE_INTEGER } = this.#validation ?? {};
-    let num = Number.parseInt(val, 10);
+    const num = Number.parseInt(val, 10);
     if (Number.isNaN(num) || num < min || num > max) return prevVal;
 
     return String(num);
