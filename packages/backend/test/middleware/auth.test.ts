@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test } from "node:test";
-import { adminOnly } from "../../src/middleware/auth";
+import { adminOnly } from "../../src/middleware/auth.ts";
 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? "";
 const unauthorizedJson = { message: "Unauthorized" };
