@@ -4,14 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && tsc -p server/tsconfig.json && vite build",
-    "preview": "vite preview",
-    "start": "node server.js",
-    "start:local": "node deploy/server.js",
     "lint": "eslint",
     "format": "prettier . --check",
-    "format:write": "prettier . --write"
+    "format:write": "prettier . --write",
+    "dev": "vite",
+    "build": "tsc --noEmit && tsc -p server/tsconfig.json && vite build",
+    "start": "node server.js",
+    "start:local": "node deploy/server.js"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.1.0",

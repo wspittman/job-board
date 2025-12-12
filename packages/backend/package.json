@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "tsx watch --env-file=./.env ./src/app.ts",
-    "build": "tsc",
-    "pretest": "tsc --noEmit",
-    "test": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
     "lint": "eslint",
     "format": "prettier . --check",
-    "format:write": "prettier . --write"
+    "format:write": "prettier . --write",
+    "pretest": "tsc --noEmit",
+    "test": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
+    "dev": "tsx watch --env-file=./.env ./src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js"
   },
   "dependencies": {
     "applicationinsights": "^2.9.5",
