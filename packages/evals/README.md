@@ -8,9 +8,8 @@ curated ground truth data.
 
 - Node.js 24 or newer (the repository root manages the toolchain).
 - Project dependencies installed from the monorepo root with `npm install`.
-- A `.env` file in the repository root that provides the backend configuration, including
+- A `.env` file in the package folder that provides the backend configuration, including
   `OPENAI_API_KEY`, the target `LLM_MODEL`, and optional `LLM_REASONING_EFFORT`.
-- Access to the target ATS (Greenhouse or Lever) when fetching fresh input examples.
 
 The evaluation package reuses the backend configuration (`packages/backend/src/config.ts`), so
 any environment variables documented for the backend also apply here.

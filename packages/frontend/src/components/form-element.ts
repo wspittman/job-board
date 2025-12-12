@@ -4,9 +4,11 @@ import html from "./form-element.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
+export type FormValue = string | number | boolean | undefined;
+
 export interface FormOption {
   label: string;
-  value: unknown;
+  value: FormValue;
 }
 
 export interface FormElementProps {
@@ -28,7 +30,7 @@ export interface FormElementProps {
   options?: FormOption[];
 
   // editable
-  value?: unknown;
+  value?: FormValue;
 }
 
 /**
@@ -92,7 +94,7 @@ export abstract class FormElement extends ComponentBase {
    * Updates the externally visible value while keeping form internals aligned.
    * @param value - The new value to display within the intake element
    */
-  set value(value: unknown) {
+  set value(value: FormValue) {
     this.intake.value = String(value ?? "");
     this.#syncAttribute();
   }

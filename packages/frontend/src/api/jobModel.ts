@@ -1,5 +1,9 @@
 import { api, API_URL } from "./api";
-import { toJobFamilyLabel, toWorkTimeBasisLabel } from "./apiEnums";
+import {
+  toJobFamilyLabel,
+  toPayCadenceLabel,
+  toWorkTimeBasisLabel,
+} from "./apiEnums";
 import type { JobModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 import { metadataModel } from "./metadataModel";
@@ -37,10 +41,10 @@ export class JobModel {
     return `${base}?companyId=${this.#job.companyId}&jobId=${this.#job.id}`;
   }
 
-  async getDisplayDetail() {
+  getDisplayDetail() {
     const { title, company, facets } = this.#job;
     const { summary } = facets ?? {};
-    const companyFriendly = await metadataModel.getCompanyFriendlyName(company);
+    const companyFriendly = metadataModel.getCompanyFriendlyName(company);
 
     return {
       title,
@@ -49,10 +53,18 @@ export class JobModel {
     };
   }
 
-  async getDisplayFacets(useShort = false) {
-    const { isRemote, location, postTS, facets, workTimeBasis, jobFamily } =
-      this.#job;
-    const { salary, experience } = facets ?? {};
+  getDisplayFacets(useShort = false) {
+    const {
+      isRemote,
+      location,
+      postTS,
+      facets,
+      workTimeBasis,
+      jobFamily,
+      minSalary,
+      payCadence,
+    } = this.#job;
+    const { experience } = facets ?? {};
 
     let loc = location;
     if (isRemote) {
@@ -73,9 +85,16 @@ export class JobModel {
       ? this.#tsToDaysString(postTS)
       : new Date(postTS).toLocaleDateString();
 
+    const compCurrency = "$";
+    const compMinSalary = minSalary?.toLocaleString();
+    const compCadence = toPayCadenceLabel(payCadence);
+    const comp = [compMinSalary ? compCurrency : "", compMinSalary, compCadence]
+      .filter(Boolean)
+      .join(" ");
+
     return {
       location: loc,
-      salary: salary ? `$${salary.toLocaleString()}` : undefined,
+      comp,
       experience: exp,
       post,
       workTimeBasis: toWorkTimeBasisLabel(workTimeBasis),

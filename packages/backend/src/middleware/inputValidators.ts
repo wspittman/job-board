@@ -1,8 +1,9 @@
 import { z } from "dry-utils-openai";
 import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
-import { JobFamily, WorkTimeBasis } from "../models/enums.ts";
+import { JobFamily, PayCadence, WorkTimeBasis } from "../models/enums.ts";
 import type { CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
+import { stripObj } from "../utils/objUtils.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
 // Z Helpers
@@ -14,8 +15,8 @@ const coerceInt = <T>(zt: Z<T>) =>
   soft(
     z.preprocess(
       (val) => (typeof val === "string" ? parseInt(val, 10) : val),
-      zt
-    )
+      zt,
+    ),
   );
 
 // Basic Schema Components
@@ -46,6 +47,7 @@ const FiltersSchema = z.object({
   isRemote: coerceString(z.stringbool()),
   workTimeBasis: soft(WorkTimeBasis),
   jobFamily: soft(JobFamily),
+  payCadence: soft(PayCadence),
   title: soft(SearchSchema),
   location: soft(SearchSchema),
   daysSince: coerceInt(z.int().positive().max(365)),
@@ -136,13 +138,4 @@ function zParse<T>(zt: Z<T>, data: unknown = {}): T {
     throw new AppError(`${path?.join(".")} field is invalid: ${message}`);
   }
   return result.data;
-}
-
-/**
- * Remove properties with null or undefined values from an object
- */
-function stripObj<T extends Record<string, unknown>>(obj: T): T {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, val]) => val != null)
-  ) as T;
 }

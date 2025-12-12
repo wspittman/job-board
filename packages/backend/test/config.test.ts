@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { afterEach, beforeEach, describe, test } from "node:test";
+import { afterEach, beforeEach, suite, test } from "node:test";
 
 const originalEnv = { ...process.env };
 const VALID_ADMIN_TOKEN = "a".repeat(16);
@@ -10,7 +10,7 @@ const importFreshConfig = async () =>
 const setEnv = (extras: Record<string, string | undefined> = {}) =>
   (process.env = { ...originalEnv, ...extras });
 
-describe("config", () => {
+suite("config", () => {
   beforeEach(() => setEnv());
   afterEach(() => setEnv());
 

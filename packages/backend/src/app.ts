@@ -1,7 +1,7 @@
 import { logError, startTelemetry } from "./utils/telemetry.ts";
 
 // We need this as early as possible, for reasons
-await startTelemetry();
+startTelemetry();
 
 import cors from "cors";
 import type { NextFunction, Request, Response } from "express";
@@ -10,6 +10,7 @@ import helmet from "helmet";
 import { config } from "./config.ts";
 import { db } from "./db/db.ts";
 import { router } from "./routes/routes.ts";
+import { AppError } from "./utils/AppError.ts";
 
 const app = express();
 
@@ -25,10 +26,19 @@ app.use((_: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   logError(err);
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  let statusCode = 500;
+  let message = "Internal Server Error";
+
+  if (err instanceof AppError) {
+    statusCode = err.statusCode || statusCode;
+  }
+
+  if (err instanceof Error) {
+    message = err.message || message;
+  }
 
   res.status(statusCode).json({
     status: "error",
@@ -63,4 +73,4 @@ async function startServer() {
 }
 
 // Initialize server
-startServer();
+void startServer();

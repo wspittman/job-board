@@ -1,0 +1,7 @@
+deploy
+dist
+build
+coverage
+node_modules
+*.log
+.env

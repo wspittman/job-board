@@ -32,24 +32,22 @@ export class Results extends ComponentBase {
    * Sets up the selection callback and resets the results list.
    * @param onSelect - Handler invoked when a job card is selected.
    */
-  async init({ onSelect }: Props) {
+  init({ onSelect }: Props) {
     this.#onSelect = onSelect;
-    await this.updateJobs(undefined);
+    this.updateJobs(undefined);
   }
 
   /**
    * Rebuilds the job list display from the provided dataset.
    * @param value - Array of job models to render, or undefined to clear the list.
    */
-  async updateJobs(value: JobModel[] | undefined, isSavedJob = false) {
+  updateJobs(value: JobModel[] | undefined, isSavedJob = false) {
     const onClick = (id: string) => this.#selectCard(id);
 
-    this.cards = await Promise.all(
-      (value ?? []).map((job, index) => {
-        const isSelected = index === 0;
-        return JobCard.create({ job, isSelected, onClick });
-      })
-    );
+    this.cards = (value ?? []).map((job, index) => {
+      const isSelected = index === 0;
+      return JobCard.create({ job, isSelected, onClick });
+    });
 
     const displayCards: Node[] = [...this.cards];
     if (!isSavedJob) {

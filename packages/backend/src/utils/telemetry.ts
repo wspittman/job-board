@@ -21,9 +21,19 @@ https://github.com/microsoft/ApplicationInsights-node.js/issues/1354
 import type { Bag } from "../types/types.ts";
 import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
+interface TypedRequestData extends RequestData {
+  properties: Bag | unknown[] | undefined;
+}
+interface TypedEventData extends EventData {
+  properties: Bag | unknown[] | undefined;
+}
+interface TypedExceptionData extends ExceptionData {
+  properties: Bag | unknown[] | undefined;
+}
+
 let _client: NodeClient;
 
-export async function startTelemetry(): Promise<void> {
+export function startTelemetry(): void {
   telemetryWorkaround
     .setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
     .start();
@@ -70,7 +80,7 @@ const asyncLocalStorage = new AsyncLocalStorage<Bag>();
  */
 export function withAsyncContext(
   name: string,
-  fn: () => Promise<void>
+  fn: () => Promise<void>,
 ): Promise<void> {
   const start = Date.now();
   return asyncLocalStorage.run({}, async () => {
@@ -188,7 +198,7 @@ export function subscribeError({ tag, val }: LogSub): void {
  */
 export function createSubscribeAggregator(
   source: string,
-  callLimit: number
+  callLimit: number,
 ): (sub: AgSub) => void {
   return ({ tag, dense, metrics, blob }: AgSub) => {
     const ag = getSubContext<AgBag>(source, {
@@ -228,19 +238,22 @@ export function telemetryProcessor({ data }: EnvelopeTelemetry): boolean {
     if (!data.baseData) return true;
 
     switch (data.baseType) {
-      case "RequestData":
-        const requestData = data.baseData as RequestData;
+      case "RequestData": {
+        const requestData = data.baseData as TypedRequestData;
         appendContext(requestData);
         devLogRequest(requestData);
         break;
-      case "EventData":
+      }
+      case "EventData": {
         const eventData = data.baseData as EventData;
         appendContext(eventData);
         devLogEvent(eventData);
         break;
-      case "ExceptionData":
+      }
+      case "ExceptionData": {
         devLogException(data.baseData as ExceptionData);
         break;
+      }
       case "RemoteDependencyData":
       case "MetricData":
         // Uncomment for local debug logging
@@ -258,7 +271,7 @@ export function telemetryProcessor({ data }: EnvelopeTelemetry): boolean {
   return true;
 }
 
-function appendContext(baseData: RequestData | EventData) {
+function appendContext(baseData: TypedRequestData | TypedEventData) {
   const requestData = baseData;
   requestData.properties = {
     ...requestData.properties,
@@ -268,7 +281,7 @@ function appendContext(baseData: RequestData | EventData) {
 
 // #region Development Logging
 
-function devLogRequest(requestData: RequestData) {
+function devLogRequest(requestData: TypedRequestData) {
   if (config.NODE_ENV === "dev") {
     const { name, responseCode, duration, properties } = requestData;
     devLog({
@@ -280,14 +293,14 @@ function devLogRequest(requestData: RequestData) {
   }
 }
 
-function devLogEvent(eventData: EventData) {
+function devLogEvent(eventData: TypedEventData) {
   if (config.NODE_ENV === "dev") {
     const { name, properties } = eventData;
     devLog({ name, ...properties });
   }
 }
 
-function devLogException({ exceptions, properties }: ExceptionData) {
+function devLogException({ exceptions, properties }: TypedExceptionData) {
   if (config.NODE_ENV === "dev") {
     const [first, ...rest] = exceptions;
     const simplify = (ex: ExceptionDetails) => ({
@@ -296,10 +309,15 @@ function devLogException({ exceptions, properties }: ExceptionData) {
     });
 
     if (first) {
-      if (typeof properties?.cause === "string") {
+      if (
+        !Array.isArray(properties) &&
+        typeof properties?.["cause"] === "string"
+      ) {
         try {
-          properties.cause = JSON.parse(properties.cause);
-        } catch {}
+          properties["cause"] = JSON.parse(properties["cause"]);
+        } catch {
+          /* ignore */
+        }
       }
 
       devLog({
@@ -318,7 +336,7 @@ function devLog(data: object) {
         timestamp: new Date().toISOString(),
         ...data,
       },
-      { depth: null }
+      { depth: null },
     );
   }
 }

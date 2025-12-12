@@ -4,7 +4,7 @@
 
 .faq-hero {
   text-align: center;
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
 }
 
 .faq-intro {
@@ -72,6 +72,11 @@
   display: none; /* Hidden by default, "block" when populated */
   color: var(--text-muted);
   font-size: var(--font-size-xs);
+}
+
+.section-header {
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 @media (max-width: 600px) {

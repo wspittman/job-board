@@ -41,7 +41,7 @@ export class AsyncQueue<T> {
   constructor(
     name: string,
     fn: (task: T) => Promise<void>,
-    { concurrentLimit = 5, taskDelayMs = 0, onComplete }: Options = {}
+    { concurrentLimit = 5, taskDelayMs = 0, onComplete }: Options = {},
   ) {
     this.name = name;
     this.fn = fn;
@@ -64,7 +64,7 @@ export class AsyncQueue<T> {
     // If there are no tasks or the batch is full, return
     if (!this.head || this.active >= this.concurrentLimit) return;
 
-    this.runTask(this.dequeue());
+    void this.runTask(this.dequeue());
     this.begin();
   }
 

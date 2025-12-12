@@ -10,6 +10,6 @@ try {
     el.textContent = lastRefreshed;
     el.style.display = "block";
   }
-} catch (err) {
+} catch {
   // ignore
 }

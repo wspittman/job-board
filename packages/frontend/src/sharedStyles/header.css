@@ -90,7 +90,9 @@
   & svg {
     position: absolute;
     height: inherit;
-    transition: opacity 0.22s ease, transform 0.22s ease;
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
     will-change: opacity, transform;
   }
 }

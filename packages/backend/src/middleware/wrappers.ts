@@ -14,7 +14,7 @@ const SUCCESS = { status: "success" };
 export function jsonRoute<IN, OUT>(
   fn: (input: IN) => Promise<OUT>,
   inputValidator?: (input: unknown) => IN,
-  outputFormatter?: (output: OUT) => unknown
+  outputFormatter?: (output: OUT) => unknown,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -36,7 +36,7 @@ export function jsonRoute<IN, OUT>(
  */
 export function asyncRoute<T>(
   fn: (input: T) => Promise<void>,
-  inputValidator?: (input: unknown) => T
+  inputValidator?: (input: unknown) => T,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -64,7 +64,7 @@ export function asyncRoute<T>(
  */
 export function redirectRoute<IN>(
   fn: (input: IN) => Promise<string>,
-  inputValidator?: (input: unknown) => IN
+  inputValidator?: (input: unknown) => IN,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -88,9 +88,9 @@ function pathToLogName(path: string) {
 /**
  * Get the input from the request, optionally validating it.
  */
-function getInput<T>(req: Request, validator?: (input: unknown) => T) {
-  const rawInput = req.method === "GET" ? convertQuery(req) : req.body;
-  return validator ? validator(rawInput) : rawInput;
+function getInput<T>(req: Request, validator?: (input: unknown) => T): T {
+  const rawInput = req.method === "GET" ? convertQuery(req) : (req.body as T);
+  return validator ? validator(rawInput) : (rawInput as T);
 }
 
 /**
@@ -100,7 +100,7 @@ function convertQuery(req: Request): Record<string, string> {
   return Object.fromEntries(
     Object.entries(req.query).filter(
       (entry): entry is [string, string] =>
-        typeof entry[1] === "string" && entry[1].length > 0
-    )
+        typeof entry[1] === "string" && entry[1].length > 0,
+    ),
   ) as Record<string, string>;
 }

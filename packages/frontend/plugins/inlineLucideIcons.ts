@@ -4,11 +4,11 @@ import type { Plugin } from "vite";
 
 const ICON_DIR = path.resolve(
   process.cwd(),
-  "../../node_modules/lucide-static/icons"
+  "../../node_modules/lucide-static/icons",
 );
 const ICON_PATTERN = new RegExp(
   `^(\\s*)<svg[^>]*?\\sdata-icon="([^"]+)"[^>]*></svg>`,
-  "gim"
+  "gim",
 );
 
 const R_KEY = "RANDOM";
@@ -100,6 +100,7 @@ async function expand(html: string): Promise<string> {
 
   parts.push(html.slice(lastIndex));
 
+  // eslint-disable-next-line @typescript-eslint/await-thenable
   const resolvedParts = await Promise.all(parts);
   return resolvedParts.join("");
 }
@@ -120,7 +121,7 @@ async function loadRandomTri(indent: string): Promise<string> {
 
 async function loadRandomIcon(
   indent: string,
-  style: string = ""
+  style: string = "",
 ): Promise<string> {
   const dc = getRandomColor();
   const ds = randInt(0, 3);

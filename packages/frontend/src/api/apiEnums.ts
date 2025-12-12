@@ -4,7 +4,7 @@ const workTimeBasis = {
 } as const;
 
 export type WorkTimeBasis = keyof typeof workTimeBasis;
-export const workTimeBasisOptions = Object.entries(workTimeBasis).map(toOption);
+export const workTimeBasisOptions = toOptions(workTimeBasis);
 export const toWorkTimeBasis = (value: unknown) => asEnum(workTimeBasis, value);
 export const toWorkTimeBasisLabel = (value: unknown) =>
   asLabel(workTimeBasis, value);
@@ -27,11 +27,24 @@ const jobFamily = {
 } as const;
 
 export type JobFamily = keyof typeof jobFamily;
-export const jobFamilyOptions = Object.entries(jobFamily).map(toOption);
+export const jobFamilyOptions = toOptions(jobFamily);
 export const toJobFamily = (value: unknown): JobFamily | undefined =>
   asEnum(jobFamily, value);
 export const toJobFamilyLabel = (value: unknown): string =>
   asLabel(jobFamily, value);
+
+const payCadence = {
+  hourly: "Hourly",
+  salary: "Annually",
+  stipend: "Stipend",
+} as const;
+
+export type PayCadence = keyof typeof payCadence;
+export const payCadenceOptions = toOptions(payCadence);
+export const toPayCadence = (value: unknown): PayCadence | undefined =>
+  asEnum(payCadence, value);
+export const toPayCadenceLabel = (value: unknown): string =>
+  asLabel(payCadence, value);
 
 type Enum<T extends string> = Record<T, string>;
 
@@ -43,9 +56,11 @@ function asEnum<T extends string>(obj: Enum<T>, value: unknown): T | undefined {
 
 function asLabel<T extends string>(obj: Enum<T>, value: unknown): string {
   const val = asEnum(obj, value);
-  return val ? obj[val] : String(value);
+  return val ? obj[val] : "";
 }
 
-function toOption([value, label]: [string, string]) {
-  return { value, label };
+function toOptions<T extends string>(obj: Enum<T>) {
+  return Object.entries<string>(obj)
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 }

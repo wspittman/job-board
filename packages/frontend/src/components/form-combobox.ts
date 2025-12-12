@@ -3,6 +3,7 @@ import {
   FormElement,
   type FormElementProps,
   type FormOption,
+  type FormValue,
 } from "./form-element";
 
 import css from "./form-combobox.css?raw";
@@ -31,7 +32,7 @@ export class FormCombobox extends FormElement {
     this.addEventListener("focusout", (event) => this.#handleFocusOut(event));
     this.intake.addEventListener("focus", () => this.#menu.open());
     this.intake.addEventListener("keydown", (event) =>
-      this.#menu.handleKeydown(event as KeyboardEvent)
+      this.#menu.handleKeydown(event as KeyboardEvent),
     );
   }
 
@@ -48,7 +49,7 @@ export class FormCombobox extends FormElement {
    * Selects an option based on the provided value.
    * @param value - The form value to search for among options
    */
-  override set value(value: unknown) {
+  override set value(value: FormValue) {
     const option = this.#menu.optionFromValue(String(value ?? ""));
     this.#selectOption(option);
   }
@@ -111,7 +112,7 @@ class MenuEl {
     this.element.setAttribute("role", "listbox");
 
     this.element.addEventListener("mousedown", (event) =>
-      event.preventDefault()
+      event.preventDefault(),
     );
     this.element.addEventListener("click", (event) => this.#onClick(event));
 
@@ -150,7 +151,7 @@ class MenuEl {
 
     const oldActive = this.#filteredOptions[this.#activeIndex];
     this.#filteredOptions = this.#rawOptions.filter((x) =>
-      x.compareLabel.includes(trimmed)
+      x.compareLabel.includes(trimmed),
     );
 
     if (oldActive) {

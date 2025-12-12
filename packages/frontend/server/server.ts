@@ -29,12 +29,9 @@ interface Encodings {
   useGzip: boolean;
 }
 
-declare global {
-  namespace Express {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-    interface Request {
-      _urlParts?: UrlParts;
-    }
+declare module "express-serve-static-core" {
+  interface Request {
+    _urlParts?: UrlParts;
   }
 }
 
@@ -95,7 +92,7 @@ app.use(
       if (!type.includes("application/json")) return false;
       return compression.filter(req, res);
     },
-  })
+  }),
 );
 
 // API proxy middleware
@@ -118,7 +115,7 @@ app.use(
         }
       },
     },
-  })
+  }),
 );
 
 // Middleware to handle URL rewriting and compression
@@ -167,17 +164,21 @@ app.use(
       // Cache other prebuilt files for 1 day
       res.setHeader("Cache-Control", "public, max-age=86400");
     },
-  })
+  }),
 );
 
 // Global error handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  let message = "Internal Server Error";
 
-  res.status(statusCode).json({
+  if (err instanceof Error) {
+    message = err.message || message;
+  }
+
+  res.status(500).json({
     status: "error",
-    statusCode,
+    statusCode: 500,
     message,
   });
 });
@@ -220,7 +221,7 @@ async function getUrlParts(req: Request): Promise<UrlParts | T404> {
 
 async function getCompressionUrl(
   urlParts: UrlParts,
-  { useBrotli, useGzip }: Encodings
+  { useBrotli, useGzip }: Encodings,
 ) {
   const { base, ext, dir } = urlParts;
   const filePath = joinFS(__dist, dir, `${base}${ext}`);

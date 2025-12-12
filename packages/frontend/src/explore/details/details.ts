@@ -35,33 +35,33 @@ export class Details extends ComponentBase {
     this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
     this.#jobChips = this.getEl<JobChips>("chips")!;
     this.#detailEmbed = this.getEl<DetailEmbed>("description")!;
-    this.#copyButton.addEventListener("click", () => this.#copyJobLink());
+    this.#copyButton.addEventListener("click", () => void this.#copyJobLink());
   }
 
   /**
    * Updates the job being displayed and re-renders the panel contents.
    * @param value - The job to render, or undefined to clear the panel.
    */
-  async updateJob(value: JobModel | undefined) {
+  updateJob(value: JobModel | undefined) {
     if (this.#job?.id === value?.id) return;
 
     requestAnimationFrame(() => (this.scrollTop = 0));
     this.#job = value;
-    await this.#render();
+    this.#render();
   }
 
-  async #render() {
+  #render() {
     if (!this.#job) return;
 
-    const { title, company } = await this.#job.getDisplayDetail();
+    const { title, company } = this.#job.getDisplayDetail();
     this.setManyTexts({ title, company });
 
-    await this.#jobChips.init({ job: this.#job });
+    this.#jobChips.init({ job: this.#job });
     this.#detailEmbed.description = this.#job.description;
     this.#applyLink.href = this.#job.applyUrl;
     this.#applyLink.setAttribute(
       "aria-label",
-      `Apply for ${title} position at ${company}`
+      `Apply for ${title} position at ${company}`,
     );
   }
 
@@ -87,7 +87,7 @@ export class Details extends ComponentBase {
 
     const timeout = window.setTimeout(
       () => this.#setCopyButtonState("idle"),
-      2000
+      2000,
     );
     this.#copyResetHandle = timeout;
   }

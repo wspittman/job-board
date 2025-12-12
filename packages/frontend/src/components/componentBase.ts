@@ -24,7 +24,7 @@ export abstract class ComponentBase extends HTMLElement {
   constructor(
     html: string,
     css: CSSStyleSheet | CSSStyleSheet[],
-    options: Options = {}
+    options: Options = {},
   ) {
     const cssSheets = Array.isArray(css) ? css : [css];
     const { omitPartsCss = false } = options;
@@ -44,7 +44,9 @@ export abstract class ComponentBase extends HTMLElement {
    * Lifecycle hook called when the component is connected to the DOM.
    * Override this method in derived classes to perform logic on DOM insertion.
    */
-  protected onLoad(): void {}
+  protected onLoad(): Promise<void> {
+    return Promise.resolve();
+  }
 
   /**
    * Hides the component by setting display to none.
@@ -138,6 +140,6 @@ export abstract class ComponentBase extends HTMLElement {
    * Triggers the onLoad lifecycle hook.
    */
   connectedCallback() {
-    this.onLoad();
+    void this.onLoad();
   }
 }

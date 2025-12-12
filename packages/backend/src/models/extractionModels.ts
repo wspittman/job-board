@@ -44,7 +44,7 @@ export const ExtractionCompany = z
       "Prefer the corporate root domain (e.g., https://www.example.com). Strip tracking params/fragments.",
       "Exclude ATS/careers and vendor subdomains (e.g., *.lever.co, *.greenhouse.io, careers.example.com).",
       "If no URL is explicitly stated, return ''.",
-      "Example: 'Visit us at www.example.com' → 'https://www.example.com'."
+      "Example: 'Visit us at www.example.com' → 'https://www.example.com'.",
     ),
     foundingYear: z
       .number()
@@ -56,7 +56,7 @@ export const ExtractionCompany = z
           "If both founding and launch years are present, return the founding year.",
           "If no founding year is explicitly stated, return -1.",
           "Example: 'Founded in 2014; launched 2016' → 2014.",
-        ].join(" ")
+        ].join(" "),
       ),
     stage: CompanyStage,
     size: CompanySizeBand,
@@ -64,14 +64,14 @@ export const ExtractionCompany = z
       "1-3 sentence factual summary of what the company does (product/market, customers, differentiators).",
       "Third person, present tense. Avoid marketing slogans.",
       "Exclude role-specific details (responsibilities, benefits, comp, team stack).",
-      "If no company details are present, return ''."
+      "If no company details are present, return ''.",
     ),
   })
   .describe(
     [
       "Company-level facts explicitly stated in the source.",
       "Prefer the most recent explicit facts, except foundingYear which should be the original legal founding.",
-    ].join(" ")
+    ].join(" "),
   );
 export type ExtractionCompany = z.infer<typeof ExtractionCompany>;
 
@@ -84,7 +84,7 @@ export const ExtractionLocation = z
       "'Located in downtown Seattle' → Seattle;",
       "'Our office is in Cologne, Germany' → Cologne;",
       "'We are headquartered in São Paulo' → São Paulo;",
-      "'Remote US only' → ''."
+      "'Remote US only' → ''.",
     ),
     regionCode: zString(
       "ISO 3166-2 subdivision code (uppercase) excluding country prefix.",
@@ -92,7 +92,7 @@ export const ExtractionLocation = z
       "'Located in downtown Seattle' → WA;",
       "'Our office is in Cologne, Germany' → NW;",
       "'We are headquartered in São Paulo' → SP;",
-      "'Remote US only' → ''."
+      "'Remote US only' → ''.",
     ),
     countryCode: zString(
       "ISO 3166-1 alpha-2 country code (uppercase).",
@@ -102,14 +102,14 @@ export const ExtractionLocation = z
       "'Our office is in Cologne, Germany' → DE;",
       "'We are headquartered in São Paulo' → BR;",
       "'Remote US only' → US.",
-      "'Remote worldwide' → ''."
+      "'Remote worldwide' → ''.",
     ),
   })
   .describe(
     [
       "Normalized single location explicitly stated for the context.",
       "When the context is remote, use the primary office location if stated.",
-    ].join(" ")
+    ].join(" "),
   );
 export type ExtractionLocation = z.infer<typeof ExtractionLocation>;
 
@@ -124,7 +124,7 @@ export const ExtractionRemoteEligibility = z
           "Examples:",
           "'Remote (US and Canada only)' → ['US', 'CA'].",
           "'Remote worldwide' → [].",
-        ].join(" ")
+        ].join(" "),
       ),
     regions: z
       .array(z.string())
@@ -136,21 +136,21 @@ export const ExtractionRemoteEligibility = z
           "'Remote (NY, CA, TX)' → ['US-NY', 'US-CA', 'US-TX'].",
           "'Remote (US only)' → [].",
           "'Remote worldwide' → [].",
-        ].join(" ")
+        ].join(" "),
       ),
     notes: zString().describe(
       [
         "Freeform clarifications, in this order: restrictions, exclusions, preferences, other.",
         "This might include time-zone limits, legal entity constraints, work authorization requirements, and other factors.",
         "When the role is not remote or no clarifications are needed, return ''",
-      ].join(" ")
+      ].join(" "),
     ),
   })
   .describe(
     [
       "Remote work eligibility as explicitly stated.",
       "Uppercase codes, no duplicates.",
-    ].join(" ")
+    ].join(" "),
   );
 export type ExtractionRemoteEligibility = z.infer<
   typeof ExtractionRemoteEligibility
@@ -162,19 +162,19 @@ export const ExtractionSalaryRange = z
     cadence: PayCadence,
     min: zPosNum(
       "Minimum salary in the stated currency and cadence.",
-      "If not explicitly stated, return -1."
+      "If not explicitly stated, return -1.",
     ),
     max: zPosNum(
       "Maximum salary in the stated currency and cadence.",
-      "If not explicitly stated, return -1."
+      "If not explicitly stated, return -1.",
     ),
     minOTE: zPosNum(
       "Minimum on-target earnings (base + target variable comp) in the stated currency and cadence.",
-      "If variable comp is not explicitly stated, return -1."
+      "If variable comp is not explicitly stated, return -1.",
     ),
     maxOTE: zPosNum(
       "Maximum on-target earnings (base + target variable comp) in the stated currency and cadence.",
-      "If variable comp is not explicitly stated, return -1."
+      "If variable comp is not explicitly stated, return -1.",
     ),
   })
   .describe(
@@ -182,7 +182,7 @@ export const ExtractionSalaryRange = z
       "Salary figures as stated, normalized to a single currency",
       "If only one number is provided, set both min and max to that number.",
       "Ensure min ≤ max",
-    ].join(" ")
+    ].join(" "),
   );
 export type ExtractionSalaryRange = z.infer<typeof ExtractionSalaryRange>;
 
@@ -196,7 +196,7 @@ export const ExtractionBenefitHighlights = z
         [
           "Employer-paid share of employee health insurance premium, 0-100.",
           "If not explicitly stated, return -1.",
-        ].join(" ")
+        ].join(" "),
       ),
     ptoDays: z
       .union([
@@ -205,24 +205,24 @@ export const ExtractionBenefitHighlights = z
           "If PTO days are not explicitly stated, return -1.",
           "Examples:",
           "'15 days PTO' → 15;",
-          "'3 weeks vacation' → 15;"
+          "'3 weeks vacation' → 15;",
         ),
         z.literal("Unlimited"),
       ])
       .describe(
-        "The number of paid time off days, or 'Unlimited' if role provides an unlimited PTO benefit."
+        "The number of paid time off days, or 'Unlimited' if role provides an unlimited PTO benefit.",
       ),
     parentalLeaveWeeks: zPosNum(
       "Fully paid parental leave weeks (total weeks of pay available to a new parent).",
       "If parental leave amount is not explicitly stated, return -1.",
-      "Example: '12 weeks paid parental leave' → '12'."
+      "Example: '12 weeks paid parental leave' → '12'.",
     ),
   })
   .describe(
     [
       "Key benefits as explicitly stated.",
       "Use numeric scalars; do not convert units.",
-    ].join(" ")
+    ].join(" "),
   );
 export type ExtractionBenefitHighlights = z.infer<
   typeof ExtractionBenefitHighlights
@@ -247,14 +247,14 @@ export const ExtractionJob = z
       "If not explicitly stated, return -1.",
       "Examples:",
       "'5-8 years' → 5;",
-      "'3+ years' → 3;"
+      "'3+ years' → 3;",
     ),
     summary: zString(
       "1-2 sentence factual summary of the role's key responsibilities.",
       "Third person, present tense.",
       "Use active voice and specific technologies/skills.",
       "Do not repeat the company or job title.",
-      "No marketing fluff. No internal reasoning."
+      "No marketing fluff. No internal reasoning.",
     ),
   })
   .describe(
@@ -263,6 +263,6 @@ export const ExtractionJob = z
       "Set string fields to '' when not explicitly stated.",
       "Set numeric fields to -1 when not explicitly stated.",
       "Prefer the most recent explicit fact when multiple conflict.",
-    ].join(" ")
+    ].join(" "),
   );
 export type ExtractionJob = z.infer<typeof ExtractionJob>;

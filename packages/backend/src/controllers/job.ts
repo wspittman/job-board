@@ -41,7 +41,7 @@ export async function getJobs(filterInput: Filters) {
     const result = job ? [job] : [];
     logProperty(
       "GetJobs_Id",
-      `${companyId}_${jobId}_${job ? "Found" : "NotFound"}`
+      `${companyId}_${jobId}_${job ? "Found" : "NotFound"}`,
     );
     return result;
   }
@@ -90,7 +90,7 @@ export async function getApplyRedirectUrl(key: JobKey): Promise<string> {
  * @returns Promise resolving when jobs are refreshed
  */
 export async function refreshJobsForCompany(
-  key: CompanyKey & { replaceJobsOlderThan?: number }
+  key: CompanyKey & { replaceJobsOlderThan?: number },
 ) {
   logProperty("Input", key);
   const companyId = key.id;
@@ -111,7 +111,7 @@ export async function refreshJobsForCompany(
 
   if (remove.length) {
     await batch("DeleteJob", remove, (id) =>
-      db.job.remove({ id, companyId: key.id })
+      db.job.remove({ id, companyId: key.id }),
     );
   }
 
@@ -142,11 +142,15 @@ async function getJobIds(companyId: string, cutoffMS?: number) {
 async function getAtsJobs(
   key: CompanyKey,
   currentIds: string[],
-  ignoreIds: string[] = []
+  ignoreIds: string[] = [],
 ) {
   // If there are no current jobs, assume newly added company and get full job data for all jobs
   const getFullJobInfo = !currentIds.length;
   let atsJobs = await ats.getJobs(key, getFullJobInfo);
+
+  // Remove any jobs that are more than 1 year old to avoid processing stale listings
+  const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
+  atsJobs = atsJobs.filter(({ item: { postTS } }) => postTS >= oneYearAgo);
 
   // Create sets for faster comparisons
   const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
@@ -221,10 +225,13 @@ async function readJobsByFilters({
   isRemote,
   workTimeBasis,
   jobFamily,
+  payCadence,
 }: EnhancedFilters) {
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
   const query = new Query();
+
+  // Exact Matches
 
   if (companyId) {
     query.whereCondition("companyId", "=", companyId);
@@ -246,6 +253,12 @@ async function readJobsByFilters({
     query.whereCondition("jobFamily", "=", jobFamily);
   }
 
+  if (payCadence) {
+    query.whereCondition("salaryRange.cadence", "=", payCadence);
+  }
+
+  // Range Matches
+
   if (daysSince) {
     const millisecondsPerDay = 24 * 60 * 60 * 1000;
     const sinceTS = Date.now() - daysSince * millisecondsPerDay;
@@ -259,6 +272,8 @@ async function readJobsByFilters({
   if (minSalary) {
     query.whereCondition("salaryRange.min", ">=", minSalary);
   }
+
+  // Substring Matches
 
   if (title) {
     query.whereCondition("title", "CONTAINS", title);

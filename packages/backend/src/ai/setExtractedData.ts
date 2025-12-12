@@ -15,6 +15,7 @@ export function setExtractedData(item: object, completion: object) {
   Object.assign(item, removeNulls(completion) ?? {});
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 function removeNulls(v: unknown): DeepPartialNullToUndef<unknown> | undefined {
   if (v == null) return undefined;
 
@@ -39,7 +40,7 @@ function removeNulls(v: unknown): DeepPartialNullToUndef<unknown> | undefined {
 
   const entries = Object.entries(v)
     .map(([key, value]) => [key, removeNulls(value)])
-    .filter(([_, value]) => value != undefined);
+    .filter(([, value]) => value != undefined);
 
   return entries.length ? Object.fromEntries(entries) : undefined;
 }

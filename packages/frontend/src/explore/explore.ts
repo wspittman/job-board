@@ -42,8 +42,8 @@ function onActionClick() {
  * Sets the selected job in the details pane and focuses the details view.
  * @param jobId - Identifier of the job chosen from the results list.
  */
-async function onJobSelect(jobId: string) {
-  await panes.details.updateJob(jobMap.get(jobId));
+function onJobSelect(jobId: string) {
+  panes.details.updateJob(jobMap.get(jobId));
   setActivePane("details");
 }
 
@@ -58,7 +58,7 @@ async function onFilterChange(filters: FilterModel) {
   const requestId = ++lastRequestId;
 
   if (filters.isEmpty()) {
-    await setJobs();
+    setJobs();
     return;
   }
 
@@ -72,13 +72,13 @@ async function onFilterChange(filters: FilterModel) {
       return;
     }
 
-    await setJobs(jobs, isSavedJob);
-  } catch (error) {
+    setJobs(jobs, isSavedJob);
+  } catch {
     if (requestId !== lastRequestId) {
       return;
     }
 
-    await setJobs();
+    setJobs();
     panes.results.showError();
   }
 }
@@ -93,7 +93,7 @@ function updateQueryString(filters: FilterModel) {
   history.replaceState({}, "", newUrl);
 }
 
-async function setJobs(jobs?: JobModel[], isSavedJob = false) {
+function setJobs(jobs?: JobModel[], isSavedJob = false) {
   jobMap.clear();
   for (const job of jobs ?? []) {
     jobMap.set(job.id, job);
@@ -101,10 +101,8 @@ async function setJobs(jobs?: JobModel[], isSavedJob = false) {
 
   const firstJob = jobs?.[0];
 
-  await Promise.all([
-    panes.results.updateJobs(jobs, isSavedJob),
-    panes.details.updateJob(firstJob),
-  ]);
+  panes.results.updateJobs(jobs, isSavedJob);
+  panes.details.updateJob(firstJob);
 
   panes.details.toggleAttribute("empty", !firstJob);
   updateActionButton();
@@ -127,7 +125,7 @@ function updateActionButton() {
   actionButton.textContent = getActionButtonLabel();
   actionButton.toggleAttribute(
     "disabled",
-    activePane === "filters" && !jobMap.size
+    activePane === "filters" && !jobMap.size,
   );
 }
 

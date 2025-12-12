@@ -5,7 +5,9 @@ process.env.ADMIN_TOKEN ??= "test-admin-token-123456";
 process.env.APPLICATIONINSIGHTS_CONNECTION_STRING ??= "";
 process.env.NODE_ENV ??= "test";
 
-const telemetryWorkaround = (await import("../src/utils/telemetryWorkaround.cjs")).default;
+const telemetryWorkaround = (
+  await import("../src/utils/telemetryWorkaround.cjs")
+).default;
 const telemetryClient = {
   addTelemetryProcessor: () => {},
   config: { disableAppInsights: true },

@@ -14,7 +14,7 @@ h1,
 h2,
 h3 {
   line-height: var(--heading-line-height);
-  margin: 0 0 0.5em 0;
+  margin: 0 0 var(--space-md) 0;
   color: var(--primary-main);
 }
 h1 {

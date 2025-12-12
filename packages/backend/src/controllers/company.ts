@@ -13,12 +13,12 @@ import { metadataCompanyExecutor, metadataJobExecutor } from "./metadata.ts";
 const companyInfoQueue = new AsyncQueue(
   "RefreshCompanyInfo",
   refreshCompanyInfo,
-  { onComplete: metadataCompanyExecutor }
+  { onComplete: metadataCompanyExecutor },
 );
 const companyJobQueue = new AsyncQueue(
   "RefreshJobsForCompany",
   refreshJobsForCompany,
-  { onComplete: metadataJobExecutor, concurrentLimit: 3, taskDelayMs: 100 }
+  { onComplete: metadataJobExecutor, concurrentLimit: 3, taskDelayMs: 100 },
 );
 
 /**
@@ -54,7 +54,7 @@ export async function removeCompany(key: CompanyKey) {
   metadataCompanyExecutor.call();
   if (jobIds.length) {
     await batch("RemoveCompanyJobs", jobIds, (id) =>
-      db.job.remove({ id, companyId })
+      db.job.remove({ id, companyId }),
     );
     metadataJobExecutor.call();
   }

@@ -1,4 +1,4 @@
-import type { JobFamily, WorkTimeBasis } from "./apiEnums";
+import type { JobFamily, PayCadence, WorkTimeBasis } from "./apiEnums";
 
 export interface MetadataModelApi {
   companyCount: number;
@@ -8,20 +8,28 @@ export interface MetadataModelApi {
 }
 
 export interface JobModelApi {
+  // Keys
   id: string;
   companyId: string;
-  company: string;
+
+  // The Work
   title: string;
+  company: string;
+  workTimeBasis?: WorkTimeBasis;
+  jobFamily?: JobFamily;
+
+  // The Compensation
+  payCadence?: PayCadence;
+  minSalary?: number;
+
+  // Other
   description: string;
   postTS: number;
   applyUrl: string;
   isRemote: boolean;
-  workTimeBasis: string;
-  jobFamily: string;
   location: string;
   facets?: {
     summary?: string;
-    salary?: number;
     experience?: number;
   };
 }
@@ -33,6 +41,7 @@ export interface FilterModelApi {
   isRemote?: boolean;
   workTimeBasis?: WorkTimeBasis;
   jobFamily?: JobFamily;
+  payCadence?: PayCadence;
   // Substring Match
   title?: string;
   location?: string;

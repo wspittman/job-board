@@ -2,7 +2,11 @@ import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
 
-import { jobFamilyOptions, workTimeBasisOptions } from "../../api/apiEnums";
+import {
+  jobFamilyOptions,
+  payCadenceOptions,
+  workTimeBasisOptions,
+} from "../../api/apiEnums";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
 import { Chip } from "../../components/chip";
@@ -20,7 +24,7 @@ const DEBOUNCE_DELAY = 500;
 
 interface Props {
   initialFilters?: FilterModel;
-  onChange?: (filters: FilterModel) => void;
+  onChange?: (filters: FilterModel) => Promise<void>;
 }
 
 interface FormElementDef extends FormElementProps {
@@ -56,6 +60,27 @@ const filterDefs: Record<string, FormElementDef[]> = {
       options: jobFamilyOptions,
     },
   ],
+  "The Compensation": [
+    {
+      type: "jb-form-select",
+      name: "payCadence",
+      label: "Pay Basis",
+      options: payCadenceOptions,
+    },
+    {
+      type: "jb-form-input",
+      name: "minSalary",
+      label: "Minimum Rate",
+      tooltip:
+        "Ignores currency symbols. We'll be working to improve controls here in the future.",
+      prefix: "$",
+      validation: {
+        type: "int",
+        min: 0,
+        max: 9_999_999,
+      },
+    },
+  ],
   Other: [
     {
       type: "jb-form-select",
@@ -74,19 +99,6 @@ const filterDefs: Record<string, FormElementDef[]> = {
     },
     {
       type: "jb-form-input",
-      name: "minSalary",
-      label: "Minimum Salary",
-      tooltip:
-        "Searches across both hourly and annual rates, and ignores currency symbols. We'll be working to improve controls here in the future.",
-      prefix: "$",
-      validation: {
-        type: "int",
-        min: 0,
-        max: 9_999_999,
-      },
-    },
-    {
-      type: "jb-form-input",
       name: "maxExperience",
       label: "Required Experience",
       prefix: "I have",
@@ -102,7 +114,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "daysSince",
       label: "Posted Since",
       tooltip:
-        "Filters to when jobs say they were posted, so '7' will show jobs posted in the last week. Some data sources do not provide posting dates, in which case we treat the date we first saw it as the posting date.",
+        "Filters to jobs posted within the specified number of days. Some data source only provide last updated date, so we use the earliest date we've seen.",
       prefix: "Posted within",
       suffix: "days ago",
       validation: {
@@ -131,7 +143,7 @@ export class Filters extends ComponentBase {
   readonly #inputs = new Map<FilterModelKey, FormElement>();
 
   #debounceTimer: number | undefined;
-  #onChange?: (filters: FilterModel) => void;
+  #onChange?: (filters: FilterModel) => Promise<void>;
   #isCollapsed = false;
   #initialFilters: FilterModel | undefined;
 
@@ -173,7 +185,7 @@ export class Filters extends ComponentBase {
       if (!this.isConnected) return;
 
       const def = filterDefs["The Work"]?.find(
-        (def) => def.name === "companyId"
+        (def) => def.name === "companyId",
       );
       if (!def) return;
 
@@ -182,7 +194,7 @@ export class Filters extends ComponentBase {
         options,
         onChange: () => this.#debounceOnChange(),
       });
-    } catch (err) {
+    } catch {
       // ignore
     }
 
@@ -235,13 +247,13 @@ export class Filters extends ComponentBase {
     if (!this.#onChange) return;
 
     if (this.#debounceTimer) {
-      clearTimeout(this.#debounceTimer);
+      window.clearTimeout(this.#debounceTimer);
     }
 
     this.#debounceTimer = window.setTimeout(() => {
       const data = this.#getFilterData();
-      this.#onChange?.(data);
       this.#renderChips(data);
+      void this.#onChange?.(data);
     }, DEBOUNCE_DELAY);
   }
 
@@ -250,9 +262,9 @@ export class Filters extends ComponentBase {
     return FilterModel.fromFormData(formData);
   }
 
-  async #renderChips(filters: FilterModel): Promise<void> {
+  #renderChips(filters: FilterModel): void {
     const fragment = document.createDocumentFragment();
-    const entries = await filters.toFriendlyStrings();
+    const entries = filters.toFriendlyStrings();
 
     for (const [key, label] of entries) {
       fragment.appendChild(
@@ -260,7 +272,7 @@ export class Filters extends ComponentBase {
           label,
           onDelete: () => (this.#inputs.get(key)!.value = ""),
           filled: true,
-        })
+        }),
       );
     }
 
@@ -278,7 +290,7 @@ export class Filters extends ComponentBase {
     this.#toggle.setAttribute("aria-expanded", String(!collapsed));
     this.#toggle.setAttribute(
       "aria-label",
-      collapsed ? "Expand filters panel" : "Collapse filters panel"
+      collapsed ? "Expand filters panel" : "Collapse filters panel",
     );
   }
 }
