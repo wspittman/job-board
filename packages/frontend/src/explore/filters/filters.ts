@@ -64,7 +64,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
     {
       type: "jb-form-select",
       name: "payCadence",
-      label: "Paid by",
+      label: "Pay Basis",
       options: payCadenceOptions,
     },
     {

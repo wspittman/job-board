@@ -98,7 +98,7 @@ export class FilterModel {
         case "jobFamily":
           return [key, toJobFamilyLabel(value)];
         case "payCadence":
-          return [key, `Paid by: ${toPayCadenceLabel(value)}`];
+          return [key, `Pay Basis: ${toPayCadenceLabel(value)}`];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
