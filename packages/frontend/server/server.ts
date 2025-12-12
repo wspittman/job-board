@@ -1,5 +1,5 @@
 import compression from "compression";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -168,7 +168,8 @@ app.use(
 );
 
 // Global error handler
-app.use((err: unknown, _req: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   let message = "Internal Server Error";
 
   if (err instanceof Error) {

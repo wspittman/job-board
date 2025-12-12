@@ -4,7 +4,7 @@ import { logError, startTelemetry } from "./utils/telemetry.ts";
 startTelemetry();
 
 import cors from "cors";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
 import { config } from "./config.ts";
@@ -26,7 +26,8 @@ app.use((_: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: unknown, _req: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   logError(err);
   let statusCode = 500;
   let message = "Internal Server Error";
