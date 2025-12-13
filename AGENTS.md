@@ -5,10 +5,7 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 ## Workspaces
 
 - **`packages/backend`** – Express 5 + TypeScript API service that integrates with Azure Cosmos DB and Application Insights telemetry. See `packages/backend/AGENTS.md` for backend-specific commands and conventions.
-- **`packages/frontend`** – Current Vite-powered application that uses vanilla HTML/CSS/JS with TanStack Query.
-  - `npm run start:frontend` (alias of `npm run dev --workspace=frontend`) runs Vite with HMR.
-  - `npm run build --workspace=frontend` emits assets to `packages/frontend/dist/` and `npm run preview --workspace=frontend` serves them.
-  - Production hosting relies on `server.js`; set `API_URL` and optional `PORT`.
+- **`packages/frontend`** – Current Vite-powered application built with vanilla HTML/CSS/JS. See `packages/frontend/AGENTS.md` for frontend-specific commands and conventions.
 - **`packages/admin`** – TypeScript CLI for administrative operations.
   - Execute with `npm run admin -- <command> [args]` from the repo root.
   - Requires `.env` values `ADMIN_API_BASE_URL` (trailing slash) and `ADMIN_API_TOKEN`.
@@ -46,10 +43,8 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 # Development Conventions
 
 - The project uses a monorepo structure with workspaces for the frontend and backend.
-- The frontend is a vanilla HTML/CSS/JS application built with Vite.
-- The `frontend` package uses `eslint` for linting.
-- The `frontend` package uses `prettier` for code formatting.
 - Prefer running linting and formatting from the repo root via `npm run lint` and `npm run format` (or `npm run format:write` to apply fixes).
+- Workspace-specific tools and workflows are described in the corresponding `AGENTS.md` files.
 
 ### Comments
 
@@ -61,7 +56,7 @@ Avoid adding new dependencies and warn when you do.
 
 ### Testing expectations
 
-- Frontend code changes: run `npm run lint --workspace=frontend` and `npm run format --workspace=frontend` (or `npm run format:write --workspace=frontend` to autofix).
+- Follow workspace-specific linting, formatting, and testing guidance for code changes.
 - Docs-only changes do not require tests, but note that testing was skipped in your summary.
 
 ## Scratchpad
