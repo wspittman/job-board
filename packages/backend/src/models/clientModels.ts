@@ -11,6 +11,7 @@ export interface Filters {
   workTimeBasis?: WorkTimeBasis;
   jobFamily?: JobFamily;
   payCadence?: PayCadence;
+  currency?: string;
   // Substring Match
   title?: string;
   location?: string;
@@ -49,6 +50,7 @@ export interface ClientJob {
   jobFamily?: JobFamily;
 
   // The Compensation
+  currency?: string;
   payCadence?: PayCadence;
   minSalary?: number;
 

@@ -226,6 +226,7 @@ async function readJobsByFilters({
   workTimeBasis,
   jobFamily,
   payCadence,
+  currency,
 }: EnhancedFilters) {
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
@@ -255,6 +256,10 @@ async function readJobsByFilters({
 
   if (payCadence) {
     query.whereCondition("salaryRange.cadence", "=", payCadence);
+  }
+
+  if (currency) {
+    query.whereCondition("salaryRange.currency", "=", currency.toUpperCase());
   }
 
   // Range Matches

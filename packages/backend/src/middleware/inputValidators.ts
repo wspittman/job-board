@@ -48,6 +48,7 @@ const FiltersSchema = z.object({
   workTimeBasis: soft(WorkTimeBasis),
   jobFamily: soft(JobFamily),
   payCadence: soft(PayCadence),
+  currency: coerceString(z.string().min(3).max(3).toUpperCase()),
   title: soft(SearchSchema),
   location: soft(SearchSchema),
   daysSince: coerceInt(z.int().positive().max(365)),
