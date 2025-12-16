@@ -3,6 +3,7 @@ import "../../components/form-input";
 import "../../components/form-select";
 
 import {
+  currencyOptions,
   jobFamilyOptions,
   payCadenceOptions,
   workTimeBasisOptions,
@@ -66,6 +67,12 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "payCadence",
       label: "Pay Basis",
       options: payCadenceOptions,
+    },
+    {
+      type: "jb-form-select",
+      name: "currency",
+      label: "Currency",
+      options: currencyOptions,
     },
     {
       type: "jb-form-input",

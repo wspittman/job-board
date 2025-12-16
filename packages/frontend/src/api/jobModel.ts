@@ -1,5 +1,6 @@
 import { api, API_URL } from "./api";
 import {
+  toCurrencyLabel,
   toJobFamilyLabel,
   toPayCadenceLabel,
   toWorkTimeBasisLabel,
@@ -63,6 +64,7 @@ export class JobModel {
       jobFamily,
       minSalary,
       payCadence,
+      currency,
     } = this.#job;
     const { experience } = facets ?? {};
 
@@ -99,6 +101,7 @@ export class JobModel {
       post,
       workTimeBasis: toWorkTimeBasisLabel(workTimeBasis),
       jobFamily: toJobFamilyLabel(jobFamily),
+      currency: toCurrencyLabel(currency),
     };
   }
 
