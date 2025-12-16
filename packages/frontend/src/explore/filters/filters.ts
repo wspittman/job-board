@@ -65,13 +65,13 @@ const filterDefs: Record<string, FormElementDef[]> = {
     {
       type: "jb-form-select",
       name: "payCadence",
-      label: "Pay Basis",
+      label: "Pay By",
       options: payCadenceOptions,
     },
     {
       type: "jb-form-select",
       name: "currency",
-      label: "Currency",
+      label: "Pay In",
       options: currencyOptions,
     },
     {
@@ -79,7 +79,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "minSalary",
       label: "Minimum Rate",
       tooltip:
-        "Ignores currency symbols. We'll be working to improve controls here in the future.",
+        "This may have unexpected results if Pay By and Pay In are not also specified.",
       prefix: "$",
       validation: {
         type: "int",

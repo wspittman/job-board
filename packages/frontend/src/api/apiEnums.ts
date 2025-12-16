@@ -73,8 +73,8 @@ export const toJobFamilyLabel = (value: unknown): string =>
   asLabel(jobFamily, value);
 
 const payCadence = {
-  hourly: "Hourly",
-  salary: "Annually",
+  hourly: "Hour",
+  salary: "Annual",
   stipend: "Stipend",
 } as const;
 
