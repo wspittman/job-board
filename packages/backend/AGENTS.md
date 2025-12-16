@@ -14,6 +14,13 @@ This package contains the Express 5 + TypeScript API service. Run all commands f
 - Use JSDoc comments for public APIs and complex logic. Avoid trailing inline comments. For async @returns descriptions, describe the resolved value rather than the promise.
 - Avoid adding new dependencies and call out any additions in your summary.
 
+## Testing style
+
+- Tests run via `npm test --workspace=backend`, which executes `node --import tsx --import ./test/setup.ts --test test/**/*.test.ts`. The shared `test/setup.ts` file sets default env vars and stubs telemetry/database/server bootstrapping; keep new tests compatible with those defaults.
+- Use the built-in `node:test` runner with `suite`/`test` blocks and `assert/strict` expectations. Prefer table-driven cases (arrays of inputs iterated with `forEach`) to cover variants succinctly, as seen in `test/config.test.ts` and `test/middleware/*.test.ts`.
+- Rely on `node:test` mocks (e.g., `mock.fn`, `mock.method`) to stub Express responses or helper modules. Reset mock call counts in `beforeEach` instead of recreating objects per test when practical.
+- Keep test helpers small and colocated in the file (e.g., `mockRequest`, `validator`, `formatter`) and name tests with descriptive, data-driven strings built from the inputs.
+
 ## Quality checks
 
 - Lint: `npm run lint --workspace=backend`.
