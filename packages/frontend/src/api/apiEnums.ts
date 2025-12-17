@@ -35,6 +35,20 @@ function toCurrencyName(code: string): string {
   return code;
 }
 
+const currencyFormatters: Map<Currency, Intl.NumberFormat> = new Map();
+const getCurrencyFormatter = (currency: Currency) => {
+  let formatter = currencyFormatters.get(currency);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 0,
+    });
+    currencyFormatters.set(currency, formatter);
+  }
+  return formatter;
+};
+
 // #endregion
 
 const workTimeBasis = {
@@ -74,7 +88,7 @@ export const toJobFamilyLabel = (value: unknown): string =>
 
 const payCadence = {
   hourly: "Hour",
-  salary: "Annual",
+  salary: "Year",
   stipend: "Stipend",
 } as const;
 
@@ -134,3 +148,18 @@ export const toCurrency = (value: unknown): Currency | undefined =>
 export const toCurrencyLabel = (value: unknown): string =>
   // Unlike other enums, fall back to the code itself if unknown
   asLabel(currency, value) || (typeof value === "string" ? value : "");
+export function toCurrencyFormat(
+  n: number,
+  currency?: Currency,
+  prefix: string = "",
+): string {
+  try {
+    if (currency) {
+      const formatter = getCurrencyFormatter(currency);
+      return formatter.format(n);
+    }
+  } catch {
+    /* ignore */
+  }
+  return prefix + n.toLocaleString();
+}
