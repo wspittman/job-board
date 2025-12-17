@@ -25,7 +25,7 @@ function mockRequest(method: Method, input: In): Request {
 
 const route = (input: In) => {
   return input.fail
-    ? Promise.reject(new Error("Failed"))
+    ? Promise.reject(new Error("Route Throws"))
     : Promise.resolve(`${input.in}_R`);
 };
 const routeVoid = async (input: In) => {
@@ -39,7 +39,7 @@ function validator(input: unknown): In {
   if (input && typeof input === "object" && "in" in input) {
     return { ...input, in: `${input.in}_V` };
   }
-  throw new Error("Invalid");
+  throw new Error("Validator Throws");
 }
 
 function formatter(output: Out | string | void): Out {
@@ -107,31 +107,24 @@ suite("jsonRoute", () => {
     });
   });
 
-  test("Invalid: Validator error", async () => {
-    const req = mockRequest("PUT", {} as In);
-    const handler = jsonRoute(routeStr, validator, formatter);
+  const failCases: [Request, string][] = [
+    [mockRequest("GET", {} as In), "Validator Throws"],
+    [mockRequest("PUT", {} as In), "Validator Throws"],
+    [mockRequest("PUT", { in: "data", fail: true }), "Route Throws"],
+  ];
 
-    await handler(req, res, next);
+  failCases.forEach(([req, errMsg]) => {
+    test(`Invalid: ${req.method} expected error "${errMsg}"`, async () => {
+      const handler = jsonRoute(routeStr, validator, formatter);
 
-    assert.equal(jsonFn.mock.callCount(), 0);
-    assert.equal(next.mock.callCount(), 1);
+      await handler(req, res, next);
 
-    const err = next.mock.calls[0]?.arguments.at(0);
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, "Invalid");
-  });
+      assert.equal(jsonFn.mock.callCount(), 0);
+      assert.equal(next.mock.callCount(), 1);
 
-  test("Invalid: Route error", async () => {
-    const req = mockRequest("PUT", { in: "data", fail: true });
-    const handler = jsonRoute(routeStr, validator, formatter);
-
-    await handler(req, res, next);
-
-    assert.equal(jsonFn.mock.callCount(), 0);
-    assert.equal(next.mock.callCount(), 1);
-
-    const err = next.mock.calls[0]?.arguments.at(0);
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, "Failed");
+      const err = next.mock.calls[0]?.arguments.at(0);
+      assert.ok(err instanceof Error);
+      assert.equal(err.message, errMsg);
+    });
   });
 });
