@@ -1,7 +1,9 @@
 import type { Request, Response } from "express";
 import assert from "node:assert/strict";
-import { beforeEach, mock, suite, test } from "node:test";
-import { jsonRoute } from "../../src/middleware/wrappers.ts";
+import { beforeEach, mock, suite, test, TestContext } from "node:test";
+// Note: Destructuring functions such as import { setTimeout } from 'node:timers' is currently not supported by [Mock Timers] API.
+import timers from "node:timers/promises";
+import { asyncRoute, jsonRoute } from "../../src/middleware/wrappers.ts";
 
 type Method = "GET" | "PUT";
 
@@ -14,11 +16,32 @@ interface Out {
   result: string;
 }
 
+/**
+ * Mocks timers for testing
+ * @param context - The test context
+ * @returns A function to tick the mocked timers
+ */
+function mockTimers(context: TestContext) {
+  context.mock.timers.enable({ apis: ["setTimeout"] });
+  return async (ms: number) => {
+    // Advance the mocked timers by the given number of milliseconds
+    context.mock.timers.tick(ms);
+    // Force the event loop to run all pending callbacks
+    await timers.setImmediate();
+  };
+}
+
 // #region Function Inputs
+
+const IN_DATA = "INPUT_DATA";
+const IN_BASIC: In = { in: IN_DATA };
+const IN_FAIL: In = { ...IN_BASIC, fail: true };
+const IN_BAD = {} as In;
 
 function mockRequest(method: Method, input: In): Request {
   return {
     method,
+    path: "/test/path",
     ...(method === "GET" ? { query: input } : { body: input }),
   } as Request;
 }
@@ -76,7 +99,7 @@ suite("jsonRoute", () => {
 
   successCases.forEach(([fn, method, omitV, omitF]) => {
     test(`Valid: ${method} ${fn.name} V:${!omitV} F:${!omitF}`, async () => {
-      const req = mockRequest(method, { in: "mark" });
+      const req = mockRequest(method, IN_BASIC);
       const handler = jsonRoute(
         fn,
         omitV ? undefined : validator,
@@ -89,7 +112,7 @@ suite("jsonRoute", () => {
       assert.equal(next.mock.callCount(), 0);
 
       const expectedResult = [
-        "mark",
+        IN_DATA,
         !omitV ? "_V" : "",
         "_R",
         !omitF ? "_F" : "",
@@ -108,9 +131,9 @@ suite("jsonRoute", () => {
   });
 
   const failCases: [Request, string][] = [
-    [mockRequest("GET", {} as In), "Validator Throws"],
-    [mockRequest("PUT", {} as In), "Validator Throws"],
-    [mockRequest("PUT", { in: "data", fail: true }), "Route Throws"],
+    [mockRequest("GET", IN_BAD), "Validator Throws"],
+    [mockRequest("PUT", IN_BAD), "Validator Throws"],
+    [mockRequest("PUT", IN_FAIL), "Route Throws"],
   ];
 
   failCases.forEach(([req, errMsg]) => {
@@ -126,5 +149,78 @@ suite("jsonRoute", () => {
       assert.ok(err instanceof Error);
       assert.equal(err.message, errMsg);
     });
+  });
+});
+
+suite("asyncRoute", () => {
+  const writeHeadFn = mock.fn();
+  const endFn = mock.fn();
+  const res: Response = {
+    writeHead: writeHeadFn,
+    end: endFn,
+    get headersSent() {
+      return endFn.mock.callCount() > 0;
+    },
+  } as unknown as Response;
+  const asyncComplete = mock.fn();
+  const routeAsync = mock.fn(async (input: In) => {
+    await timers.setTimeout(1000);
+    await routeVoid(input);
+    asyncComplete();
+  });
+  const next = mock.fn();
+
+  beforeEach(() => {
+    writeHeadFn.mock.resetCalls();
+    endFn.mock.resetCalls();
+    routeAsync.mock.resetCalls();
+    asyncComplete.mock.resetCalls();
+    next.mock.resetCalls();
+  });
+
+  function validateCalls(type: "start" | "end" | "next") {
+    const started = type === "start" || type === "end";
+    assert.equal(writeHeadFn.mock.callCount(), started ? 1 : 0);
+    assert.equal(endFn.mock.callCount(), started ? 1 : 0);
+    assert.equal(routeAsync.mock.callCount(), started ? 1 : 0);
+    assert.equal(asyncComplete.mock.callCount(), type === "end" ? 1 : 0);
+    assert.equal(next.mock.callCount(), type === "next" ? 1 : 0);
+  }
+
+  test("Valid and asynchronous", async (context) => {
+    const tick = mockTimers(context);
+    const req = mockRequest("PUT", IN_BASIC);
+    const handler = asyncRoute(routeAsync, validator);
+
+    handler(req, res, next);
+
+    validateCalls("start");
+    await tick(1000);
+    validateCalls("end");
+  });
+
+  test("Invalid: Validator Throws", async () => {
+    const req = mockRequest("PUT", IN_BAD);
+    const handler = asyncRoute(routeAsync, validator);
+
+    handler(req, res, next);
+
+    validateCalls("next");
+    const err = next.mock.calls[0]?.arguments.at(0);
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, "Validator Throws");
+  });
+
+  test("Invalid: Route Throws", async (context) => {
+    const tick = mockTimers(context);
+    const req = mockRequest("PUT", IN_FAIL);
+    const handler = asyncRoute(routeAsync, validator);
+
+    handler(req, res, next);
+
+    validateCalls("start");
+    await tick(1000);
+    validateCalls("start");
+    // We aren't bothering to mock and check logError calls here
   });
 });
