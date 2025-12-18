@@ -3,7 +3,11 @@ import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test, TestContext } from "node:test";
 // Note: Destructuring functions such as import { setTimeout } from 'node:timers' is currently not supported by [Mock Timers] API.
 import timers from "node:timers/promises";
-import { asyncRoute, jsonRoute } from "../../src/middleware/wrappers.ts";
+import {
+  asyncRoute,
+  jsonRoute,
+  redirectRoute,
+} from "../../src/middleware/wrappers.ts";
 
 type Method = "GET" | "PUT";
 
@@ -190,6 +194,7 @@ suite("asyncRoute", () => {
   test("Valid and asynchronous", async (context) => {
     const tick = mockTimers(context);
     const req = mockRequest("PUT", IN_BASIC);
+    // Note: We don't need to test validator cases here again since they are covered in jsonRoute tests
     const handler = asyncRoute(routeAsync, validator);
 
     handler(req, res, next);
@@ -222,5 +227,53 @@ suite("asyncRoute", () => {
     await tick(1000);
     validateCalls("start");
     // We aren't bothering to mock and check logError calls here
+  });
+});
+
+suite("redirectRoute", () => {
+  const redirectFn = mock.fn();
+  const res: Response = { redirect: redirectFn } as unknown as Response;
+  const next = mock.fn();
+
+  beforeEach(() => {
+    redirectFn.mock.resetCalls();
+    next.mock.resetCalls();
+  });
+
+  test(`Valid with redirect`, async () => {
+    const req = mockRequest("PUT", IN_BASIC);
+    // Note: We don't need to test validator cases here again since they are covered in jsonRoute tests
+    const handler = redirectRoute(routeStr, validator);
+
+    await handler(req, res, next);
+
+    assert.equal(redirectFn.mock.callCount(), 1);
+    assert.equal(next.mock.callCount(), 0);
+
+    const expectedUrl = `${IN_DATA}_V_R`;
+    const redirectArgs = redirectFn.mock.calls[0]?.arguments;
+    assert.equal(redirectArgs?.at(0), 302);
+    assert.equal(redirectArgs?.at(1), expectedUrl);
+  });
+
+  const failCases: [Request, string][] = [
+    [mockRequest("GET", IN_BAD), "Validator Throws"],
+    [mockRequest("PUT", IN_BAD), "Validator Throws"],
+    [mockRequest("PUT", IN_FAIL), "Route Throws"],
+  ];
+
+  failCases.forEach(([req, errMsg]) => {
+    test(`Invalid: ${req.method} expected error "${errMsg}"`, async () => {
+      const handler = redirectRoute(routeStr, validator);
+
+      await handler(req, res, next);
+
+      assert.equal(redirectFn.mock.callCount(), 0);
+      assert.equal(next.mock.callCount(), 1);
+
+      const err = next.mock.calls[0]?.arguments.at(0);
+      assert.ok(err instanceof Error);
+      assert.equal(err.message, errMsg);
+    });
   });
 });
