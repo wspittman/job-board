@@ -1,13 +1,12 @@
-const baseUrl = process.env["ADMIN_API_BASE_URL"];
-const token = process.env["ADMIN_API_TOKEN"];
+import { config } from "./config.ts";
 
 export async function fetcher(path: string, method: string, body?: unknown) {
-  const endpoint = new URL(`${baseUrl}${path}`).toString();
+  const endpoint = new URL(`${config.ADMIN_API_BASE_URL}${path}`).toString();
 
   const response = await fetch(endpoint, {
     method,
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${config.ADMIN_API_TOKEN}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
