@@ -1,4 +1,5 @@
 import {
+  toCurrency,
   toJobFamily,
   toJobFamilyLabel,
   toPayCadence,
@@ -98,7 +99,9 @@ export class FilterModel {
         case "jobFamily":
           return [key, toJobFamilyLabel(value)];
         case "payCadence":
-          return [key, `Pay Basis: ${toPayCadenceLabel(value)}`];
+          return [key, `Pay by: ${toPayCadenceLabel(value)}`];
+        case "currency":
+          return [key, `Pay in: ${toCurrency(value)}`];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
@@ -110,7 +113,7 @@ export class FilterModel {
         case "maxExperience":
           return [key, `Experience: ${Number(value).toLocaleString()} years`];
         case "minSalary":
-          return [key, `Pay Rate: $${Number(value).toLocaleString()}`];
+          return [key, `Pay Rate: ${Number(value).toLocaleString()}`];
         default:
           return [key, `${key}: ${value}`];
       }
@@ -142,6 +145,7 @@ export class FilterModel {
     this.#filters.workTimeBasis = toWorkTimeBasis(get("workTimeBasis"));
     this.#filters.jobFamily = toJobFamily(get("jobFamily"));
     this.#filters.payCadence = toPayCadence(get("payCadence"));
+    this.#filters.currency = toCurrency(get("currency"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
     this.#filters.location = normString(get("location"));
     this.#filters.minSalary = normNumber(get("minSalary"));

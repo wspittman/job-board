@@ -115,7 +115,7 @@ export class Greenhouse extends ATSBase {
       ats: "greenhouse",
 
       // Basic
-      name,
+      name: name.trim(),
 
       // We might have this given to us, we might need to extract it
       description: standardizeUntrustedHtml(content),

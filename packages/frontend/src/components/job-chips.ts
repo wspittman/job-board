@@ -32,27 +32,13 @@ export class JobChips extends ComponentBase {
   init({ job, useShort }: Props) {
     const element = this.getEl<HTMLDivElement>("container")!;
 
-    const { location, post, ...rest } = job.getDisplayFacets(useShort);
-
-    const labels = Object.values(rest);
-    this.#pend(labels, location, location === "Remote");
-    this.#pend(labels, post, useShort && !post.endsWith("days ago"));
-
-    const children = labels
-      .filter(Boolean)
+    const children = job
+      .getDisplayFacets(useShort)
       .map((label) => Chip.create({ label: label! }));
 
     element.replaceChildren(...children);
 
     return element;
-  }
-
-  #pend(labels: unknown[], label: string, isPrepend = false) {
-    if (isPrepend) {
-      labels.unshift(label);
-    } else {
-      labels.push(label);
-    }
   }
 }
 

@@ -1,5 +1,6 @@
 import { api, API_URL } from "./api";
 import {
+  toCurrencyFormat,
   toJobFamilyLabel,
   toPayCadenceLabel,
   toWorkTimeBasisLabel,
@@ -54,16 +55,8 @@ export class JobModel {
   }
 
   getDisplayFacets(useShort = false) {
-    const {
-      isRemote,
-      location,
-      postTS,
-      facets,
-      workTimeBasis,
-      jobFamily,
-      minSalary,
-      payCadence,
-    } = this.#job;
+    const { isRemote, location, postTS, facets, workTimeBasis, jobFamily } =
+      this.#job;
     const { experience } = facets ?? {};
 
     let loc = location;
@@ -84,22 +77,18 @@ export class JobModel {
     const post = useShort
       ? this.#tsToDaysString(postTS)
       : new Date(postTS).toLocaleDateString();
+    const isPrePost = useShort && !post.endsWith("days ago");
 
-    const compCurrency = "$";
-    const compMinSalary = minSalary?.toLocaleString();
-    const compCadence = toPayCadenceLabel(payCadence);
-    const comp = [compMinSalary ? compCurrency : "", compMinSalary, compCadence]
-      .filter(Boolean)
-      .join(" ");
-
-    return {
-      location: loc,
-      comp,
-      experience: exp,
-      post,
-      workTimeBasis: toWorkTimeBasisLabel(workTimeBasis),
-      jobFamily: toJobFamilyLabel(jobFamily),
-    };
+    return [
+      isPrePost ? post : undefined,
+      loc === "Remote" ? loc : undefined,
+      this.#getCompString(),
+      exp,
+      toWorkTimeBasisLabel(workTimeBasis),
+      toJobFamilyLabel(jobFamily),
+      loc === "Remote" ? undefined : loc,
+      isPrePost ? undefined : post,
+    ].filter(Boolean);
   }
 
   #tsToDaysString(ts: number): string {
@@ -108,5 +97,21 @@ export class JobModel {
     if (days < 7) return "New";
     if (days < 30) return "Recent";
     return `${days} days ago`;
+  }
+
+  #getCompString(): string | undefined {
+    const { minSalary, payCadence, currency } = this.#job;
+    const cadence = toPayCadenceLabel(payCadence) || undefined;
+
+    if (minSalary != null) {
+      const noCurrencyPrefix = cadence ? "" : "Pay: ";
+      const amount = toCurrencyFormat(minSalary, currency, noCurrencyPrefix);
+      return cadence ? `${amount} / ${cadence}` : `${amount}`;
+    }
+
+    if (currency && cadence) return `Paid in ${currency} per ${cadence}`;
+    if (cadence) return `Paid per ${cadence}`;
+    if (currency) return `Paid in ${currency}`;
+    return undefined;
   }
 }

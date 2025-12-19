@@ -174,6 +174,8 @@ suite("useFilters", () => {
     { jobFamily: "" },
     { payCadence: "hourly" },
     { payCadence: "" },
+    { currency: "USD" },
+    { currency: "usd" },
     { title: SEARCH_TERM },
     { location: SEARCH_TERM },
     { daysSince: "30" },
@@ -218,6 +220,7 @@ suite("useFilters", () => {
         ...coerceInt("daysSince", input.daysSince),
         ...coerceInt("maxExperience", input.maxExperience),
         ...coerceInt("minSalary", input.minSalary),
+        ...(input.currency ? { currency: input.currency.toUpperCase() } : {}),
       };
       assert.deepStrictEqual(result, expected);
     });
@@ -232,6 +235,10 @@ suite("useFilters", () => {
     { jobFamily: 123 },
     { payCadence: "invalid_value" },
     { payCadence: 123 },
+    { currency: "" },
+    { currency: "US" },
+    { currency: "USDD" },
+    { currency: 123 },
     { title: SEARCH_TOO_SHORT },
     { title: SEARCH_TOO_LONG },
     { location: SEARCH_TOO_SHORT },

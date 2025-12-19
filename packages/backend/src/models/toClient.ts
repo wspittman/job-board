@@ -36,6 +36,7 @@ export const toClientJob = ({
     jobFamily,
 
     // The Compensation
+    currency: salaryRange?.currency,
     minSalary: salaryRange?.min,
     payCadence: salaryRange?.cadence,
 
