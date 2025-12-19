@@ -23,6 +23,8 @@ This package contains the Express 5 + TypeScript API service. Run all commands f
 
 ## Quality checks
 
+Always run the following before committing changes:
+
 - Lint: `npm run lint --workspace=backend`.
-- Format: `npm run format --workspace=backend` (or `npm run format:write --workspace=backend` to apply fixes).
-- Tests: run `npm test --workspace=backend` when feasible for backend changes.
+- Format: `npm run format:write --workspace=backend`
+- Tests: `npm test --workspace=backend`
