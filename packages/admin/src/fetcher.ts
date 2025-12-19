@@ -22,13 +22,13 @@ async function prepareResult(response: Response): Promise<unknown> {
   const responseText = await response.text();
   const contentType = response.headers.get("content-type") ?? "";
   const value = contentType.includes("application/json")
-    ? safeJsonParse(responseText) ?? responseText
+    ? (safeJsonParse(responseText) ?? responseText)
     : responseText;
 
   if (!response.ok) {
-    const errorMessage = value ?? response.statusText;
+    const errorMessage = JSON.stringify(value) ?? response.statusText;
     throw new Error(
-      `Request failed with status ${response.status}: ${errorMessage}`
+      `Request failed with status ${response.status}: ${errorMessage}`,
     );
   }
 
@@ -38,7 +38,7 @@ async function prepareResult(response: Response): Promise<unknown> {
 function safeJsonParse(value: string): unknown {
   try {
     return JSON.parse(value);
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }

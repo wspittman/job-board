@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "clean": "git clean -fdx -- \":(glob)**/node_modules/**\" \":(glob)**/deploy/**\" \":(glob)**/dist/**\" \":(glob)**/*.tsbuildinfo\"",
-    "lint": "npm run lint --workspace=backend --workspace=frontend",
-    "format": "npm run format --workspace=backend --workspace=frontend",
-    "format:write": "npm run format:write --workspace=backend --workspace=frontend",
+    "lint": "npm run lint --workspace=admin --workspace=backend --workspace=frontend",
+    "format": "npm run format --workspace=admin --workspace=backend --workspace=frontend",
+    "format:write": "npm run format:write --workspace=admin --workspace=backend --workspace=frontend",
     "test": "npm run test --workspace=backend",
     "pre-checkin": "node scripts/checklist.mjs",
     "pre-deploy": "node scripts/checklist.mjs -- full",
