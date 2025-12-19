@@ -1,50 +1,33 @@
 import process from "node:process";
-import { addCompanies, deleteCompany, deleteJob } from "./commands.ts";
-import { atsTypes, commands } from "./types.ts";
+import { CommandError, getUsage, runCommand } from "./commands.ts";
+import { atsTypes } from "./types.ts";
 
 function usageReminder() {
-  console.error(
+  console.log(
     [
       "Usage:",
       "  npm run admin -- <COMMAND> <ARGS>",
       "",
-      `  COMMAND: ${commands.join("|")}`,
+      "  COMMAND:",
+      ...getUsage("    "),
       "",
-      "  npm run admin -- add-companies <ATS_ID> <COMPANY_ID> [...COMPANY_ID]",
-      `    ATS_ID: ${atsTypes.join("|")}`,
+      "  COMMON ARGUMENTS:",
+      `    ATS_ID: ATS type, one of [${atsTypes.join("|")}]`,
       "",
-      "  npm run admin -- delete-job <COMPANY_ID> <JOB_ID>",
-      "", 
-      "  npm run admin -- delete-company <ATS_ID> <COMPANY_ID>",
-    ].join("\n")
+    ].join("\n"),
   );
 }
 
-async function run() {
+async function main() {
   const [command, ...args] = process.argv.slice(2);
-
-  switch (command) {
-    case "add-companies":
-      await addCompanies(args);
-      break;
-    case "delete-job":
-      await deleteJob(args);
-      break;
-    case "delete-company":
-      await deleteCompany(args);
-      break;
-    default:
-      throw new Error("Invalid command");
-  }
+  await runCommand(command, args);
 }
 
-run().catch((err) => {
-  if (
-    err instanceof Error &&
-    ["Invalid command", "Invalid arguments"].includes(err.message)
-  ) {
+main().catch((err) => {
+  if (err instanceof CommandError) {
     usageReminder();
   }
   console.error(err instanceof Error ? err.message : err);
+  console.error();
   process.exitCode = 1;
 });
