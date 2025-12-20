@@ -7,19 +7,33 @@ interface Command {
   run(args: string[]): Promise<void>;
 }
 
+function validateAts(ats?: string): string {
+  ats = ats?.toLowerCase();
+
+  if (!ats || !atsTypes.includes(ats)) {
+    throw new CommandError("Invalid argument: ATS");
+  }
+
+  return ats;
+}
+
+function validateIds(name: string, ...ids: (string | undefined)[]): string[] {
+  const validIds = ids
+    .map((id) => id?.replace(",", "").trim() || "")
+    .filter((id) => !!id);
+
+  if (!validIds.length) {
+    throw new CommandError(`Invalid argument: ${name}`);
+  }
+
+  return validIds;
+}
+
 const addCompanies: Command = {
-  usage: () => "<ATS_ID> <COMPANY_ID> [...COMPANY_ID]",
-
-  run: async (args: string[]): Promise<void> => {
-    let [ats, ...companyIds] = args;
-    ats = ats?.toLowerCase() ?? "";
-    companyIds = companyIds
-      .map((id) => id.replace(",", "").trim())
-      .filter((id) => !!id.length);
-
-    if (!atsTypes.includes(ats) || !companyIds.length) {
-      throw new CommandError("Invalid arguments");
-    }
+  usage: () => "<ATS> <COMPANY_ID> [...COMPANY_ID]",
+  run: async ([ats, ...companyIds]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    companyIds = validateIds("COMPANY_ID", ...companyIds);
 
     console.log(`Adding ${companyIds.length} companies from ${ats}`);
     const result = await fetcher("companies", "PUT", { ats, ids: companyIds });
@@ -29,42 +43,32 @@ const addCompanies: Command = {
 
 const deleteJob: Command = {
   usage: () => "<COMPANY_ID> <JOB_ID>",
+  run: async ([companyId, jobId]: string[]): Promise<void> => {
+    [companyId] = validateIds("COMPANY_ID", companyId);
+    [jobId] = validateIds("JOB_ID", jobId);
 
-  run: async (args: string[]): Promise<void> => {
-    const [companyId, id] = args;
-
-    if (!companyId || !id) {
-      throw new CommandError("Invalid arguments");
-    }
-
-    console.log(`Deleting job ${id} for company ${companyId}`);
-    const result = await fetcher("job", "DELETE", { id, companyId });
+    console.log(`Deleting job ${jobId} for company ${companyId}`);
+    const result = await fetcher("job", "DELETE", { id: jobId, companyId });
     console.log("Success", result);
   },
 };
 
 const deleteCompany: Command = {
-  usage: () => "<ATS_ID> <COMPANY_ID>",
+  usage: () => "<ATS> <COMPANY_ID>",
+  run: async ([ats, companyId]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    [companyId] = validateIds("COMPANY_ID", companyId);
 
-  run: async (args: string[]): Promise<void> => {
-    const [atsInput, id] = args;
-
-    const ats = atsInput?.toLowerCase() ?? "";
-
-    if (!atsTypes.includes(ats) || !id) {
-      throw new CommandError("Invalid arguments");
-    }
-
-    console.log(`Deleting company ${id} from ${ats}`);
-    const result = await fetcher("company", "DELETE", { ats, id });
+    console.log(`Deleting company ${companyId} from ${ats}`);
+    const result = await fetcher("company", "DELETE", { ats, id: companyId });
     console.log("Success", result);
   },
 };
 
 const registry: Record<string, Command> = {
-  "add-companies": addCompanies,
-  "delete-job": deleteJob,
-  "delete-company": deleteCompany,
+  addCompanies,
+  deleteJob,
+  deleteCompany,
 };
 
 export class CommandError extends Error {}
