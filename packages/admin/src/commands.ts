@@ -1,6 +1,9 @@
+import { FLOW_NAMES, runFlow } from "./commands/e2e.ts";
 import { fetcher } from "./fetcher.ts";
 import { atsTypes } from "./types.ts";
 import { asArray } from "./utils.ts";
+
+export class CommandError extends Error {}
 
 interface Command {
   usage(): string | string[];
@@ -36,7 +39,8 @@ const addCompanies: Command = {
     companyIds = validateIds("COMPANY_ID", ...companyIds);
 
     console.log(`Adding ${companyIds.length} companies from ${ats}`);
-    const result = await fetcher("companies", "PUT", { ats, ids: companyIds });
+    const body = { ats, ids: companyIds };
+    const result = await fetcher("PUT", "companies", { body });
     console.log("Success", result);
   },
 };
@@ -48,7 +52,8 @@ const deleteJob: Command = {
     [jobId] = validateIds("JOB_ID", jobId);
 
     console.log(`Deleting job ${jobId} for company ${companyId}`);
-    const result = await fetcher("job", "DELETE", { id: jobId, companyId });
+    const body = { id: jobId, companyId };
+    const result = await fetcher("DELETE", "job", { body });
     console.log("Success", result);
   },
 };
@@ -60,8 +65,20 @@ const deleteCompany: Command = {
     [companyId] = validateIds("COMPANY_ID", companyId);
 
     console.log(`Deleting company ${companyId} from ${ats}`);
-    const result = await fetcher("company", "DELETE", { ats, id: companyId });
+    const body = { ats, id: companyId };
+    const result = await fetcher("DELETE", "company", { body });
     console.log("Success", result);
+  },
+};
+
+const e2e: Command = {
+  usage: () => ["<FLOW>", `FLOW: ${FLOW_NAMES.join("|")}`],
+  run: async ([flow]: string[]): Promise<void> => {
+    if (!flow || !FLOW_NAMES.includes(flow)) {
+      throw new CommandError("Invalid argument: FLOW");
+    }
+
+    await runFlow(flow);
   },
 };
 
@@ -69,9 +86,8 @@ const registry: Record<string, Command> = {
   addCompanies,
   deleteJob,
   deleteCompany,
+  e2e,
 };
-
-export class CommandError extends Error {}
 
 export async function runCommand(
   name = "",

@@ -12,7 +12,7 @@ function usageReminder() {
       ...getUsage("    "),
       "",
       "  COMMON ARGUMENTS:",
-      `    ATS: [${atsTypes.join("|")}]`,
+      `    ATS: ${atsTypes.join("|")}`,
       "",
     ].join("\n"),
   );
