@@ -100,6 +100,7 @@ class MenuEl {
   #rawOptions: OptionEl[] = [];
   #filteredOptions: OptionEl[] = [];
   #activeIndex = -1;
+  #prevActivated: OptionEl | undefined = undefined;
   #isOpen = false;
   #onSelect?: (option?: OptionEl) => void;
 
@@ -264,13 +265,17 @@ class MenuEl {
   }
 
   #applyActiveState() {
-    this.#filteredOptions.forEach((item, idx) => {
-      const isActive = idx === this.#activeIndex;
-      item.active = isActive;
-      if (isActive) {
-        item.element.scrollIntoView({ block: "nearest" });
-      }
-    });
+    const item = this.#filteredOptions[this.#activeIndex];
+
+    if (!item || this.#prevActivated === item) return;
+
+    if (this.#prevActivated) {
+      this.#prevActivated.active = false;
+    }
+
+    item.active = true;
+    item.element.scrollIntoView({ block: "nearest" });
+    this.#prevActivated = item;
   }
 
   #onClick({ target }: PointerEvent) {
