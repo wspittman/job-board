@@ -14,52 +14,6 @@
   aspect-ratio: 1 / 1;
   position: relative;
   display: grid;
-  place-items: center;
-
-  & svg {
-    position: absolute;
-  }
-
-  & .lucide-funnel {
-    transform: scale(-1, 1);
-    width: 75%;
-    height: 75%;
-    stroke: var(--primary-dark);
-    stroke-width: 1;
-    fill: var(--bg-active);
-  }
-
-  & .lucide-dollar-sign {
-    top: 80%;
-    left: 45%;
-    width: 20%;
-    height: 20%;
-    stroke: darkgreen;
-  }
-
-  & .lucide-smile {
-    top: 72%;
-    left: 24%;
-    width: 20%;
-    height: 20%;
-    stroke: green;
-  }
-
-  & .lucide-party-popper {
-    top: 66%;
-    left: 62%;
-    width: 20%;
-    height: 20%;
-    stroke: mediumblue;
-  }
-
-  & .random-icon svg {
-    top: calc(10% * var(--tri-row) + var(--dy, 0));
-    left: calc(3% + 6% * var(--tri-row) + 12% * var(--tri-col) + var(--dx, 0));
-    width: calc(10% + var(--ds, 0));
-    height: calc(10% + var(--ds, 0));
-    stroke: hsl(var(--dc));
-  }
 }
 
 .hm-hero-ring {
@@ -86,6 +40,11 @@
     hsla(0, 0%, 100%, 0.45),
     hsla(0, 0%, 100%, 0)
   );
+}
+
+.hm-hero-icons {
+  display: grid;
+  place-items: center;
 }
 
 .hm-hero-content {
