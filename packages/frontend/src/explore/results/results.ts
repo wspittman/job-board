@@ -16,8 +16,9 @@ interface Props {
  * Custom element responsible for rendering job results and coordinating selection events.
  */
 export class Results extends ComponentBase {
-  #list: HTMLElement;
-  cards: JobCard[] = [];
+  #listEl: HTMLElement;
+  #cards: JobCard[] = [];
+  #selectedCard?: JobCard;
   #onSelect?: (jobId: string) => void;
 
   /**
@@ -25,7 +26,7 @@ export class Results extends ComponentBase {
    */
   constructor() {
     super(html, cssSheet);
-    this.#list = this.getEl("list")!;
+    this.#listEl = this.getEl("list")!;
   }
 
   /**
@@ -43,44 +44,61 @@ export class Results extends ComponentBase {
    */
   updateJobs(value: JobModel[] | undefined, isSavedJob = false) {
     const onClick = (id: string) => this.#selectCard(id);
+    this.#clearCards();
 
-    this.cards = (value ?? []).map((job, index) => {
+    this.#cards = (value ?? []).map((job, index) => {
       const isSelected = index === 0;
       return JobCard.create({ job, isSelected, onClick });
     });
 
-    const displayCards: Node[] = [...this.cards];
+    this.#selectedCard = this.#cards.at(0);
+
+    const displayCards: Node[] = [...this.#cards];
     if (!isSavedJob) {
       displayCards.push(MessageCard.create({ count: value?.length }));
     } else if (!value?.length) {
       displayCards.push(MessageCard.create({ message: "NoSavedJob" }));
     }
 
-    this.#list.replaceChildren(...displayCards);
+    this.#listEl.replaceChildren(...displayCards);
   }
 
   /**
    * Replaces the list with an error message when job loading fails.
    */
   showError() {
-    this.cards = [];
-    this.#list.replaceChildren(MessageCard.create({ message: "Error" }));
+    this.#clearCards();
+    this.#listEl.replaceChildren(MessageCard.create({ message: "Error" }));
   }
 
   /**
    * Displays a loading state while job results are being fetched.
    */
   showLoading() {
-    this.cards = [];
-    this.#list.replaceChildren(MessageCard.create({ message: "Loading" }));
+    this.#clearCards();
+    this.#listEl.replaceChildren(MessageCard.create({ message: "Loading" }));
+  }
+
+  #clearCards() {
+    this.#cards = [];
+    this.#selectedCard = undefined;
   }
 
   #selectCard(selectedId: string) {
-    if (!selectedId) return;
+    if (!selectedId || this.#selectedCard?.jobId === selectedId) return;
     this.#onSelect?.(selectedId);
-    this.cards.forEach((card) => {
-      card.isSelected = card.jobId === selectedId;
-    });
+
+    if (this.#selectedCard) {
+      this.#selectedCard.isSelected = false;
+    }
+
+    this.#selectedCard = this.#cards.find((card) => card.jobId === selectedId);
+
+    if (this.#selectedCard) {
+      this.#selectedCard.isSelected = true;
+    }
+
+    console.log("Selected job ID:", selectedId);
   }
 }
 
