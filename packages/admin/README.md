@@ -34,6 +34,7 @@ npm install
 | ------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------------------- |
 | `add-companies <ats> <companyId...>` | Imports one or more company IDs from a supported ATS (`greenhouse` or `lever`). | `npm run admin -- add-companies greenhouse 123 456` |
 | `delete-job <companyId> <jobId>`     | Removes a specific job posting for the given company.                           | `npm run admin -- delete-job 123 abc-789`           |
+| `e2e <flow>`                         | Runs a predefined end-to-end flow against the backend API.                      | `npm run admin -- e2e smoke`                        |
 
 Each command prints a success or error message based on the API response.
 

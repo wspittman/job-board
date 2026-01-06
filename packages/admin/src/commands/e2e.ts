@@ -1,31 +1,7 @@
+import assert from "node:assert/strict";
+import { flows } from "../e2e/flows.ts";
+import type { Step } from "../e2e/step.ts";
 import { fetcher } from "../fetcher.ts";
-import type { HttpMethod } from "../types.ts";
-
-/**
- * Defines a single step in an end-to-end flow.
- */
-interface Step {
-  method: HttpMethod;
-  path: string;
-  body?: unknown;
-  asAdmin?: boolean;
-  expectStatus?: number;
-}
-
-const flows: Record<string, Step[]> = {
-  smoke: [
-    {
-      method: "GET",
-      path: "metadata",
-      asAdmin: false,
-    },
-    {
-      method: "GET",
-      path: "jobs",
-      asAdmin: false,
-    },
-  ],
-};
 
 export const FLOW_NAMES = Object.keys(flows);
 
@@ -42,28 +18,44 @@ export async function runFlow(name: string): Promise<void> {
 
   console.log(`Running flow "${name}"`);
 
-  for (const [
-    index,
-    { method, path, expectStatus = 200, ...opts },
-  ] of flow.entries()) {
-    const step = index + 1;
-
-    console.log(`[${step}/${flow.length}] ${method} ${path}`);
-
-    const result = await fetcher(method, path, {
-      ...opts,
-      env: "local",
-      throwOnError: false,
-    });
-
-    console.log(`  Status: ${result.status}`);
-
-    if (result.status !== expectStatus) {
-      console.error(`FAIL: Step ${step} expected status ${expectStatus}`);
-      console.dir(result, { depth: null });
+  try {
+    for (let i = 0; i < flow.length; i++) {
+      await runStep(i + 1, flow.length, flow[i]!);
+    }
+  } catch (err) {
+    if (err instanceof assert.AssertionError) {
+      console.error(`\n${err.message}`);
       return;
     }
+    throw err;
   }
 
-  console.log(`Flow "${name}" completed successfully.`);
+  console.log(`\nFlow "${name}" completed successfully.`);
+}
+
+async function runStep(
+  n: number,
+  total: number,
+  { name, method, path, expectStatus, expectBody, ...opts }: Step,
+): Promise<void> {
+  console.log(`\n[${n}/${total}] ${name}`);
+  console.log(`${method} ${path}`);
+
+  const { status, value } = await fetcher(method, path, {
+    ...opts,
+    env: "local",
+    throwOnError: false,
+  });
+
+  console.log(`Status: ${status}`);
+  console.dir(value, { depth: null });
+
+  assert.equal(status, expectStatus, `FAIL: Step ${n} Wrong Status`);
+  if (expectBody != undefined) {
+    assert.partialDeepStrictEqual(
+      value,
+      expectBody,
+      `FAIL: Step ${n} Wrong Body`,
+    );
+  }
 }
