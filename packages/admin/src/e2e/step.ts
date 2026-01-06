@@ -20,8 +20,8 @@ export interface Step {
 }
 
 export const formStep = (
-  name: string,
   path: string,
+  name: string,
   step: Partial<Step> = {},
 ): Step => ({
   name,
@@ -33,18 +33,18 @@ export const formStep = (
 });
 
 export const formSucStep = (
-  name: string,
   path: string,
+  name: string,
   step: Partial<Step> = {},
-): Step => formStep(name, path, { expectBody: SUCCESS_BODY, ...step });
+): Step => formStep(path, name, { expectBody: SUCCESS_BODY, ...step });
 
 export const formErrStep = (
-  name: string,
   path: string,
+  name: string,
   message: string,
   step: Partial<Step> = {},
 ): Step =>
-  formStep(name, path, {
+  formStep(path, name, {
     expectStatus: 400,
     expectBody: errBody(message, step.expectStatus),
     ...step,

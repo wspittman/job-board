@@ -38,8 +38,7 @@ async function runStep(
   total: number,
   { name, method, path, expectStatus, expectBody, ...opts }: Step,
 ): Promise<void> {
-  console.log(`\n[${n}/${total}] ${name}`);
-  console.log(`${method} ${path}`);
+  console.log(`\n[${n}/${total}] ${method} ${path}: ${name}`);
 
   const { status, value } = await fetcher(method, path, {
     ...opts,
