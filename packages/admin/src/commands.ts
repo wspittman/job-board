@@ -83,7 +83,7 @@ export async function runCommand(
 
   cmd.prerequisite?.();
 
-  return await cmd.run(args);
+  await cmd.run(args);
 }
 
 export function getUsage(indent = ""): string[] {

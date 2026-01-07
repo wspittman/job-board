@@ -11,8 +11,8 @@ This is a web application for a job board. It is a monorepo with multiple worksp
   - Requires `.env` values like `PROD_API_TOKEN` and `LOCAL_API_TOKEN`.
   - Supports commands like `add-companies` and `delete-job` against the backend admin API.
 - **`packages/evals`** – Local evaluation harness that mirrors backend LLM extraction logic.
-  - Fetch ATS input samples with `npm run eval-fetch-input -- <dataModel> <ats> <companyId> [jobId]`.
-  - Run evaluations via `npm run eval -- <dataModel> [runName]`; results stored under `input/`, `ground/`, `outcome/`, and `report/`.
+  - Fetch ATS input samples with `npm run eval -- fetch-input <dataModel> <ats> <companyId> [jobId]`.
+  - Run evaluations via `npm run eval -- evals <dataModel> [runName]`; results stored under `input/`, `ground/`, `outcome/`, and `report/`.
   - Relies on backend `.env` variables including `OPENAI_API_KEY`, `LLM_MODEL`, and `LLM_REASONING_EFFORT`.
 
 # Building and Running

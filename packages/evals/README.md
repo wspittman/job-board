@@ -30,7 +30,7 @@ created automatically the first time you save data.
 You can capture fresh scenarios directly from an Applicant Tracking System (ATS):
 
 ```bash
-npm run eval-fetch-input -- <dataModel> <ats> <companyId> [jobId]
+npm run eval -- fetch-input <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel` must be either `company` or `job`.
@@ -47,7 +47,7 @@ inspect the payload, add or adjust ground-truth fields, and save the companion f
 Once the inputs and ground truth are in place, launch an evaluation run from the repository root:
 
 ```bash
-npm run eval -- <dataModel> [runName]
+npm run eval -- evals <dataModel> [runName]
 ```
 
 - `dataModel` again selects `company` or `job`.
@@ -67,3 +67,11 @@ versioning.
   concurrent experiments.
 - Keep input and ground files in private version control so that future runs can reproduce prior
   baselines.
+
+## Playground
+
+To run the clustering playground workflow:
+
+```bash
+npm run eval -- playground
+```

@@ -27,7 +27,7 @@ The `input` and `ground` folders must be populated before running an evaluation.
 Capture scenarios directly from an ATS:
 
 ```
-npm run eval-fetch-input -- <dataModel> <ats> <companyId> [jobId]
+npm run eval -- fetch-input <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel`: `company` or `job`.
@@ -42,13 +42,21 @@ Each run writes a timestamped JSON file under `input/<dataModel>/` so you can re
 Execute evaluations once inputs and ground truth exist:
 
 ```
-npm run eval -- <dataModel> [runName]
+npm run eval -- evals <dataModel> [runName]
 ```
 
 - `dataModel`: `company` or `job`.
 - `runName`: optional label; a timestamp is used when omitted.
 
 Outputs are written to `outcome/<dataModel>/` (model responses) and `report/<dataModel>/` (summary metrics). Each JSON document includes an `evalTS` timestamp for traceability.
+
+## Playground
+
+Run the clustering playground flow:
+
+```
+npm run eval -- playground
+```
 
 ## Notes
 
