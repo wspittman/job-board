@@ -1,6 +1,6 @@
 import process from "node:process";
-import { CommandError, getUsage, runCommand } from "./commands.ts";
-import { atsTypes } from "./types.ts";
+import { getUsage, runCommand } from "./commands.ts";
+import { atsTypes, CommandError } from "./types.ts";
 
 function usageReminder() {
   console.log(

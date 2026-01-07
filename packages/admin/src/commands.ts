@@ -1,14 +1,7 @@
-import { FLOW_NAMES, runFlow } from "./commands/e2e.ts";
+import { e2e } from "./e2e/e2e.ts";
 import { fetcher } from "./fetcher.ts";
-import { atsTypes } from "./types.ts";
+import { atsTypes, CommandError, type Command } from "./types.ts";
 import { asArray } from "./utils.ts";
-
-export class CommandError extends Error {}
-
-interface Command {
-  usage(): string | string[];
-  run(args: string[]): Promise<void>;
-}
 
 function validateAts(ats?: string): string {
   ats = ats?.toLowerCase();
@@ -71,17 +64,6 @@ const deleteCompany: Command = {
   },
 };
 
-const e2e: Command = {
-  usage: () => ["<FLOW>", `FLOW: ${FLOW_NAMES.join("|")}`],
-  run: async ([flow]: string[]): Promise<void> => {
-    if (!flow || !FLOW_NAMES.includes(flow)) {
-      throw new CommandError("Invalid argument: FLOW");
-    }
-
-    await runFlow(flow);
-  },
-};
-
 const registry: Record<string, Command> = {
   addCompanies,
   deleteJob,
@@ -98,6 +80,8 @@ export async function runCommand(
   if (!cmd) {
     throw new CommandError(`Invalid Command "${name}"`);
   }
+
+  cmd.prerequisite?.();
 
   return await cmd.run(args);
 }

@@ -1,15 +1,36 @@
 import assert from "node:assert/strict";
-import { flows } from "../e2e/flows.ts";
-import type { Step } from "../e2e/step.ts";
+import { config } from "../config.ts";
 import { fetcher } from "../fetcher.ts";
+import { CommandError, type Command } from "../types.ts";
+import { flows } from "./flows.ts";
+import type { Step } from "./step.ts";
 
-export const FLOW_NAMES = Object.keys(flows);
+const { LOCAL_API_TOKEN, GREENHOUSE_IDS, LEVER_IDS } = config;
+const FLOW_NAMES = Object.keys(flows);
+
+export const e2e: Command = {
+  usage: () => ["<FLOW>", `FLOW: ${FLOW_NAMES.join("|")}`],
+  prerequisite,
+  run: async ([flow]: string[]): Promise<void> => {
+    if (!flow || !FLOW_NAMES.includes(flow)) {
+      throw new CommandError("Invalid argument: FLOW");
+    }
+
+    await runFlow(flow);
+  },
+};
+
+function prerequisite(): void {
+  assert.notEqual(LOCAL_API_TOKEN, "unset", "ENV: LOCAL_API_TOKEN unset");
+  assert.ok(GREENHOUSE_IDS.length > 0, "ENV: GREENHOUSE_IDS <= 0");
+  assert.ok(LEVER_IDS.length > 0, "ENV: LEVER_IDS <= 0");
+}
 
 /**
  * Execute the named flow against the configured backend API.
  * @param name - Flow identifier to execute.
  */
-export async function runFlow(name: string): Promise<void> {
+async function runFlow(name: string): Promise<void> {
   const flow = flows[name];
 
   if (!flow) {

@@ -1,6 +1,9 @@
+import { config } from "../config.ts";
 import { type Step, formErrStep, formStep, formSucStep } from "./step.ts";
 
-const GREENHOUSE_EXAMPLE = "vaulttec";
+const { GREENHOUSE_IDS } = config;
+
+const GREENHOUSE_EXAMPLE = GREENHOUSE_IDS[0];
 
 const pings: Step[] = [
   formSucStep("", "Ping"),
@@ -9,7 +12,7 @@ const pings: Step[] = [
   formStep("metadata", "Status check", { expectBody: {} }),
 ];
 
-const errors: Step[] = [
+const validations: Step[] = [
   // Refresh Jobs
   formErrStep("refresh/jobs", "Auth Missing", "Unauthorized", {
     method: "POST",
@@ -115,8 +118,43 @@ const errors: Step[] = [
   ),
 ];
 
+/*
+/refresh/companies
+(async -> trigger company info queue -> company metadata executor)
+
+/refresh/jobs
+/refresh/jobs for specific ATS
+/refresh/jobs for specific, but unknown, company
+/refresh/jobs for specific company
+/refresh/jobs for the same specific company (no changes expected)
+/refresh/jobs for specific company with replaceJobsOlderThan=now
+(async -> trigger job info queue -> metadata job executor)
+
+/company add company (greenhouse, lever, re-add, unknown)
+(async -> trigger company info queue -> company metadata executor)
+
+/companies add companies ([greenhouse, lever, re-add, unknown])
+(async -> trigger company info queue -> company metadata executor)
+
+/company delete company (good, unknown)
+(async -> trigger company metadata executor)
+(if jobs -> delete jobs and trigger job metadata executor)
+
+/job/apply (greenhouse, lever, unknown (err))
+
+/jobs (specific company)
+
+/job delete job (good, unknown)
+*/
+
+/*
+TBD: ability to wait for user input when async processing is completed
+TBD: reading metadata specifically to diffing expected changes?
+  Stop option: meta baseline, meta comparison?
+*/
+
 export const flows: Record<string, Step[]> = {
   pings,
-  errors,
-  smoke: [...pings, ...errors],
+  validations,
+  smoke: [...pings, ...validations],
 };
