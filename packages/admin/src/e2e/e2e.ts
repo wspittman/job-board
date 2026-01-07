@@ -57,7 +57,7 @@ async function runFlow(name: string): Promise<void> {
 async function runStep(
   n: number,
   total: number,
-  { name, method, path, expectStatus, expectBody, ...opts }: Step,
+  { name, method, path, expectStatus, expectBody, asyncWait, ...opts }: Step,
 ): Promise<void> {
   console.log(`\n[${n}/${total}] ${method} ${path}: ${name}`);
 
@@ -77,5 +77,18 @@ async function runStep(
       expectBody,
       `FAIL: Step ${n} Wrong Body`,
     );
+  }
+
+  if (asyncWait) {
+    console.log("\nPress Enter to resume after async operation completes...");
+    await new Promise<void>((resolve) => {
+      // When you attach a data listener to process.stdin, it switches the stream into "flowing" mode.
+      // To allow the script to exit, you need to explicitly pause() the stdin stream after receiving the data.
+      process.stdin.resume();
+      process.stdin.once("data", () => {
+        process.stdin.pause();
+        resolve();
+      });
+    });
   }
 }

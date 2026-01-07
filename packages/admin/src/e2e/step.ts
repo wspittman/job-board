@@ -17,6 +17,9 @@ export interface Step {
   // Expected Response
   expectStatus: number;
   expectBody?: unknown;
+
+  // Wait on user input before proceeding
+  asyncWait?: boolean;
 }
 
 export const formStep = (

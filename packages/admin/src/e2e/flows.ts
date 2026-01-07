@@ -148,7 +148,6 @@ const validations: Step[] = [
 */
 
 /*
-TBD: ability to wait for user input when async processing is completed
 TBD: reading metadata specifically to diffing expected changes?
   Stop option: meta baseline, meta comparison?
 */
