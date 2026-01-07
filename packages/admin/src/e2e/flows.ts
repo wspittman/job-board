@@ -106,6 +106,13 @@ const validations: Step[] = [
     "id field is invalid: Invalid input: expected string, received undefined",
     {},
   ),
+  formErrStep("job/apply", "Not Found Error", "Job not found", {
+    query: {
+      id: "unknown_job_id",
+      companyId: "unknown_company_id",
+    },
+    expectStatus: 404,
+  }),
   formErrStep(
     "job",
     "Empty Body Error",

@@ -4,6 +4,7 @@ import type { HttpMethod } from "./types.ts";
 type ENV = "prod" | "local";
 
 interface Options {
+  query?: Record<string, string>;
   body?: unknown;
   asAdmin?: boolean;
   env?: ENV;
@@ -25,10 +26,17 @@ interface Result {
 export async function fetcher(
   method: HttpMethod,
   path: string,
-  { body, asAdmin = true, env = "prod", throwOnError = true }: Options = {},
+  {
+    query,
+    body,
+    asAdmin = true,
+    env = "prod",
+    throwOnError = true,
+  }: Options = {},
 ): Promise<Result> {
   const [baseUrl, token] = getUrlAndToken(env);
-  const endpoint = new URL(`${baseUrl}${path}`).toString();
+  const endpoint = new URL(`${baseUrl}${path}`);
+  endpoint.search = new URLSearchParams(query ?? {}).toString();
 
   const response = await fetch(endpoint, {
     method,
