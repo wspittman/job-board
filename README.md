@@ -43,7 +43,7 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
    npm install
    ```
 2. Configure environment variables:
-   - Each workspace uses its own `.env` file. Consult the individual package READMEs for required keys (e.g., `DATABASE_URL`, `LLM_MODEL`, `ADMIN_API_BASE_URL`).
+   - Each workspace uses its own `.env` file. Consult the individual package READMEs for required keys.
    - For local Cosmos DB development, follow the instructions below to set up the emulator and export its certificate.
 
 ### Local CosmosDB Emulator
@@ -82,7 +82,7 @@ The admin CLI provides scripted access to backend operations. Invoke it from the
 npm run admin -- <command> [args]
 ```
 
-Configure `ADMIN_API_BASE_URL` and `ADMIN_API_TOKEN` in `packages/admin/.env` (or your shell)
+Configure `PROD_API_TOKEN` and `LOCAL_API_TOKEN` (and their corresponding base URLs if not using defaults) in `packages/admin/.env` (or your shell)
 before invoking the CLI. Available commands include importing companies from Greenhouse or
 Lever and deleting individual job postings.
 

@@ -10,17 +10,17 @@ npm run admin -- <command> [args]
 
 ## Prerequisites
 
-Create an `.env` file inside `packages/admin/` (or provide environment variables another
-way) with the API connection details:
+Copy `.env.example` to `.env` inside `packages/admin/` (or provide environment variables
+another way) and fill in the API connection details:
 
-```ini
-ADMIN_API_BASE_URL=<https://backend.example.com/admin/>
-ADMIN_API_TOKEN=<api token with admin privileges>
-```
-
-- `ADMIN_API_BASE_URL` should end with a trailing slash so the CLI can append request paths
-  correctly.
-- `ADMIN_API_TOKEN` is passed as the `Authorization: Bearer` header on each request.
+| Variable           | Description                                                        |
+| ------------------ | ------------------------------------------------------------------ |
+| PROD_API_BASE_URL  | Base URL for the production backend API (optional, has default).   |
+| PROD_API_TOKEN     | Bearer token with admin privileges for the production backend API. |
+| LOCAL_API_BASE_URL | Base URL for the local backend API (optional, has default).        |
+| LOCAL_API_TOKEN    | Bearer token with admin privileges for the local backend API.      |
+| GREENHOUSE_IDS     | Comma-separated list of company IDs for e2e tests                  |
+| LEVER_IDS          | Comma-separated list of company IDs for e2e tests                  |
 
 Install workspace dependencies from the repository root if you have not already:
 

@@ -8,7 +8,7 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 - **`packages/frontend`** – Current Vite-powered application built with vanilla HTML/CSS/JS. See `packages/frontend/AGENTS.md` for frontend-specific commands and conventions.
 - **`packages/admin`** – TypeScript CLI for administrative operations.
   - Execute with `npm run admin -- <command> [args]` from the repo root.
-  - Requires `.env` values `ADMIN_API_BASE_URL` (trailing slash) and `ADMIN_API_TOKEN`.
+  - Requires `.env` values like `PROD_API_TOKEN` and `LOCAL_API_TOKEN`.
   - Supports commands like `add-companies` and `delete-job` against the backend admin API.
 - **`packages/evals`** – Local evaluation harness that mirrors backend LLM extraction logic.
   - Fetch ATS input samples with `npm run eval-fetch-input -- <dataModel> <ats> <companyId> [jobId]`.

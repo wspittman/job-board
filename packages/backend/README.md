@@ -14,7 +14,7 @@ The backend package implements the API for the Job Board monorepo. It is an Expr
    ```bash
    npm install
    ```
-2. Create an `.env` file and supply the required environment variables listed below.
+2. Copy `.env.example` to `.env` inside `packages/backend/` and supply the required environment variables listed below.
 3. Start the backend in watch mode from the repository root:
    ```bash
    npm run start:backend
