@@ -6,7 +6,7 @@ function usageReminder() {
   console.log(
     [
       "Usage:",
-      "  npm run admin -- <COMMAND> <ARGS>",
+      "  npm run ops -- <COMMAND> <ARGS>",
       "",
       "  COMMAND:",
       ...getUsage("    "),
