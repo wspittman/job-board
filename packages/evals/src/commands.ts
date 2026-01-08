@@ -1,5 +1,6 @@
 import { evals } from "./commands/eval.ts";
 import { fetchInput } from "./commands/fetchInput.ts";
+import { jobCounts } from "./commands/jobCounts.ts";
 import { playground } from "./commands/playground.ts";
 import { CommandError, type Command } from "./types.ts";
 
@@ -11,6 +12,7 @@ const registry: Record<string, Command> = {
   evals,
   "fetch-input": fetchInput,
   playground,
+  "job-counts": jobCounts,
 };
 
 /**

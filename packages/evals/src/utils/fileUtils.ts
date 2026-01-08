@@ -5,7 +5,7 @@ import type { DataModel } from "../portal/pTypes.ts";
 import type { Bag, Source } from "../types/types.ts";
 
 type Role = "Input" | "Outcome" | "Ground" | "Report" | "Cache";
-type SubRole = DataModel | "playground" | "";
+type SubRole = DataModel | "playground" | "job_counts" | "";
 
 // Base directory for all evaluation-related files.
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +34,7 @@ export async function readSources(subRole: SubRole): Promise<Source[]> {
  */
 async function readSource(
   subRole: SubRole,
-  sourceName: string
+  sourceName: string,
 ): Promise<Source | undefined> {
   const input = await readObj<Bag>("Input", subRole, sourceName);
   const ground = await readObj<Bag>("Ground", subRole, sourceName);
@@ -54,7 +54,7 @@ async function readSource(
 export async function readObj<T>(
   role: Role,
   subRole: SubRole,
-  name: string
+  name: string,
 ): Promise<T | undefined> {
   let filePath = getPath(role, subRole, name);
 

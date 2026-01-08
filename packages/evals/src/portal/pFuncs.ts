@@ -70,3 +70,17 @@ export async function infer(dataModel: DataModel, context: Bag) {
       break;
   }
 }
+
+/**
+ * Fetches the job count for a company from the ATS.
+ * @param ats - ATS provider key
+ * @param companyId - ATS company slug/id
+ * @returns The number of jobs for the company
+ */
+export async function fetchJobCount(
+  ats: ATS,
+  companyId: string,
+): Promise<number> {
+  const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
+  return jobs.length;
+}
