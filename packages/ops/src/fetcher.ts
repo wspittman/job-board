@@ -16,7 +16,7 @@ interface Result {
 }
 
 /**
- * Send a request to the backend API using the admin CLI configuration.
+ * Send a request to the backend API using the ops CLI configuration.
  * @param method - HTTP method to use for the request.
  * @param path - API path relative to the configured base URL.
  * @param opt - Additional request options.

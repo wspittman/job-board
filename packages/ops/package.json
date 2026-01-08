@@ -1,5 +1,5 @@
 {
-  "name": "admin",
+  "name": "ops",
   "version": "1.0.0",
   "type": "module",
   "private": true,
@@ -7,7 +7,7 @@
     "lint": "eslint",
     "format": "prettier . --check",
     "format:write": "prettier . --write",
-    "admin": "tsx --env-file=.env src/index.ts"
+    "ops": "tsx --env-file=.env src/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

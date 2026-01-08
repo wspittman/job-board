@@ -1,16 +1,16 @@
-# Admin CLI
+# Ops CLI
 
-The `packages/admin` workspace provides a small command-line utility that lets operators
-perform administrative actions against the Job Board backend API. The tool is executed
+The `packages/ops` workspace provides a small command-line utility that lets operators
+run operational scripts against a running Job Board backend API instance. The tool is executed
 through the root-level npm script:
 
 ```bash
-npm run admin -- <command> [args]
+npm run ops -- <command> [args]
 ```
 
 ## Prerequisites
 
-Copy `.env.example` to `.env` inside `packages/admin/` (or provide environment variables
+Copy `.env.example` to `.env` inside `packages/ops/` (or provide environment variables
 another way) and fill in the API connection details:
 
 | Variable           | Description                                                        |
@@ -30,11 +30,11 @@ npm install
 
 ## Available commands
 
-| Command                              | Description                                                                     | Example                                             |
-| ------------------------------------ | ------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `add-companies <ats> <companyId...>` | Imports one or more company IDs from a supported ATS (`greenhouse` or `lever`). | `npm run admin -- add-companies greenhouse 123 456` |
-| `delete-job <companyId> <jobId>`     | Removes a specific job posting for the given company.                           | `npm run admin -- delete-job 123 abc-789`           |
-| `e2e <flow>`                         | Runs a predefined end-to-end flow against the backend API.                      | `npm run admin -- e2e smoke`                        |
+| Command                              | Description                                                                     | Example                                           |
+| ------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `add-companies <ats> <companyId...>` | Imports one or more company IDs from a supported ATS (`greenhouse` or `lever`). | `npm run ops -- add-companies greenhouse 123 456` |
+| `delete-job <companyId> <jobId>`     | Removes a specific job posting for the given company.                           | `npm run ops -- delete-job 123 abc-789`           |
+| `e2e <flow>`                         | Runs a predefined end-to-end flow against the backend API.                      | `npm run ops -- e2e smoke`                        |
 
 Each command prints a success or error message based on the API response.
 
