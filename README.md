@@ -92,7 +92,7 @@ The evaluation workspace reproduces the backend’s extraction logic locally. Af
 input and ground-truth data under `packages/evals/`, run:
 
 ```bash
-npm run eval -- <dataModel> [runName]
+npm run eval -- evals <dataModel> [runName]
 ```
 
 Outputs are written beside the source data (inputs, ground truth, outcomes, and reports)

@@ -12,6 +12,7 @@ export interface Step {
   method: HttpMethod;
   path: string;
   asAdmin: boolean;
+  query?: Record<string, string>;
   body?: unknown;
 
   // Expected Response
