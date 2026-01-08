@@ -7,7 +7,7 @@ function usageReminder() {
   console.log(
     [
       "Usage:",
-      "  npm run eval -- <COMMAND> <ARGS>",
+      "  npm run lab -- <COMMAND> <ARGS>",
       "",
       "  COMMAND:",
       ...getUsage("    "),

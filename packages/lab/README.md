@@ -1,21 +1,22 @@
-# Evals package
+# Lab package
 
-This workspace contains the local evaluation harness for the job-board project. It runs the
-same LLM-powered extraction logic that the backend uses and scores the model output against
-curated ground truth data.
+This workspace contains scripts for running evals and intermediate data collection that need
+direct access to backend-only logic or data (not surfaced via API). It includes the local
+evaluation harness for the job-board project, running the same LLM-powered extraction logic
+that the backend uses and scoring model output against curated ground truth data.
 
 ## Prerequisites
 
 - Node.js 24 or newer (the repository root manages the toolchain).
 - Project dependencies installed from the monorepo root with `npm install`.
-- Copy `.env.example` to `.env` inside `packages/evals/` and supply the required environment variables. The evaluation package reuses the backend configuration (`packages/backend/src/config.ts`), so any environment variables documented for the backend also apply here.
+- Copy `.env.example` to `.env` inside `packages/lab/` and supply the required environment variables. The lab package reuses the backend configuration (`packages/backend/src/config.ts`), so any environment variables documented for the backend also apply here.
 
 ## Repository layout
 
 Evaluation artifacts live next to this README once they are generated:
 
 ```
-packages/evals/
+packages/lab/
   input/      # JSON inputs gathered from an ATS (one file per scenario)
   ground/     # Ground-truth labels that evaluators maintain alongside each input
   outcome/    # Model responses captured during a run
@@ -30,7 +31,7 @@ created automatically the first time you save data.
 You can capture fresh scenarios directly from an Applicant Tracking System (ATS):
 
 ```bash
-npm run eval -- fetch-input <dataModel> <ats> <companyId> [jobId]
+npm run lab -- fetch-input <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel` must be either `company` or `job`.
@@ -47,7 +48,7 @@ inspect the payload, add or adjust ground-truth fields, and save the companion f
 Once the inputs and ground truth are in place, launch an evaluation run from the repository root:
 
 ```bash
-npm run eval -- evals <dataModel> [runName]
+npm run lab -- evals <dataModel> [runName]
 ```
 
 - `dataModel` again selects `company` or `job`.
@@ -73,5 +74,5 @@ versioning.
 To run the clustering playground workflow:
 
 ```bash
-npm run eval -- playground
+npm run lab -- playground
 ```

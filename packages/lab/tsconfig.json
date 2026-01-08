@@ -7,7 +7,7 @@
     "noEmit": true,
 
     "outDir": "./dist",
-    // All source files under `packages/evals/src` and `packages/backend/src`
+    // All source files under `packages/lab/src` and `packages/backend/src`
     "rootDir": "..",
 
     // [Environment Dependent]

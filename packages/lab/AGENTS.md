@@ -1,19 +1,19 @@
-# Evals workspace instructions
+# Lab workspace instructions
 
-This package contains the local evaluation harness that mirrors the backend LLM extraction logic. Run commands from the repo root unless noted otherwise.
+This package contains scripts for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API). It includes the local evaluation harness that mirrors the backend LLM extraction logic. Run commands from the repo root unless noted otherwise.
 
 ## Prerequisites and configuration
 
 - Node.js 24 or newer (managed at the repo root).
 - Install dependencies once from the monorepo root with `npm install`.
-- Place a `.env` file in `packages/evals/` that reuses the backend configuration (see `packages/backend/src/config.ts`). Required keys include `OPENAI_API_KEY`, `LLM_MODEL`, and optional `LLM_REASONING_EFFORT`; other backend vars are honored when present.
+- Place a `.env` file in `packages/lab/` that reuses the backend configuration (see `packages/backend/src/config.ts`). Required keys include `OPENAI_API_KEY`, `LLM_MODEL`, and optional `LLM_REASONING_EFFORT`; other backend vars are honored when present.
 
 ## Data layout expectations
 
 Evaluation artifacts are stored alongside this file:
 
 ```
-packages/evals/
+packages/lab/
   input/      # JSON inputs pulled from an ATS
   ground/     # Ground-truth labels paired with each input
   outcome/    # Model responses captured during evaluation
@@ -27,7 +27,7 @@ The `input` and `ground` folders must be populated before running an evaluation.
 Capture scenarios directly from an ATS:
 
 ```
-npm run eval -- fetch-input <dataModel> <ats> <companyId> [jobId]
+npm run lab -- fetch-input <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel`: `company` or `job`.
@@ -42,7 +42,7 @@ Each run writes a timestamped JSON file under `input/<dataModel>/` so you can re
 Execute evaluations once inputs and ground truth exist:
 
 ```
-npm run eval -- evals <dataModel> [runName]
+npm run lab -- evals <dataModel> [runName]
 ```
 
 - `dataModel`: `company` or `job`.
@@ -55,7 +55,7 @@ Outputs are written to `outcome/<dataModel>/` (model responses) and `report/<dat
 Run the clustering playground flow:
 
 ```
-npm run eval -- playground
+npm run lab -- playground
 ```
 
 ## Notes
