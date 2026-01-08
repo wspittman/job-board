@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "eval": "tsx --env-file=.env src/index.ts"
+    "lab": "tsx --env-file=.env src/index.ts"
   },
   "dependencies": {
     "dry-utils-async": "^0.3.1",

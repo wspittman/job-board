@@ -6,13 +6,13 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 
 - **`packages/backend`** – Express 5 + TypeScript API service that integrates with Azure Cosmos DB and Application Insights telemetry. See `packages/backend/AGENTS.md` for backend-specific commands and conventions.
 - **`packages/frontend`** – Current Vite-powered application built with vanilla HTML/CSS/JS. See `packages/frontend/AGENTS.md` for frontend-specific commands and conventions.
-- **`packages/admin`** – TypeScript CLI for administrative operations.
-  - Execute with `npm run admin -- <command> [args]` from the repo root.
+- **`packages/ops`** – TypeScript CLI for operational scripts that take actions against a running backend API instance.
+  - Execute with `npm run ops -- <command> [args]` from the repo root.
   - Requires `.env` values like `PROD_API_TOKEN` and `LOCAL_API_TOKEN`.
   - Supports commands like `add-companies` and `delete-job` against the backend admin API.
-- **`packages/evals`** – Local evaluation harness that mirrors backend LLM extraction logic.
-  - Fetch ATS input samples with `npm run eval-fetch-input -- <dataModel> <ats> <companyId> [jobId]`.
-  - Run evaluations via `npm run eval -- <dataModel> [runName]`; results stored under `input/`, `ground/`, `outcome/`, and `report/`.
+- **`packages/lab`** – Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
+  - Fetch ATS input samples with `npm run lab -- fetch-input <dataModel> <ats> <companyId> [jobId]`.
+  - Run evaluations via `npm run lab -- evals <dataModel> [runName]`; results stored under `input/`, `ground/`, `outcome/`, and `report/`.
   - Relies on backend `.env` variables including `OPENAI_API_KEY`, `LLM_MODEL`, and `LLM_REASONING_EFFORT`.
 
 # Building and Running
