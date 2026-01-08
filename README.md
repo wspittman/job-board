@@ -28,7 +28,7 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
   - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
   - [`packages/ops`](packages/ops/README.md): TypeScript CLI for operational scripts that take actions against a running backend API, such as adding/deleting companies from supported ATS providers.
-  - [`packages/evals`](packages/evals/README.md): Local evaluation harness that mirrors backend LLM extraction logic against curated datasets.
+  - [`packages/lab`](packages/lab/README.md): Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
 - **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
 - **Install once from the repo root**: `npm install`
 - **Dev servers**: `npm run start:backend` and `npm run start:frontend`
@@ -89,10 +89,10 @@ Lever and deleting individual job postings.
 ## Evaluation harness
 
 The evaluation workspace reproduces the backend’s extraction logic locally. After preparing
-input and ground-truth data under `packages/evals/`, run:
+input and ground-truth data under `packages/lab/`, run:
 
 ```bash
-npm run eval -- evals <dataModel> [runName]
+npm run lab -- evals <dataModel> [runName]
 ```
 
 Outputs are written beside the source data (inputs, ground truth, outcomes, and reports)
