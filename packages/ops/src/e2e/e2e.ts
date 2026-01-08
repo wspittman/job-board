@@ -80,7 +80,7 @@ async function runStep(
   }
 
   if (asyncWait) {
-    console.log("\nPress Enter to resume after async operation completes...");
+    console.log(`\n${asyncWait}, then press Enter to continue...`);
     await new Promise<void>((resolve) => {
       // When you attach a data listener to process.stdin, it switches the stream into "flowing" mode.
       // To allow the script to exit, you need to explicitly pause() the stdin stream after receiving the data.

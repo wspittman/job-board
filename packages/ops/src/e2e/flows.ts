@@ -1,9 +1,16 @@
 import { config } from "../config.ts";
-import { type Step, formErrStep, formStep, formSucStep } from "./step.ts";
+import {
+  type Step,
+  formAsyncStep,
+  formErrStep,
+  formStep,
+  formSucStep,
+} from "./step.ts";
 
 const { GREENHOUSE_IDS } = config;
 
 const GREENHOUSE_EXAMPLE = GREENHOUSE_IDS[0];
+const UNKNOWN = "unknown_id";
 
 const pings: Step[] = [
   formSucStep("", "Ping"),
@@ -28,7 +35,7 @@ const validations: Step[] = [
       body: {
         ats: "greenhouse",
         companyId: GREENHOUSE_EXAMPLE,
-        unknownArg: "nope",
+        unknownArg: UNKNOWN,
       },
     },
   ),
@@ -52,7 +59,7 @@ const validations: Step[] = [
       method: "POST",
       asAdmin: true,
       body: {
-        ats: "unknown",
+        ats: UNKNOWN,
         companyId: GREENHOUSE_EXAMPLE,
       },
     },
@@ -108,8 +115,8 @@ const validations: Step[] = [
   ),
   formErrStep("job/apply", "Not Found Error", "Job not found", {
     query: {
-      id: "unknown_job_id",
-      companyId: "unknown_company_id",
+      id: UNKNOWN,
+      companyId: UNKNOWN,
     },
     expectStatus: 404,
   }),
@@ -125,33 +132,97 @@ const validations: Step[] = [
   ),
 ];
 
+const unknowns: Step[] = [
+  formAsyncStep("refresh/jobs", "Unknown Company", {
+    method: "POST",
+    asAdmin: true,
+    body: {
+      ats: "greenhouse",
+      companyId: UNKNOWN,
+    },
+  }),
+  formErrStep(
+    "company",
+    "Unknown Company",
+    `greenhouse / ${UNKNOWN}: Not Found`,
+    {
+      method: "PUT",
+      body: {
+        ats: "greenhouse",
+        id: UNKNOWN,
+      },
+      expectStatus: 404,
+    },
+  ),
+  formSucStep("companies", "Unknown Companies", {
+    method: "PUT",
+    asAdmin: true,
+    body: {
+      ats: "greenhouse",
+      ids: [UNKNOWN, UNKNOWN + "2", UNKNOWN + "3"],
+    },
+    asyncWait: "Verify internal Not Found exceptions",
+  }),
+  formSucStep("company", "Unknown Company", {
+    method: "DELETE",
+    asAdmin: true,
+    body: {
+      ats: "greenhouse",
+      id: UNKNOWN,
+    },
+  }),
+  formSucStep("job", "Unknown Company", {
+    method: "DELETE",
+    asAdmin: true,
+    body: {
+      id: UNKNOWN,
+      companyId: UNKNOWN,
+    },
+  }),
+  formSucStep("job", "Unknown Job", {
+    method: "DELETE",
+    asAdmin: true,
+    body: {
+      id: UNKNOWN,
+      companyId: GREENHOUSE_EXAMPLE,
+    },
+  }),
+];
+
 /*
+Flow:
+/company delete company GH1
+/company delete company LV1
+-> Metadata baseline
+/company add company GH1
+/company add company LV1
+...
+
 /refresh/companies
 (async -> trigger company info queue -> company metadata executor)
 
 /refresh/jobs
 /refresh/jobs for specific ATS
-/refresh/jobs for specific, but unknown, company
 /refresh/jobs for specific company
 /refresh/jobs for the same specific company (no changes expected)
 /refresh/jobs for specific company with replaceJobsOlderThan=now
 (async -> trigger job info queue -> metadata job executor)
 
-/company add company (greenhouse, lever, re-add, unknown)
+/company add company (greenhouse, lever, re-add)
 (async -> trigger company info queue -> company metadata executor)
 
-/companies add companies ([greenhouse, lever, re-add, unknown])
+/companies add companies ([greenhouse, lever, re-add])
 (async -> trigger company info queue -> company metadata executor)
 
-/company delete company (good, unknown)
+/company delete company (good)
 (async -> trigger company metadata executor)
 (if jobs -> delete jobs and trigger job metadata executor)
 
-/job/apply (greenhouse, lever, unknown (err))
+/job/apply (greenhouse, lever)
 
 /jobs (specific company)
 
-/job delete job (good, unknown)
+/job delete job (specific job)
 */
 
 /*
@@ -162,5 +233,6 @@ TBD: reading metadata specifically to diffing expected changes?
 export const flows: Record<string, Step[]> = {
   pings,
   validations,
-  smoke: [...pings, ...validations],
+  unknowns,
+  smoke: [...pings, ...validations, ...unknowns],
 };

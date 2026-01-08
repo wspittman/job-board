@@ -20,7 +20,7 @@ export interface Step {
   expectBody?: unknown;
 
   // Wait on user input before proceeding
-  asyncWait?: boolean;
+  asyncWait?: string;
 }
 
 export const formStep = (
@@ -41,6 +41,18 @@ export const formSucStep = (
   name: string,
   step: Partial<Step> = {},
 ): Step => formStep(path, name, { expectBody: SUCCESS_BODY, ...step });
+
+export const formAsyncStep = (
+  path: string,
+  name: string,
+  step: Partial<Step> = {},
+): Step =>
+  formStep(path, name, {
+    expectStatus: 202,
+    expectBody: "Accepted",
+    asyncWait: "Verify Async Action",
+    ...step,
+  });
 
 export const formErrStep = (
   path: string,
