@@ -138,7 +138,7 @@ app.use(async (req, res, next) => {
 app.use(
   express.static(__dist, {
     setHeaders(res) {
-      const { ext, compEnc, dir, base } = res.req._urlParts ?? {};
+      const { ext, compEnc, dir } = res.req._urlParts ?? {};
 
       if (ext) {
         res.type(ext);
@@ -155,14 +155,14 @@ app.use(
         return;
       }
 
-      if (base && ["favicon", "og-image", "robots", "sitemap"].includes(base)) {
-        // Cache site metadata files for 1 week
-        res.setHeader("Cache-Control", "public, max-age=604800");
+      if (ext === ".html") {
+        // Cache HTML files for 15 minutes
+        res.setHeader("Cache-Control", "public, max-age=900");
         return;
       }
 
-      // Cache other prebuilt files for 1 day
-      res.setHeader("Cache-Control", "public, max-age=86400");
+      // Cache site metadata files for 1 week
+      res.setHeader("Cache-Control", "public, max-age=604800");
     },
   }),
 );

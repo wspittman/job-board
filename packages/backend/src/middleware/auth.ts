@@ -1,16 +1,17 @@
-import { timingSafeEqual } from "node:crypto";
 import type { NextFunction, Request, Response } from "express";
+import { timingSafeEqual } from "node:crypto";
 import { config } from "../config.ts";
+import { AppError } from "../utils/AppError.ts";
 
 /**
  * Simple token-match auth for only-me endpoints
  */
-export function adminOnly(req: Request, res: Response, next: NextFunction) {
+export function adminOnly(req: Request, _res: Response, next: NextFunction) {
   // Authorization: Bearer <token>
   const token = req.header("Authorization")?.split(" ")[1];
 
   if (!token) {
-    res.status(401).json({ message: "Unauthorized" });
+    next(new AppError("Unauthorized", 401));
     return;
   }
 
@@ -18,7 +19,7 @@ export function adminOnly(req: Request, res: Response, next: NextFunction) {
   const expected = Buffer.from(config.ADMIN_TOKEN);
 
   if (provided.length !== expected.length) {
-    res.status(401).json({ message: "Unauthorized" });
+    next(new AppError("Unauthorized", 401));
     return;
   }
 
@@ -27,5 +28,5 @@ export function adminOnly(req: Request, res: Response, next: NextFunction) {
     return;
   }
 
-  res.status(401).json({ message: "Unauthorized" });
+  next(new AppError("Unauthorized", 401));
 }

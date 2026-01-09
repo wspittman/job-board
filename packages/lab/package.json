@@ -1,0 +1,19 @@
+{
+  "name": "lab",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lab": "tsx --env-file=.env src/index.ts"
+  },
+  "dependencies": {
+    "dry-utils-async": "^0.3.1",
+    "dry-utils-openai": "^0.4.0",
+    "ml-kmeans": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "typescript": "^5.6.2",
+    "tsx": "^4.7.1"
+  }
+}

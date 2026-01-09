@@ -142,7 +142,9 @@ function zParse<T>(zt: Z<T>, data: unknown = {}): T {
   const result = zt.safeParse(data);
   if (!result.success) {
     const { path, message } = result.error.issues[0] ?? {};
-    throw new AppError(`${path?.join(".")} field is invalid: ${message}`);
+    let pathStr = path?.join(".");
+    pathStr = pathStr ? `${pathStr} field is invalid: ` : "";
+    throw new AppError(`${pathStr}${message}`);
   }
   return result.data;
 }

@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "clean": "git clean -fdx -- \":(glob)**/node_modules/**\" \":(glob)**/deploy/**\" \":(glob)**/dist/**\" \":(glob)**/*.tsbuildinfo\"",
-    "lint": "npm run lint --workspace=backend --workspace=frontend",
-    "format": "npm run format --workspace=backend --workspace=frontend",
-    "format:write": "npm run format:write --workspace=backend --workspace=frontend",
+    "lint": "npm run lint --workspace=ops --workspace=backend --workspace=frontend",
+    "format": "npm run format --workspace=ops --workspace=backend --workspace=frontend",
+    "format:write": "npm run format:write --workspace=ops --workspace=backend --workspace=frontend",
     "test": "npm run test --workspace=backend",
     "pre-checkin": "node scripts/checklist.mjs",
     "pre-deploy": "node scripts/checklist.mjs -- full",
@@ -14,9 +14,8 @@
     "start:frontend:cast": "npm run dev --workspace=frontend -- --host",
     "link-dry-utils": "npm link dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
-    "eval": "npm run eval --workspace=evals --",
-    "eval-fetch-input": "npm run fetch-input --workspace=evals --",
-    "admin": "npm run admin --workspace=admin"
+    "lab": "npm run lab --workspace=lab",
+    "ops": "npm run ops --workspace=ops"
   },
   "private": true,
   "workspaces": [

@@ -27,8 +27,10 @@ const companyJobQueue = new AsyncQueue(
  * @returns Promise resolving when company is added
  */
 export async function addCompany(key: CompanyKey) {
-  await addCompanyInternal(key);
-  companyInfoQueue.add([key]);
+  const added = await addCompanyInternal(key);
+  if (added) {
+    companyInfoQueue.add([key]);
+  }
 }
 
 /**
@@ -38,7 +40,9 @@ export async function addCompany(key: CompanyKey) {
  */
 export async function addCompanies({ ids, ats }: CompanyKeys) {
   const keys = ids.map((id) => ({ id, ats }));
-  await batch("AddCompanies", keys, addCompanyInternal);
+  await batch("AddCompanies", keys, async (key) => {
+    await addCompanyInternal(key);
+  });
   companyInfoQueue.add(keys);
 }
 
@@ -99,13 +103,14 @@ export async function refreshJobs({
 
 async function addCompanyInternal(key: CompanyKey) {
   const exists = await db.company.get(key);
-  if (exists) return;
+  if (exists) return false;
 
   const { item: company } = await ats.getCompany(key);
-  if (!company) return;
+  if (!company) return false;
 
   await db.company.upsert(company);
   // Don't add to companyInfoQueue here, we want the caller to do it so they can batch
+  return true;
 }
 
 async function refreshCompanyInfo(key: CompanyKey) {

@@ -5,12 +5,12 @@ cosmosdbcert.cer
 agent_notes/
 agent_scripts/
 
-# Eval Folders
-packages/evals/input/
-packages/evals/ground/
-packages/evals/outcome/
-packages/evals/report/
-packages/evals/cache/
+# Lab Folders
+packages/lab/input/
+packages/lab/ground/
+packages/lab/outcome/
+packages/lab/report/
+packages/lab/cache/
 
 # TypeScript cache
 *.tsbuildinfo

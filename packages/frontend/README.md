@@ -31,7 +31,10 @@ packages/frontend/
 ├── src/
 │   ├── api/          # Data-fetching utilities shared across pages
 │   ├── components/   # Reusable UI building blocks
-│   ├── pages/        # Route-specific React entry points (index, explore, FAQ, 404)
+│   ├── home/         # Home page logic and styles
+│   ├── explore/      # Explore page logic and styles
+│   ├── faq/          # FAQ page logic and styles
+│   ├── 404/          # 404 page logic and styles
 │   ├── partials/     # Layout pieces such as headers, footers, and hero sections
 │   └── sharedStyles/ # Global CSS modules and tokens
 ├── plugins/          # Vite plugins and supporting utilities

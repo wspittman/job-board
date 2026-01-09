@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test } from "node:test";
 import { adminOnly } from "../../src/middleware/auth.ts";
+import { AppError } from "../../src/utils/AppError.ts";
 
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? "";
-const unauthorizedJson = { message: "Unauthorized" };
 
 function mockRequest(authHeader?: string): Request {
   return {
@@ -15,17 +15,10 @@ function mockRequest(authHeader?: string): Request {
 }
 
 suite("adminOnly", () => {
-  const statusFn = mock.fn(() => res);
-  const jsonFn = mock.fn(() => res);
-  const res: Response = {
-    status: statusFn,
-    json: jsonFn,
-  } as unknown as Response;
+  const res: Response = {} as unknown as Response;
   const next = mock.fn();
 
   beforeEach(() => {
-    statusFn.mock.resetCalls();
-    jsonFn.mock.resetCalls();
     next.mock.resetCalls();
   });
 
@@ -40,20 +33,18 @@ suite("adminOnly", () => {
     test(`Rejects requests with ${name}`, () => {
       adminOnly(mockRequest(header), res, next);
 
-      assert.equal(statusFn.mock.callCount(), 1);
-      assert.equal(jsonFn.mock.callCount(), 1);
-      assert.equal(next.mock.callCount(), 0);
-
-      assert.equal(statusFn.mock.calls[0]?.arguments.at(0), 401);
-      assert.deepEqual(jsonFn.mock.calls[0]?.arguments.at(0), unauthorizedJson);
+      assert.equal(next.mock.callCount(), 1);
+      const err = next.mock.calls[0]?.arguments.at(0);
+      assert.ok(err instanceof AppError);
+      assert.equal(err.statusCode, 401);
+      assert.equal(err.message, "Unauthorized");
     });
   });
 
   test("Allows requests with valid bearer token", () => {
     adminOnly(mockRequest(`Bearer ${ADMIN_TOKEN}`), res, next);
 
-    assert.equal(statusFn.mock.callCount(), 0);
-    assert.equal(jsonFn.mock.callCount(), 0);
     assert.equal(next.mock.callCount(), 1);
+    assert.equal(next.mock.calls[0]?.arguments.length, 0);
   });
 });
