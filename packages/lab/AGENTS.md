@@ -62,3 +62,10 @@ npm run lab -- playground
 
 - The harness relies on the same backend configuration and model pricing table (see `src/evalConfig.ts`); ensure your chosen `LLM_MODEL` is supported.
 - Use distinct `runName` values to disambiguate experiments and keep artifacts organized.
+
+## Quality checks
+
+Always run the following before committing changes:
+
+- Lint: `npm run lint --workspace=lab`.
+- Format: `npm run format:write --workspace=lab`

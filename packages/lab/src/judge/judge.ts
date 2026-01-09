@@ -9,7 +9,7 @@ export interface Judgement extends Stats {
 export async function judge(
   actual: Bag,
   expected: Bag,
-  rubric: Rubric<Bag>
+  rubric: Rubric<Bag>,
 ): Promise<Judgement> {
   const results = await runChecks(actual, expected, rubric);
   const stats = checksToStats(results);
@@ -17,7 +17,7 @@ export async function judge(
   return {
     ...stats,
     suboptimal: results.filter(
-      (r) => (r.score ?? 0) < 0.8 && r.omit !== "good"
+      (r) => (r.score ?? 0) < 0.8 && r.omit !== "good",
     ),
   };
 }

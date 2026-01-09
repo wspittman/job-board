@@ -15,7 +15,7 @@ export interface CheckOut extends CheckIn {
   score?: number;
 }
 
-type CheckFunction = (input: CheckIn) => Promise<CheckOut>;
+type CheckFunction = (input: CheckIn) => CheckOut | Promise<CheckOut>;
 
 export type Rubric<T> = {
   [key in keyof T]: CheckFunction | Rubric<Bag>;
@@ -24,7 +24,7 @@ export type Rubric<T> = {
 export async function runChecks(
   actual: Bag,
   expected: Bag,
-  rubric: Rubric<Bag>
+  rubric: Rubric<Bag>,
 ): Promise<CheckOut[]> {
   return await runChecksInternal("", actual, expected, rubric);
 }
@@ -33,7 +33,7 @@ async function runChecksInternal(
   prop: string,
   actual: unknown,
   expected: unknown,
-  check: CheckFunction | Rubric<Bag>
+  check: CheckFunction | Rubric<Bag>,
 ): Promise<CheckOut[]> {
   if (typeof check === "object" && check !== null) {
     const act = actual as Bag;
@@ -44,7 +44,7 @@ async function runChecksInternal(
         Object.entries(check).map(async ([key, mVal]) => {
           const newProp = prop ? `${prop}.${key}` : key;
           return await runChecksInternal(newProp, act?.[key], exp?.[key], mVal);
-        })
+        }),
       )
     ).flat();
   }
@@ -57,7 +57,7 @@ async function runChecksInternal(
 /**
  * Checks if the actual value is strictly equal to the ground truth value.
  */
-export async function equals(input: CheckIn): Promise<CheckOut> {
+export function equals(input: CheckIn): CheckOut {
   const undef = omit(input);
   if (undef) return undef;
 
@@ -67,7 +67,7 @@ export async function equals(input: CheckIn): Promise<CheckOut> {
   return { check: equals.name, score: match ? 1 : 0, ...input };
 }
 
-export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
+export function equalsCasePreferred(input: CheckIn): CheckOut {
   const undef = omit(input);
   if (undef) return undef;
 
@@ -96,7 +96,7 @@ export async function equalsCasePreferred(input: CheckIn): Promise<CheckOut> {
   return { check: equalsCasePreferred.name, score, ...input };
 }
 
-export async function equalsUrl(input: CheckIn): Promise<CheckOut> {
+export function equalsUrl(input: CheckIn): CheckOut {
   const undef = omit(input);
   if (undef) return undef;
 
@@ -147,7 +147,7 @@ export async function similar(input: CheckIn): Promise<CheckOut> {
   return { check: similar.name, score, ...input };
 }
 
-export async function arrayExactMatcher(input: CheckIn): Promise<CheckOut> {
+export function arrayExactMatcher(input: CheckIn): CheckOut {
   const undef = omit(input);
   if (undef) return undef;
 

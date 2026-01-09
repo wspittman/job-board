@@ -9,7 +9,7 @@ class EmbedCache {
 
   async getEmbedding(
     action: string,
-    text: string
+    text: string,
   ): Promise<number[] | undefined> {
     if (!text) return undefined;
     await this.#initialize();
@@ -31,7 +31,7 @@ class EmbedCache {
 
   async getEmbeddings(
     action: string,
-    texts: string[]
+    texts: string[],
   ): Promise<number[][] | undefined> {
     if (!texts.length) return [];
     await this.#initialize();
@@ -41,7 +41,7 @@ class EmbedCache {
 
     if (!uncachedTexts.length) {
       // All embeddings are cached
-      return blobs.map((b) => b.embedding!) as number[][];
+      return blobs.map((b) => b.embedding!);
     }
 
     const embeddings = await this.#embed(action, uncachedTexts);
@@ -54,14 +54,14 @@ class EmbedCache {
     let embedIdx = 0;
     for (const blob of blobs) {
       if (!blob.embedding) {
-        const newEmbedding = embeddings![embedIdx++];
+        const newEmbedding = embeddings[embedIdx++];
         this.#embeddingCache.set(blob.key, newEmbedding!);
         this.#changed = true;
         blob.embedding = newEmbedding;
       }
     }
 
-    return blobs.map((b) => b.embedding!) as number[][];
+    return blobs.map((b) => b.embedding!);
   }
 
   async saveCache() {
@@ -81,7 +81,7 @@ class EmbedCache {
 
   async #embed(
     action: string,
-    input: string[]
+    input: string[],
   ): Promise<number[][] | undefined> {
     if (!input.length) return [];
 

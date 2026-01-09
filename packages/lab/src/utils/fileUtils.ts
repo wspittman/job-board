@@ -64,8 +64,8 @@ export async function readObj<T>(
 
   try {
     const file = await readFile(filePath, "utf-8");
-    return JSON.parse(file);
-  } catch (error) {
+    return JSON.parse(file) as T;
+  } catch {
     return undefined;
   }
 }

@@ -63,9 +63,11 @@ export async function fetchInput(
 export async function infer(dataModel: DataModel, context: Bag) {
   switch (dataModel) {
     case "company":
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
       await llm.fillCompanyInfo(context as any);
       break;
     case "job":
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
       await llm.fillJobInfo(context as any);
       break;
   }
