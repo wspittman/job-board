@@ -1,15 +1,18 @@
 import { config } from "../config.ts";
 import {
   type Step,
+  addCompaniesStep,
+  addCompanyStep,
+  delCompanyStep,
   formAsyncStep,
   formErrStep,
   formStep,
   formSucStep,
+  resetSteps,
 } from "./step.ts";
 
-const { GREENHOUSE_IDS } = config;
+const { GREENHOUSE_IDS: ghIds, LEVER_IDS: lvIds } = config;
 
-const GREENHOUSE_EXAMPLE = GREENHOUSE_IDS[0];
 const UNKNOWN = "unknown_id";
 
 const pings: Step[] = [
@@ -34,7 +37,7 @@ const validations: Step[] = [
       asAdmin: true,
       body: {
         ats: "greenhouse",
-        companyId: GREENHOUSE_EXAMPLE,
+        companyId: ghIds[0],
         unknownArg: UNKNOWN,
       },
     },
@@ -47,7 +50,7 @@ const validations: Step[] = [
       method: "POST",
       asAdmin: true,
       body: {
-        companyId: GREENHOUSE_EXAMPLE,
+        companyId: ghIds[0],
       },
     },
   ),
@@ -60,7 +63,7 @@ const validations: Step[] = [
       asAdmin: true,
       body: {
         ats: UNKNOWN,
-        companyId: GREENHOUSE_EXAMPLE,
+        companyId: ghIds[0],
       },
     },
   ),
@@ -134,8 +137,6 @@ const validations: Step[] = [
 
 const unknowns: Step[] = [
   formAsyncStep("refresh/jobs", "Unknown Company", {
-    method: "POST",
-    asAdmin: true,
     body: {
       ats: "greenhouse",
       companyId: UNKNOWN,
@@ -154,23 +155,12 @@ const unknowns: Step[] = [
       expectStatus: 404,
     },
   ),
-  formSucStep("companies", "Unknown Companies", {
-    method: "PUT",
-    asAdmin: true,
-    body: {
-      ats: "greenhouse",
-      ids: [UNKNOWN, UNKNOWN + "2", UNKNOWN + "3"],
-    },
-    asyncWait: "Verify internal Not Found exceptions",
-  }),
-  formSucStep("company", "Unknown Company", {
-    method: "DELETE",
-    asAdmin: true,
-    body: {
-      ats: "greenhouse",
-      id: UNKNOWN,
-    },
-  }),
+  addCompaniesStep(
+    "greenhouse",
+    [UNKNOWN, UNKNOWN + "2", UNKNOWN + "3"],
+    "Verify internal Not Found exceptions",
+  ),
+  delCompanyStep("greenhouse", UNKNOWN),
   formSucStep("job", "Unknown Company", {
     method: "DELETE",
     asAdmin: true,
@@ -184,39 +174,37 @@ const unknowns: Step[] = [
     asAdmin: true,
     body: {
       id: UNKNOWN,
-      companyId: GREENHOUSE_EXAMPLE,
+      companyId: ghIds[0],
     },
   }),
 ];
 
-/*
-Flow:
-/company delete company GH1
-/company delete company LV1
--> Metadata baseline
-/company add company GH1
-/company add company LV1
-...
+const companies: Step[] = [
+  ...resetSteps,
+  // Metadata baseline would go here
+  // Add one company from each ATS
+  addCompanyStep("greenhouse", ghIds[0]!),
+  addCompanyStep("lever", lvIds[0]!),
+  // Re-add the same companies to test idempotency
+  addCompanyStep("greenhouse", ghIds[0]!),
+  addCompanyStep("lever", lvIds[0]!),
+  // Add multiple companies from each ATS
+  addCompaniesStep("greenhouse", ghIds),
+  addCompaniesStep("lever", lvIds, "Verify company metadata executor"),
+  // Metadata check would go here
+  formAsyncStep("refresh/companies", "Refresh All Companies"),
+  // Metadata check would go here
+];
 
-/refresh/companies
-(async -> trigger company info queue -> company metadata executor)
+/*
+To be added to a flow:
 
 /refresh/jobs
 /refresh/jobs for specific ATS
 /refresh/jobs for specific company
 /refresh/jobs for the same specific company (no changes expected)
 /refresh/jobs for specific company with replaceJobsOlderThan=now
-(async -> trigger job info queue -> metadata job executor)
-
-/company add company (greenhouse, lever, re-add)
-(async -> trigger company info queue -> company metadata executor)
-
-/companies add companies ([greenhouse, lever, re-add])
-(async -> trigger company info queue -> company metadata executor)
-
-/company delete company (good)
-(async -> trigger company metadata executor)
-(if jobs -> delete jobs and trigger job metadata executor)
+(async -> trigger job info queue -> job metadata executor)
 
 /job/apply (greenhouse, lever)
 
@@ -234,5 +222,6 @@ export const flows: Record<string, Step[]> = {
   pings,
   validations,
   unknowns,
-  smoke: [...pings, ...validations, ...unknowns],
+  companies,
+  smoke: [...pings, ...validations, ...unknowns, ...companies],
 };

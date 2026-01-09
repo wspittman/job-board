@@ -1,4 +1,5 @@
-export const atsTypes = ["greenhouse", "lever"];
+export const atsTypes = ["greenhouse", "lever"] as const;
+export type Ats = (typeof atsTypes)[number];
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface Command {

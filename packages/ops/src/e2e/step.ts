@@ -1,5 +1,7 @@
-import type { HttpMethod } from "../types.ts";
+import { config } from "../config.ts";
+import type { Ats, HttpMethod } from "../types.ts";
 
+const { GREENHOUSE_IDS: ghIds, LEVER_IDS: lvIds } = config;
 const SUCCESS_BODY = { status: "success" };
 
 /**
@@ -48,6 +50,8 @@ export const formAsyncStep = (
   step: Partial<Step> = {},
 ): Step =>
   formStep(path, name, {
+    method: "POST",
+    asAdmin: true,
     expectStatus: 202,
     expectBody: "Accepted",
     asyncWait: "Verify Async Action",
@@ -66,8 +70,42 @@ export const formErrStep = (
     ...step,
   });
 
-const errBody = (message: string, statusCode = 400) => ({
-  status: "error",
-  statusCode,
-  message,
-});
+export const delCompanyStep = (ats: Ats, id: string): Step =>
+  companySucStep("DELETE", ats, id);
+
+export const addCompanyStep = (ats: Ats, id: string): Step =>
+  companySucStep("PUT", ats, id);
+
+export const addCompaniesStep = (
+  ats: Ats,
+  ids: string[],
+  asyncWait?: string,
+): Step =>
+  formSucStep("companies", `${ats} / [${ids.join(", ")}]`, {
+    method: "PUT",
+    asAdmin: true,
+    body: { ats, ids },
+    asyncWait,
+  });
+
+export const resetSteps: Step[] = [
+  ...ghIds.map((x) => delCompanyStep("greenhouse", x)),
+  ...lvIds.map((x) => delCompanyStep("lever", x)),
+];
+resetSteps.at(-1)!.asyncWait = "Verify companies deleted and metadata reset";
+
+function companySucStep(method: HttpMethod, ats: Ats, id: string): Step {
+  return formSucStep(`company`, `${ats} / ${id}`, {
+    method,
+    asAdmin: true,
+    body: { ats, id },
+  });
+}
+
+function errBody(message: string, statusCode = 400) {
+  return {
+    status: "error",
+    statusCode,
+    message,
+  };
+}

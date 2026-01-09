@@ -22,8 +22,8 @@ export const e2e: Command = {
 
 function prerequisite(): void {
   assert.notEqual(LOCAL_API_TOKEN, "unset", "ENV: LOCAL_API_TOKEN unset");
-  assert.ok(GREENHOUSE_IDS.length > 0, "ENV: GREENHOUSE_IDS <= 0");
-  assert.ok(LEVER_IDS.length > 0, "ENV: LEVER_IDS <= 0");
+  assert.ok(GREENHOUSE_IDS.length > 2, "ENV: GREENHOUSE_IDS <= 2");
+  assert.ok(LEVER_IDS.length > 2, "ENV: LEVER_IDS <= 2");
 }
 
 /**
