@@ -2,17 +2,14 @@
 
 This package contains the Express 5 + TypeScript API service. Run all commands from the repo root unless stated otherwise.
 
+Be sure the refer to and follow the general development conventions in the root-level `AGENTS.md`.
+
 ## Development workflows
 
 - Development server: `npm run start:backend` (runs `tsx watch src/app.ts`).
 - Production build: `npm run build --workspace=backend` followed by `npm run start --workspace=backend`; artifacts are emitted to `dist/`.
 - Environment variables are loaded from `.env`. See `src/config.ts` for values such as `DATABASE_URL`, `LLM_MODEL`, `LLM_REASONING_EFFORT`, `OPENAI_API_KEY`, `ADMIN_TOKEN`, and `APPLICATIONINSIGHTS_CONNECTION_STRING`.
 - API routes are defined in `src/routes/routes.ts`.
-
-## Code conventions
-
-- Use JSDoc comments for public APIs and complex logic. Avoid trailing inline comments. For async @returns descriptions, describe the resolved value rather than the promise.
-- Avoid adding new dependencies and call out any additions in your summary.
 
 ## Testing style
 

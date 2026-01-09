@@ -45,6 +45,7 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 - The project uses a monorepo structure with workspaces for the frontend and backend.
 - Prefer running linting and formatting from the repo root via `npm run lint` and `npm run format` (or `npm run format:write` to apply fixes).
 - Workspace-specific tools and workflows are described in the corresponding `AGENTS.md` files.
+- Keep `README.md` and any relevant `AGENTS.md` files updated when code or workflow changes affect them.
 
 ### Comments
 
