@@ -92,7 +92,10 @@ export const resetSteps: Step[] = [
   ...ghIds.map((x) => delCompanyStep("greenhouse", x)),
   ...lvIds.map((x) => delCompanyStep("lever", x)),
 ];
-resetSteps.at(-1)!.asyncWait = "Verify companies deleted and metadata reset";
+const lastStep = resetSteps.at(-1);
+if (lastStep) {
+  lastStep.asyncWait = "Verify companies deleted and metadata reset";
+}
 
 function companySucStep(method: HttpMethod, ats: Ats, id: string): Step {
   return formSucStep(`company`, `${ats} / ${id}`, {

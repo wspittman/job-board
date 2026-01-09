@@ -202,6 +202,7 @@ To be added to a flow:
 /refresh/jobs
 /refresh/jobs for specific ATS
 /refresh/jobs for specific company
+/refresh/jobs for specific company (does not exist)
 /refresh/jobs for the same specific company (no changes expected)
 /refresh/jobs for specific company with replaceJobsOlderThan=now
 (async -> trigger job info queue -> job metadata executor)
