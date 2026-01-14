@@ -21,6 +21,8 @@ https://github.com/microsoft/ApplicationInsights-node.js/issues/1354
 import type { Bag } from "../types/types.ts";
 import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
+// #region Types and Startup
+
 interface TypedRequestData extends RequestData {
   properties: Bag | unknown[] | undefined;
 }
@@ -70,6 +72,10 @@ interface CustomContext extends CorrelationContext {
 }
 
 const asyncLocalStorage = new AsyncLocalStorage<Bag>();
+
+// #endregion
+
+// #region Context Management
 
 /**
  * Executes an async function within a new telemetry context
@@ -126,6 +132,10 @@ function getSubContext<T>(name: string, base: T): T {
   return context[name] as T;
 }
 
+// #endregion
+
+// #region Logging Functions
+
 /**
  * Logs a property to the current telemetry context
  * @param name - Name of the property
@@ -146,13 +156,6 @@ export function logProperty(name: string, value: unknown): void {
   } else {
     context[name] = value;
   }
-}
-
-/**
- * Helper to translate dry-utils subscribers to logProperty calls
- */
-export function subscribeLog({ tag, val }: LogSub): void {
-  logProperty(tag, val);
 }
 
 /**
@@ -181,6 +184,17 @@ export function logError(error: unknown): void {
   }
 
   _client?.trackException({ exception, properties });
+}
+
+// #endregion
+
+// #region Dry-Utils Subscribers
+
+/**
+ * Helper to translate dry-utils subscribers to logProperty calls
+ */
+export function subscribeLog({ tag, val }: LogSub): void {
+  logProperty(tag, val);
 }
 
 /**
@@ -227,6 +241,10 @@ export function createSubscribeAggregator(
     }
   };
 }
+
+// #endregion
+
+// #region (Send) Telemetry Processor
 
 /**
  * Application Insights telemetry processor that enriches telemetry with context
@@ -278,6 +296,8 @@ function appendContext(baseData: TypedRequestData | TypedEventData) {
     ...getContext(),
   };
 }
+
+// #endregion
 
 // #region Development Logging
 
