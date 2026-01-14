@@ -1,8 +1,4 @@
-import {
-  logError,
-  logRequestIdentifiers,
-  startTelemetry,
-} from "./utils/telemetry.ts";
+import { logError, startTelemetry } from "./utils/telemetry.ts";
 
 // We need this as early as possible, for reasons
 startTelemetry();
@@ -13,6 +9,7 @@ import express from "express";
 import helmet from "helmet";
 import { config } from "./config.ts";
 import { db } from "./db/db.ts";
+import { logIdentifiers } from "./middleware/logRequestIdentifiers.ts";
 import { router } from "./routes/routes.ts";
 import { AppError } from "./utils/AppError.ts";
 
@@ -21,10 +18,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({ maxAge: 86400 }));
 app.use(express.json());
-app.use((req: Request, _: Response, next: NextFunction) => {
-  logRequestIdentifiers(req.headers);
-  next();
-});
+app.use(logIdentifiers);
 
 app.use("/api", router);
 
