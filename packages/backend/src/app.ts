@@ -1,4 +1,8 @@
-import { logError, startTelemetry } from "./utils/telemetry.ts";
+import {
+  logError,
+  logRequestIdentifiers,
+  startTelemetry,
+} from "./utils/telemetry.ts";
 
 // We need this as early as possible, for reasons
 startTelemetry();
@@ -17,6 +21,10 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use((req: Request, _: Response, next: NextFunction) => {
+  logRequestIdentifiers(req.headers);
+  next();
+});
 
 app.use("/api", router);
 

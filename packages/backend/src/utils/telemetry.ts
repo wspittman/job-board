@@ -186,6 +186,24 @@ export function logError(error: unknown): void {
   _client?.trackException({ exception, properties });
 }
 
+/**
+ * Logs client-provided identifiers from request headers into telemetry context.
+ * @param headers - Request headers object.
+ */
+export function logRequestIdentifiers(headers: Bag): void {
+  let visitorId = headers["x-vid"];
+  visitorId = typeof visitorId === "string" ? visitorId.trim() : "";
+  if (visitorId) {
+    logProperty("visitorId", visitorId);
+  }
+
+  let sessionId = headers["x-session-id"];
+  sessionId = typeof sessionId === "string" ? sessionId.trim() : "";
+  if (sessionId) {
+    logProperty("sessionId", sessionId);
+  }
+}
+
 // #endregion
 
 // #region Dry-Utils Subscribers
