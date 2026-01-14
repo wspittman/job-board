@@ -197,7 +197,7 @@ export function logRequestIdentifiers(headers: Bag): void {
     logProperty("visitorId", visitorId);
   }
 
-  let sessionId = headers["x-session-id"];
+  let sessionId = headers["x-sid"];
   sessionId = typeof sessionId === "string" ? sessionId.trim() : "";
   if (sessionId) {
     logProperty("sessionId", sessionId);

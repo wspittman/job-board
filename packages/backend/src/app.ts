@@ -19,7 +19,7 @@ import { AppError } from "./utils/AppError.ts";
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({ maxAge: 86400 }));
 app.use(express.json());
 app.use((req: Request, _: Response, next: NextFunction) => {
   logRequestIdentifiers(req.headers);
