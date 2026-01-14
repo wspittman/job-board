@@ -5,6 +5,11 @@ const viteApiUrl = import.meta.env["VITE_API_URL"] as unknown;
 const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
 export const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
 
+const VISITOR_ID_STORAGE = "v_id";
+const SESSION_ID_STORAGE = "s_id";
+const VISITOR_ID_HEADER = "x-vid";
+const SESSION_ID_HEADER = "x-sid";
+
 const qc = new QueryClient({
   defaultOptions: {
     queries: {
@@ -28,7 +33,7 @@ class APIConnector {
   public async fetchMetadata(): Promise<MetadataModelApi> {
     return await qc.fetchQuery({
       queryKey: ["metadata"],
-      queryFn: () => this.httpCall<MetadataModelApi>("metadata"),
+      queryFn: () => this.#httpCall<MetadataModelApi>("metadata"),
     });
   }
 
@@ -42,7 +47,7 @@ class APIConnector {
 
     return await qc.fetchQuery({
       queryKey: ["jobs", params],
-      queryFn: () => this.httpCall<JobModelApi[]>(`jobs?${params}`),
+      queryFn: () => this.#httpCall<JobModelApi[]>(`jobs?${params}`),
     });
   }
 
@@ -51,11 +56,24 @@ class APIConnector {
    * @param url - The URL endpoint to call.
    * @returns The response data as type T.
    */
-  protected async httpCall<T>(url: string): Promise<T> {
+  async #httpCall<T>(url: string): Promise<T> {
     const trimmedUrl = url.replace(/^\/+/, "");
+    const headers = new Headers();
+
+    const visitorId = this.#getStorageId("local", VISITOR_ID_STORAGE);
+    const sessionId = this.#getStorageId("session", SESSION_ID_STORAGE);
+
+    if (visitorId) {
+      headers.set(VISITOR_ID_HEADER, visitorId);
+    }
+
+    if (sessionId) {
+      headers.set(SESSION_ID_HEADER, sessionId);
+    }
 
     const response = await fetch(`${API_URL}/${trimmedUrl}`, {
       signal: AbortSignal.timeout(10_000),
+      headers,
     });
 
     const { statusText, ok } = response;
@@ -65,6 +83,23 @@ class APIConnector {
     }
 
     return (await response.json()) as T;
+  }
+
+  #getStorageId(area: "local" | "session", key: string): string | undefined {
+    try {
+      const storage =
+        area === "local" ? window.localStorage : window.sessionStorage;
+      let id = storage.getItem(key) ?? undefined;
+
+      if (!id) {
+        id = window.crypto.randomUUID();
+        storage.setItem(key, id);
+      }
+
+      return id;
+    } catch {
+      return undefined;
+    }
   }
 }
 
