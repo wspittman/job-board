@@ -5,10 +5,8 @@ const viteApiUrl = import.meta.env["VITE_API_URL"] as unknown;
 const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
 export const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
 
-const VISITOR_ID_STORAGE = "v_id";
-const SESSION_ID_STORAGE = "s_id";
-const VISITOR_ID_HEADER = "x-vid";
-const SESSION_ID_HEADER = "x-sid";
+const idKeys = ["visitorId", "sessionId"] as const;
+const idHeaders = ["Jb-Visitor-Id", "Jb-Session-Id"] as const;
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -45,10 +43,24 @@ class APIConnector {
   public async fetchJobs(params: string): Promise<JobModelApi[]> {
     if (!params) return [];
 
-    return await qc.fetchQuery({
+    const result = await qc.fetchQuery({
       queryKey: ["jobs", params],
       queryFn: () => this.#httpCall<JobModelApi[]>(`jobs?${params}`),
     });
+
+    if (result.length) {
+      const idQuery = new URLSearchParams(
+        this.#getStorageIdObject("query"),
+      ).toString();
+
+      if (idQuery) {
+        result.forEach((job) => {
+          job.applyUrl += "&" + idQuery;
+        });
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -58,22 +70,10 @@ class APIConnector {
    */
   async #httpCall<T>(url: string): Promise<T> {
     const trimmedUrl = url.replace(/^\/+/, "");
-    const headers = new Headers();
-
-    const visitorId = this.#getStorageId("local", VISITOR_ID_STORAGE);
-    const sessionId = this.#getStorageId("session", SESSION_ID_STORAGE);
-
-    if (visitorId) {
-      headers.set(VISITOR_ID_HEADER, visitorId);
-    }
-
-    if (sessionId) {
-      headers.set(SESSION_ID_HEADER, sessionId);
-    }
 
     const response = await fetch(`${API_URL}/${trimmedUrl}`, {
       signal: AbortSignal.timeout(10_000),
-      headers,
+      headers: new Headers(this.#getStorageIdObject("headers")),
     });
 
     const { statusText, ok } = response;
@@ -83,6 +83,24 @@ class APIConnector {
     }
 
     return (await response.json()) as T;
+  }
+
+  #getStorageIdObject(target: "headers" | "query"): Record<string, string> {
+    const [visitorKey, sessionKey] = target === "headers" ? idHeaders : idKeys;
+    const visitorId = this.#getStorageId("local", idKeys[0]);
+    const sessionId = this.#getStorageId("session", idKeys[1]);
+
+    const result: Record<string, string> = {};
+
+    if (visitorId) {
+      result[visitorKey] = visitorId;
+    }
+
+    if (sessionId) {
+      result[sessionKey] = sessionId;
+    }
+
+    return result;
   }
 
   #getStorageId(area: "local" | "session", key: string): string | undefined {
