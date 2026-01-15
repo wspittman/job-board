@@ -2,10 +2,6 @@ import { QueryCache, QueryClient } from "@tanstack/query-core";
 import { getStorageIds } from "../utils/storage";
 import type { JobModelApi, MetadataModelApi } from "./apiTypes";
 
-const viteApiUrl = import.meta.env["VITE_API_URL"] as unknown;
-const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
-export const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
-
 const qc = new QueryClient({
   defaultOptions: {
     queries: {
@@ -55,7 +51,7 @@ class APIConnector {
   async #httpCall<T>(url: string): Promise<T> {
     const trimmedUrl = url.replace(/^\/+/, "");
 
-    const response = await fetch(`${API_URL}/${trimmedUrl}`, {
+    const response = await fetch(`api/${trimmedUrl}`, {
       signal: AbortSignal.timeout(10_000),
       headers: new Headers(getStorageIds("headers")),
     });

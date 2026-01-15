@@ -1,5 +1,5 @@
 import { getStorageIds } from "../utils/storage";
-import { api, API_URL } from "./api";
+import { api } from "./api";
 import {
   toCurrencyFormat,
   toJobFamilyLabel,
@@ -17,15 +17,7 @@ export class JobModel {
     if (filters.isEmpty()) return [];
     const params = filters.toUrlSearchParams().toString();
     const jobsApi = await api.fetchJobs(params);
-
-    if (!jobsApi.length) return [];
-
-    const idQuery = new URLSearchParams(getStorageIds("query")).toString();
-
-    return jobsApi.map((jobApi) => {
-      jobApi.applyUrl += idQuery ? "&" + idQuery : "";
-      return new JobModel(jobApi);
-    });
+    return jobsApi.map((jobApi) => new JobModel(jobApi));
   }
 
   readonly #job: JobModelApi;
@@ -43,7 +35,8 @@ export class JobModel {
   }
 
   get applyUrl(): string {
-    return API_URL + this.#job.applyUrl;
+    const idQuery = new URLSearchParams(getStorageIds("query")).toString();
+    return "/api" + this.#job.applyUrl + (idQuery ? "&" + idQuery : "");
   }
 
   get bookmarkUrl(): string {

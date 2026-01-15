@@ -33,4 +33,13 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    proxy: {
+      "/api": {
+        // For external device testing, replace localhost with your machine's local IP address (ipconfig)
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
+  },
 });
