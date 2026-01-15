@@ -10,6 +10,7 @@ import { getApplyRedirectUrl, getJobs, removeJob } from "../controllers/job.ts";
 import { getMetadata } from "../controllers/metadata.ts";
 import { adminOnly } from "../middleware/auth.ts";
 import {
+  useBeacon,
   useCompanyKey,
   useCompanyKeys,
   useFilters,
@@ -18,6 +19,7 @@ import {
 } from "../middleware/inputValidators.ts";
 import {
   asyncRoute,
+  beaconRoute,
   jsonRoute,
   redirectRoute,
 } from "../middleware/wrappers.ts";
@@ -29,6 +31,7 @@ router.get(
   "/",
   jsonRoute(() => Promise.resolve()),
 );
+router.post("/beacon", express.text(), beaconRoute(useBeacon));
 
 router.post("/refresh/companies", adminOnly, asyncRoute(refreshCompanies));
 router.post(

@@ -62,6 +62,22 @@ const FiltersSchema = z.object({
   minSalary: coerceInt(z.int().positive().max(10_000_000)),
 });
 
+const beaconSchema = z.object({
+  tag: soft(IdSchema),
+  visitorId: soft(z.uuid()),
+  sessionId: soft(z.uuid()),
+});
+
+/**
+ * Validate and log beacon data
+ */
+export function useBeacon(input: unknown): void {
+  const { tag, visitorId, sessionId } = zParse(beaconSchema, input);
+  if (tag) logProperty("tag", tag);
+  if (visitorId) logProperty("visitorId", visitorId);
+  if (sessionId) logProperty("sessionId", sessionId);
+}
+
 /**
  * Validate search filter options
  * @returns Validated Filters

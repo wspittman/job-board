@@ -1,9 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import type { Bag } from "../types/types.ts";
-import { logError, logProperty } from "../utils/telemetry.ts";
+import { logError } from "../utils/telemetry.ts";
+import { useBeacon } from "./inputValidators.ts";
 
-const idQueryStrings = ["visitorId", "sessionId"] as const;
-const idHeaders = ["jb-visitor-id", "jb-session-id"] as const;
+const visitorHeader = "jb-visitor-id";
+const sessionHeader = "jb-session-id";
 const useQs = ["/api/job/apply"];
 
 /**
@@ -11,22 +12,20 @@ const useQs = ["/api/job/apply"];
  */
 export function logIdentifiers(req: Request, _: Response, next: NextFunction) {
   try {
-    const isQs = req.method === "GET" && useQs.includes(req.path);
-    const [visitor, session] = isQs ? idQueryStrings : idHeaders;
-    const bag = isQs ? req.query : req.headers;
-    logId("visitorId", bag, visitor);
-    logId("sessionId", bag, session);
+    const bag: Bag = {
+      visitorId: req.headers[visitorHeader],
+      sessionId: req.headers[sessionHeader],
+    };
+
+    if (req.method === "GET" && useQs.includes(req.path)) {
+      bag["visitorId"] ??= req.query["visitorId"];
+      bag["sessionId"] ??= req.query["sessionId"];
+    }
+
+    useBeacon(bag);
   } catch (error) {
     // Log but don't block on telemetry issues
     logError(error);
   }
   next();
-}
-
-function logId(name: string, bag: Bag, key: string) {
-  const idRaw = bag[key];
-  const id = typeof idRaw === "string" ? idRaw.trim() : "";
-  if (id) {
-    logProperty(name, id);
-  }
 }
