@@ -1,12 +1,10 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
+import { getStorageIds } from "../utils/storage";
 import type { JobModelApi, MetadataModelApi } from "./apiTypes";
 
 const viteApiUrl = import.meta.env["VITE_API_URL"] as unknown;
 const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
 export const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
-
-const idKeys = ["visitorId", "sessionId"] as const;
-const idHeaders = ["Jb-Visitor-Id", "Jb-Session-Id"] as const;
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -43,24 +41,10 @@ class APIConnector {
   public async fetchJobs(params: string): Promise<JobModelApi[]> {
     if (!params) return [];
 
-    const result = await qc.fetchQuery({
+    return await qc.fetchQuery({
       queryKey: ["jobs", params],
       queryFn: () => this.#httpCall<JobModelApi[]>(`jobs?${params}`),
     });
-
-    if (result.length) {
-      const idQuery = new URLSearchParams(
-        this.#getStorageIdObject("query"),
-      ).toString();
-
-      if (idQuery) {
-        result.forEach((job) => {
-          job.applyUrl += "&" + idQuery;
-        });
-      }
-    }
-
-    return result;
   }
 
   /**
@@ -73,7 +57,7 @@ class APIConnector {
 
     const response = await fetch(`${API_URL}/${trimmedUrl}`, {
       signal: AbortSignal.timeout(10_000),
-      headers: new Headers(this.#getStorageIdObject("headers")),
+      headers: new Headers(getStorageIds("headers")),
     });
 
     const { statusText, ok } = response;
@@ -83,41 +67,6 @@ class APIConnector {
     }
 
     return (await response.json()) as T;
-  }
-
-  #getStorageIdObject(target: "headers" | "query"): Record<string, string> {
-    const [visitorKey, sessionKey] = target === "headers" ? idHeaders : idKeys;
-    const visitorId = this.#getStorageId("local", idKeys[0]);
-    const sessionId = this.#getStorageId("session", idKeys[1]);
-
-    const result: Record<string, string> = {};
-
-    if (visitorId) {
-      result[visitorKey] = visitorId;
-    }
-
-    if (sessionId) {
-      result[sessionKey] = sessionId;
-    }
-
-    return result;
-  }
-
-  #getStorageId(area: "local" | "session", key: string): string | undefined {
-    try {
-      const storage =
-        area === "local" ? window.localStorage : window.sessionStorage;
-      let id = storage.getItem(key) ?? undefined;
-
-      if (!id) {
-        id = window.crypto.randomUUID();
-        storage.setItem(key, id);
-      }
-
-      return id;
-    } catch {
-      return undefined;
-    }
   }
 }
 

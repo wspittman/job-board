@@ -1,3 +1,4 @@
+import { getStorageIds } from "../utils/storage";
 import { api, API_URL } from "./api";
 import {
   toCurrencyFormat,
@@ -16,7 +17,15 @@ export class JobModel {
     if (filters.isEmpty()) return [];
     const params = filters.toUrlSearchParams().toString();
     const jobsApi = await api.fetchJobs(params);
-    return jobsApi.map((jobApi) => new JobModel(jobApi));
+
+    if (!jobsApi.length) return [];
+
+    const idQuery = new URLSearchParams(getStorageIds("query")).toString();
+
+    return jobsApi.map((jobApi) => {
+      jobApi.applyUrl += idQuery ? "&" + idQuery : "";
+      return new JobModel(jobApi);
+    });
   }
 
   readonly #job: JobModelApi;
