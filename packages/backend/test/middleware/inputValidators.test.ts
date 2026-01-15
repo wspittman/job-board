@@ -52,68 +52,33 @@ suite("useBeacon", () => {
     correlationContext = {};
   });
 
-  const validCases = [
+  const validCases: (Bag | [Bag, Bag])[] = [
+    {},
+    { tag: "home" },
+    { visitorId: uuid },
+    { sessionId: uuid },
     {
-      input: {},
-      expectedCalls: [],
+      tag: "careers",
+      visitorId: uuid,
+      sessionId: uuid,
     },
-    {
-      input: { tag: "home" },
-      expectedCalls: [["tag", "home"]],
-    },
-    {
-      input: { visitorId: uuid },
-      expectedCalls: [["visitorId", uuid]],
-    },
-    {
-      input: { sessionId: uuid },
-      expectedCalls: [["sessionId", uuid]],
-    },
-    {
-      input: {
-        tag: "careers",
-        visitorId: uuid,
-        sessionId: uuid,
-      },
-      expectedCalls: [
-        ["tag", "careers"],
-        ["visitorId", uuid],
-        ["sessionId", uuid],
-      ],
-    },
-    {
-      input: { tag: "about", extra: "ignored" },
-      expectedCalls: [["tag", "about"]],
-    },
-    {
-      input: { tag: "" },
-      expectedCalls: [],
-    },
-    {
-      input: { tag: ID_INVALID_LENGTH },
-      expectedCalls: [],
-    },
-    {
-      input: { tag: 123 },
-      expectedCalls: [],
-    },
-    {
-      input: { visitorId: "not-a-uuid" },
-      expectedCalls: [],
-    },
-    {
-      input: { sessionId: "not-a-uuid" },
-      expectedCalls: [],
-    },
+    [{ tag: "about", extra: "ignored" }, { tag: "about" }],
+    [{ tag: "" }, {}],
+    [{ tag: ID_INVALID_LENGTH }, {}],
+    [{ tag: 123 }, {}],
+    [{ visitorId: "not-a-uuid" }, {}],
+    [{ sessionId: "not-a-uuid" }, {}],
   ];
 
-  validCases.forEach(({ input, expectedCalls }) => {
+  validCases.forEach((caseInput) => {
+    const [input, expected] = Array.isArray(caseInput)
+      ? caseInput
+      : [caseInput, caseInput];
+
     test(toTestName("Valid input", input), () => {
       useBeacon(input);
-      assert.deepStrictEqual(
-        (correlationContext.requestContext as Bag)?.prop ?? {},
-        Object.fromEntries(expectedCalls),
-      );
+      const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
+      assert.deepStrictEqual(actual, expected);
     });
   });
 

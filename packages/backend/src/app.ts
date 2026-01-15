@@ -9,7 +9,7 @@ import express from "express";
 import helmet from "helmet";
 import { config } from "./config.ts";
 import { db } from "./db/db.ts";
-import { logIdentifiers } from "./middleware/logRequestIdentifiers.ts";
+import { logIdentifiers } from "./middleware/logIdentifiers.ts";
 import { router } from "./routes/routes.ts";
 import { AppError } from "./utils/AppError.ts";
 
