@@ -35,7 +35,7 @@ export class JobModel {
   }
 
   get applyUrl(): string {
-    const idQuery = new URLSearchParams(getStorageIds("query")).toString();
+    const idQuery = new URLSearchParams(getStorageIds()).toString();
     return "/api" + this.#job.applyUrl + (idQuery ? "&" + idQuery : "");
   }
 

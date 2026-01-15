@@ -38,6 +38,8 @@ declare module "express-serve-static-core" {
 // #endregion
 
 const PAGES = new Set(["index", "faq", "404", "explore"]);
+const METHOD_ALLOWED = new Set(["GET", "HEAD", "POST"]);
+const POST_ALLOWED = new Set(["/api/beacon"]);
 
 const MAL_PATTERN = [
   // File Endings
@@ -75,7 +77,10 @@ app.use((req, res, next) => {
     return;
   }
 
-  if (req.method !== "GET" && req.method !== "HEAD") {
+  if (
+    !METHOD_ALLOWED.has(req.method) ||
+    (req.method === "POST" && !POST_ALLOWED.has(req.path))
+  ) {
     res.status(405).send("Method Not Allowed");
     return;
   }

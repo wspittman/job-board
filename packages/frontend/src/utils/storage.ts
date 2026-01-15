@@ -1,10 +1,12 @@
 type Storage = "local" | "session";
-type Target = "headers" | "query";
+type Target = "headers" | "plain";
 
 const idKeys = ["visitorId", "sessionId"] as const;
 const idHeaders = ["Jb-Visitor-Id", "Jb-Session-Id"] as const;
 
-export function getStorageIds(target: Target): Record<string, string> {
+export function getStorageIds(
+  target: Target = "plain",
+): Record<string, string> {
   const [visitorKey, sessionKey] = target === "headers" ? idHeaders : idKeys;
   const visitorId = getId("local", idKeys[0]);
   const sessionId = getId("session", idKeys[1]);
@@ -38,3 +40,12 @@ function getId(sType: Storage, key: string): string | undefined {
     return undefined;
   }
 }
+
+function beacon() {
+  const ids = getStorageIds();
+  const data = JSON.stringify({ tag: location.pathname, ...ids });
+  navigator.sendBeacon("/api/beacon", data);
+}
+
+// Send a beacon on page load
+beacon();
