@@ -282,7 +282,10 @@ suite("redirectRoute", () => {
 suite("beaconRoute", () => {
   const writeHeadFn = mock.fn();
   const endFn = mock.fn();
-  const res: Response = { writeHead: writeHeadFn, end: endFn } as Response;
+  const res: Response = {
+    writeHead: writeHeadFn,
+    end: endFn,
+  } as unknown as Response;
   const next = mock.fn();
 
   beforeEach(() => {

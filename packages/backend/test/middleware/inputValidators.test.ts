@@ -1,17 +1,21 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
+import { beforeEach, mock, suite, test } from "node:test";
 import {
+  useBeacon,
   useCompanyKey,
   useCompanyKeys,
   useFilters,
   useJobKey,
   useRefreshJobsOptions,
 } from "../../src/middleware/inputValidators";
+import { Bag } from "../../src/types/types";
+import telemetryWorkaround from "../../src/utils/telemetryWorkaround.cjs";
 
 // Simple valid keys
 const ats = "lever";
 const companyId = "org1";
 const jobId = "job1";
+const uuid = "123e4567-e89b-12d3-a456-426614174000";
 
 // Simple invalid keys
 const ATS_INVALID = "invalid";
@@ -34,6 +38,94 @@ const JOB_KEY = { id: jobId, companyId };
 const SEARCH_TERM = "software engineer";
 const SEARCH_TOO_SHORT = "a";
 const SEARCH_TOO_LONG = "x".repeat(101);
+
+suite("useBeacon", () => {
+  let correlationContext: Bag = {};
+
+  mock.method(
+    telemetryWorkaround,
+    "getCorrelationContext",
+    () => correlationContext,
+  );
+
+  beforeEach(() => {
+    correlationContext = {};
+  });
+
+  const validCases = [
+    {
+      input: {},
+      expectedCalls: [],
+    },
+    {
+      input: { tag: "home" },
+      expectedCalls: [["tag", "home"]],
+    },
+    {
+      input: { visitorId: uuid },
+      expectedCalls: [["visitorId", uuid]],
+    },
+    {
+      input: { sessionId: uuid },
+      expectedCalls: [["sessionId", uuid]],
+    },
+    {
+      input: {
+        tag: "careers",
+        visitorId: uuid,
+        sessionId: uuid,
+      },
+      expectedCalls: [
+        ["tag", "careers"],
+        ["visitorId", uuid],
+        ["sessionId", uuid],
+      ],
+    },
+    {
+      input: { tag: "about", extra: "ignored" },
+      expectedCalls: [["tag", "about"]],
+    },
+    {
+      input: { tag: "" },
+      expectedCalls: [],
+    },
+    {
+      input: { tag: ID_INVALID_LENGTH },
+      expectedCalls: [],
+    },
+    {
+      input: { tag: 123 },
+      expectedCalls: [],
+    },
+    {
+      input: { visitorId: "not-a-uuid" },
+      expectedCalls: [],
+    },
+    {
+      input: { sessionId: "not-a-uuid" },
+      expectedCalls: [],
+    },
+  ];
+
+  validCases.forEach(({ input, expectedCalls }) => {
+    test(toTestName("Valid input", input), () => {
+      useBeacon(input);
+      assert.deepStrictEqual(
+        (correlationContext.requestContext as Bag)?.prop ?? {},
+        Object.fromEntries(expectedCalls),
+      );
+    });
+  });
+
+  const invalidCases = ["not-an-object", null];
+
+  invalidCases.forEach((input) => {
+    test(toTestName("Invalid input", { input }), () => {
+      assert.throws(() => useBeacon(input));
+      assert.deepStrictEqual(correlationContext, {});
+    });
+  });
+});
 
 suite("useCompanyKey", () => {
   const validCases = [
