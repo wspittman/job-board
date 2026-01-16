@@ -2,10 +2,10 @@
 
 This package contains scripts for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API). It includes the local evaluation harness that mirrors the backend LLM extraction logic. Run commands from the repo root unless noted otherwise.
 
+Be sure the refer to and follow the general development conventions in the root-level `AGENTS.md`.
+
 ## Prerequisites and configuration
 
-- Node.js 24 or newer (managed at the repo root).
-- Install dependencies once from the monorepo root with `npm install`.
 - Place a `.env` file in `packages/lab/` that reuses the backend configuration (see `packages/backend/src/config.ts`). Required keys include `OPENAI_API_KEY`, `LLM_MODEL`, and optional `LLM_REASONING_EFFORT`; other backend vars are honored when present.
 
 ## Data layout expectations
@@ -62,3 +62,10 @@ npm run lab -- playground
 
 - The harness relies on the same backend configuration and model pricing table (see `src/evalConfig.ts`); ensure your chosen `LLM_MODEL` is supported.
 - Use distinct `runName` values to disambiguate experiments and keep artifacts organized.
+
+## Quality checks
+
+Always run the following before committing changes:
+
+- Lint: `npm run lint --workspace=lab`.
+- Format: `npm run format:write --workspace=lab`

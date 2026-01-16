@@ -5,6 +5,7 @@ import { beforeEach, mock, suite, test, TestContext } from "node:test";
 import timers from "node:timers/promises";
 import {
   asyncRoute,
+  beaconRoute,
   jsonRoute,
   redirectRoute,
 } from "../../src/middleware/wrappers.ts";
@@ -275,5 +276,70 @@ suite("redirectRoute", () => {
       assert.ok(err instanceof Error);
       assert.equal(err.message, errMsg);
     });
+  });
+});
+
+suite("beaconRoute", () => {
+  const writeHeadFn = mock.fn();
+  const endFn = mock.fn();
+  const res: Response = {
+    writeHead: writeHeadFn,
+    end: endFn,
+  } as unknown as Response;
+  const next = mock.fn();
+
+  beforeEach(() => {
+    writeHeadFn.mock.resetCalls();
+    endFn.mock.resetCalls();
+    next.mock.resetCalls();
+  });
+
+  test("Valid beacon payload", () => {
+    const validatorFn = mock.fn();
+    const handler = beaconRoute(validatorFn);
+    const payload = { event: "beacon", value: 42 };
+    const req = { body: JSON.stringify(payload) } as Request;
+
+    handler(req, res, next);
+
+    assert.equal(validatorFn.mock.callCount(), 1);
+    assert.deepEqual(validatorFn.mock.calls[0]?.arguments.at(0), payload);
+    assert.equal(writeHeadFn.mock.callCount(), 1);
+    assert.equal(writeHeadFn.mock.calls[0]?.arguments.at(0), 204);
+    assert.equal(endFn.mock.callCount(), 1);
+    assert.equal(next.mock.callCount(), 0);
+  });
+
+  test("Invalid JSON payload", () => {
+    const validatorFn = mock.fn();
+    const handler = beaconRoute(validatorFn);
+    const req = { body: "{bad-json" } as Request;
+
+    handler(req, res, next);
+
+    assert.equal(validatorFn.mock.callCount(), 0);
+    assert.equal(writeHeadFn.mock.callCount(), 0);
+    assert.equal(endFn.mock.callCount(), 0);
+    assert.equal(next.mock.callCount(), 1);
+    const err = next.mock.calls[0]?.arguments.at(0);
+    assert.ok(err instanceof Error);
+  });
+
+  test("Validator throws", () => {
+    const validatorFn = mock.fn(() => {
+      throw new Error("Beacon validator failed");
+    });
+    const handler = beaconRoute(validatorFn);
+    const req = { body: JSON.stringify({ ok: false }) } as Request;
+
+    handler(req, res, next);
+
+    assert.equal(validatorFn.mock.callCount(), 1);
+    assert.equal(writeHeadFn.mock.callCount(), 0);
+    assert.equal(endFn.mock.callCount(), 0);
+    assert.equal(next.mock.callCount(), 1);
+    const err = next.mock.calls[0]?.arguments.at(0);
+    assert.ok(err instanceof Error);
+    assert.equal(err.message, "Beacon validator failed");
   });
 });

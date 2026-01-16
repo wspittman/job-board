@@ -77,6 +77,23 @@ export function redirectRoute<IN>(
   };
 }
 
+/**
+ * Creates an Express route handler for beacon requests
+ * @param inputValidator - Function to validate and log the input
+ * @returns Express middleware that handles the request
+ */
+export function beaconRoute(inputValidator: (input: unknown) => void) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    try {
+      inputValidator(JSON.parse(req.body as string));
+      res.writeHead(204);
+      res.end();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
 function pathToLogName(path: string) {
   return path
     .split("/")

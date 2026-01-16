@@ -12,7 +12,7 @@ import { embedCache } from "../utils/embedCache.ts";
 import { readSources, writeObj } from "../utils/fileUtils.ts";
 
 subscribeAsyncLogging({
-  log: ({ tag, val }) => console.log(`${tag}: ${val}`),
+  log: ({ tag, val }) => console.log(tag, val),
   error: ({ tag, val }) => console.error(new Error(tag, { cause: val })),
 });
 
@@ -70,7 +70,7 @@ async function runEval(run: Run): Promise<void> {
     },
   );
 
-  const rep = await report(run, outcomes);
+  const rep = report(run, outcomes);
   await writeObj(
     rep,
     "Report",

@@ -41,14 +41,14 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
       metrics["inTokens"] ?? 0,
       metrics["outTokens"] ?? 0,
       inCost,
-      outCost
+      outCost,
     ),
     ...judgement,
     output,
   };
 }
 
-export async function report(run: Run, outcomes: Outcome[]) {
+export function report(run: Run, outcomes: Outcome[]) {
   console.log(`Combining ${outcomes.length} outcomes`);
 
   const cost = outcomes.reduce((a, o) => a + o.cost, 0);
@@ -67,7 +67,7 @@ export async function report(run: Run, outcomes: Outcome[]) {
 
 async function runInference(
   run: Run,
-  source: Source
+  source: Source,
 ): Promise<[NumBag | undefined, Bag]> {
   // Use telemetryCatcher to mark the input and trace the LLM logs
   const [mark, markedInput] = catcher.createMarkedInput(source);

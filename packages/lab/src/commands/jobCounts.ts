@@ -45,4 +45,8 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
   }
 
   await writeObj({ ats, counts }, "Outcome", "job_counts", `${Date.now()}`);
+
+  if (companyIds.length < 5) {
+    console.log("\nJob Counts:", counts);
+  }
 }

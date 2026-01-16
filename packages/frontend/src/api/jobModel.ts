@@ -1,4 +1,5 @@
-import { api, API_URL } from "./api";
+import { getStorageIds } from "../utils/storage";
+import { api } from "./api";
 import {
   toCurrencyFormat,
   toJobFamilyLabel,
@@ -34,7 +35,8 @@ export class JobModel {
   }
 
   get applyUrl(): string {
-    return API_URL + this.#job.applyUrl;
+    const idQuery = new URLSearchParams(getStorageIds()).toString();
+    return "/api" + this.#job.applyUrl + (idQuery ? "&" + idQuery : "");
   }
 
   get bookmarkUrl(): string {

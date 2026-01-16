@@ -1,9 +1,6 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
+import { getStorageIds } from "../utils/storage";
 import type { JobModelApi, MetadataModelApi } from "./apiTypes";
-
-const viteApiUrl = import.meta.env["VITE_API_URL"] as unknown;
-const apiUrlString = typeof viteApiUrl === "string" ? viteApiUrl.trim() : "";
-export const API_URL = apiUrlString.replace(/\/+$/, "") || "/api";
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -28,7 +25,7 @@ class APIConnector {
   public async fetchMetadata(): Promise<MetadataModelApi> {
     return await qc.fetchQuery({
       queryKey: ["metadata"],
-      queryFn: () => this.httpCall<MetadataModelApi>("metadata"),
+      queryFn: () => this.#httpCall<MetadataModelApi>("metadata"),
     });
   }
 
@@ -42,7 +39,7 @@ class APIConnector {
 
     return await qc.fetchQuery({
       queryKey: ["jobs", params],
-      queryFn: () => this.httpCall<JobModelApi[]>(`jobs?${params}`),
+      queryFn: () => this.#httpCall<JobModelApi[]>(`jobs?${params}`),
     });
   }
 
@@ -51,11 +48,12 @@ class APIConnector {
    * @param url - The URL endpoint to call.
    * @returns The response data as type T.
    */
-  protected async httpCall<T>(url: string): Promise<T> {
+  async #httpCall<T>(url: string): Promise<T> {
     const trimmedUrl = url.replace(/^\/+/, "");
 
-    const response = await fetch(`${API_URL}/${trimmedUrl}`, {
+    const response = await fetch(`api/${trimmedUrl}`, {
       signal: AbortSignal.timeout(10_000),
+      headers: new Headers(getStorageIds("headers")),
     });
 
     const { statusText, ok } = response;

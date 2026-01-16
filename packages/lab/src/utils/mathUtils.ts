@@ -20,12 +20,12 @@ export function cost(
   inTokens: number,
   outTokens: number,
   inCost: number,
-  outCost: number
+  outCost: number,
 ) {
   return truncate(
     // Cost is per million tokens
     (inTokens * inCost) / 1_000_000 + (outTokens * outCost) / 1_000_000,
-    8
+    8,
   );
 }
 
@@ -38,7 +38,7 @@ export function cost(
 export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   const dotProduct = vecA.reduce(
     (sum, val, i) => sum + val * (vecB[i] ?? 0),
-    0
+    0,
   );
   const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val ** 2, 0));
   const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val ** 2, 0));

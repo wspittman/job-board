@@ -1,17 +1,21 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
+import { beforeEach, mock, suite, test } from "node:test";
 import {
+  useBeacon,
   useCompanyKey,
   useCompanyKeys,
   useFilters,
   useJobKey,
   useRefreshJobsOptions,
 } from "../../src/middleware/inputValidators";
+import { Bag } from "../../src/types/types";
+import telemetryWorkaround from "../../src/utils/telemetryWorkaround.cjs";
 
 // Simple valid keys
 const ats = "lever";
 const companyId = "org1";
 const jobId = "job1";
+const uuid = "123e4567-e89b-12d3-a456-426614174000";
 
 // Simple invalid keys
 const ATS_INVALID = "invalid";
@@ -34,6 +38,59 @@ const JOB_KEY = { id: jobId, companyId };
 const SEARCH_TERM = "software engineer";
 const SEARCH_TOO_SHORT = "a";
 const SEARCH_TOO_LONG = "x".repeat(101);
+
+suite("useBeacon", () => {
+  let correlationContext: Bag = {};
+
+  mock.method(
+    telemetryWorkaround,
+    "getCorrelationContext",
+    () => correlationContext,
+  );
+
+  beforeEach(() => {
+    correlationContext = {};
+  });
+
+  const validCases: (Bag | [Bag, Bag])[] = [
+    {},
+    { tag: "home" },
+    { visitorId: uuid },
+    { sessionId: uuid },
+    {
+      tag: "careers",
+      visitorId: uuid,
+      sessionId: uuid,
+    },
+    [{ tag: "about", extra: "ignored" }, { tag: "about" }],
+    [{ tag: "" }, {}],
+    [{ tag: ID_INVALID_LENGTH }, {}],
+    [{ tag: 123 }, {}],
+    [{ visitorId: "not-a-uuid" }, {}],
+    [{ sessionId: "not-a-uuid" }, {}],
+  ];
+
+  validCases.forEach((caseInput) => {
+    const [input, expected] = Array.isArray(caseInput)
+      ? caseInput
+      : [caseInput, caseInput];
+
+    test(toTestName("Valid input", input), () => {
+      useBeacon(input);
+      const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
+      assert.deepStrictEqual(actual, expected);
+    });
+  });
+
+  const invalidCases = ["not-an-object", null];
+
+  invalidCases.forEach((input) => {
+    test(toTestName("Invalid input", { input }), () => {
+      assert.throws(() => useBeacon(input));
+      assert.deepStrictEqual(correlationContext, {});
+    });
+  });
+});
 
 suite("useCompanyKey", () => {
   const validCases = [

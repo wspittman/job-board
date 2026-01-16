@@ -9,14 +9,16 @@ import express from "express";
 import helmet from "helmet";
 import { config } from "./config.ts";
 import { db } from "./db/db.ts";
+import { logIdentifiers } from "./middleware/logIdentifiers.ts";
 import { router } from "./routes/routes.ts";
 import { AppError } from "./utils/AppError.ts";
 
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({ maxAge: 86400 }));
 app.use(express.json());
+app.use(logIdentifiers);
 
 app.use("/api", router);
 

@@ -30,7 +30,7 @@ export function combineStats(statList: Stats[]): Stats {
 
   if (combined.match?.score) {
     combined.match.score = truncate(
-      combined.match.score / (combined.match.total || 1)
+      combined.match.score / (combined.match.total || 1),
     );
   }
 
@@ -48,7 +48,7 @@ export function combineStats(statList: Stats[]): Stats {
   const scoreWeighted = score * total;
   const omitWeighted = f1 * omitTotal;
   combined.overall = truncate(
-    (scoreWeighted + omitWeighted) / (total + omitTotal || 1)
+    (scoreWeighted + omitWeighted) / (total + omitTotal || 1),
   );
 
   return combined;
