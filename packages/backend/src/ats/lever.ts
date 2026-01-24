@@ -5,6 +5,7 @@ import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { logError } from "../utils/telemetry.ts";
 import { ATSBase } from "./atsBase.ts";
+import { normTitle } from "./normalization.ts";
 
 interface JobResult {
   id: string;
@@ -137,7 +138,7 @@ export class Lever extends ATSBase {
       companyId: companyId,
 
       // Basic
-      title: text?.trim(),
+      title: normTitle(text),
       description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),
       applyUrl,

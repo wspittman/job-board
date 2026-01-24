@@ -196,6 +196,19 @@ const companies: Step[] = [
   // Metadata check would go here
 ];
 
+const manual = [
+  //addCompanyStep("greenhouse", "noxgroup"),
+  formSucStep("refresh/jobs", "Refresh Nox Group Jobs", {
+    method: "POST",
+    asAdmin: true,
+    body: {
+      ats: "greenhouse",
+      companyId: "noxgroup",
+      replaceJobsOlderThan: Date.now(),
+    },
+  }),
+];
+
 /*
 To be added to a flow:
 
@@ -225,4 +238,5 @@ export const flows: Record<string, Step[]> = {
   unknowns,
   companies,
   smoke: [...pings, ...validations, ...unknowns, ...companies],
+  manual,
 };

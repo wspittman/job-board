@@ -3,6 +3,7 @@ import { config } from "../config.ts";
 import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { ATSBase } from "./atsBase.ts";
+import { normTitle } from "./normalization.ts";
 
 interface CompanyResult {
   name: string;
@@ -132,7 +133,7 @@ export class Greenhouse extends ATSBase {
       companyId: companyId,
 
       // Basic
-      title: title?.trim(),
+      title: normTitle(title),
       description: "",
       postTS: new Date(updated_at).getTime(),
       applyUrl: absolute_url,
