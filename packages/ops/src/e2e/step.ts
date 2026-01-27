@@ -1,5 +1,5 @@
 import { config } from "../config.ts";
-import type { Ats, HttpMethod } from "../types.ts";
+import type { ATS, HttpMethod } from "../types.ts";
 
 const { GREENHOUSE_IDS: ghIds, LEVER_IDS: lvIds } = config;
 const SUCCESS_BODY = { status: "success" };
@@ -70,14 +70,14 @@ export const formErrStep = (
     ...step,
   });
 
-export const delCompanyStep = (ats: Ats, id: string): Step =>
+export const delCompanyStep = (ats: ATS, id: string): Step =>
   companySucStep("DELETE", ats, id);
 
-export const addCompanyStep = (ats: Ats, id: string): Step =>
+export const addCompanyStep = (ats: ATS, id: string): Step =>
   companySucStep("PUT", ats, id);
 
 export const addCompaniesStep = (
-  ats: Ats,
+  ats: ATS,
   ids: string[],
   asyncWait?: string,
 ): Step =>
@@ -97,7 +97,7 @@ if (lastStep) {
   lastStep.asyncWait = "Verify companies deleted and metadata reset";
 }
 
-function companySucStep(method: HttpMethod, ats: Ats, id: string): Step {
+function companySucStep(method: HttpMethod, ats: ATS, id: string): Step {
   return formSucStep(`company`, `${ats} / ${id}`, {
     method,
     asAdmin: true,

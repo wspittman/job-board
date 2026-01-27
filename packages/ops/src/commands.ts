@@ -1,16 +1,16 @@
 import { e2e } from "./e2e/e2e.ts";
 import { fetcher } from "./fetcher.ts";
-import { atsTypes, CommandError, type Command } from "./types.ts";
+import { atsTypes, CommandError, type ATS, type Command } from "./types.ts";
 import { asArray } from "./utils.ts";
 
-function validateAts(ats?: string): string {
-  ats = ats?.toLowerCase();
+function validateAts(ats?: string): ATS {
+  const vATS = ats?.toLowerCase() as ATS;
 
-  if (!ats || !atsTypes.includes(ats)) {
+  if (!vATS || !atsTypes.includes(vATS)) {
     throw new CommandError("Invalid argument: ATS");
   }
 
-  return ats;
+  return vATS;
 }
 
 function validateIds(name: string, ...ids: (string | undefined)[]): string[] {
