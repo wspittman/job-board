@@ -4,6 +4,7 @@ import {
   refreshCompanies,
   refreshJobs,
   removeCompany,
+  syncCompanyJobs,
 } from "../controllers/company.ts";
 import { removeJob } from "../controllers/job.ts";
 import { adminOnly } from "../middleware/auth.ts";
@@ -36,5 +37,10 @@ adminRouter.delete(
   "/company",
   adminOnly,
   jsonRoute(removeCompany, useCompanyKey),
+);
+adminRouter.post(
+  "/company/jobs/sync",
+  adminOnly,
+  jsonRoute(syncCompanyJobs, useCompanyKey),
 );
 adminRouter.delete("/job", adminOnly, jsonRoute(removeJob, useJobKey));
