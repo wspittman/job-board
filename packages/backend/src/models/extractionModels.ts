@@ -249,6 +249,9 @@ export const ExtractionJob = z
       "'5-8 years' → 5;",
       "'3+ years' → 3;",
     ),
+    jdLanguage: zString(
+      "ISO 639-1 alpha-2 language code for the language the job description is written in (lowercase), e.g. 'en'.",
+    ),
     summary: zString(
       "1-2 sentence factual summary of the role's key responsibilities.",
       "Third person, present tense.",
