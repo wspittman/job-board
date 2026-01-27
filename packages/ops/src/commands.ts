@@ -64,10 +64,24 @@ const deleteCompany: Command = {
   },
 };
 
+const syncCompanyJobs: Command = {
+  usage: () => "<ATS> <COMPANY_ID>",
+  run: async ([ats, companyId]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    [companyId] = validateIds("COMPANY_ID", companyId);
+
+    console.log(`Syncing jobs for company ${companyId} from ${ats}`);
+    const body = { ats, id: companyId };
+    const result = await fetcher("POST", "company/jobs/sync", { body });
+    console.log("Success", result);
+  },
+};
+
 const registry: Record<string, Command> = {
   addCompanies,
   deleteJob,
   deleteCompany,
+  syncCompanyJobs,
   e2e,
 };
 
