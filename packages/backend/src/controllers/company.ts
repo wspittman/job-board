@@ -101,6 +101,48 @@ export async function refreshJobs({
   companyJobQueue.add(keys);
 }
 
+/**
+ * Syncs denormalized company fields for all jobs tied to a company.
+ * @param key - Company identifier containing id and ATS type
+ * @returns Summary of job updates performed
+ */
+export async function syncCompanyJobs(key: CompanyKey) {
+  const company = await db.company.get(key);
+  if (!company) {
+    throw new AppError("Company not found");
+  }
+
+  const jobs = await db.job.getAll(company.id);
+  const updates = jobs.flatMap((job) => {
+    const companyName = company.name;
+    const companyStage = company.stage;
+    const companySize = company.size;
+    const needsUpdate =
+      job.companyName !== companyName ||
+      job.companyStage !== companyStage ||
+      job.companySize !== companySize;
+
+    if (!needsUpdate) {
+      return [];
+    }
+
+    return [
+      {
+        ...job,
+        companyName,
+        companyStage,
+        companySize,
+      },
+    ];
+  });
+
+  if (updates.length) {
+    await batch("SyncCompanyJobs", updates, (job) => db.job.upsert(job));
+  }
+
+  return { updatedJobs: updates.length, totalJobs: jobs.length };
+}
+
 async function addCompanyInternal(key: CompanyKey) {
   const exists = await db.company.get(key);
   if (exists) return false;
