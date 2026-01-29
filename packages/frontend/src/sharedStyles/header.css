@@ -4,12 +4,18 @@
   top: 0;
   z-index: 1100;
   padding: 0 var(--space-lg);
-  gap: var(--space-md);
   height: var(--header-height);
   background: var(--primary-main);
   color: var(--text-contrast);
   align-items: center;
   box-shadow: var(--shadow-soft);
+}
+
+.nav {
+  display: flex;
+  flex: 1;
+  height: 75%;
+  align-items: center;
 }
 
 .app-link {
@@ -27,7 +33,7 @@
   align-items: center;
   gap: var(--space-md);
   font-size: var(--h3-size);
-  height: 75%;
+  height: 100%;
 }
 
 .header-logo {
@@ -153,7 +159,7 @@
 
 /* Desktop Nav */
 
-.nav {
+.nav-links {
   display: flex;
   align-items: center;
   gap: var(--space-md);
@@ -179,7 +185,7 @@
     display: block;
   }
 
-  .nav {
+  .nav-links {
     display: none;
     position: absolute;
     top: 100%;
@@ -196,7 +202,7 @@
     z-index: 1100;
   }
 
-  .menu-toggle:checked ~ .nav {
+  .menu-toggle:checked ~ .nav-links {
     max-height: 400px;
     display: flex;
   }
