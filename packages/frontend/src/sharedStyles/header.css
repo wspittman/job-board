@@ -12,8 +12,26 @@
   box-shadow: var(--shadow-soft);
 }
 
-.header-logo {
+.app-link {
+  line-height: var(--heading-line-height);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-xs);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--h3-size);
   height: 75%;
+}
+
+.header-logo {
+  height: 100%;
   background: var(--bg-default);
   border-radius: var(--radius);
   aspect-ratio: 1 / 1;
@@ -49,20 +67,6 @@
     height: calc(40% + var(--ds, 0));
     stroke: hsl(var(--dc));
   }
-}
-
-.app-link {
-  line-height: var(--heading-line-height);
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-    text-underline-offset: var(--space-xs);
-  }
-}
-
-.brand {
-  font-size: var(--h3-size);
 }
 
 .spacer {
