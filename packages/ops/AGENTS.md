@@ -7,7 +7,7 @@ Be sure the refer to and follow the general development conventions in the root-
 ## Development workflows
 
 - Run a CLI command: `npm run ops -- <command> [args]` (executes `tsx --env-file=.env src/index.ts`).
-- Examples: `npm run ops -- add-companies greenhouse name1 name2` or `npm run ops -- delete-job name1 job1`.
+- Examples: `npm run ops -- addCompanies greenhouse name1 name2` or `npm run ops -- deleteJob name1 job1`.
 - Environment variables are loaded from `.env`. See `src/config.ts` for keys (e.g., `PROD_API_TOKEN`, `LOCAL_API_TOKEN`).
 
 ## Quality checks

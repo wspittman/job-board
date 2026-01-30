@@ -67,6 +67,10 @@ class JobContainer extends Container<Job> {
     return this.getIdsByPartitionKey(companyId);
   }
 
+  async getAll(companyId: string) {
+    return this.getItemsByPartitionKey(companyId);
+  }
+
   async getIdsAndTimestamps(companyId: string) {
     return this.query<{ id: string; _ts: number }>(
       "SELECT c.id, c._ts FROM c",

@@ -1,16 +1,16 @@
 import { e2e } from "./e2e/e2e.ts";
 import { fetcher } from "./fetcher.ts";
-import { atsTypes, CommandError, type Command } from "./types.ts";
+import { atsTypes, CommandError, type ATS, type Command } from "./types.ts";
 import { asArray } from "./utils.ts";
 
-function validateAts(ats?: string): string {
-  ats = ats?.toLowerCase();
+function validateAts(ats?: string): ATS {
+  const vATS = ats?.toLowerCase() as ATS;
 
-  if (!ats || !atsTypes.includes(ats)) {
+  if (!vATS || !atsTypes.includes(vATS)) {
     throw new CommandError("Invalid argument: ATS");
   }
 
-  return ats;
+  return vATS;
 }
 
 function validateIds(name: string, ...ids: (string | undefined)[]): string[] {
@@ -64,10 +64,24 @@ const deleteCompany: Command = {
   },
 };
 
+const syncCompanyJobs: Command = {
+  usage: () => "<ATS> <COMPANY_ID>",
+  run: async ([ats, companyId]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    [companyId] = validateIds("COMPANY_ID", companyId);
+
+    console.log(`Syncing jobs for company ${companyId} from ${ats}`);
+    const body = { ats, id: companyId };
+    const result = await fetcher("POST", "company/jobs/sync", { body });
+    console.log("Success", result);
+  },
+};
+
 const registry: Record<string, Command> = {
   addCompanies,
   deleteJob,
   deleteCompany,
+  syncCompanyJobs,
   e2e,
 };
 
