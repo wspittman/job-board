@@ -1,3 +1,4 @@
+import { z } from "dry-utils-openai";
 import type { DeepPartialNullToUndef } from "../types/types.ts";
 import type {
   ExtractionCompany,
@@ -5,21 +6,22 @@ import type {
   ExtractionLocation,
 } from "./extractionModels.ts";
 
-export type ATS = "greenhouse" | "lever";
+export const IdSchema = z.string().trim().nonempty().max(100);
+export const AtsSchema = z.enum(["greenhouse", "lever"] as const);
+export type ATS = z.infer<typeof AtsSchema>;
 
 /**
  * - id: The ATS company name
  * - pKey: ats
  */
-export interface CompanyKey {
-  id: string;
-  ats: ATS;
-}
+export const CompanyKeySchema = z.object({ id: IdSchema, ats: AtsSchema });
+export type CompanyKey = z.infer<typeof CompanyKeySchema>;
 
-export interface CompanyKeys {
-  ids: CompanyKey["id"][];
-  ats: CompanyKey["ats"];
-}
+export const CompanyKeysSchema = z.object({
+  ids: z.array(IdSchema).nonempty().max(50),
+  ats: AtsSchema,
+});
+export type CompanyKeys = z.infer<typeof CompanyKeysSchema>;
 
 export interface Company
   extends CompanyKey, DeepPartialNullToUndef<ExtractionCompany> {
@@ -31,10 +33,8 @@ export interface Company
  * - id: The ATS-granted job id
  * - pKey: companyId
  */
-export interface JobKey {
-  id: string;
-  companyId: string;
-}
+export const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
+export type JobKey = z.infer<typeof JobKeySchema>;
 
 export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
   title: string;
