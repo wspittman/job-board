@@ -1,17 +1,17 @@
 import express from "express";
 import {
   addCompanies,
+  ignoreJob,
   refreshCompanies,
   refreshJobs,
   removeCompany,
   syncCompanyJobs,
 } from "../controllers/company.ts";
-import { removeJob } from "../controllers/job.ts";
 import { adminOnly } from "../middleware/auth.ts";
 import {
   useCompanyKey,
   useCompanyKeys,
-  useJobKey,
+  useFullJobKey,
   useRefreshJobsOptions,
 } from "../middleware/inputValidators.ts";
 import { asyncRoute, jsonRoute } from "../middleware/wrappers.ts";
@@ -43,4 +43,8 @@ adminRouter.post(
   adminOnly,
   jsonRoute(syncCompanyJobs, useCompanyKey),
 );
-adminRouter.delete("/job", adminOnly, jsonRoute(removeJob, useJobKey));
+adminRouter.delete(
+  "/company/job",
+  adminOnly,
+  jsonRoute(ignoreJob, useFullJobKey),
+);

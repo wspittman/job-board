@@ -57,15 +57,6 @@ export async function getJobs(filterInput: Filters) {
 }
 
 /**
- * Removes a job from the database
- * @param key - Job identifier containing id and companyId
- * @returns Promise resolving when the job is deleted
- */
-export async function removeJob(key: JobKey) {
-  return db.job.remove(key);
-}
-
-/**
  * Retrieves the application redirect URL for a given job
  * @param key - Job identifier containing id and companyId
  * @returns URL to redirect the user to for job application
@@ -189,13 +180,7 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
     logProperty("Skipped_GeneralApplication", job.item.title);
 
     // Add to company ignore list to prevent future processing
-    const company = await db.company.get(companyKey);
-    if (company) {
-      company.ignoreJobIds ??= [];
-      company.ignoreJobIds.push(job.item.id);
-      await db.company.upsert(company);
-    }
-
+    await db.company.ignoreJobUpsert(companyKey, job.item);
     return;
   }
 

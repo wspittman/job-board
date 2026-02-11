@@ -5,10 +5,12 @@ import {
   AtsSchema,
   CompanyKeySchema,
   CompanyKeysSchema,
+  FullJobKeySchema,
   IdSchema,
   JobKeySchema,
   type CompanyKey,
   type CompanyKeys,
+  type FullJobKey,
   type JobKey,
 } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
@@ -120,6 +122,21 @@ export function useJobKey(input: unknown): JobKey {
   const jobKey = zParse(JobKeySchema, input);
   logProperty("Input_JobKey", jobKey);
   return jobKey;
+}
+
+/**
+ * Validate company and job identifiers together
+ * @returns Object containing validated CompanyKey and JobKey
+ * @throws AppError if validation fails
+ */
+export function useFullJobKey(input: unknown): FullJobKey {
+  const { companyId, jobId, ats } = zParse(FullJobKeySchema, input);
+  const keys = {
+    companyKey: { id: companyId, ats },
+    jobKey: { id: jobId, companyId },
+  };
+  logProperty("Input_FullJobKey", keys);
+  return keys;
 }
 
 /**

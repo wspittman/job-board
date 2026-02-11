@@ -3,7 +3,7 @@ import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../models/clientModels.ts";
-import type { CompanyKey, CompanyKeys } from "../models/models.ts";
+import type { CompanyKey, CompanyKeys, FullJobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
@@ -141,6 +141,16 @@ export async function syncCompanyJobs(key: CompanyKey) {
   }
 
   return { updatedJobs: updates.length, totalJobs: jobs.length };
+}
+
+/**
+ * Deletes a job and marks it as ignored for its company to prevent re-adding from ATS sync
+ * @param key - Full job identifier containing companyKey and jobKey
+ * @returns Promise resolving when the job is deleted
+ */
+export async function ignoreJob({ companyKey, jobKey }: FullJobKey) {
+  await db.company.ignoreJobUpsert(companyKey, jobKey);
+  await db.job.remove(jobKey);
 }
 
 async function addCompanyInternal(key: CompanyKey) {

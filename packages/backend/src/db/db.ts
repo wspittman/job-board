@@ -52,6 +52,19 @@ class CompanyContainer extends Container<Company> {
   async remove({ id, ats }: CompanyKey) {
     return this.deleteItem(id, ats);
   }
+
+  async ignoreJobUpsert(key: CompanyKey, { id }: JobKey) {
+    const company = await this.get(key);
+    if (!company) return false;
+
+    company.ignoreJobIds ??= [];
+    if (!company.ignoreJobIds.includes(id)) {
+      company.ignoreJobIds.push(id);
+      await this.upsert(company);
+    }
+
+    return true;
+  }
 }
 
 class JobContainer extends Container<Job> {

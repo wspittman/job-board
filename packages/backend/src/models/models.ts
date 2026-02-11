@@ -36,6 +36,14 @@ export interface Company
 export const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
 export type JobKey = z.infer<typeof JobKeySchema>;
 
+export const FullJobKeySchema = z.object({
+  companyId: IdSchema,
+  jobId: IdSchema,
+  ats: AtsSchema,
+});
+// Not inferred -> this get split on validation into separate company and job keys
+export type FullJobKey = { jobKey: JobKey; companyKey: CompanyKey };
+
 export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
   title: string;
   description: string;

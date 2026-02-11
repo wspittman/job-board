@@ -5,6 +5,7 @@ import {
   useCompanyKey,
   useCompanyKeys,
   useFilters,
+  useFullJobKey,
   useJobKey,
   useRefreshJobsOptions,
 } from "../../src/middleware/inputValidators";
@@ -33,6 +34,7 @@ const COMPANY_KEYS = {
   ats,
 };
 const JOB_KEY = { id: jobId, companyId };
+const COMPANY_AND_JOB_KEYS = { companyId, jobId, ats };
 
 // Filters
 const SEARCH_TERM = "software engineer";
@@ -173,6 +175,40 @@ suite("useJobKey", () => {
   invalidCases.forEach((input) => {
     test(toTestName("Invalid input", input), () => {
       assert.throws(() => useJobKey(input));
+    });
+  });
+});
+
+suite("useCompanyAndJobKeys", () => {
+  const validCases = [
+    { ...COMPANY_AND_JOB_KEYS },
+    { ...COMPANY_AND_JOB_KEYS, otherKey: "stuff" },
+  ];
+
+  validCases.forEach((input) => {
+    test(toTestName("Valid input", input), () => {
+      const result = useFullJobKey(input);
+      assert.deepStrictEqual(result, {
+        companyKey: COMPANY_KEY,
+        jobKey: JOB_KEY,
+      });
+    });
+  });
+
+  const invalidCases = [
+    { ...COMPANY_AND_JOB_KEYS, companyId: undefined },
+    { ...COMPANY_AND_JOB_KEYS, jobId: undefined },
+    { ...COMPANY_AND_JOB_KEYS, ats: undefined },
+    { ...COMPANY_AND_JOB_KEYS, companyId: ID_INVALID_TYPE },
+    { ...COMPANY_AND_JOB_KEYS, jobId: ID_INVALID_TYPE },
+    { ...COMPANY_AND_JOB_KEYS, companyId: ID_INVALID_LENGTH },
+    { ...COMPANY_AND_JOB_KEYS, jobId: ID_INVALID_LENGTH },
+    { ...COMPANY_AND_JOB_KEYS, ats: ATS_INVALID },
+  ];
+
+  invalidCases.forEach((input) => {
+    test(toTestName("Invalid input", input), () => {
+      assert.throws(() => useFullJobKey(input));
     });
   });
 });
