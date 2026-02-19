@@ -1,21 +1,6 @@
 // @ts-check
 
-import eslint from "@eslint/js";
 import { defineConfig } from "eslint/config";
-import tseslint from "typescript-eslint";
+import baseConfig from "../../eslint.base.config.js";
 
-export default defineConfig(
-  eslint.configs.recommended,
-  tseslint.configs.recommendedTypeChecked,
-  {
-    ignores: ["**/*.js"],
-  },
-  {
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-);
+export default defineConfig(...baseConfig);

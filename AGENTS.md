@@ -47,15 +47,15 @@ This is a web application for a job board. It is a monorepo with multiple worksp
 - Workspace-specific tools and workflows are described in the corresponding `AGENTS.md` files.
 - Keep `README.md` and any relevant `AGENTS.md` files updated when code or workflow changes affect them.
 
-### Comments
+## Comments
 
 Use JSDoc comments for all public APIs and complex logic. This helps with code readability and provides useful information for developers using the code. Go light on comments otherwise. Never put comments at the end of lines. When writing @returns comments for async functions, prefer to describe the resolved value rather than the promise itself.
 
-### Dependencies
+## Dependencies
 
 Avoid adding new dependencies and warn when you do.
 
-### Testing expectations
+## Testing expectations
 
 - Follow workspace-specific linting, formatting, and testing guidance for code changes.
 - Docs-only changes do not require tests, but note that testing was skipped in your summary.

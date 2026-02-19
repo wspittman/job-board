@@ -8,8 +8,9 @@ function npmCommand(cmd, ...args) {
     throw new Error(`Command ${cmd} is not allowed.`);
   }
 
+  const fullCmd = `npm ${cmd} ${args.join(" ")}`;
+
   try {
-    const fullCmd = `npm ${cmd} ${args.join(" ")}`;
     console.log(`\n###\nRunning: ${fullCmd}\n###`);
     execSync(fullCmd, { stdio: "inherit" });
   } catch (error) {
