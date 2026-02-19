@@ -51,6 +51,20 @@ const deleteJob: Command = {
   },
 };
 
+const ignoreJob: Command = {
+  usage: () => "<ATS> <COMPANY_ID> <JOB_ID>",
+  run: async ([ats, companyId, jobId]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    [companyId] = validateIds("COMPANY_ID", companyId);
+    [jobId] = validateIds("JOB_ID", jobId);
+
+    console.log(`Ignoring job ${jobId} for company ${companyId} from ${ats}`);
+    const body = { ats, companyId, jobId };
+    const result = await fetcher("DELETE", "company/job", { body });
+    console.log("Success", result);
+  },
+};
+
 const deleteCompany: Command = {
   usage: () => "<ATS> <COMPANY_ID>",
   run: async ([ats, companyId]: string[]): Promise<void> => {
@@ -80,6 +94,7 @@ const syncCompanyJobs: Command = {
 const registry: Record<string, Command> = {
   addCompanies,
   deleteJob,
+  ignoreJob,
   deleteCompany,
   syncCompanyJobs,
   e2e,

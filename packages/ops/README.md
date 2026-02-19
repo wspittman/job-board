@@ -30,12 +30,13 @@ npm install
 
 ## Available commands
 
-| Command                             | Description                                                                     | Example                                          |
-| ----------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `addCompanies <ats> <companyId...>` | Imports one or more company IDs from a supported ATS (`greenhouse` or `lever`). | `npm run ops -- addCompanies greenhouse 123 456` |
-| `deleteJob <companyId> <jobId>`     | Removes a specific job posting for the given company.                           | `npm run ops -- deleteJob 123 abc-789`           |
-| `syncCompanyJobs <ats> <companyId>` | Syncs job postings for a company from the requested ATS.                        | `npm run ops -- syncCompanyJobs greenhouse 123`  |
-| `e2e <flow>`                        | Runs a predefined end-to-end flow against the backend API.                      | `npm run ops -- e2e smoke`                       |
+| Command                               | Description                                                                     | Example                                           |
+| ------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `addCompanies <ats> <companyId...>`   | Imports one or more company IDs from a supported ATS (`greenhouse` or `lever`). | `npm run ops -- addCompanies greenhouse 123 456`  |
+| `deleteJob <companyId> <jobId>`       | Removes a specific job posting for the given company.                           | `npm run ops -- deleteJob 123 abc-789`            |
+| `ignoreJob <ats> <companyId> <jobId>` | Marks a job as ignored for a company so future ATS syncs do not re-add it.      | `npm run ops -- ignoreJob greenhouse 123 abc-789` |
+| `syncCompanyJobs <ats> <companyId>`   | Syncs job postings for a company from the requested ATS.                        | `npm run ops -- syncCompanyJobs greenhouse 123`   |
+| `e2e <flow>`                          | Runs a predefined end-to-end flow against the backend API.                      | `npm run ops -- e2e smoke`                        |
 
 Each command prints a success or error message based on the API response.
 
