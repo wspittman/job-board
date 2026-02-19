@@ -124,9 +124,9 @@ const validations: Step[] = [
     expectStatus: 404,
   }),
   formErrStep(
-    "job",
+    "company/job",
     "Empty Body Error",
-    "id field is invalid: Invalid input: expected string, received undefined",
+    "companyId field is invalid: Invalid input: expected string, received undefined",
     {
       method: "DELETE",
       asAdmin: true,
@@ -161,19 +161,21 @@ const unknowns: Step[] = [
     "Verify internal Not Found exceptions",
   ),
   delCompanyStep("greenhouse", UNKNOWN),
-  formSucStep("job", "Unknown Company", {
+  formSucStep("company/job", "Unknown Company", {
     method: "DELETE",
     asAdmin: true,
     body: {
-      id: UNKNOWN,
+      ats: "greenhouse",
+      jobId: UNKNOWN,
       companyId: UNKNOWN,
     },
   }),
-  formSucStep("job", "Unknown Job", {
+  formSucStep("company/job", "Unknown Job", {
     method: "DELETE",
     asAdmin: true,
     body: {
-      id: UNKNOWN,
+      ats: "greenhouse",
+      jobId: UNKNOWN,
       companyId: ghIds[0],
     },
   }),
