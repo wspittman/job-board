@@ -1,14 +1,24 @@
 import { z } from "dry-utils-openai";
 import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
 import { JobFamily, PayCadence, WorkTimeBasis } from "../models/enums.ts";
-import type { CompanyKey, CompanyKeys, JobKey } from "../models/models.ts";
+import {
+  AtsSchema,
+  CompanyKeySchema,
+  CompanyKeysSchema,
+  FullJobKeySchema,
+  IdSchema,
+  JobKeySchema,
+  type CompanyKey,
+  type CompanyKeys,
+  type FullJobKey,
+  type JobKey,
+} from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { stripObj } from "../utils/objUtils.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
 // Z Helpers
 type Z<T> = z.ZodType<T>;
-const zArray = <T>(zt: Z<T>) => z.array(zt).nonempty().max(50);
 const soft = <T>(zt: Z<T>) => zt.optional().catch(undefined);
 const coerceString = <T>(zt: Z<T>) => soft(z.preprocess(String, zt));
 const coerceInt = <T>(zt: Z<T>) =>
@@ -20,8 +30,6 @@ const coerceInt = <T>(zt: Z<T>) =>
   );
 
 // Basic Schema Components
-const AtsSchema = z.enum(["greenhouse", "lever"] as const);
-const IdSchema = z.string().trim().nonempty().max(100);
 const SearchSchema = z.string().trim().min(3).max(100);
 const TimestampSchema = z
   .number()
@@ -29,11 +37,6 @@ const TimestampSchema = z
   .refine((val) => val <= Date.now(), {
     message: "Timestamp cannot be in the future",
   });
-
-// Key Schemas
-const CompanyKeySchema = z.object({ id: IdSchema, ats: AtsSchema });
-const CompanyKeysSchema = z.object({ ids: zArray(IdSchema), ats: AtsSchema });
-const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
 
 const RefreshJobsOptionsSchema = z.strictObject({
   ats: AtsSchema.optional(),
@@ -119,6 +122,21 @@ export function useJobKey(input: unknown): JobKey {
   const jobKey = zParse(JobKeySchema, input);
   logProperty("Input_JobKey", jobKey);
   return jobKey;
+}
+
+/**
+ * Validate company and job identifiers together
+ * @returns Object containing validated CompanyKey and JobKey
+ * @throws AppError if validation fails
+ */
+export function useFullJobKey(input: unknown): FullJobKey {
+  const { companyId, jobId, ats } = zParse(FullJobKeySchema, input);
+  const keys = {
+    companyKey: { id: companyId, ats },
+    jobKey: { id: jobId, companyId },
+  };
+  logProperty("Input_FullJobKey", keys);
+  return keys;
 }
 
 /**

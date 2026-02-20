@@ -140,28 +140,33 @@ export class FilterModel {
   }
 
   #fromGeneric(get: (key: string) => string | null | undefined): void {
-    this.#filters.title = normString(get("title"));
-    this.#filters.companyId = normString(get("companyId"));
+    this.#filters.title = normSearchString(get("title"));
+    this.#filters.companyId = normIdString(get("companyId"));
     this.#filters.workTimeBasis = toWorkTimeBasis(get("workTimeBasis"));
     this.#filters.jobFamily = toJobFamily(get("jobFamily"));
     this.#filters.payCadence = toPayCadence(get("payCadence"));
     this.#filters.currency = toCurrency(get("currency"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
-    this.#filters.location = normString(get("location"));
+    this.#filters.location = normSearchString(get("location"));
     this.#filters.minSalary = normNumber(get("minSalary"));
     this.#filters.maxExperience = normNumber(get("maxExperience"));
     this.#filters.daysSince = normNumber(get("daysSince"));
     this.#filters.jobId = !isEmpty(this.#filters.companyId)
-      ? normString(get("jobId"))
+      ? normIdString(get("jobId"))
       : undefined;
   }
 }
 
 const isEmpty = (v: unknown) => v == undefined || v === "";
 
-const normString = (value?: string | null): string | undefined => {
+const normSearchString = (value?: string | null): string | undefined => {
   const trimmed = value?.trim();
   return isEmpty(trimmed) || trimmed.length < 3 ? undefined : trimmed;
+};
+
+const normIdString = (value?: string | null): string | undefined => {
+  const trimmed = value?.trim();
+  return isEmpty(trimmed) ? undefined : trimmed;
 };
 
 const normNumber = (value?: string | null): number | undefined => {

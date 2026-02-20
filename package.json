@@ -1,6 +1,11 @@
 {
   "name": "job-board",
   "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "clean": "git clean -fdx -- \":(glob)**/node_modules/**\" \":(glob)**/deploy/**\" \":(glob)**/dist/**\" \":(glob)**/*.tsbuildinfo\"",
     "lint": "npm run lint --workspaces",
@@ -16,9 +21,5 @@
     "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "lab": "npm run lab --workspace=lab",
     "ops": "npm run ops --workspace=ops"
-  },
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ]
+  }
 }

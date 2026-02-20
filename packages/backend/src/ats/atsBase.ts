@@ -58,10 +58,7 @@ export abstract class ATSBase {
     url: string,
   ): Promise<T> {
     const start = Date.now();
-    let logStatus: StatusResponse = {
-      status: 500,
-      statusText: "Request Exception",
-    };
+    let logStatus: StatusResponse;
 
     try {
       const response = await fetch(`${this.baseUrl}/${id}/${url}`, {
@@ -90,6 +87,10 @@ export abstract class ATSBase {
       throw new AppError(`${this.ats} / ${id}: Request Failed`, 500, error);
     } finally {
       const duration = Date.now() - start;
+      logStatus ??= {
+        status: 500,
+        statusText: "Request Exception",
+      };
       logAtsCall(`GET ${name}`, this.ats, id, duration, logStatus);
     }
   }
