@@ -10,12 +10,12 @@
     "ops": "tsx --env-file=.env src/index.ts"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^24.10.0",
-    "eslint": "^9.39.1",
+    "eslint": "^10.0.0",
     "prettier": "^3.7.4",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2",
-    "typescript-eslint": "^8.49.0"
+    "typescript-eslint": "^8.56.0"
   }
 }
