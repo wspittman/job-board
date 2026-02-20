@@ -1,6 +1,6 @@
 import {
   Container,
-  dbConnect,
+  connectDB,
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
@@ -149,7 +149,7 @@ class DB {
    * @returns Promise that resolves when all containers are initialized
    */
   async connect(): Promise<void> {
-    const containers = await dbConnect({
+    const containers = await connectDB({
       endpoint: config.DATABASE_URL,
       key: config.DATABASE_KEY,
       name: "jobboard",
