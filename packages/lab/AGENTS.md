@@ -1,8 +1,10 @@
 # Lab workspace instructions
 
-This package contains scripts for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API). It includes the local evaluation harness that mirrors the backend LLM extraction logic. Run commands from the repo root unless noted otherwise.
+CLI for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
 
-Be sure the refer to and follow the general development conventions in the root-level `AGENTS.md`.
+It includes the local evaluation harness that mirrors the backend LLM extraction logic.
+
+Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stated otherwise.
 
 ## Prerequisites and configuration
 
@@ -62,10 +64,3 @@ npm run lab -- playground
 
 - The harness relies on the same backend configuration and model pricing table (see `src/evalConfig.ts`); ensure your chosen `LLM_MODEL` is supported.
 - Use distinct `runName` values to disambiguate experiments and keep artifacts organized.
-
-## Quality checks
-
-Always run the following before committing changes:
-
-- Lint: `npm run lint --workspace=lab`.
-- Format: `npm run format:write --workspace=lab`

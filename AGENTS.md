@@ -2,6 +2,8 @@
 
 Web application for a job board, an npm workspaces monorepo.
 
+Common Tech Stack: TypeScript, Node, Eslint, Prettier, Tsx
+
 ## Workspaces
 
 - `packages/backend`: REST service that integrates with Azure Cosmos DB, Application Insights telemetry, LLM provider, and public ATS APIs.

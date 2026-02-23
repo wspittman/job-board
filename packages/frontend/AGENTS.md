@@ -1,20 +1,17 @@
-# Frontend workspace instructions
+# Frontend
 
-This package contains the Vite-powered vanilla HTML/CSS/JS application that delivers the current job board experience. Run commands from the repo root unless stated otherwise.
+A vanilla HTML/CSS/JS MPA site client with server-side wrapper for production hosting.
 
-Be sure the refer to and follow the general development conventions in the root-level `AGENTS.md`.
+Package-specific Tech Stack: Vite, Express for production server wrapper, lucide for icons, @tanstack/query-core for data fetching state management
+
+Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stated otherwise.
 
 ## Development workflows
 
-- Development server: `npm run start:frontend` (alias of `npm run dev --workspace=frontend`) runs Vite with hot module reloading.
-- Production build: `npm run build --workspace=frontend` type-checks the app and `server/` code before emitting assets to `dist/`.
-- Preview: `npm run preview --workspace=frontend` serves the built assets for local verification.
-- Production hosting: `npm run start --workspace=frontend` uses `server.js`; configure `API_URL` and optionally `PORT` for the Express static file server.
+- Development server: `npm run start:frontend`.
+- Production build: `npm run build --workspace=frontend` followed by `npm run start:local`; artifacts are emitted to `dist/`.
+  - This uses `server.js`; configure `API_URL` and optionally `PORT` for the Express static file server.
 
 ## Quality checks
 
-Always run the following before committing changes:
-
-- Lint: `npm run lint --workspace=frontend`.
-- Format: `npm run format:write --workspace=frontend`
-- No dedicated frontend test suite exists; when feasible, validate UI changes with a development server or `npm run build --workspace=frontend`.
+In addition to running `npm run pre-checkin` from the repo root, validate UI changes with a development server if possible.
