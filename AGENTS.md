@@ -33,6 +33,7 @@ Run the following commands from the root of the repository:
 - Documentation: Keep `README.md` and any relevant `AGENTS.md` files updated when code or workflow changes affect them.
 - Dependencies: Avoid adding new dependencies and warn when you do.
 - Quality checks: Always run `npm run pre-checkin` before committing code.
+- Knowledge sharing: If you learn something that wasn't obvious, add it to a root level `Learnings.md` file for review and inclusion in the main `AGENTS.md` docs.
 
 ## Comments
 
