@@ -1,7 +1,7 @@
 import express from "express";
 import { addCompany } from "../controllers/company.ts";
 import { getApplyRedirectUrl, getJobs } from "../controllers/job.ts";
-import { getMetadata } from "../controllers/metadata.ts";
+import { getCompanyName, getMetadata } from "../controllers/metadata.ts";
 import { adminRouter } from "./adminRoutes.ts";
 import {
   useBeacon,
@@ -27,7 +27,10 @@ router.post("/beacon", express.text(), beaconRoute(useBeacon));
 router.put("/company", jsonRoute(addCompany, useCompanyKey));
 
 router.get("/job/apply", redirectRoute(getApplyRedirectUrl, useJobKey));
-router.get("/jobs", jsonRoute(getJobs, useFilters, toClientJobs));
+router.get(
+  "/jobs",
+  jsonRoute(getJobs, useFilters, (jobs) => toClientJobs(jobs, getCompanyName)),
+);
 
 router.get("/metadata", jsonRoute(getMetadata));
 

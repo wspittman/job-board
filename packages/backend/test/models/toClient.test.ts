@@ -11,7 +11,6 @@ const buildJob = (overrides: Partial<Job> = {}): Job => ({
   description: "Build features.",
   postTS: 1_723_456_789,
   applyUrl: "https://example.com/apply",
-  companyName: "Acme",
   presence: "remote",
   primaryLocation: {
     city: "Seattle",
@@ -37,26 +36,39 @@ suite("toClientJob", () => {
   test("maps job fields and normalizes output", () => {
     const job = buildJob();
 
-    assert.deepEqual(toClientJob(job), {
-      id: "job id",
-      companyId: "acme/1",
-      title: "Senior Engineer",
-      company: "Acme",
-      workTimeBasis: "full_time",
-      jobFamily: "engineering",
-      currency: "USD",
-      minSalary: 120000,
-      payCadence: "salary",
-      description: "Build features.",
-      postTS: 1_723_456_789,
-      applyUrl: "/job/apply?id=job%20id&companyId=acme%2F1",
-      isRemote: true,
-      location: "Seattle, WA, United States (US)",
-      facets: {
-        summary: "Owns the core platform.",
-        experience: 3,
+    assert.deepEqual(
+      toClientJob(job, (companyId) =>
+        companyId === "acme/1" ? "Acme" : undefined,
+      ),
+      {
+        id: "job id",
+        companyId: "acme/1",
+        title: "Senior Engineer",
+        company: "Acme",
+        workTimeBasis: "full_time",
+        jobFamily: "engineering",
+        currency: "USD",
+        minSalary: 120000,
+        payCadence: "salary",
+        description: "Build features.",
+        postTS: 1_723_456_789,
+        applyUrl: "/job/apply?id=job%20id&companyId=acme%2F1",
+        isRemote: true,
+        location: "Seattle, WA, United States (US)",
+        facets: {
+          summary: "Owns the core platform.",
+          experience: 3,
+        },
       },
-    });
+    );
+  });
+
+  test("falls back to company id when mapping is unavailable", () => {
+    const job = buildJob();
+
+    const result = toClientJob(job, () => undefined);
+
+    assert.equal(result.company, "acme/1");
   });
 
   test("drops undefined top-level fields", () => {
@@ -86,12 +98,15 @@ suite("toClientJobs", () => {
   test("maps arrays of jobs", () => {
     const jobs = [buildJob(), buildJob({ id: "job-2", companyId: "acme 2" })];
 
-    const results = toClientJobs(jobs);
+    const results = toClientJobs(jobs, (companyId) =>
+      companyId === "acme/1" ? "Acme" : "Acme 2",
+    );
 
     assert.equal(results.length, 2);
     assert.equal(
       results[1]?.applyUrl,
       "/job/apply?id=job-2&companyId=acme%202",
     );
+    assert.equal(results[1]?.company, "Acme 2");
   });
 });

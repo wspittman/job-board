@@ -50,8 +50,6 @@ export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
   postTS: number;
   applyUrl: string;
 
-  // Denormalized from Company to reduce joins
-  companyName: Company["name"];
   companyStage?: Company["stage"];
   companySize?: Company["size"];
 

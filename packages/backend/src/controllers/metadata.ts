@@ -4,6 +4,7 @@ import { AsyncExecutor } from "../utils/asyncExecutor.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
 let cachedMetadata: Promise<ClientMetadata> | undefined;
+let cachedCompanyNames: Map<string, string> | undefined;
 
 export const metadataCompanyExecutor = new AsyncExecutor(
   "RefreshMetadata",
@@ -29,6 +30,7 @@ async function refreshCompanyMetadata() {
   logProperty("Metadata", { companyCount: companies.length });
 
   cachedMetadata = undefined;
+  cachedCompanyNames = undefined;
 }
 
 async function refreshJobMetadata() {
@@ -55,15 +57,22 @@ export async function getMetadata() {
   return cachedMetadata;
 }
 
+export function getCompanyName(companyId: string): string | undefined {
+  return cachedCompanyNames?.get(companyId);
+}
+
 async function loadMetadata(): Promise<ClientMetadata> {
   const [companyMetadata, jobMetadata] = await Promise.all([
     db.metadata.getItem("company", "company"),
     db.metadata.getItem("job", "job"),
   ]);
 
+  const companyNames = companyMetadata?.companyNames ?? [];
+  cachedCompanyNames = new Map(companyNames);
+
   const metadata: ClientMetadata = {
     companyCount: companyMetadata?.companyCount ?? 0,
-    companyNames: companyMetadata?.companyNames ?? [],
+    companyNames,
     jobCount: jobMetadata?.jobCount ?? 0,
     // _ts is in seconds, but the client expects milliseconds
     timestamp:

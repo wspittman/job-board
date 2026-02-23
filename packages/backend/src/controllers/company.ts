@@ -114,13 +114,10 @@ export async function syncCompanyJobs(key: CompanyKey) {
 
   const jobs = await db.job.getAll(company.id);
   const updates = jobs.flatMap((job) => {
-    const companyName = company.name;
     const companyStage = company.stage;
     const companySize = company.size;
     const needsUpdate =
-      job.companyName !== companyName ||
-      job.companyStage !== companyStage ||
-      job.companySize !== companySize;
+      job.companyStage !== companyStage || job.companySize !== companySize;
 
     if (!needsUpdate) {
       return [];
@@ -129,7 +126,6 @@ export async function syncCompanyJobs(key: CompanyKey) {
     return [
       {
         ...job,
-        companyName,
         companyStage,
         companySize,
       },

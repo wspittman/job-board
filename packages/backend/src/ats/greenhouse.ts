@@ -137,7 +137,6 @@ export class Greenhouse extends ATSBase {
       description: "",
       postTS: new Date(updated_at).getTime(),
       applyUrl: absolute_url,
-      companyName: companyId,
     };
 
     // NOTE: Don't set context here because refreshJobInfo depends on it being undefined to know when to fetch full job data

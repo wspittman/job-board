@@ -95,7 +95,7 @@ export async function refreshJobsForCompany(
     return;
   }
 
-  const { ignoreJobIds, name, stage, size } = company;
+  const { ignoreJobIds, stage, size } = company;
   const [add, remove, ignore] = await getAtsJobs(key, currentIds, ignoreJobIds);
 
   logProperty("Ignored", ignore);
@@ -108,8 +108,6 @@ export async function refreshJobsForCompany(
 
   if (add.length) {
     add.forEach(({ item }) => {
-      item.companyName = name;
-
       if (stage) item.companyStage = stage;
       if (size) item.companySize = size;
     });
