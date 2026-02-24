@@ -97,8 +97,6 @@ export class Results extends ComponentBase {
     if (this.#selectedCard) {
       this.#selectedCard.isSelected = true;
     }
-
-    console.log("Selected job ID:", selectedId);
   }
 }
 
