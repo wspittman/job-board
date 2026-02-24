@@ -3,30 +3,31 @@ import { stripObj } from "../utils/objUtils.ts";
 import type { ClientJob } from "./clientModels.ts";
 import type { Job } from "./models.ts";
 
-export type CompanyNameLookup = (companyId: string) => string | undefined;
+type GetCompanyNameFn = (companyId: string) => Promise<string | undefined>;
+let getCompanyName: GetCompanyNameFn;
 
-export const toClientJobs = (
-  jobs: Job[],
-  companyNameLookup?: CompanyNameLookup,
-): ClientJob[] => jobs.map((job) => toClientJob(job, companyNameLookup));
+export function setGetCompanyName(fn: GetCompanyNameFn) {
+  getCompanyName = fn;
+}
 
-export const toClientJob = (
-  {
-    id,
-    companyId,
-    title,
-    description,
-    postTS,
-    presence,
-    primaryLocation,
-    salaryRange,
-    requiredExperience,
-    summary,
-    workTimeBasis,
-    jobFamily,
-  }: Job,
-  companyNameLookup?: CompanyNameLookup,
-): ClientJob => {
+export async function toClientJobs(jobs: Job[]): Promise<ClientJob[]> {
+  return Promise.all(jobs.map((job) => toClientJob(job)));
+}
+
+export async function toClientJob({
+  id,
+  companyId,
+  title,
+  description,
+  postTS,
+  presence,
+  primaryLocation,
+  salaryRange,
+  requiredExperience,
+  summary,
+  workTimeBasis,
+  jobFamily,
+}: Job): Promise<ClientJob> {
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
   const applyUrl = `/job/apply?id=${encodeId}&companyId=${encodeCompanyId}`;
@@ -38,7 +39,7 @@ export const toClientJob = (
 
     // The Work
     title,
-    company: companyNameLookup?.(companyId) ?? companyId,
+    company: (await getCompanyName(companyId)) ?? companyId,
     workTimeBasis,
     jobFamily,
 
@@ -58,4 +59,4 @@ export const toClientJob = (
       experience: requiredExperience ?? undefined,
     },
   });
-};
+}

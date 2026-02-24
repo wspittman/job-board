@@ -14,13 +14,13 @@ const SUCCESS = { status: "success" };
 export function jsonRoute<IN, OUT>(
   fn: (input: IN) => Promise<OUT>,
   inputValidator?: (input: unknown) => IN,
-  outputFormatter?: (output: OUT) => unknown,
+  outputFormatter?: (output: OUT) => Promise<unknown>,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const input = getInput(req, inputValidator);
       const result = await fn(input);
-      const output = outputFormatter ? outputFormatter(result) : result;
+      const output = outputFormatter ? await outputFormatter(result) : result;
       res.json(output ?? SUCCESS);
     } catch (error) {
       next(error);

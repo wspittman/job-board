@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 
-import { toClientJob, toClientJobs } from "../../src/models/toClient.ts";
 import type { Job } from "../../src/models/models.ts";
+import {
+  setGetCompanyName,
+  toClientJob,
+  toClientJobs,
+} from "../../src/models/toClient.ts";
 
 const buildJob = (overrides: Partial<Job> = {}): Job => ({
   id: "job id",
@@ -33,45 +37,44 @@ const buildJob = (overrides: Partial<Job> = {}): Job => ({
 });
 
 suite("toClientJob", () => {
-  test("maps job fields and normalizes output", () => {
+  test("maps job fields and normalizes output", async () => {
     const job = buildJob();
-
-    assert.deepEqual(
-      toClientJob(job, (companyId) =>
-        companyId === "acme/1" ? "Acme" : undefined,
-      ),
-      {
-        id: "job id",
-        companyId: "acme/1",
-        title: "Senior Engineer",
-        company: "Acme",
-        workTimeBasis: "full_time",
-        jobFamily: "engineering",
-        currency: "USD",
-        minSalary: 120000,
-        payCadence: "salary",
-        description: "Build features.",
-        postTS: 1_723_456_789,
-        applyUrl: "/job/apply?id=job%20id&companyId=acme%2F1",
-        isRemote: true,
-        location: "Seattle, WA, United States (US)",
-        facets: {
-          summary: "Owns the core platform.",
-          experience: 3,
-        },
-      },
+    setGetCompanyName((companyId) =>
+      Promise.resolve(companyId === "acme/1" ? "Acme" : undefined),
     );
+
+    assert.deepEqual(await toClientJob(job), {
+      id: "job id",
+      companyId: "acme/1",
+      title: "Senior Engineer",
+      company: "Acme",
+      workTimeBasis: "full_time",
+      jobFamily: "engineering",
+      currency: "USD",
+      minSalary: 120000,
+      payCadence: "salary",
+      description: "Build features.",
+      postTS: 1_723_456_789,
+      applyUrl: "/job/apply?id=job%20id&companyId=acme%2F1",
+      isRemote: true,
+      location: "Seattle, WA, United States (US)",
+      facets: {
+        summary: "Owns the core platform.",
+        experience: 3,
+      },
+    });
   });
 
-  test("falls back to company id when mapping is unavailable", () => {
+  test("falls back to company id when mapping is unavailable", async () => {
     const job = buildJob();
 
-    const result = toClientJob(job, () => undefined);
+    setGetCompanyName(() => Promise.resolve(undefined));
+    const result = await toClientJob(job);
 
     assert.equal(result.company, "acme/1");
   });
 
-  test("drops undefined top-level fields", () => {
+  test("drops undefined top-level fields", async () => {
     const job = buildJob({
       presence: "onsite",
       primaryLocation: undefined,
@@ -80,7 +83,7 @@ suite("toClientJob", () => {
       summary: undefined,
     });
 
-    const result = toClientJob(job);
+    const result = await toClientJob(job);
 
     assert.equal(result.isRemote, false);
     assert.equal(result.location, "");
@@ -95,12 +98,14 @@ suite("toClientJob", () => {
 });
 
 suite("toClientJobs", () => {
-  test("maps arrays of jobs", () => {
+  test("maps arrays of jobs", async () => {
     const jobs = [buildJob(), buildJob({ id: "job-2", companyId: "acme 2" })];
 
-    const results = toClientJobs(jobs, (companyId) =>
-      companyId === "acme/1" ? "Acme" : "Acme 2",
+    setGetCompanyName((companyId) =>
+      Promise.resolve(companyId === "acme/1" ? "Acme" : "Acme 2"),
     );
+
+    const results = await toClientJobs(jobs);
 
     assert.equal(results.length, 2);
     assert.equal(
