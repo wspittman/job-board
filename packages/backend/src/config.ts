@@ -9,6 +9,8 @@ interface Config {
   DATABASE_URL: string;
   DATABASE_KEY: string;
   DATABASE_LOCAL_CERT_PATH: string;
+  DATABASE_MOCK_OPTIONS?: string;
+  DATABASE_MOCK_OPTIONS_PATH?: string;
 
   GREENHOUSE_URL: string;
   LEVER_URL: string;
@@ -50,6 +52,8 @@ export const config: Config = {
   DATABASE_LOCAL_CERT_PATH:
     process.env["DATABASE_LOCAL_CERT_PATH"] ||
     path.resolve(process.cwd(), "cosmosdbcert.cer"),
+  DATABASE_MOCK_OPTIONS: process.env["DATABASE_MOCK_OPTIONS"]?.trim(),
+  DATABASE_MOCK_OPTIONS_PATH: process.env["DATABASE_MOCK_OPTIONS_PATH"]?.trim(),
 
   // ATS configs
   GREENHOUSE_URL:

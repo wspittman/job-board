@@ -2,8 +2,8 @@ import timers from "node:timers";
 import { withAsyncContext } from "./telemetry.ts";
 
 /**
- * Creates a debounced function that delays invoking `fn` until after `delay` milliseconds 
- * have elapsed since the last time the debounced function was invoked. The execution 
+ * Creates a debounced function that delays invoking `fn` until after `delay` milliseconds
+ * have elapsed since the last time the debounced function was invoked. The execution
  * is wrapped in an asynchronous context for telemetry.
  *
  * @param name - The name used for telemetry context.
@@ -38,8 +38,8 @@ type DBPromise<T> = {
 
 /**
  * Creates a function that caches and returns the result of an asynchronous operation.
- * Subsequent calls return the same promise until it resolves successfully or is 
- * explicitly cleared. If the operation fails, it automatically retries with 
+ * Subsequent calls return the same promise until it resolves successfully or is
+ * explicitly cleared. If the operation fails, it automatically retries with
  * exponential backoff.
  *
  * @param fn - The asynchronous function that resolves with the data.

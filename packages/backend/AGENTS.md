@@ -6,9 +6,39 @@ Package-specific Tech Stack: Express, Application Insights, CosmosDB via dry-uti
 
 Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stated otherwise.
 
-## Development workflows
+## Container-Friendly Cosmos Mocking
 
 Important: Azure CosmosDB Emulator or an Azure CosmosDB account is required to run the backend API locally. Agents may not have this available depending on their environment.
+
+When running in environments without a Cosmos DB emulator (such as AI agent containers), you can enable in-memory mocks powered by `dry-utils-cosmosdb`:
+
+1. Create a JSON object keyed by container name (`company`, `job`, etc.).
+2. Provide it through `DATABASE_MOCK_OPTIONS` (inline JSON) or `DATABASE_MOCK_OPTIONS_PATH` (path to JSON file).
+3. Start the backend normally; `connectDB` will use the mock state/query handlers instead of reaching Azure Cosmos DB.
+
+If both variables are set, file-based options load first and inline JSON overrides duplicate container keys.
+
+Example JSON:
+
+```json
+{
+  "company": {
+    "data": [{ "id": "acme", "ats": "greenhouse", "name": "Acme" }]
+  },
+  "job": {
+    "data": [
+      {
+        "id": "job-1",
+        "companyId": "acme",
+        "title": "Engineer",
+        "status": "open"
+      }
+    ]
+  }
+}
+```
+
+## Development workflows
 
 - Development server: `npm run start:backend`
 - Production build: `npm run build --workspace=backend` followed by `npm run start --workspace=backend`; artifacts are emitted to `dist/`.
