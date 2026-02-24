@@ -1,10 +1,21 @@
 import { db } from "../db/db.ts";
 import type { ClientMetadata } from "../models/clientModels.ts";
-import { debounceAsync } from "../utils/debounceUtils.ts";
+import { debounceAsync, debouncePromise } from "../utils/debounceUtils.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
-let cachedMetadata: Promise<ClientMetadata> | undefined;
-let cachedCompanyNames: Map<string, string> | undefined;
+const cachedMetadata = debouncePromise(loadMetadata);
+const cachedCompanyNames = debouncePromise(loadCompanyNames);
+
+export function getMetadata(): Promise<ClientMetadata> {
+  return cachedMetadata();
+}
+
+export async function getCompanyName(
+  companyId: string,
+): Promise<string | undefined> {
+  const companyMap = await cachedCompanyNames();
+  return companyMap.get(companyId);
+}
 
 export const refreshCompanyMetadata = debounceAsync(
   "RefreshMetadata",
@@ -29,8 +40,8 @@ async function refreshCompanyInternal() {
 
   logProperty("Metadata", { companyCount: companies.length });
 
-  cachedMetadata = undefined;
-  cachedCompanyNames = undefined;
+  cachedMetadata.clear();
+  cachedCompanyNames.clear();
 }
 
 async function refreshJobInternal() {
@@ -43,22 +54,7 @@ async function refreshJobInternal() {
 
   logProperty("Metadata", { jobCount });
 
-  cachedMetadata = undefined;
-}
-
-export async function getMetadata() {
-  if (!cachedMetadata) {
-    cachedMetadata = loadMetadata().catch((error) => {
-      cachedMetadata = undefined;
-      throw error;
-    });
-  }
-
-  return cachedMetadata;
-}
-
-export function getCompanyName(companyId: string): string | undefined {
-  return cachedCompanyNames?.get(companyId);
+  cachedMetadata.clear();
 }
 
 async function loadMetadata(): Promise<ClientMetadata> {
@@ -68,7 +64,6 @@ async function loadMetadata(): Promise<ClientMetadata> {
   ]);
 
   const companyNames = companyMetadata?.companyNames ?? [];
-  cachedCompanyNames = new Map(companyNames);
 
   const metadata: ClientMetadata = {
     companyCount: companyMetadata?.companyCount ?? 0,
@@ -80,4 +75,9 @@ async function loadMetadata(): Promise<ClientMetadata> {
   };
 
   return metadata;
+}
+
+async function loadCompanyNames(): Promise<Map<string, string>> {
+  const metadata = await cachedMetadata();
+  return new Map(metadata.companyNames);
 }
