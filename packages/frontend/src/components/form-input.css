@@ -7,7 +7,7 @@
 }
 
 .adornment {
-  padding-right: var(--space-md);
+  padding-inline-end: var(--space-md);
   font-size: var(--font-size-xs);
   color: var(--text-muted);
   white-space: nowrap;

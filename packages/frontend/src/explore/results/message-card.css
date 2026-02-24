@@ -34,7 +34,7 @@
   width: var(--space-lg);
   height: var(--space-lg);
   border: 0.2rem solid var(--bg-border);
-  border-top-color: var(--primary-main);
+  border-block-start-color: var(--primary-main);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
