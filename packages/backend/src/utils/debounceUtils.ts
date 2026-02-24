@@ -1,4 +1,4 @@
-import { clearTimeout, setTimeout } from "node:timers";
+import timers from "node:timers";
 import { withAsyncContext } from "./telemetry.ts";
 
 export function debounceAsync(
@@ -10,10 +10,10 @@ export function debounceAsync(
 
   return function debouncedFn() {
     if (timeoutId) {
-      clearTimeout(timeoutId);
+      timers.clearTimeout(timeoutId);
     }
 
-    timeoutId = setTimeout(() => {
+    timeoutId = timers.setTimeout(() => {
       void withAsyncContext(name, async () => {
         await fn();
       });
@@ -37,7 +37,7 @@ export function debouncePromise<T>(fn: () => Promise<T>): DBPromise<T> {
         resolve(result);
       })
       .catch(() => {
-        setTimeout(() => wrapFn(resolve), errRetry * 60 * 1000);
+        timers.setTimeout(() => wrapFn(resolve), errRetry * 60 * 1000);
         errRetry *= 2;
       });
   };

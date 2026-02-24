@@ -1,4 +1,4 @@
-import { setTimeout } from "node:timers/promises";
+import timers from "node:timers/promises";
 import { fetchJobCount, validateAts } from "../portal/pFuncs.ts";
 import { CommandError, type Command } from "../types.ts";
 import type { Bag } from "../types/types.ts";
@@ -41,7 +41,7 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
         error instanceof Error ? error.message : String(error);
     }
     process.stdout.write(".");
-    await setTimeout(100); // Throttle requests
+    await timers.setTimeout(100); // Throttle requests
   }
 
   await writeObj({ ats, counts }, "Outcome", "job_counts", `${Date.now()}`);
