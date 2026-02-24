@@ -9,14 +9,14 @@ import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
-import { metadataJobExecutor } from "./metadata.ts";
+import { refreshJobMetadata } from "./metadata.ts";
 
 type EnhancedFilters = Omit<Filters, "location"> & {
   location?: Location;
 };
 
 const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
-  onComplete: metadataJobExecutor,
+  onComplete: refreshJobMetadata,
 });
 
 /**

@@ -1,22 +1,22 @@
 import { db } from "../db/db.ts";
 import type { ClientMetadata } from "../models/clientModels.ts";
-import { AsyncExecutor } from "../utils/asyncExecutor.ts";
+import { debounceAsync } from "../utils/debounceUtils.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
 let cachedMetadata: Promise<ClientMetadata> | undefined;
 let cachedCompanyNames: Map<string, string> | undefined;
 
-export const metadataCompanyExecutor = new AsyncExecutor(
+export const refreshCompanyMetadata = debounceAsync(
   "RefreshMetadata",
-  refreshCompanyMetadata,
+  refreshCompanyInternal,
 );
 
-export const metadataJobExecutor = new AsyncExecutor(
+export const refreshJobMetadata = debounceAsync(
   "RefreshMetadata",
-  refreshJobMetadata,
+  refreshJobInternal,
 );
 
-async function refreshCompanyMetadata() {
+async function refreshCompanyInternal() {
   const companies = await db.company.query<{ id: string; name: string }>(
     "SELECT c.id, c.name FROM c",
   );
@@ -33,7 +33,7 @@ async function refreshCompanyMetadata() {
   cachedCompanyNames = undefined;
 }
 
-async function refreshJobMetadata() {
+async function refreshJobInternal() {
   const jobCount = await db.job.getCount();
 
   await db.metadata.upsertItem({

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test } from "node:test";
 import timers from "node:timers/promises";
-import { AsyncExecutor } from "../../src/utils/asyncExecutor.ts";
+import { debounceAsync } from "../../src/utils/debounceUtils.ts";
 
-suite("AsyncExecutor", () => {
+suite("debounceAsync", () => {
   const task = mock.fn(async () => {});
 
   beforeEach(() => {
@@ -11,9 +11,9 @@ suite("AsyncExecutor", () => {
   });
 
   test("executes after delay", async () => {
-    const executor = new AsyncExecutor("executor", task, 10);
+    const executor = debounceAsync("executor", task, 10);
 
-    executor.call();
+    executor();
 
     assert.equal(task.mock.callCount(), 0);
     await timers.setTimeout(5);
@@ -24,11 +24,11 @@ suite("AsyncExecutor", () => {
   });
 
   test("debounces calls within the delay", async () => {
-    const executor = new AsyncExecutor("executor", task, 10);
+    const executor = debounceAsync("executor", task, 10);
 
-    executor.call();
+    executor();
     await timers.setTimeout(5);
-    executor.call();
+    executor();
     await timers.setTimeout(5);
 
     assert.equal(task.mock.callCount(), 0);
@@ -39,11 +39,11 @@ suite("AsyncExecutor", () => {
   });
 
   test("allows execution after the debounce completes", async () => {
-    const executor = new AsyncExecutor("executor", task, 10);
+    const executor = debounceAsync("executor", task, 10);
 
-    executor.call();
+    executor();
     await timers.setTimeout(15);
-    executor.call();
+    executor();
     await timers.setTimeout(15);
 
     assert.equal(task.mock.callCount(), 2);
