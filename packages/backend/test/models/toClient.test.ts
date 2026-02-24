@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 
-import { toClientJob, toClientJobs } from "../../src/models/toClient.ts";
 import type { Job } from "../../src/models/models.ts";
+import {
+  setGetCompanyName,
+  toClientJob,
+  toClientJobs,
+} from "../../src/models/toClient.ts";
 
 const buildJob = (overrides: Partial<Job> = {}): Job => ({
   id: "job id",
@@ -11,7 +15,6 @@ const buildJob = (overrides: Partial<Job> = {}): Job => ({
   description: "Build features.",
   postTS: 1_723_456_789,
   applyUrl: "https://example.com/apply",
-  companyName: "Acme",
   presence: "remote",
   primaryLocation: {
     city: "Seattle",
@@ -34,10 +37,13 @@ const buildJob = (overrides: Partial<Job> = {}): Job => ({
 });
 
 suite("toClientJob", () => {
-  test("maps job fields and normalizes output", () => {
+  test("maps job fields and normalizes output", async () => {
     const job = buildJob();
+    setGetCompanyName((companyId) =>
+      Promise.resolve(companyId === "acme/1" ? "Acme" : undefined),
+    );
 
-    assert.deepEqual(toClientJob(job), {
+    assert.deepEqual(await toClientJob(job), {
       id: "job id",
       companyId: "acme/1",
       title: "Senior Engineer",
@@ -59,7 +65,16 @@ suite("toClientJob", () => {
     });
   });
 
-  test("drops undefined top-level fields", () => {
+  test("falls back to company id when mapping is unavailable", async () => {
+    const job = buildJob();
+
+    setGetCompanyName(() => Promise.resolve(undefined));
+    const result = await toClientJob(job);
+
+    assert.equal(result.company, "acme/1");
+  });
+
+  test("drops undefined top-level fields", async () => {
     const job = buildJob({
       presence: "onsite",
       primaryLocation: undefined,
@@ -68,7 +83,7 @@ suite("toClientJob", () => {
       summary: undefined,
     });
 
-    const result = toClientJob(job);
+    const result = await toClientJob(job);
 
     assert.equal(result.isRemote, false);
     assert.equal(result.location, "");
@@ -83,15 +98,20 @@ suite("toClientJob", () => {
 });
 
 suite("toClientJobs", () => {
-  test("maps arrays of jobs", () => {
+  test("maps arrays of jobs", async () => {
     const jobs = [buildJob(), buildJob({ id: "job-2", companyId: "acme 2" })];
 
-    const results = toClientJobs(jobs);
+    setGetCompanyName((companyId) =>
+      Promise.resolve(companyId === "acme/1" ? "Acme" : "Acme 2"),
+    );
+
+    const results = await toClientJobs(jobs);
 
     assert.equal(results.length, 2);
     assert.equal(
       results[1]?.applyUrl,
       "/job/apply?id=job-2&companyId=acme%202",
     );
+    assert.equal(results[1]?.company, "Acme 2");
   });
 });

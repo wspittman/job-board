@@ -3,15 +3,23 @@ import { stripObj } from "../utils/objUtils.ts";
 import type { ClientJob } from "./clientModels.ts";
 import type { Job } from "./models.ts";
 
-export const toClientJobs = (jobs: Job[]): ClientJob[] => jobs.map(toClientJob);
+type GetCompanyNameFn = (companyId: string) => Promise<string | undefined>;
+let getCompanyName: GetCompanyNameFn;
 
-export const toClientJob = ({
+export function setGetCompanyName(fn: GetCompanyNameFn) {
+  getCompanyName = fn;
+}
+
+export async function toClientJobs(jobs: Job[]): Promise<ClientJob[]> {
+  return Promise.all(jobs.map((job) => toClientJob(job)));
+}
+
+export async function toClientJob({
   id,
   companyId,
   title,
   description,
   postTS,
-  companyName,
   presence,
   primaryLocation,
   salaryRange,
@@ -19,7 +27,7 @@ export const toClientJob = ({
   summary,
   workTimeBasis,
   jobFamily,
-}: Job): ClientJob => {
+}: Job): Promise<ClientJob> {
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
   const applyUrl = `/job/apply?id=${encodeId}&companyId=${encodeCompanyId}`;
@@ -31,7 +39,7 @@ export const toClientJob = ({
 
     // The Work
     title,
-    company: companyName,
+    company: (await getCompanyName(companyId)) ?? companyId,
     workTimeBasis,
     jobFamily,
 
@@ -51,4 +59,4 @@ export const toClientJob = ({
       experience: requiredExperience ?? undefined,
     },
   });
-};
+}

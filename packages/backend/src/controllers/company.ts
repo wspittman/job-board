@@ -8,17 +8,21 @@ import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { refreshJobsForCompany } from "./job.ts";
-import { metadataCompanyExecutor, metadataJobExecutor } from "./metadata.ts";
+import { refreshCompanyMetadata, refreshJobMetadata } from "./metadata.ts";
 
 const companyInfoQueue = new AsyncQueue(
   "RefreshCompanyInfo",
   refreshCompanyInfo,
-  { onComplete: metadataCompanyExecutor },
+  { onComplete: refreshCompanyMetadata },
 );
 const companyJobQueue = new AsyncQueue(
   "RefreshJobsForCompany",
   refreshJobsForCompany,
-  { onComplete: metadataJobExecutor, concurrentLimit: 3, taskDelayMs: 100 },
+  {
+    onComplete: refreshJobMetadata,
+    concurrentLimit: 3,
+    taskDelayMs: 100,
+  },
 );
 
 /**
@@ -55,12 +59,12 @@ export async function removeCompany(key: CompanyKey) {
   const companyId = key.id;
   const jobIds = await db.job.getIds(companyId);
   await db.company.remove(key);
-  metadataCompanyExecutor.call();
+  refreshCompanyMetadata();
   if (jobIds.length) {
     await batch("RemoveCompanyJobs", jobIds, (id) =>
       db.job.remove({ id, companyId }),
     );
-    metadataJobExecutor.call();
+    refreshJobMetadata();
   }
 }
 
@@ -114,13 +118,10 @@ export async function syncCompanyJobs(key: CompanyKey) {
 
   const jobs = await db.job.getAll(company.id);
   const updates = jobs.flatMap((job) => {
-    const companyName = company.name;
     const companyStage = company.stage;
     const companySize = company.size;
     const needsUpdate =
-      job.companyName !== companyName ||
-      job.companyStage !== companyStage ||
-      job.companySize !== companySize;
+      job.companyStage !== companyStage || job.companySize !== companySize;
 
     if (!needsUpdate) {
       return [];
@@ -129,7 +130,6 @@ export async function syncCompanyJobs(key: CompanyKey) {
     return [
       {
         ...job,
-        companyName,
         companyStage,
         companySize,
       },

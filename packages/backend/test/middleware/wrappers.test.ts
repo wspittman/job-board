@@ -70,9 +70,9 @@ function validator(input: unknown): In {
   throw new Error("Validator Throws");
 }
 
-function formatter(output: Out | string | void): Out {
+function formatter(output: Out | string | void): Promise<Out> {
   const str = output && typeof output === "object" ? output.result : output;
-  return { result: `${str ?? ""}_F` };
+  return Promise.resolve({ result: `${str ?? ""}_F` });
 }
 
 // #endregion
