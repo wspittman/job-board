@@ -4,6 +4,7 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
+import { loadMockDBOptions } from "./mockDBOptions.ts";
 import type {
   Company,
   CompanyKey,
@@ -155,6 +156,10 @@ class DB {
       name: "jobboard",
       localCertPath:
         config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
+      mockDBOptions: loadMockDBOptions({
+        mockOptionsJson: config.DATABASE_MOCK_OPTIONS,
+        mockOptionsPath: config.DATABASE_MOCK_OPTIONS_PATH,
+      }),
       containers: [
         {
           name: "company",
