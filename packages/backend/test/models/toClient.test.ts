@@ -3,7 +3,7 @@ import { suite, test } from "node:test";
 
 import type { Job } from "../../src/models/models.ts";
 import {
-  setGetCompanyName,
+  setGetCompanyQuickRef,
   toClientJob,
   toClientJobs,
 } from "../../src/models/toClient.ts";
@@ -39,8 +39,12 @@ const buildJob = (overrides: Partial<Job> = {}): Job => ({
 suite("toClientJob", () => {
   test("maps job fields and normalizes output", async () => {
     const job = buildJob();
-    setGetCompanyName((companyId) =>
-      Promise.resolve(companyId === "acme/1" ? "Acme" : undefined),
+    setGetCompanyQuickRef((companyId) =>
+      Promise.resolve(
+        companyId === "acme/1"
+          ? ["acme/1", "Acme", "https://acme.example"]
+          : undefined,
+      ),
     );
 
     assert.deepEqual(await toClientJob(job), {
@@ -48,6 +52,7 @@ suite("toClientJob", () => {
       companyId: "acme/1",
       title: "Senior Engineer",
       company: "Acme",
+      companyWebsite: "https://acme.example",
       workTimeBasis: "full_time",
       jobFamily: "engineering",
       currency: "USD",
@@ -68,10 +73,11 @@ suite("toClientJob", () => {
   test("falls back to company id when mapping is unavailable", async () => {
     const job = buildJob();
 
-    setGetCompanyName(() => Promise.resolve(undefined));
+    setGetCompanyQuickRef(() => Promise.resolve(undefined));
     const result = await toClientJob(job);
 
     assert.equal(result.company, "acme/1");
+    assert.equal("companyWebsite" in result, false);
   });
 
   test("drops undefined top-level fields", async () => {
@@ -101,8 +107,12 @@ suite("toClientJobs", () => {
   test("maps arrays of jobs", async () => {
     const jobs = [buildJob(), buildJob({ id: "job-2", companyId: "acme 2" })];
 
-    setGetCompanyName((companyId) =>
-      Promise.resolve(companyId === "acme/1" ? "Acme" : "Acme 2"),
+    setGetCompanyQuickRef((companyId) =>
+      Promise.resolve(
+        companyId === "acme/1"
+          ? ["acme/1", "Acme", "https://acme.example"]
+          : ["acme/2", "Acme 2", "https://acme2.example"],
+      ),
     );
 
     const results = await toClientJobs(jobs);
@@ -113,5 +123,6 @@ suite("toClientJobs", () => {
       "/job/apply?id=job-2&companyId=acme%202",
     );
     assert.equal(results[1]?.company, "Acme 2");
+    assert.equal(results[1]?.companyWebsite, "https://acme2.example");
   });
 });

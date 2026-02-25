@@ -64,6 +64,8 @@ export interface ClientJob {
     summary?: string;
     experience?: number;
   };
+
+  companyWebsite?: string;
 }
 
 export interface ClientMetadata {

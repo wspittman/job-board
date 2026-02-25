@@ -1,7 +1,7 @@
 import express from "express";
 import { addCompany } from "../controllers/company.ts";
 import { getApplyRedirectUrl, getJobs } from "../controllers/job.ts";
-import { getCompanyName, getMetadata } from "../controllers/metadata.ts";
+import { getCompanyQuickRef, getMetadata } from "../controllers/metadata.ts";
 import {
   useBeacon,
   useCompanyKey,
@@ -13,11 +13,11 @@ import {
   jsonRoute,
   redirectRoute,
 } from "../middleware/wrappers.ts";
-import { setGetCompanyName, toClientJobs } from "../models/toClient.ts";
+import { setGetCompanyQuickRef, toClientJobs } from "../models/toClient.ts";
 import { adminRouter } from "./adminRoutes.ts";
 
 // Dumb but makes testing and passing easier
-setGetCompanyName(getCompanyName);
+setGetCompanyQuickRef(getCompanyQuickRef);
 
 export const router = express.Router();
 

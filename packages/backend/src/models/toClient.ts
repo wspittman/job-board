@@ -1,13 +1,13 @@
 import { normalizedLocation } from "../utils/location.ts";
 import { stripObj } from "../utils/objUtils.ts";
 import type { ClientJob } from "./clientModels.ts";
-import type { Job } from "./models.ts";
+import type { CompanyQuickRef, Job } from "./models.ts";
 
-type GetCompanyNameFn = (companyId: string) => Promise<string | undefined>;
-let getCompanyName: GetCompanyNameFn;
+type GetCompanyQuickRef = (id: string) => Promise<CompanyQuickRef | undefined>;
+let getCompanyQuickRef: GetCompanyQuickRef;
 
-export function setGetCompanyName(fn: GetCompanyNameFn) {
-  getCompanyName = fn;
+export function setGetCompanyQuickRef(fn: GetCompanyQuickRef) {
+  getCompanyQuickRef = fn;
 }
 
 export async function toClientJobs(jobs: Job[]): Promise<ClientJob[]> {
@@ -31,6 +31,7 @@ export async function toClientJob({
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
   const applyUrl = `/job/apply?id=${encodeId}&companyId=${encodeCompanyId}`;
+  const [, companyName, website] = (await getCompanyQuickRef(companyId)) ?? [];
 
   return stripObj({
     // Keys
@@ -39,7 +40,7 @@ export async function toClientJob({
 
     // The Work
     title,
-    company: (await getCompanyName(companyId)) ?? companyId,
+    company: companyName ?? companyId,
     workTimeBasis,
     jobFamily,
 
@@ -58,5 +59,7 @@ export async function toClientJob({
       summary: summary ?? undefined,
       experience: requiredExperience ?? undefined,
     },
+
+    companyWebsite: website,
   });
 }
