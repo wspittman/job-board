@@ -15,6 +15,22 @@
 
 .company {
   color: var(--primary-dark);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+    text-underline-offset: var(--space-xs);
+  }
+
+  &[aria-disabled="true"] {
+    pointer-events: none;
+  }
+
+  & svg {
+    width: var(--space-md);
+    height: var(--space-md);
+  }
 }
 
 .actions {

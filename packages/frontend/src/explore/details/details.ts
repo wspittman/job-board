@@ -21,6 +21,8 @@ const copyButtonAriaText: Record<CopyButtonState, string> = {
 export class Details extends ComponentBase {
   readonly #copyButton: HTMLButtonElement;
   readonly #applyLink: HTMLAnchorElement;
+  readonly #companyLink: HTMLAnchorElement;
+  readonly #companyExternalIcon: HTMLElement;
   readonly #jobChips: JobChips;
   readonly #detailEmbed: DetailEmbed;
   #job?: JobModel;
@@ -33,6 +35,8 @@ export class Details extends ComponentBase {
     super(html, cssSheet);
     this.#copyButton = this.getEl<HTMLButtonElement>("copy")!;
     this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
+    this.#companyLink = this.getEl<HTMLAnchorElement>("companyLink")!;
+    this.#companyExternalIcon = this.getEl<HTMLElement>("companyExternalIcon")!;
     this.#jobChips = this.getEl<JobChips>("chips")!;
     this.#detailEmbed = this.getEl<DetailEmbed>("description")!;
     this.#copyButton.addEventListener("click", () => void this.#copyJobLink());
@@ -55,6 +59,23 @@ export class Details extends ComponentBase {
 
     const { title, company } = this.#job.getDisplayDetail();
     this.setManyTexts({ title, company });
+
+    const companyWebsite = this.#job.companyWebsite;
+    const hasCompanyWebsite = !!companyWebsite;
+    this.#companyExternalIcon.hidden = !hasCompanyWebsite;
+
+    if (hasCompanyWebsite) {
+      this.#companyLink.setAttribute("aria-disabled", "false");
+      this.#companyLink.href = companyWebsite;
+      this.#companyLink.setAttribute(
+        "aria-label",
+        `Visit ${company} website in a new tab`,
+      );
+    } else {
+      this.#companyLink.setAttribute("aria-disabled", "true");
+      this.#companyLink.removeAttribute("href");
+      this.#companyLink.removeAttribute("aria-label");
+    }
 
     this.#jobChips.init({ job: this.#job });
     this.#detailEmbed.description = this.#job.description;

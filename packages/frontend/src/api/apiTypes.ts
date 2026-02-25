@@ -38,6 +38,8 @@ export interface JobModelApi {
     summary?: string;
     experience?: number;
   };
+
+  companyWebsite?: string;
 }
 
 export interface FilterModelApi {

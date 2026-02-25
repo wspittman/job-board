@@ -34,6 +34,10 @@ export class JobModel {
     return this.#job.description;
   }
 
+  get companyWebsite(): string | undefined {
+    return this.#job.companyWebsite;
+  }
+
   get applyUrl(): string {
     const idQuery = new URLSearchParams(getStorageIds()).toString();
     return "/api" + this.#job.applyUrl + (idQuery ? "&" + idQuery : "");
