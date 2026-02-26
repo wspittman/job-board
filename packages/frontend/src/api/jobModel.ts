@@ -1,6 +1,7 @@
 import { getStorageIds } from "../utils/storage";
 import { api } from "./api";
 import {
+  toCompanyStageLabel,
   toCurrencyFormat,
   toJobFamilyLabel,
   toPayCadenceLabel,
@@ -61,8 +62,15 @@ export class JobModel {
   }
 
   getDisplayFacets(useShort = false) {
-    const { isRemote, location, postTS, facets, workTimeBasis, jobFamily } =
-      this.#job;
+    const {
+      isRemote,
+      location,
+      postTS,
+      facets,
+      workTimeBasis,
+      jobFamily,
+      companyStage,
+    } = this.#job;
     const { experience } = facets ?? {};
 
     let loc = location;
@@ -85,6 +93,8 @@ export class JobModel {
       : new Date(postTS).toLocaleDateString();
     const isPrePost = useShort && !post.endsWith("days ago");
 
+    const stageLabel = toCompanyStageLabel(companyStage);
+
     return [
       isPrePost ? post : undefined,
       loc === "Remote" ? loc : undefined,
@@ -93,6 +103,7 @@ export class JobModel {
       toWorkTimeBasisLabel(workTimeBasis),
       toJobFamilyLabel(jobFamily),
       loc === "Remote" ? undefined : loc,
+      useShort ? stageLabel : `${stageLabel} Company`,
       isPrePost ? undefined : post,
     ].filter(Boolean);
   }
