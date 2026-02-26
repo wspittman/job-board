@@ -55,7 +55,7 @@ const FiltersSchema = z.object({
   isRemote: coerceString(z.stringbool()),
   workTimeBasis: soft(WorkTimeBasis),
   jobFamily: soft(JobFamily),
-  companystage: soft(CompanyStage),
+  companyStage: soft(CompanyStage),
   payCadence: soft(PayCadence),
   currency: soft(
     z

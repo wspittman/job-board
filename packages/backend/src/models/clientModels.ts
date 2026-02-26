@@ -15,7 +15,7 @@ export interface Filters {
   isRemote?: boolean;
   workTimeBasis?: WorkTimeBasis;
   jobFamily?: JobFamily;
-  companystage?: CompanyStage;
+  companyStage?: CompanyStage;
   payCadence?: PayCadence;
   currency?: string;
   // Substring Match
