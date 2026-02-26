@@ -45,7 +45,7 @@ suite("loadMockDBOptions", () => {
   test("throws helpful errors for invalid JSON", () => {
     assert.throws(
       () => loadMockDBData({ mockDataJson: "{not-valid-json}" }),
-      /Invalid Cosmos DB mock options JSON in DATABASE_MOCK_OPTIONS/,
+      /Invalid Cosmos DB mock options JSON in DATABASE_MOCK_DATA_JSON/,
     );
   });
 

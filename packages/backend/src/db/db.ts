@@ -157,8 +157,8 @@ class DB {
       localCertPath:
         config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
       mockDBData: loadMockDBData({
-        mockDataJson: config.DATABASE_MOCK_OPTIONS,
-        mockDataPath: config.DATABASE_MOCK_OPTIONS_PATH,
+        mockDataJson: config.DATABASE_MOCK_DATA_JSON,
+        mockDataPath: config.DATABASE_MOCK_DATA_PATH,
       }),
       containers: [
         {

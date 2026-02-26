@@ -32,7 +32,7 @@ export function loadMockDBData({
     : undefined;
 
   const inlineOptions = trimmedJson
-    ? parseMockDBOptions(trimmedJson, "DATABASE_MOCK_OPTIONS")
+    ? parseMockDBOptions(trimmedJson, "DATABASE_MOCK_DATA_JSON")
     : undefined;
 
   return {
