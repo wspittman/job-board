@@ -208,6 +208,7 @@ async function readJobsByFilters({
   isRemote,
   workTimeBasis,
   jobFamily,
+  companyStage,
   payCadence,
   currency,
 }: EnhancedFilters) {
@@ -235,6 +236,10 @@ async function readJobsByFilters({
 
   if (jobFamily) {
     query.whereCondition("jobFamily", "=", jobFamily);
+  }
+
+  if (companyStage) {
+    query.whereCondition("companyStage", "=", companyStage);
   }
 
   if (payCadence) {

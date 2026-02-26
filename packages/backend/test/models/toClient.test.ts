@@ -33,6 +33,7 @@ const buildJob = (overrides: Partial<Job> = {}): Job => ({
   summary: "Owns the core platform.",
   workTimeBasis: "full_time",
   jobFamily: "engineering",
+  companyStage: "series_a",
   ...overrides,
 });
 
@@ -55,6 +56,7 @@ suite("toClientJob", () => {
       companyWebsite: "https://acme.example",
       workTimeBasis: "full_time",
       jobFamily: "engineering",
+      companyStage: "series_a",
       currency: "USD",
       minSalary: 120000,
       payCadence: "salary",
@@ -87,6 +89,7 @@ suite("toClientJob", () => {
       salaryRange: undefined,
       requiredExperience: undefined,
       summary: undefined,
+      companyStage: undefined,
     });
 
     const result = await toClientJob(job);
@@ -96,6 +99,7 @@ suite("toClientJob", () => {
     assert.equal("currency" in result, false);
     assert.equal("minSalary" in result, false);
     assert.equal("payCadence" in result, false);
+    assert.equal("companyStage" in result, false);
     assert.deepEqual(result.facets, {
       summary: undefined,
       experience: undefined,
