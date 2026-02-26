@@ -4,7 +4,6 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
-import { loadMockDBOptions } from "./mockDBOptions.ts";
 import type {
   Company,
   CompanyKey,
@@ -18,6 +17,7 @@ import {
   subscribeError,
   subscribeLog,
 } from "../utils/telemetry.ts";
+import { loadMockDBData } from "./mockDBOptions.ts";
 
 subscribeCosmosDBLogging({
   log: subscribeLog,
@@ -156,9 +156,9 @@ class DB {
       name: "jobboard",
       localCertPath:
         config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
-      mockDBOptions: loadMockDBOptions({
-        mockOptionsJson: config.DATABASE_MOCK_OPTIONS,
-        mockOptionsPath: config.DATABASE_MOCK_OPTIONS_PATH,
+      mockDBData: loadMockDBData({
+        mockDataJson: config.DATABASE_MOCK_OPTIONS,
+        mockDataPath: config.DATABASE_MOCK_OPTIONS_PATH,
       }),
       containers: [
         {
