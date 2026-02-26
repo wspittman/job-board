@@ -1,4 +1,5 @@
 import type {
+  CompanyStage,
   Currency,
   JobFamily,
   PayCadence,
@@ -22,6 +23,7 @@ export interface JobModelApi {
   company: string;
   workTimeBasis?: WorkTimeBasis;
   jobFamily?: JobFamily;
+  companyStage?: CompanyStage;
 
   // The Compensation
   currency?: Currency;
@@ -49,6 +51,7 @@ export interface FilterModelApi {
   isRemote?: boolean;
   workTimeBasis?: WorkTimeBasis;
   jobFamily?: JobFamily;
+  companyStage?: CompanyStage;
   payCadence?: PayCadence;
   currency?: Currency;
   // Substring Match

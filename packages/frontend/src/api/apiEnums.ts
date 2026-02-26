@@ -86,6 +86,26 @@ export const toJobFamily = (value: unknown): JobFamily | undefined =>
 export const toJobFamilyLabel = (value: unknown): string =>
   asLabel(jobFamily, value);
 
+const companyStage = {
+  bootstrapped: "Bootstrapped",
+  pre_seed: "Pre-Seed",
+  seed: "Seed",
+  series_a: "Series A",
+  series_b: "Series B",
+  series_c: "Series C",
+  series_d_plus: "Series D+",
+  private_equity: "Private Equity",
+  public: "Public",
+  nonprofit: "Nonprofit",
+} as const;
+
+export type CompanyStage = keyof typeof companyStage;
+export const companyStageOptions = toOptions(companyStage);
+export const toCompanyStage = (value: unknown): CompanyStage | undefined =>
+  asEnum(companyStage, value);
+export const toCompanyStageLabel = (value: unknown): string =>
+  asLabel(companyStage, value);
+
 const payCadence = {
   hourly: "Hour",
   salary: "Year",

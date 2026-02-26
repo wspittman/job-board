@@ -3,6 +3,7 @@ import "../../components/form-input";
 import "../../components/form-select";
 
 import {
+  companyStageOptions,
   currencyOptions,
   jobFamilyOptions,
   payCadenceOptions,
@@ -45,6 +46,12 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-combobox",
       name: "companyId",
       label: "Company",
+    },
+    {
+      type: "jb-form-select",
+      name: "companyStage",
+      label: "Company Stage",
+      options: companyStageOptions,
     },
     {
       type: "jb-form-select",
