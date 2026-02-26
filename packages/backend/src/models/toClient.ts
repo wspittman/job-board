@@ -27,6 +27,7 @@ export async function toClientJob({
   summary,
   workTimeBasis,
   jobFamily,
+  companyStage,
 }: Job): Promise<ClientJob> {
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
@@ -43,6 +44,7 @@ export async function toClientJob({
     company: companyName ?? companyId,
     workTimeBasis,
     jobFamily,
+    companyStage,
 
     // The Compensation
     currency: salaryRange?.currency,
