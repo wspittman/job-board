@@ -88,7 +88,7 @@ export class JobModel {
     return [
       isPrePost ? post : undefined,
       loc === "Remote" ? loc : undefined,
-      this.#getCompString(),
+      this.#getCompString(useShort),
       exp,
       toWorkTimeBasisLabel(workTimeBasis),
       toJobFamilyLabel(jobFamily),
@@ -105,7 +105,7 @@ export class JobModel {
     return `${days} days ago`;
   }
 
-  #getCompString(): string | undefined {
+  #getCompString(useShort: boolean): string | undefined {
     const { minSalary, payCadence, currency } = this.#job;
     const cadence = toPayCadenceLabel(payCadence) || undefined;
 
@@ -115,9 +115,12 @@ export class JobModel {
       return cadence ? `${amount} / ${cadence}` : `${amount}`;
     }
 
-    if (currency && cadence) return `Paid in ${currency} per ${cadence}`;
-    if (cadence) return `Paid per ${cadence}`;
-    if (currency) return `Paid in ${currency}`;
-    return undefined;
+    if (useShort && (!payCadence || payCadence === "salary")) return undefined;
+
+    if (cadence) {
+      return `Per ${cadence}${currency ? ` (${currency})` : ""}`;
+    }
+
+    return currency;
   }
 }
