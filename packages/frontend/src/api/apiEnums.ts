@@ -43,6 +43,7 @@ const getCurrencyFormatter = (currency: Currency) => {
       style: "currency",
       currency,
       maximumFractionDigits: 0,
+      notation: "compact",
     });
     currencyFormatters.set(currency, formatter);
   }
