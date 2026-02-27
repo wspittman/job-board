@@ -70,9 +70,7 @@ async function refreshJobInternal() {
 async function getQuickRefMap(): Promise<Map<string, CompanyQuickRef>> {
   const metadata = await cacheCompanyMeta();
   const refs = metadata?.companyQuickRef ?? [];
-  const f = new Map(refs.map((x) => [x[0], x] as [string, CompanyQuickRef]));
-  console.dir(f, { depth: null });
-  return f;
+  return new Map(refs.map((x) => [x[0], x] as [string, CompanyQuickRef]));
 }
 
 async function getClientMetadata(): Promise<ClientMetadata> {
@@ -81,7 +79,8 @@ async function getClientMetadata(): Promise<ClientMetadata> {
     cacheJobMeta(),
   ]);
 
-  const companyQuickRef = companyMetadata?.companyQuickRef ?? [];
+  const companyQuickRef =
+    companyMetadata?.companyQuickRef ?? companyMetadata?.companyNames ?? [];
   const companyNames = companyQuickRef.map(
     ([id, name]) => [id, name] as [string, string],
   );
