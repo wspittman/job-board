@@ -61,7 +61,7 @@ export class JobModel {
     };
   }
 
-  getDisplayFacets(useShort = false) {
+  getDisplayFacets(useShort = false): string[] {
     const {
       isRemote,
       location,
@@ -70,6 +70,7 @@ export class JobModel {
       workTimeBasis,
       jobFamily,
       companyStage,
+      minSalary,
     } = this.#job;
     const { experience } = facets ?? {};
 
@@ -91,21 +92,34 @@ export class JobModel {
     const post = useShort
       ? this.#tsToDaysString(postTS)
       : new Date(postTS).toLocaleDateString();
-    const isPrePost = useShort && !post.endsWith("days ago");
 
     const stageLabel = toCompanyStageLabel(companyStage);
+    const stage =
+      useShort || !stageLabel ? stageLabel : `${stageLabel} Company`;
 
-    return [
-      isPrePost ? post : undefined,
-      loc === "Remote" ? loc : undefined,
-      this.#getCompString(useShort),
-      exp,
-      toWorkTimeBasisLabel(workTimeBasis),
-      toJobFamilyLabel(jobFamily),
-      loc === "Remote" ? undefined : loc,
-      useShort || !stageLabel ? stageLabel : `${stageLabel} Company`,
-      isPrePost ? undefined : post,
-    ].filter(Boolean);
+    const p1: string[] = [];
+    const p2: string[] = [];
+    const p3: string[] = [];
+
+    const pushIf = (
+      condition: boolean,
+      pIf?: string[],
+      pElse?: string[],
+      value?: string,
+    ) => {
+      if (value == null || value === "") return;
+      (condition ? pIf : pElse)?.push(value);
+    };
+
+    pushIf(useShort && !post.endsWith("days ago"), p1, p3, post);
+    pushIf(loc === "Remote", p1, p2, loc);
+    pushIf(minSalary != null, p1, p3, this.#getCompString(useShort));
+    pushIf(true, p2, undefined, exp);
+    pushIf(true, p2, undefined, toJobFamilyLabel(jobFamily));
+    pushIf(true, p2, undefined, toWorkTimeBasisLabel(workTimeBasis));
+    pushIf(true, p2, undefined, stage);
+
+    return [...p1, ...p2, ...p3.reverse()];
   }
 
   #tsToDaysString(ts: number): string {

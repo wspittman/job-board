@@ -34,7 +34,7 @@ export class JobChips extends ComponentBase {
 
     const children = job
       .getDisplayFacets(useShort)
-      .map((label) => Chip.create({ label: label! }));
+      .map((label) => Chip.create({ label }));
 
     element.replaceChildren(...children);
 
