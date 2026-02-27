@@ -62,6 +62,26 @@ export async function toClientJob({
       experience: requiredExperience ?? undefined,
     },
 
-    companyWebsite: website,
+    companyWebsite: toValidHttpsWebsite(website),
   });
+}
+
+function toValidHttpsWebsite(website?: string): string | undefined {
+  website = website?.trim();
+  if (!website) return undefined;
+
+  try {
+    const url = website.includes("://")
+      ? new URL(website)
+      : new URL(`https://${website}`);
+    if (
+      url.protocol !== "https:" ||
+      !url.hostname ||
+      !url.hostname.includes(".")
+    )
+      return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
 }

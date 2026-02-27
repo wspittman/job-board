@@ -53,7 +53,7 @@ suite("toClientJob", () => {
       companyId: "acme/1",
       title: "Senior Engineer",
       company: "Acme",
-      companyWebsite: "https://acme.example",
+      companyWebsite: "https://acme.example/",
       workTimeBasis: "full_time",
       jobFamily: "engineering",
       companyStage: "series_a",
@@ -105,6 +105,41 @@ suite("toClientJob", () => {
       experience: undefined,
     });
   });
+
+  test("handles various company website formats", async () => {
+    const job = buildJob();
+
+    const testCases = [
+      { input: "https://example.com", expected: "https://example.com/" },
+      { input: "example.com", expected: "https://example.com/" },
+      { input: "http://example.com", expected: undefined },
+      { input: "  https://example.com  ", expected: "https://example.com/" },
+      { input: "not-a-url", expected: undefined },
+      { input: "", expected: undefined },
+      { input: undefined, expected: undefined },
+      { input: "ftp://example.com", expected: undefined },
+    ];
+
+    for (const { input, expected } of testCases) {
+      setGetCompanyQuickRef(() =>
+        Promise.resolve(["id", "Name", input as string]),
+      );
+      const result = await toClientJob(job);
+      if (expected === undefined) {
+        assert.equal(
+          "companyWebsite" in result,
+          false,
+          `Expected companyWebsite to be absent for input: ${input}`,
+        );
+      } else {
+        assert.equal(
+          result.companyWebsite,
+          expected,
+          `Failed for input: ${input}`,
+        );
+      }
+    }
+  });
 });
 
 suite("toClientJobs", () => {
@@ -127,6 +162,6 @@ suite("toClientJobs", () => {
       "/job/apply?id=job-2&companyId=acme%202",
     );
     assert.equal(results[1]?.company, "Acme 2");
-    assert.equal(results[1]?.companyWebsite, "https://acme2.example");
+    assert.equal(results[1]?.companyWebsite, "https://acme2.example/");
   });
 });
