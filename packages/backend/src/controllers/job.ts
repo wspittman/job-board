@@ -9,14 +9,14 @@ import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
-import { metadataJobExecutor } from "./metadata.ts";
+import { refreshJobMetadata } from "./metadata.ts";
 
 type EnhancedFilters = Omit<Filters, "location"> & {
   location?: Location;
 };
 
 const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
-  onComplete: metadataJobExecutor,
+  onComplete: refreshJobMetadata,
 });
 
 /**
@@ -95,7 +95,7 @@ export async function refreshJobsForCompany(
     return;
   }
 
-  const { ignoreJobIds, name, stage, size } = company;
+  const { ignoreJobIds, stage, size } = company;
   const [add, remove, ignore] = await getAtsJobs(key, currentIds, ignoreJobIds);
 
   logProperty("Ignored", ignore);
@@ -108,8 +108,6 @@ export async function refreshJobsForCompany(
 
   if (add.length) {
     add.forEach(({ item }) => {
-      item.companyName = name;
-
       if (stage) item.companyStage = stage;
       if (size) item.companySize = size;
     });
@@ -210,6 +208,7 @@ async function readJobsByFilters({
   isRemote,
   workTimeBasis,
   jobFamily,
+  companyStage,
   payCadence,
   currency,
 }: EnhancedFilters) {
@@ -237,6 +236,10 @@ async function readJobsByFilters({
 
   if (jobFamily) {
     query.whereCondition("jobFamily", "=", jobFamily);
+  }
+
+  if (companyStage) {
+    query.whereCondition("companyStage", "=", companyStage);
   }
 
   if (payCadence) {

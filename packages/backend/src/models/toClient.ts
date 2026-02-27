@@ -1,17 +1,25 @@
 import { normalizedLocation } from "../utils/location.ts";
 import { stripObj } from "../utils/objUtils.ts";
 import type { ClientJob } from "./clientModels.ts";
-import type { Job } from "./models.ts";
+import type { CompanyQuickRef, Job } from "./models.ts";
 
-export const toClientJobs = (jobs: Job[]): ClientJob[] => jobs.map(toClientJob);
+type GetCompanyQuickRef = (id: string) => Promise<CompanyQuickRef | undefined>;
+let getCompanyQuickRef: GetCompanyQuickRef;
 
-export const toClientJob = ({
+export function setGetCompanyQuickRef(fn: GetCompanyQuickRef) {
+  getCompanyQuickRef = fn;
+}
+
+export async function toClientJobs(jobs: Job[]): Promise<ClientJob[]> {
+  return Promise.all(jobs.map((job) => toClientJob(job)));
+}
+
+export async function toClientJob({
   id,
   companyId,
   title,
   description,
   postTS,
-  companyName,
   presence,
   primaryLocation,
   salaryRange,
@@ -19,10 +27,12 @@ export const toClientJob = ({
   summary,
   workTimeBasis,
   jobFamily,
-}: Job): ClientJob => {
+  companyStage,
+}: Job): Promise<ClientJob> {
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
   const applyUrl = `/job/apply?id=${encodeId}&companyId=${encodeCompanyId}`;
+  const [, companyName, website] = (await getCompanyQuickRef(companyId)) ?? [];
 
   return stripObj({
     // Keys
@@ -31,9 +41,10 @@ export const toClientJob = ({
 
     // The Work
     title,
-    company: companyName,
+    company: companyName ?? companyId,
     workTimeBasis,
     jobFamily,
+    companyStage,
 
     // The Compensation
     currency: salaryRange?.currency,
@@ -50,5 +61,27 @@ export const toClientJob = ({
       summary: summary ?? undefined,
       experience: requiredExperience ?? undefined,
     },
+
+    companyWebsite: toValidHttpsWebsite(website),
   });
-};
+}
+
+function toValidHttpsWebsite(website?: string): string | undefined {
+  website = website?.trim();
+  if (!website) return undefined;
+
+  try {
+    const url = website.includes("://")
+      ? new URL(website)
+      : new URL(`https://${website}`);
+    if (
+      url.protocol !== "https:" ||
+      !url.hostname ||
+      !url.hostname.includes(".")
+    )
+      return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}

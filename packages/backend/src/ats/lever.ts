@@ -142,7 +142,6 @@ export class Lever extends ATSBase {
       description: standardizeUntrustedHtml(jdHtml),
       postTS: new Date(createdAt).getTime(),
       applyUrl,
-      companyName: companyId,
     };
 
     // Useful pieces that aren't redundant with the job object

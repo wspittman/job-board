@@ -36,12 +36,42 @@ Configuration is handled in `src/config.ts`. Defaults exist for local developmen
 | `NODE_ENV`                              | Controls behavior such as telemetry suppression in development (defaults to `dev`).               |
 | `DATABASE_URL` / `DATABASE_KEY`         | Endpoint and key for the Azure Cosmos DB account. Emulator defaults are included for local usage. |
 | `DATABASE_LOCAL_CERT_PATH`              | Path to the exported Cosmos DB emulator certificate when running locally.                         |
+| `DATABASE_MOCK_DATA_JSON`               | Optional inline JSON object keyed by container name to enable dry-utils-cosmosdb mocks.           |
+| `DATABASE_MOCK_DATA_PATH`               | Optional path to a JSON file containing mock options; merged with inline options when both set.   |
 | `GREENHOUSE_URL` / `LEVER_URL`          | Base URLs for ATS integrations fetched by the data ingestion jobs.                                |
 | `LLM_MODEL` / `LLM_REASONING_EFFORT`    | OpenAI model identifier and optional reasoning setting used by AI-powered features.               |
 | `OPENAI_API_KEY`                        | Consumed implicitly by the OpenAI SDK when AI features are enabled.                               |
 | `ADMIN_TOKEN`                           | Required shared secret protecting administrative endpoints (minimum 16 characters).               |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Connection string for Application Insights telemetry collection.                                  |
 | `ENABLE_VERBOSE_BLOB_LOGGING`           | Enables expanded telemetry payload logging when set to `true`.                                    |
+
+## Container-Friendly Cosmos Mocking
+
+When running in environments without a Cosmos DB emulator (such as AI agent containers), you can enable in-memory mocks powered by `dry-utils-cosmosdb`:
+
+1. Create a JSON object keyed by container name (`company`, `job`, etc.).
+2. Provide it through `DATABASE_MOCK_DATA_JSON` (inline JSON) or `DATABASE_MOCK_DATA_PATH` (path to JSON file).
+3. Start the backend normally; `connectDB` will use the mock state/query handlers instead of reaching Azure Cosmos DB.
+
+If both variables are set, file-based options load first and inline JSON overrides duplicate container keys.
+
+Example JSON:
+
+```json
+{
+  "company": [{ "id": "acme", "ats": "greenhouse", "name": "Acme" }],
+  "job": [
+    {
+      "id": "job-1",
+      "companyId": "acme",
+      "title": "Engineer",
+      "status": "open"
+    }
+  ]
+}
+```
+
+You can also include `queries` matchers as described in the `dry-utils-cosmosdb` README when you need custom query behavior.
 
 ## Project Structure
 

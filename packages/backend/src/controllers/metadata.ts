@@ -1,37 +1,59 @@
 import { db } from "../db/db.ts";
 import type { ClientMetadata } from "../models/clientModels.ts";
-import { AsyncExecutor } from "../utils/asyncExecutor.ts";
+import type { CompanyQuickRef } from "../models/models.ts";
+import { debounceAsync, debouncePromise } from "../utils/debounceUtils.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
-let cachedMetadata: Promise<ClientMetadata> | undefined;
+const getCompanyMetadata = () => db.metadata.getItem("company", "company");
+const getJobMetadata = () => db.metadata.getItem("job", "job");
+const cacheCompanyMeta = debouncePromise(getCompanyMetadata);
+const cacheJobMeta = debouncePromise(getJobMetadata);
 
-export const metadataCompanyExecutor = new AsyncExecutor(
+const cacheQuickRefMap = debouncePromise(getQuickRefMap);
+const cachedClientMetadata = debouncePromise(getClientMetadata);
+
+export function getMetadata(): Promise<ClientMetadata> {
+  return cachedClientMetadata();
+}
+
+export async function getCompanyQuickRef(
+  id: string,
+): Promise<CompanyQuickRef | undefined> {
+  const companyMap = await cacheQuickRefMap();
+  return companyMap.get(id);
+}
+
+export const refreshCompanyMetadata = debounceAsync(
   "RefreshMetadata",
-  refreshCompanyMetadata,
+  refreshCompanyInternal,
 );
 
-export const metadataJobExecutor = new AsyncExecutor(
+export const refreshJobMetadata = debounceAsync(
   "RefreshMetadata",
-  refreshJobMetadata,
+  refreshJobInternal,
 );
 
-async function refreshCompanyMetadata() {
-  const companies = await db.company.query<{ id: string; name: string }>(
-    "SELECT c.id, c.name FROM c",
-  );
+async function refreshCompanyInternal() {
+  const refs = await db.company.query<{
+    id: string;
+    name: string;
+    website?: string;
+  }>("SELECT c.id, c.name, c.website FROM c");
 
   await db.metadata.upsertItem({
     id: "company",
-    companyCount: companies.length,
-    companyNames: companies.map((company) => [company.id, company.name]),
+    companyCount: refs.length,
+    companyQuickRef: refs.map(({ id, name, website }) => [id, name, website]),
   });
 
-  logProperty("Metadata", { companyCount: companies.length });
+  logProperty("Metadata", { companyCount: refs.length });
 
-  cachedMetadata = undefined;
+  cacheCompanyMeta.clear();
+  cacheQuickRefMap.clear();
+  cachedClientMetadata.clear();
 }
 
-async function refreshJobMetadata() {
+async function refreshJobInternal() {
   const jobCount = await db.job.getCount();
 
   await db.metadata.upsertItem({
@@ -41,29 +63,31 @@ async function refreshJobMetadata() {
 
   logProperty("Metadata", { jobCount });
 
-  cachedMetadata = undefined;
+  cacheJobMeta.clear();
+  cachedClientMetadata.clear();
 }
 
-export async function getMetadata() {
-  if (!cachedMetadata) {
-    cachedMetadata = loadMetadata().catch((error) => {
-      cachedMetadata = undefined;
-      throw error;
-    });
-  }
-
-  return cachedMetadata;
+async function getQuickRefMap(): Promise<Map<string, CompanyQuickRef>> {
+  const metadata = await cacheCompanyMeta();
+  const refs = metadata?.companyQuickRef ?? [];
+  return new Map(refs.map((x) => [x[0], x] as [string, CompanyQuickRef]));
 }
 
-async function loadMetadata(): Promise<ClientMetadata> {
+async function getClientMetadata(): Promise<ClientMetadata> {
   const [companyMetadata, jobMetadata] = await Promise.all([
-    db.metadata.getItem("company", "company"),
-    db.metadata.getItem("job", "job"),
+    cacheCompanyMeta(),
+    cacheJobMeta(),
   ]);
+
+  const companyQuickRef =
+    companyMetadata?.companyQuickRef ?? companyMetadata?.companyNames ?? [];
+  const companyNames = companyQuickRef.map(
+    ([id, name]) => [id, name] as [string, string],
+  );
 
   const metadata: ClientMetadata = {
     companyCount: companyMetadata?.companyCount ?? 0,
-    companyNames: companyMetadata?.companyNames ?? [],
+    companyNames,
     jobCount: jobMetadata?.jobCount ?? 0,
     // _ts is in seconds, but the client expects milliseconds
     timestamp:

@@ -17,6 +17,7 @@ import {
   subscribeError,
   subscribeLog,
 } from "../utils/telemetry.ts";
+import { loadMockDBData } from "./mockDBOptions.ts";
 
 subscribeCosmosDBLogging({
   log: subscribeLog,
@@ -155,6 +156,10 @@ class DB {
       name: "jobboard",
       localCertPath:
         config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
+      mockDBData: loadMockDBData({
+        mockDataJson: config.DATABASE_MOCK_DATA_JSON,
+        mockDataPath: config.DATABASE_MOCK_DATA_PATH,
+      }),
       containers: [
         {
           name: "company",

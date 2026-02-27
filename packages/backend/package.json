@@ -16,7 +16,7 @@
     "applicationinsights": "^2.9.5",
     "cors": "^2.8.5",
     "dry-utils-async": "^0.3.2",
-    "dry-utils-cosmosdb": "^0.4.0",
+    "dry-utils-cosmosdb": "^0.5.0",
     "dry-utils-openai": "^0.4.1",
     "dry-utils-text": "^0.2.1",
     "express": "^5.1.0",

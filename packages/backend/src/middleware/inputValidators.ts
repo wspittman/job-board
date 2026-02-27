@@ -1,6 +1,11 @@
 import { z } from "dry-utils-openai";
 import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
-import { JobFamily, PayCadence, WorkTimeBasis } from "../models/enums.ts";
+import {
+  CompanyStage,
+  JobFamily,
+  PayCadence,
+  WorkTimeBasis,
+} from "../models/enums.ts";
 import {
   AtsSchema,
   CompanyKeySchema,
@@ -50,6 +55,7 @@ const FiltersSchema = z.object({
   isRemote: coerceString(z.stringbool()),
   workTimeBasis: soft(WorkTimeBasis),
   jobFamily: soft(JobFamily),
+  companyStage: soft(CompanyStage),
   payCadence: soft(PayCadence),
   currency: soft(
     z

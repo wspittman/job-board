@@ -1,6 +1,7 @@
 import { getStorageIds } from "../utils/storage";
 import { api } from "./api";
 import {
+  toCompanyStageLabel,
   toCurrencyFormat,
   toJobFamilyLabel,
   toPayCadenceLabel,
@@ -34,6 +35,10 @@ export class JobModel {
     return this.#job.description;
   }
 
+  get companyWebsite(): string | undefined {
+    return this.#job.companyWebsite;
+  }
+
   get applyUrl(): string {
     const idQuery = new URLSearchParams(getStorageIds()).toString();
     return "/api" + this.#job.applyUrl + (idQuery ? "&" + idQuery : "");
@@ -56,9 +61,17 @@ export class JobModel {
     };
   }
 
-  getDisplayFacets(useShort = false) {
-    const { isRemote, location, postTS, facets, workTimeBasis, jobFamily } =
-      this.#job;
+  getDisplayFacets(useShort = false): string[] {
+    const {
+      isRemote,
+      location,
+      postTS,
+      facets,
+      workTimeBasis,
+      jobFamily,
+      companyStage,
+      minSalary,
+    } = this.#job;
     const { experience } = facets ?? {};
 
     let loc = location;
@@ -79,18 +92,34 @@ export class JobModel {
     const post = useShort
       ? this.#tsToDaysString(postTS)
       : new Date(postTS).toLocaleDateString();
-    const isPrePost = useShort && !post.endsWith("days ago");
 
-    return [
-      isPrePost ? post : undefined,
-      loc === "Remote" ? loc : undefined,
-      this.#getCompString(),
-      exp,
-      toWorkTimeBasisLabel(workTimeBasis),
-      toJobFamilyLabel(jobFamily),
-      loc === "Remote" ? undefined : loc,
-      isPrePost ? undefined : post,
-    ].filter(Boolean);
+    const stageLabel = toCompanyStageLabel(companyStage);
+    const stage =
+      useShort || !stageLabel ? stageLabel : `${stageLabel} Company`;
+
+    const p1: string[] = [];
+    const p2: string[] = [];
+    const p3: string[] = [];
+
+    const pushIf = (
+      condition: boolean,
+      pIf?: string[],
+      pElse?: string[],
+      value?: string,
+    ) => {
+      if (value == null || value === "") return;
+      (condition ? pIf : pElse)?.push(value);
+    };
+
+    pushIf(useShort && !post.endsWith("days ago"), p1, p3, post);
+    pushIf(loc === "Remote", p1, p2, loc);
+    pushIf(minSalary != null, p1, p3, this.#getCompString(useShort));
+    pushIf(true, p2, undefined, exp);
+    pushIf(true, p2, undefined, toJobFamilyLabel(jobFamily));
+    pushIf(true, p2, undefined, toWorkTimeBasisLabel(workTimeBasis));
+    pushIf(true, p2, undefined, stage);
+
+    return [...p1, ...p2, ...p3.reverse()];
   }
 
   #tsToDaysString(ts: number): string {
@@ -101,7 +130,7 @@ export class JobModel {
     return `${days} days ago`;
   }
 
-  #getCompString(): string | undefined {
+  #getCompString(useShort: boolean): string | undefined {
     const { minSalary, payCadence, currency } = this.#job;
     const cadence = toPayCadenceLabel(payCadence) || undefined;
 
@@ -111,9 +140,12 @@ export class JobModel {
       return cadence ? `${amount} / ${cadence}` : `${amount}`;
     }
 
-    if (currency && cadence) return `Paid in ${currency} per ${cadence}`;
-    if (cadence) return `Paid per ${cadence}`;
-    if (currency) return `Paid in ${currency}`;
-    return undefined;
+    if (useShort && (!payCadence || payCadence === "salary")) return undefined;
+
+    if (cadence) {
+      return `Per ${cadence}${currency ? ` (${currency})` : ""}`;
+    }
+
+    return currency;
   }
 }

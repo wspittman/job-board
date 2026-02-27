@@ -1,4 +1,9 @@
-import type { JobFamily, PayCadence, WorkTimeBasis } from "./enums.ts";
+import type {
+  CompanyStage,
+  JobFamily,
+  PayCadence,
+  WorkTimeBasis,
+} from "./enums.ts";
 import type { CompanyKey } from "./models.ts";
 
 // #region Input Models
@@ -10,6 +15,7 @@ export interface Filters {
   isRemote?: boolean;
   workTimeBasis?: WorkTimeBasis;
   jobFamily?: JobFamily;
+  companyStage?: CompanyStage;
   payCadence?: PayCadence;
   currency?: string;
   // Substring Match
@@ -48,6 +54,7 @@ export interface ClientJob {
   company: string;
   workTimeBasis?: WorkTimeBasis;
   jobFamily?: JobFamily;
+  companyStage?: CompanyStage;
 
   // The Compensation
   currency?: string;
@@ -64,6 +71,8 @@ export interface ClientJob {
     summary?: string;
     experience?: number;
   };
+
+  companyWebsite?: string;
 }
 
 export interface ClientMetadata {

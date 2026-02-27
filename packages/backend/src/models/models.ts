@@ -9,6 +9,7 @@ import type {
 export const IdSchema = z.string().trim().nonempty().max(100);
 export const AtsSchema = z.enum(["greenhouse", "lever"] as const);
 export type ATS = z.infer<typeof AtsSchema>;
+export type CompanyQuickRef = [id: string, name: string, website?: string];
 
 /**
  * - id: The ATS company name
@@ -51,7 +52,6 @@ export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
   applyUrl: string;
 
   // Denormalized from Company to reduce joins
-  companyName: Company["name"];
   companyStage?: Company["stage"];
   companySize?: Company["size"];
 
@@ -71,6 +71,9 @@ export interface Metadata {
 
   // For company type
   companyCount?: number;
+  companyQuickRef?: CompanyQuickRef[];
+  // Remove from dev after 2/27/26
+  /** @deprecated companyNames deprecated but kept until next release for backward compatibility. */
   companyNames?: [string, string][];
 
   // For job type

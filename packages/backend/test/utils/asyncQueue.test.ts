@@ -46,21 +46,21 @@ suite("AsyncQueue", () => {
   });
 
   test("invokes onComplete for each task", async () => {
-    const onComplete = { call: mock.fn() };
+    const onComplete = mock.fn();
 
     const queue = new AsyncQueue<number>(
       "test",
       async () => {
         await timers.setTimeout(2);
       },
-      { onComplete: onComplete as unknown as { call: () => void } },
+      { onComplete },
     );
 
     queue.add([10, 20, 30]);
 
-    await waitFor(() => onComplete.call.mock.callCount() === 3, 500);
+    await waitFor(() => onComplete.mock.callCount() === 3, 500);
 
-    assert.equal(onComplete.call.mock.callCount(), 3);
+    assert.equal(onComplete.mock.callCount(), 3);
   });
 
   test("continues processing after a task throws", async () => {

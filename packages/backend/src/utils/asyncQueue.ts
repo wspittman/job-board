@@ -1,9 +1,8 @@
-import { setTimeout } from "node:timers";
-import { AsyncExecutor } from "./asyncExecutor.ts";
+import timers from "node:timers";
 import { logError, logProperty, withAsyncContext } from "./telemetry.ts";
 
 interface Options {
-  onComplete?: AsyncExecutor;
+  onComplete?: () => void;
   concurrentLimit?: number;
   taskDelayMs?: number;
 }
@@ -28,7 +27,7 @@ export class AsyncQueue<T> {
 
   protected name: string;
   protected fn: (task: T) => Promise<void>;
-  protected onComplete?: AsyncExecutor;
+  protected onComplete?: () => void;
   protected concurrentLimit: number;
   protected taskDelayMs: number;
 
@@ -99,13 +98,13 @@ export class AsyncQueue<T> {
       this.active++;
       await withAsyncContext(this.name, async () => {
         await this.fn(item);
-        this.onComplete?.call();
+        this.onComplete?.();
       });
     } catch (error) {
       logError(error);
     } finally {
       this.active--;
-      setTimeout(() => this.begin(), this.taskDelayMs);
+      timers.setTimeout(() => this.begin(), this.taskDelayMs);
     }
   }
 }

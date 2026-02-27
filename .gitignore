@@ -1,10 +1,6 @@
 cosmosdbcert.cer
 .env
 
-# Agent Folders
-agent_notes/
-agent_scripts/
-
 # Lab Folders
 packages/lab/input/
 packages/lab/ground/
