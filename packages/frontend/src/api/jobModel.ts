@@ -103,7 +103,7 @@ export class JobModel {
       toWorkTimeBasisLabel(workTimeBasis),
       toJobFamilyLabel(jobFamily),
       loc === "Remote" ? undefined : loc,
-      useShort ? stageLabel : `${stageLabel} Company`,
+      useShort || !stageLabel ? stageLabel : `${stageLabel} Company`,
       isPrePost ? undefined : post,
     ].filter(Boolean);
   }
