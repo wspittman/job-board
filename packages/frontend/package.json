@@ -13,7 +13,6 @@
     "start:local": "node deploy/server.js"
   },
   "dependencies": {
-    "@fontsource-variable/inter": "^5.1.0",
     "@tanstack/query-core": "^5.90.2",
     "compression": "^1.8.1",
     "express": "^5.1.0",
