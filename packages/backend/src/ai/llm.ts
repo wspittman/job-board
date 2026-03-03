@@ -1,4 +1,5 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
+import type { InterpretQuery } from "../models/clientModels.ts";
 import type { Company, Job } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import {
@@ -9,6 +10,7 @@ import {
 import { extractLocation } from "./extractLocation.ts";
 import { fillCompanyInfo } from "./fillCompanyInfo.ts";
 import { fillJobInfo } from "./fillJobInfo.ts";
+import { interpretQuery } from "./interpretQuery.ts";
 import { isGeneralApplication } from "./isGeneralApplication.ts";
 
 subscribeOpenAILogging({
@@ -32,6 +34,10 @@ class LLMConnector {
 
   async isGeneralApplication(title: string) {
     return isGeneralApplication(title);
+  }
+
+  async interpretQuery(query: InterpretQuery) {
+    return interpretQuery(query);
   }
 }
 

@@ -35,6 +35,12 @@ export interface RefreshJobsOptions {
   replaceJobsOlderThan?: number;
 }
 
+export interface InterpretQuery {
+  query: string;
+  filters?: Filters;
+  locale?: string;
+}
+
 // #endregion
 
 // #region Output Models

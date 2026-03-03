@@ -1,5 +1,9 @@
 import { z } from "dry-utils-openai";
-import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
+import type {
+  Filters,
+  InterpretQuery,
+  RefreshJobsOptions,
+} from "../models/clientModels.ts";
 import {
   CompanyStage,
   JobFamily,
@@ -169,6 +173,22 @@ export function useRefreshJobsOptions(input: unknown): RefreshJobsOptions {
 
   logProperty("Input_RefreshJobsOptions", options);
   return options;
+}
+
+const InterpretQuerySchema = z.object({
+  query: z.string().trim().min(1).max(500),
+  filters: soft(FiltersSchema),
+  locale: soft(z.string()),
+});
+
+/**
+ * Validate natural language query interpretation request
+ * @returns Validated InterpretQuery
+ */
+export function useInterpretQuery(input: unknown): InterpretQuery {
+  const request = stripObj(zParse(InterpretQuerySchema, input));
+  logProperty("Input_InterpretQuery", request);
+  return request;
 }
 
 /**
