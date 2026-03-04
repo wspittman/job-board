@@ -9,8 +9,8 @@ import {
 } from "../utils/telemetry.ts";
 import { extractLocation } from "./extractLocation.ts";
 import { fillCompanyInfo } from "./fillCompanyInfo.ts";
+import { fillFilters } from "./fillFilters.ts";
 import { fillJobInfo } from "./fillJobInfo.ts";
-import { interpretQuery } from "./interpretQuery.ts";
 import { isGeneralApplication } from "./isGeneralApplication.ts";
 
 subscribeOpenAILogging({
@@ -36,8 +36,8 @@ class LLMConnector {
     return isGeneralApplication(title);
   }
 
-  async interpretQuery(query: InterpretQuery) {
-    return interpretQuery(query);
+  async fillFilters(query: InterpretQuery) {
+    return fillFilters(query);
   }
 }
 

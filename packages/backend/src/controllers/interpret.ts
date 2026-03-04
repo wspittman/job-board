@@ -9,6 +9,6 @@ import type { Filters, InterpretQuery } from "../models/clientModels.ts";
 export async function interpretQuery(
   request: InterpretQuery,
 ): Promise<Filters> {
-  const result = await llm.interpretQuery(request);
+  const result = await llm.fillFilters(request);
   return result;
 }
