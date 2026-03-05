@@ -1,30 +1,32 @@
 import assert from "node:assert/strict";
 import { mock, suite, test } from "node:test";
 import { llm } from "../../src/ai/llm.ts";
-import { interpretQuery } from "../../src/controllers/interpret.ts";
-import type { Filters, InterpretQuery } from "../../src/models/clientModels.ts";
+import { interpretFilters } from "../../src/controllers/interpret.ts";
+import type { Filters } from "../../src/models/clientModels.ts";
 
-suite("interpretQuery controller", () => {
-  test("calls llm.fillFilters and returns results", async () => {
-    const mockFilters: Filters = { title: "Software Engineer", isRemote: true };
-    const fillFiltersMock = mock.method(
+suite("interpretFilters controller", () => {
+  test("calls llm.interpretFilters and returns results", async () => {
+    const mockFilters: Filters = {
+      title: "Software Engineer",
+      isRemote: true,
+      location: "Berlin",
+    };
+    const interpretFiltersMock = mock.method(
       llm,
-      "fillFilters",
+      "interpretFilters",
       async () => mockFilters,
     );
 
-    const request: InterpretQuery = {
-      query: "Remote software engineer",
-      filters: { location: "Berlin" },
-    };
+    const query = "Remote software engineer";
 
-    const result = await interpretQuery(request);
+    const result = await interpretFilters(query);
 
-    assert.equal(fillFiltersMock.mock.callCount(), 1);
+    assert.equal(interpretFiltersMock.mock.callCount(), 1);
     assert.equal(result.title, "Software Engineer");
     assert.equal(result.isRemote, true);
+    assert.equal(result.location, "Berlin");
 
-    fillFiltersMock.mock.restore();
+    interpretFiltersMock.mock.restore();
   });
 
   test("transforms LLM output into standard Filters", async () => {
@@ -34,19 +36,19 @@ suite("interpretQuery controller", () => {
       title: "Fullstack",
     };
 
-    const fillFiltersMock = mock.method(
+    const interpretFiltersMock = mock.method(
       llm,
-      "fillFilters",
+      "interpretFilters",
       async () => mockFilters,
     );
 
-    const request: InterpretQuery = { query: "Remote jobs in SF" };
-    const result = await interpretQuery(request);
+    const query = "Remote jobs in SF";
+    const result = await interpretFilters(query);
 
     assert.equal(result.isRemote, true);
     assert.equal(result.location, "San Francisco, CA, United States (US)");
     assert.equal(result.title, "Fullstack");
 
-    fillFiltersMock.mock.restore();
+    interpretFiltersMock.mock.restore();
   });
 });

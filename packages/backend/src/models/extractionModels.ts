@@ -310,15 +310,16 @@ export const ExtractionFilters = z
       "Example: '$50 an hour' → 50.",
     ),
     unmappedIntent: zString(
-      "If any user intent could not be mapped to the structured filters above, describe it concisely here.",
-      "This is not for internal reasoning or model notes.",
-      "Most of the time, this should return ''.",
-      "If everything was successfully mapped, return ''.",
+      "Minimally describe missing filters the user wished existed.",
+      "Example: 'Remote jobs at startups' -> 'companyStage insufficient for startup preference'.",
+      "Example: 'react software engineer' -> 'no skill filter for React'.",
+      "If there are no missing filters, return ''.",
     ),
   })
   .describe(
     [
       "Structured filters derived from a natural language search query.",
+      "Fix common misspellings and typos.",
       "Set string fields to '' when not explicitly stated.",
       "Set numeric fields to -1 when not explicitly stated.",
     ].join(" "),

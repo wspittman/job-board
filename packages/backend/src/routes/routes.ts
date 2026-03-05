@@ -1,6 +1,6 @@
 import express from "express";
 import { addCompany } from "../controllers/company.ts";
-import { interpretQuery } from "../controllers/interpret.ts";
+import { interpretFilters } from "../controllers/interpret.ts";
 import { getApplyRedirectUrl, getJobs } from "../controllers/job.ts";
 import { getCompanyQuickRef, getMetadata } from "../controllers/metadata.ts";
 import {
@@ -34,7 +34,7 @@ router.put("/company", jsonRoute(addCompany, useCompanyKey));
 router.get("/job/apply", redirectRoute(getApplyRedirectUrl, useJobKey));
 router.get("/jobs", jsonRoute(getJobs, useFilters, toClientJobs));
 
-router.post("/interpret", jsonRoute(interpretQuery, useInterpretQuery));
+router.post("/interpret", jsonRoute(interpretFilters, useInterpretQuery));
 
 router.get("/metadata", jsonRoute(getMetadata));
 

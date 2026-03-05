@@ -190,8 +190,7 @@ export class Filters extends ComponentBase {
     this.#initialFilters = initialFilters;
 
     this.#nlSearch.init({
-      filtersIn: () => this.#getFilterData(),
-      filtersOut: (filters) => this.#handleNLUpdate(filters),
+      onFilters: (filters) => this.#handleNLUpdate(filters),
     });
 
     if (this.#initialFilters && !this.#initialFilters.isEmpty()) {

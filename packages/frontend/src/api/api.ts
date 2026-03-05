@@ -46,16 +46,11 @@ class APIConnector {
   /**
    * Translates a natural language query into structured filters.
    * @param query - The natural language search query.
-   * @param filters - Optional current filters for refinement.
    * @returns The interpreted filters.
    */
-  public async interpretQuery(
-    query: string,
-    filters?: FilterModelApi,
-  ): Promise<FilterModelApi> {
+  public async interpretQuery(query: string): Promise<FilterModelApi> {
     return await this.#httpCall<FilterModelApi>("interpret", "POST", {
       query,
-      filters,
     });
   }
 

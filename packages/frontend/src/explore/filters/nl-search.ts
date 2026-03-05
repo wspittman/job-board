@@ -11,8 +11,7 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "filters-nl-search";
 
 interface Props {
-  filtersIn: () => FilterModel;
-  filtersOut: (filters: FilterModel) => void;
+  onFilters: (filters: FilterModel) => void;
 }
 
 /**
@@ -22,8 +21,7 @@ export class NLSearch extends ComponentBase {
   readonly #query: FormTextarea;
   readonly #update: HTMLButtonElement;
   readonly #error: HTMLElement;
-  #filtersIn?: () => FilterModel;
-  #filtersOut?: (filters: FilterModel) => void;
+  #onFilters?: (filters: FilterModel) => void;
 
   /**
    * Applies the job card template and default styles to the element instance.
@@ -37,12 +35,10 @@ export class NLSearch extends ComponentBase {
 
   /**
    * Sets up the filter accessors
-   * @param filtersIn - Function that returns the current filter state
-   * @param filtersOut - Function that accepts an updated filter state to apply
+   * @param onFilters - Function that accepts an updated filter state to apply
    */
-  init({ filtersIn, filtersOut }: Props) {
-    this.#filtersIn = filtersIn;
-    this.#filtersOut = filtersOut;
+  init({ onFilters }: Props) {
+    this.#onFilters = onFilters;
 
     this.#query.init({
       label: "Describe the job you want",
@@ -72,18 +68,16 @@ export class NLSearch extends ComponentBase {
 
   async #handleUpdate(): Promise<void> {
     const query = this.#getQueryValue();
-    if (!query || !this.#filtersIn || !this.#filtersOut) return;
+    if (!query || !this.#onFilters) return;
 
     this.#update.disabled = true;
     this.#update.textContent = "Updating...";
     this.#error.hidden = true;
 
     try {
-      const filters = this.#filtersIn();
-      const filterObj = Object.fromEntries(filters.toEntries());
-      const updatedFiltersObj = await api.interpretQuery(query, filterObj);
-      const updatedFilters = FilterModel.fromApi(updatedFiltersObj);
-      this.#filtersOut(updatedFilters);
+      const filtersObj = await api.interpretQuery(query);
+      const filters = FilterModel.fromApi(filtersObj);
+      this.#onFilters(filters);
       this.#query.value = "";
     } catch {
       this.#error.textContent = "Failed. Please try again.";
