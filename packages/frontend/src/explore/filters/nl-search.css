@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.update {
+  align-self: flex-end;
+  padding: var(--space-xs) var(--space-md);
+  background: var(--primary-main);
+  color: var(--text-contrast);
+  font-size: var(--font-size-xs);
+
+  &:hover {
+    background: var(--primary-dark);
+  }
+
+  &:disabled {
+    background: var(--secondary-disabled);
+    cursor: not-allowed;
+  }
+}

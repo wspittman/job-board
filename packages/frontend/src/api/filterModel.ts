@@ -44,6 +44,12 @@ export class FilterModel {
     return model;
   }
 
+  static fromBag(bag: Record<string, string | undefined>): FilterModel {
+    const model = new FilterModel();
+    model.#fromBag(bag);
+    return model;
+  }
+
   /**
    * Checks if the filter model is empty (contains no active filters).
    * @returns True if the filter model is empty, false otherwise.
@@ -133,6 +139,10 @@ export class FilterModel {
       FilterModelKey,
       FilterModelValue,
     ][];
+  }
+
+  #fromBag(bag: Record<string, string | undefined>): void {
+    this.#fromGeneric((key) => bag[key]);
   }
 
   #fromFormData(formData: FormData): void {

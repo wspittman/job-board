@@ -44,6 +44,30 @@ class APIConnector {
   }
 
   /**
+   * Translates a natural language query into structured filters.
+   * @param query - The natural language search query.
+   * @param filters - Optional current filters for refinement.
+   * @returns The interpreted filters.
+   */
+  public async interpretQuery(
+    query: string,
+    filters?: Record<string, unknown>,
+  ): Promise<Record<string, string>> {
+    // Mocking the API response for now
+    console.log("Mocking interpretQuery for:", query, filters);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    return {
+      title: "Software Engineer",
+      location: "Berlin",
+      isRemote: "true",
+      minSalary: "100000",
+      currency: "USD",
+      payCadence: "salary",
+    };
+  }
+
+  /**
    * Makes an HTTP call to the API.
    * @param url - The URL endpoint to call.
    * @returns The response data as type T.
