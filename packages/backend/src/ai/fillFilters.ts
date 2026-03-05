@@ -3,6 +3,7 @@ import { config } from "../config.ts";
 import type { Filters, InterpretQuery } from "../models/clientModels.ts";
 import { ExtractionFilters } from "../models/extractionModels.ts";
 import type { Bag } from "../types/types.ts";
+import { normalizedLocation } from "../utils/location.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { setExtractedData } from "./setExtractedData.ts";
 
@@ -43,8 +44,17 @@ export async function fillFilters(request: InterpretQuery): Promise<Filters> {
       logProperty("Unmapped_Intent", unmappedIntent);
     }
 
+    // Map content to Filters object
+    const extractIsRemote = extractedFilters.isRemote.trim().toLowerCase();
+    const isRemote = !extractIsRemote ? undefined : extractIsRemote === "true";
+    const mappedContent: Filters = {
+      ...extractedFilters,
+      isRemote,
+      location: normalizedLocation(extractedFilters.location),
+    } as Filters;
+
     const mergeFilters = { ...request.filters };
-    setExtractedData(mergeFilters, extractedFilters);
+    setExtractedData(mergeFilters, mappedContent);
     return mergeFilters;
   }
 

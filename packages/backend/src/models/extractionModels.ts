@@ -310,8 +310,9 @@ export const ExtractionFilters = z
       "Example: '$50 an hour' → 50.",
     ),
     unmappedIntent: zString(
-      "If any user intent could not be mapped to the structured filters above, describe it here.",
-      "This is not for internal reasoning or model notes, but rather to capture any relevant user preferences or constraints that were expressed but do not fit into the structured fields.",
+      "If any user intent could not be mapped to the structured filters above, describe it concisely here.",
+      "This is not for internal reasoning or model notes.",
+      "Most of the time, this should return ''.",
       "If everything was successfully mapped, return ''.",
     ),
   })
