@@ -29,6 +29,9 @@ export interface FormElementProps {
   // For select and combobox
   options?: FormOption[];
 
+  // For textarea
+  rows?: number;
+
   // editable
   value?: FormValue;
 }
@@ -40,7 +43,7 @@ export interface FormElementProps {
 export abstract class FormElement extends ComponentBase {
   static formAssociated = true;
 
-  protected intake!: HTMLInputElement | HTMLSelectElement;
+  protected intake!: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
   #internals = this.attachInternals();
   #onChange?: () => void;
 
@@ -57,16 +60,19 @@ export abstract class FormElement extends ComponentBase {
    * @param intakeType - The native element type to create within the component
    * @param css - The component-specific stylesheet to adopt
    */
-  constructor(intakeType: "input" | "select", css: CSSStyleSheet) {
+  constructor(intakeType: "input" | "select" | "textarea", css: CSSStyleSheet) {
     super(html, [cssSheet, css]);
 
     this.intake = document.createElement(intakeType);
     this.intake.id = "intake";
     this.intake.className = "intake";
 
+    if (intakeType === "input" || intakeType === "textarea") {
+      this.intake.setAttribute("placeholder", " ");
+    }
+
     if (intakeType === "input") {
       this.intake.setAttribute("type", "text");
-      this.intake.setAttribute("placeholder", " ");
     }
 
     this.getEl("intake-wrap")!.prepend(this.intake);
