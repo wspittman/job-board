@@ -3,6 +3,7 @@ import { config } from "../config.ts";
 import type { Filters, InterpretQuery } from "../models/clientModels.ts";
 import { ExtractionFilters } from "../models/extractionModels.ts";
 import type { Bag } from "../types/types.ts";
+import { logProperty } from "../utils/telemetry.ts";
 import { setExtractedData } from "./setExtractedData.ts";
 
 const prompt = `You are a job-search assistant. Your goal is to translate a user's natural language search query into a structured set of filters.
@@ -14,6 +15,7 @@ const prompt = `You are a job-search assistant. Your goal is to translate a user
     - If the query adds a new constraint, include it in the output.
     - If the query contradicts an existing filter (e.g., current is 'Remote', query says 'In-person'), include the new value in the output, which will override the old one externally.
 - Be Specific: Only set fields that are explicitly mentioned or strongly implied by the query or the combination of query and current filters.
+- Capture Unmapped Intent: If the user query contains preferences or constraints that cannot be mapped to the structured fields (e.g., "no early-stage startups", "must use React", "dog-friendly office"), describe them in the 'unmappedIntent' field.
 `;
 
 /**
@@ -35,8 +37,14 @@ export async function fillFilters(request: InterpretQuery): Promise<Filters> {
   );
 
   if (content) {
+    const { unmappedIntent, ...extractedFilters } = content;
+
+    if (unmappedIntent) {
+      logProperty("Unmapped_Intent", unmappedIntent);
+    }
+
     const mergeFilters = { ...request.filters };
-    setExtractedData(mergeFilters, content);
+    setExtractedData(mergeFilters, extractedFilters);
     return mergeFilters;
   }
 
