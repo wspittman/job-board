@@ -21,11 +21,16 @@ export class FormTextarea extends FormElement {
    * Initializes the textarea with optional rows.
    * @param props - The configuration options for the textarea component
    */
-  override init({ rows, ...rest }: FormElementProps) {
+  override init({ maxLength, rows, ...rest }: FormElementProps) {
     super.init(rest);
+    const intake = this.intake as HTMLTextAreaElement;
 
     if (rows) {
-      (this.intake as HTMLTextAreaElement).rows = rows;
+      intake.rows = rows;
+    }
+
+    if (maxLength) {
+      intake.maxLength = maxLength;
     }
   }
 

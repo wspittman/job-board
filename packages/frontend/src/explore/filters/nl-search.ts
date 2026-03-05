@@ -46,6 +46,7 @@ export class NLSearch extends ComponentBase {
       tooltip:
         "Use natural language to update your filters. For example, 'A remote software engineering job posted in the last week'.",
       rows: 3,
+      maxLength: 200,
       onChange: () => this.#setNLUpdateState(),
     });
 

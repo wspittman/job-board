@@ -41,6 +41,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-input",
       name: "title",
       label: "Title",
+      maxLength: 100,
       tooltip:
         "A partial match search on job title text, so 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
     },
@@ -112,6 +113,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "location",
       label: "Location",
       prefix: "Working from",
+      maxLength: 100,
     },
     {
       type: "jb-form-input",

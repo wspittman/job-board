@@ -17,6 +17,9 @@ export interface FormElementProps {
   tooltip?: string;
   onChange?: () => void;
 
+  // For input and textarea
+  maxLength?: number;
+
   // For input
   prefix?: string;
   suffix?: string;
@@ -26,11 +29,11 @@ export interface FormElementProps {
     max?: number;
   };
 
-  // For select and combobox
-  options?: FormOption[];
-
   // For textarea
   rows?: number;
+
+  // For select and combobox
+  options?: FormOption[];
 
   // editable
   value?: FormValue;

@@ -27,12 +27,23 @@ export class FormInput extends FormElement {
    * Initializes the input with adornments and optional validation rules.
    * @param props - The configuration options for the input component
    */
-  override init({ prefix, suffix, validation, ...rest }: FormElementProps) {
+  override init({
+    maxLength,
+    prefix,
+    suffix,
+    validation,
+    ...rest
+  }: FormElementProps) {
     super.init(rest);
     this.#validation = validation;
+    const intake = this.intake as HTMLInputElement;
 
     if (this.#validation?.type === "int") {
-      this.intake.inputMode = "numeric";
+      intake.inputMode = "numeric";
+    }
+
+    if (maxLength) {
+      intake.maxLength = maxLength;
     }
 
     this.#createAdornment(true, prefix);
