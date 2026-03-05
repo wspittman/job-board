@@ -4,8 +4,14 @@
   gap: var(--space-sm);
 }
 
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
 .update {
-  align-self: flex-end;
   padding: var(--space-xs) var(--space-md);
   background: var(--primary-main);
   color: var(--text-contrast);
@@ -19,4 +25,9 @@
     background: var(--primary-disabled);
     cursor: not-allowed;
   }
+}
+
+.error {
+  color: var(--error-main);
+  font-size: var(--font-size-xxs);
 }

@@ -1,6 +1,6 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
 import { getStorageIds } from "../utils/storage";
-import type { JobModelApi, MetadataModelApi } from "./apiTypes";
+import type { FilterModelApi, JobModelApi, MetadataModelApi } from "./apiTypes";
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -51,33 +51,38 @@ class APIConnector {
    */
   public async interpretQuery(
     query: string,
-    filters?: Record<string, unknown>,
-  ): Promise<Record<string, string>> {
-    // Mocking the API response for now
-    console.log("Mocking interpretQuery for:", query, filters);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    return {
-      title: "Software Engineer",
-      location: "Berlin",
-      isRemote: "true",
-      minSalary: "100000",
-      currency: "USD",
-      payCadence: "salary",
-    };
+    filters?: FilterModelApi,
+  ): Promise<FilterModelApi> {
+    return await this.#httpCall<FilterModelApi>("interpret", "POST", {
+      query,
+      filters,
+    });
   }
 
   /**
    * Makes an HTTP call to the API.
    * @param url - The URL endpoint to call.
+   * @param method - The HTTP method to use (defaults to GET).
+   * @param body - The request body (for POST/PUT requests).
    * @returns The response data as type T.
    */
-  async #httpCall<T>(url: string): Promise<T> {
+  async #httpCall<T>(
+    url: string,
+    method: "GET" | "POST" = "GET",
+    body?: unknown,
+  ): Promise<T> {
     const trimmedUrl = url.replace(/^\/+/, "");
+    const headers = new Headers(getStorageIds("headers"));
+
+    if (body) {
+      headers.set("Content-Type", "application/json");
+    }
 
     const response = await fetch(`api/${trimmedUrl}`, {
+      method,
       signal: AbortSignal.timeout(10_000),
-      headers: new Headers(getStorageIds("headers")),
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
     });
 
     const { statusText, ok } = response;

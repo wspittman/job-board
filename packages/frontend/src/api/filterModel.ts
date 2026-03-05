@@ -44,9 +44,14 @@ export class FilterModel {
     return model;
   }
 
-  static fromBag(bag: Record<string, string | undefined>): FilterModel {
+  /**
+   * Creates a FilterModel instance from a FilterModelApi object.
+   * @param apiFilters - The FilterModelApi object.
+   * @returns A new FilterModel instance.
+   */
+  static fromApi(apiFilters: FilterModelApi): FilterModel {
     const model = new FilterModel();
-    model.#fromBag(bag);
+    Object.assign(model.#filters, apiFilters);
     return model;
   }
 
@@ -139,10 +144,6 @@ export class FilterModel {
       FilterModelKey,
       FilterModelValue,
     ][];
-  }
-
-  #fromBag(bag: Record<string, string | undefined>): void {
-    this.#fromGeneric((key) => bag[key]);
   }
 
   #fromFormData(formData: FormData): void {

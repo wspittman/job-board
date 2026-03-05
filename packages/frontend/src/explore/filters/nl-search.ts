@@ -21,6 +21,7 @@ interface Props {
 export class NLSearch extends ComponentBase {
   readonly #query: FormTextarea;
   readonly #update: HTMLButtonElement;
+  readonly #error: HTMLElement;
   #filtersIn?: () => FilterModel;
   #filtersOut?: (filters: FilterModel) => void;
 
@@ -31,6 +32,7 @@ export class NLSearch extends ComponentBase {
     super(html, cssSheet);
     this.#query = this.getEl<FormTextarea>("query")!;
     this.#update = this.getEl<HTMLButtonElement>("update")!;
+    this.#error = this.getEl("error")!;
   }
 
   /**
@@ -74,15 +76,17 @@ export class NLSearch extends ComponentBase {
 
     this.#update.disabled = true;
     this.#update.textContent = "Updating...";
+    this.#error.hidden = true;
 
     try {
       const filters = this.#filtersIn();
       const filterObj = Object.fromEntries(filters.toEntries());
       const updatedFiltersObj = await api.interpretQuery(query, filterObj);
-      const updatedFilters = FilterModel.fromBag(updatedFiltersObj);
+      const updatedFilters = FilterModel.fromApi(updatedFiltersObj);
       this.#filtersOut(updatedFilters);
     } catch {
-      /** ignore */
+      this.#error.textContent = "Failed. Please try again.";
+      this.#error.hidden = false;
     } finally {
       this.#update.disabled = false;
       this.#update.textContent = "Update";
