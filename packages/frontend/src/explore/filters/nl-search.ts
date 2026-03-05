@@ -84,6 +84,7 @@ export class NLSearch extends ComponentBase {
       const updatedFiltersObj = await api.interpretQuery(query, filterObj);
       const updatedFilters = FilterModel.fromApi(updatedFiltersObj);
       this.#filtersOut(updatedFilters);
+      this.#query.value = "";
     } catch {
       this.#error.textContent = "Failed. Please try again.";
       this.#error.hidden = false;
