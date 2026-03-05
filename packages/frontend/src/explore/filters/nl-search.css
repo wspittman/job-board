@@ -16,7 +16,7 @@
   }
 
   &:disabled {
-    background: var(--secondary-disabled);
+    background: var(--primary-disabled);
     cursor: not-allowed;
   }
 }
