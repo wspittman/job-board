@@ -85,7 +85,7 @@ export class NLSearch extends ComponentBase {
       this.#error.hidden = false;
     } finally {
       this.#setNLUpdateState();
-      this.#update.textContent = "Add Filters";
+      this.#update.textContent = "Add";
     }
   }
 }
