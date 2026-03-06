@@ -51,7 +51,7 @@ export class FilterModel {
    */
   static fromApi(apiFilters: FilterModelApi): FilterModel {
     const model = new FilterModel();
-    Object.assign(model.#filters, apiFilters);
+    model.#fromApi(apiFilters);
     return model;
   }
 
@@ -152,6 +152,13 @@ export class FilterModel {
 
   #fromUrlSearchParams(params: URLSearchParams): void {
     this.#fromGeneric((key) => params.get(key));
+  }
+
+  #fromApi(apiFilters: FilterModelApi): void {
+    this.#fromGeneric((key) => {
+      const val = apiFilters[key as FilterModelKey];
+      return val == null ? val : String(val);
+    });
   }
 
   #fromGeneric(get: (key: string) => string | null | undefined): void {
