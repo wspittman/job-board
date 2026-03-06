@@ -24,7 +24,7 @@ export class NLSearch extends ComponentBase {
   #onFilters?: (filters: FilterModel) => void;
 
   /**
-   * Applies the job card template and default styles to the element instance.
+   * Creates a NLSearch component instance.
    */
   constructor() {
     super(html, cssSheet);
@@ -71,6 +71,7 @@ export class NLSearch extends ComponentBase {
     const query = this.#getQueryValue();
     if (!query || !this.#onFilters) return;
 
+    this.#query.disabled = true;
     this.#update.disabled = true;
     this.#update.textContent = "Adding...";
     this.#error.hidden = true;
@@ -84,8 +85,9 @@ export class NLSearch extends ComponentBase {
       this.#error.textContent = "Failed. Please try again.";
       this.#error.hidden = false;
     } finally {
-      this.#setNLUpdateState();
+      this.#query.disabled = false;
       this.#update.textContent = "Add";
+      this.#setNLUpdateState();
     }
   }
 }

@@ -108,6 +108,14 @@ export abstract class FormElement extends ComponentBase {
     this.#syncAttribute();
   }
 
+  set disabled(isDisabled: boolean) {
+    if (isDisabled) {
+      this.intake.setAttribute("disabled", "true");
+    } else {
+      this.intake.removeAttribute("disabled");
+    }
+  }
+
   /**
    * Retrieves the value that should be submitted with the form.
    * Subclasses may override to provide custom representations.
