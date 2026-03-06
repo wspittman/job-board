@@ -42,7 +42,7 @@
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: var(--space-sm);
-  margin-block-end: var(--space-md);
+  margin-block-end: var(--space-sm);
 }
 
 .form {
@@ -85,11 +85,7 @@
   }
 
   .collapsed {
-    & .form {
-      display: none;
-    }
-
-    & filters-nl-search {
+    .collapsible {
       display: none;
     }
 
@@ -102,7 +98,7 @@
     }
   }
 
-  .explain {
+  .hide-large {
     display: none;
   }
 }
