@@ -72,7 +72,7 @@ export class NLSearch extends ComponentBase {
     if (!query || !this.#onFilters) return;
 
     this.#update.disabled = true;
-    this.#update.textContent = "Updating...";
+    this.#update.textContent = "Adding...";
     this.#error.hidden = true;
 
     try {
@@ -84,8 +84,8 @@ export class NLSearch extends ComponentBase {
       this.#error.textContent = "Failed. Please try again.";
       this.#error.hidden = false;
     } finally {
-      this.#update.disabled = false;
-      this.#update.textContent = "Update";
+      this.#setNLUpdateState();
+      this.#update.textContent = "Add Filters";
     }
   }
 }
