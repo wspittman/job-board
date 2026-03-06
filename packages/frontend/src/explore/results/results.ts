@@ -85,8 +85,12 @@ export class Results extends ComponentBase {
   }
 
   #selectCard(selectedId: string) {
-    if (!selectedId || this.#selectedCard?.jobId === selectedId) return;
+    if (!selectedId) return;
+
+    // Notify the details pane of the selection change, even if the same card is re-selected
     this.#onSelect?.(selectedId);
+
+    if (this.#selectedCard?.jobId === selectedId) return;
 
     if (this.#selectedCard) {
       this.#selectedCard.isSelected = false;
