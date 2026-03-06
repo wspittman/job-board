@@ -171,6 +171,20 @@ export function useRefreshJobsOptions(input: unknown): RefreshJobsOptions {
   return options;
 }
 
+const InterpretQuerySchema = z.object({
+  query: z.string().trim().min(1).max(200),
+});
+
+/**
+ * Validate natural language query interpretation request
+ * @returns Validated query string
+ */
+export function useInterpretQuery(input: unknown): string {
+  const { query } = stripObj(zParse(InterpretQuerySchema, input));
+  logProperty("Input_InterpretQuery", query);
+  return query;
+}
+
 /**
  * Parse and validate data using a Zod schema
  * @param zt - Zod schema to use for validation

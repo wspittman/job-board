@@ -1,6 +1,7 @@
 import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
+import "./nl-search";
 
 import {
   companyStageOptions,
@@ -17,6 +18,7 @@ import type {
   FormElement,
   FormElementProps,
 } from "../../components/form-element";
+import type { NLSearch } from "./nl-search";
 
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
@@ -39,6 +41,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-input",
       name: "title",
       label: "Title",
+      maxLength: 100,
       tooltip:
         "A partial match search on job title text, so 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
     },
@@ -110,6 +113,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "location",
       label: "Location",
       prefix: "Working from",
+      maxLength: 100,
     },
     {
       type: "jb-form-input",
@@ -155,6 +159,7 @@ export class Filters extends ComponentBase {
   readonly #chips: HTMLElement;
   readonly #form: HTMLFormElement;
   readonly #inputs = new Map<FilterModelKey, FormElement>();
+  readonly #nlSearch: NLSearch;
 
   #debounceTimer: number | undefined;
   #onChange?: (filters: FilterModel) => Promise<void>;
@@ -168,8 +173,9 @@ export class Filters extends ComponentBase {
     super(html, cssSheet);
     this.#container = this.getEl("container")!;
     this.#toggle = this.getEl<HTMLButtonElement>("toggle")!;
-    this.#form = this.getEl<HTMLFormElement>("form")!;
     this.#chips = this.getEl("chips")!;
+    this.#nlSearch = this.getEl<NLSearch>("nl-search")!;
+    this.#form = this.getEl<HTMLFormElement>("form")!;
 
     this.#toggle.addEventListener("click", () => this.#handleToggle());
     this.#setCollapsed(false);
@@ -184,6 +190,10 @@ export class Filters extends ComponentBase {
   init({ onChange, initialFilters }: Props) {
     this.#onChange = onChange;
     this.#initialFilters = initialFilters;
+
+    this.#nlSearch.init({
+      onFilters: (filters) => this.#handleNLUpdate(filters),
+    });
 
     if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
       this.#setCollapsed(true);
@@ -306,6 +316,17 @@ export class Filters extends ComponentBase {
       "aria-label",
       collapsed ? "Expand filters panel" : "Collapse filters panel",
     );
+  }
+
+  #handleNLUpdate(filters: FilterModel): void {
+    for (const [key, value] of filters.toEntries()) {
+      const input = this.#inputs.get(key);
+      if (input) {
+        input.value = value ?? "";
+      }
+    }
+
+    this.#debounceOnChange();
   }
 }
 

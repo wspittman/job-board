@@ -6,6 +6,7 @@ import {
   useCompanyKeys,
   useFilters,
   useFullJobKey,
+  useInterpretQuery,
   useJobKey,
   useRefreshJobsOptions,
 } from "../../src/middleware/inputValidators";
@@ -80,7 +81,7 @@ suite("useBeacon", () => {
     test(toTestName("Valid input", input), () => {
       useBeacon(input);
       const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
-      assert.deepStrictEqual(actual, expected);
+      assert.deepEqual(actual, expected);
     });
   });
 
@@ -89,7 +90,7 @@ suite("useBeacon", () => {
   invalidCases.forEach((input) => {
     test(toTestName("Invalid input", { input }), () => {
       assert.throws(() => useBeacon(input));
-      assert.deepStrictEqual(correlationContext, {});
+      assert.deepEqual(correlationContext, {});
     });
   });
 });
@@ -103,7 +104,7 @@ suite("useCompanyKey", () => {
   validCases.forEach((input) => {
     test(toTestName("Valid input", input), () => {
       const result = useCompanyKey(input);
-      assert.deepStrictEqual(result, COMPANY_KEY);
+      assert.deepEqual(result, COMPANY_KEY);
     });
   });
 
@@ -131,7 +132,7 @@ suite("useCompanyKeys", () => {
   validCases.forEach((input) => {
     test(toTestName("Valid input", input), () => {
       const result = useCompanyKeys(input);
-      assert.deepStrictEqual(result, COMPANY_KEYS);
+      assert.deepEqual(result, COMPANY_KEYS);
     });
   });
 
@@ -159,7 +160,7 @@ suite("useJobKey", () => {
   validCases.forEach((input) => {
     test(toTestName("Valid input", input), () => {
       const result = useJobKey(input);
-      assert.deepStrictEqual(result, JOB_KEY);
+      assert.deepEqual(result, JOB_KEY);
     });
   });
 
@@ -188,7 +189,7 @@ suite("useCompanyAndJobKeys", () => {
   validCases.forEach((input) => {
     test(toTestName("Valid input", input), () => {
       const result = useFullJobKey(input);
-      assert.deepStrictEqual(result, {
+      assert.deepEqual(result, {
         companyKey: COMPANY_KEY,
         jobKey: JOB_KEY,
       });
@@ -226,7 +227,7 @@ suite("useRefreshJobsOptions", () => {
   validCases.forEach((input) => {
     test(toTestName("Valid input", input), () => {
       const result = useRefreshJobsOptions(input);
-      assert.deepStrictEqual(result, input);
+      assert.deepEqual(result, input);
     });
   });
 
@@ -318,7 +319,7 @@ suite("useFilters", () => {
         ...coerceInt("minSalary", input.minSalary),
         ...(input.currency ? { currency: input.currency.toUpperCase() } : {}),
       };
-      assert.deepStrictEqual(result, expected);
+      assert.deepEqual(result, expected);
     });
   });
 
@@ -355,7 +356,35 @@ suite("useFilters", () => {
   invalidCases.forEach((input) => {
     test(toTestName("Invalid input", input), () => {
       const result = useFilters(input);
-      assert.deepStrictEqual(result, {});
+      assert.deepEqual(result, {});
+    });
+  });
+});
+
+suite("useInterpretQuery", () => {
+  const validCases = [
+    { query: "remote engineering jobs" },
+    { query: "staff engineer", unknown: "ignored" },
+  ];
+
+  validCases.forEach((input) => {
+    test(toTestName("Valid input", input), () => {
+      const result = useInterpretQuery(input);
+      assert.equal(result, input.query);
+    });
+  });
+
+  const invalidCases = [
+    {},
+    { query: "" },
+    { query: "   " },
+    { query: "a".repeat(501) },
+    { query: 101 },
+  ];
+
+  invalidCases.forEach((input) => {
+    test(toTestName("Invalid input", input), () => {
+      assert.throws(() => useInterpretQuery(input));
     });
   });
 });

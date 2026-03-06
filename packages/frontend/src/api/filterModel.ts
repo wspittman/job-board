@@ -45,6 +45,17 @@ export class FilterModel {
   }
 
   /**
+   * Creates a FilterModel instance from a FilterModelApi object.
+   * @param apiFilters - The FilterModelApi object.
+   * @returns A new FilterModel instance.
+   */
+  static fromApi(apiFilters: FilterModelApi): FilterModel {
+    const model = new FilterModel();
+    model.#fromApi(apiFilters);
+    return model;
+  }
+
+  /**
    * Checks if the filter model is empty (contains no active filters).
    * @returns True if the filter model is empty, false otherwise.
    */
@@ -141,6 +152,13 @@ export class FilterModel {
 
   #fromUrlSearchParams(params: URLSearchParams): void {
     this.#fromGeneric((key) => params.get(key));
+  }
+
+  #fromApi(apiFilters: FilterModelApi): void {
+    this.#fromGeneric((key) => {
+      const val = apiFilters[key as FilterModelKey];
+      return val == null ? val : String(val);
+    });
   }
 
   #fromGeneric(get: (key: string) => string | null | undefined): void {

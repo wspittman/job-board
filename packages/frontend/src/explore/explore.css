@@ -31,6 +31,7 @@ explore-filters {
   max-width: max(20%, 300px);
   height: 100%;
   overflow: auto;
+  scrollbar-width: thin;
 }
 
 explore-results,
@@ -38,6 +39,7 @@ explore-details {
   flex: 2;
   height: 100%;
   overflow: auto;
+  scrollbar-width: thin;
 }
 
 explore-results[smallen] {

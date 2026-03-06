@@ -9,6 +9,7 @@ import {
 import { extractLocation } from "./extractLocation.ts";
 import { fillCompanyInfo } from "./fillCompanyInfo.ts";
 import { fillJobInfo } from "./fillJobInfo.ts";
+import { interpretFilters } from "./interpretFilters.ts";
 import { isGeneralApplication } from "./isGeneralApplication.ts";
 
 subscribeOpenAILogging({
@@ -32,6 +33,10 @@ class LLMConnector {
 
   async isGeneralApplication(title: string) {
     return isGeneralApplication(title);
+  }
+
+  async interpretFilters(query: string) {
+    return interpretFilters(query);
   }
 }
 

@@ -12,6 +12,14 @@ import {
 } from "./enums.ts";
 
 /*
+Do not use .optional()
+OpenAI's structured outputs allow for nulls, but the models are really bad at using them.
+They prefer to hallucinate values rather than emit null.
+Instead, instruct to return "" or -1 when information is not available.
+We strip those properties out post-extraction.
+*/
+
+/*
 Schema properties that are supported by both OpenAI, Gemini, and Zod
 
 String
@@ -269,3 +277,55 @@ export const ExtractionJob = z
     ].join(" "),
   );
 export type ExtractionJob = z.infer<typeof ExtractionJob>;
+
+export const ExtractionFilters = z
+  .object({
+    isRemote: z
+      .enum(["true", "false", ""] as const)
+      .describe(
+        [
+          "true if the user is looking for remote work.",
+          "false if the user wants in-person or hybrid.",
+          "'' if no preference is stated.",
+        ].join(" "),
+      ),
+    workTimeBasis: WorkTimeBasis,
+    jobFamily: JobFamily,
+    companyStage: CompanyStage,
+    payCadence: PayCadence,
+    currency: zString("ISO 4217 currency code (uppercase), e.g. 'USD'."),
+    title: zString(
+      "A partial match search on job title text.",
+      "Example: 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
+    ),
+    location: ExtractionLocation,
+    daysSince: zPosNum(
+      "Filters to jobs posted within the specified number of days.",
+      "Example: 'posted today' → 1, 'this week' → 7.",
+    ),
+    maxExperience: zPosNum(
+      "Maximum years of experience the user has or is looking for.",
+      "Example: 'Job for student' → 0, 'I have 3 years experience' → 3.",
+      "Example: 'Roles that require less than 5 years experience' → 4.",
+    ),
+    minSalary: zPosNum(
+      "Minimum salary the user is looking for, in the specified currency and cadence.",
+      "Example: '$100k a year' → 100000.",
+      "Example: '$50 an hour' → 50.",
+    ),
+    unmappedIntent: zString(
+      "Minimally describe missing filters the user wished existed.",
+      "Example: 'Remote jobs at startups' -> 'companyStage insufficient for startup preference'.",
+      "Example: 'react software engineer' -> 'no skill filter for React'.",
+      "If there are no missing filters, return ''.",
+    ),
+  })
+  .describe(
+    [
+      "Structured filters derived from a natural language search query.",
+      "Fix common misspellings and typos.",
+      "Set string fields to '' when not explicitly stated.",
+      "Set numeric fields to -1 when not explicitly stated.",
+    ].join(" "),
+  );
+export type ExtractionFilters = z.infer<typeof ExtractionFilters>;

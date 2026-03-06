@@ -6,6 +6,7 @@
   --palette-error: 356 60%;
   --palette-success: 142 60%;
 
+  --primary-disabled: hsl(var(--palette-primary) 70%);
   --primary-light: hsl(var(--palette-primary) 60%);
   --primary-main: hsl(var(--palette-primary) 50%);
   --primary-dark: hsl(var(--palette-primary) 40%);
@@ -85,6 +86,10 @@
 }
 
 /* ===== Base ===== */
+html {
+  scrollbar-width: thin;
+}
+
 body {
   margin: 0;
   min-height: 100dvh;
