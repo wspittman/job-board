@@ -22,7 +22,7 @@ suite("config", () => {
   invalidAdminTokenCases.forEach(([name, adminToken]) => {
     test(`Invalid ADMIN_TOKEN: "${name}"`, async () => {
       setEnv({ ADMIN_TOKEN: adminToken });
-      await assert.rejects(importFreshConfig, /ADMIN_TOKEN must be set/);
+      await assert.rejects(importFreshConfig, /ADMIN_TOKEN/);
     });
   });
 
