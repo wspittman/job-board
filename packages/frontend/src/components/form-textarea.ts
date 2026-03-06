@@ -34,6 +34,11 @@ export class FormTextarea extends FormElement {
     }
   }
 
+  clear() {
+    this.value = "";
+    this.intake.style.height = "auto";
+  }
+
   protected override onInput() {
     super.onInput();
     this.intake.style.height = "auto";
