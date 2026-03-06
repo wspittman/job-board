@@ -39,7 +39,7 @@ declare module "express-serve-static-core" {
 
 const PAGES = new Set(["index", "faq", "404", "explore"]);
 const METHOD_ALLOWED = new Set(["GET", "HEAD", "POST"]);
-const POST_ALLOWED = new Set(["/api/beacon"]);
+const POST_ALLOWED = new Set(["/api/beacon", "/api/interpret"]);
 
 const MAL_PATTERN = [
   // File Endings
