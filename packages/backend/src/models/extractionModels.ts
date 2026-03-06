@@ -280,11 +280,15 @@ export type ExtractionJob = z.infer<typeof ExtractionJob>;
 
 export const ExtractionFilters = z
   .object({
-    isRemote: zString(
-      "True if the user is looking for remote work.",
-      "False if the user wants in-person or hybrid.",
-      "'' if no preference is stated.",
-    ),
+    isRemote: z
+      .enum(["true", "false", ""] as const)
+      .describe(
+        [
+          "true if the user is looking for remote work.",
+          "false if the user wants in-person or hybrid.",
+          "'' if no preference is stated.",
+        ].join(" "),
+      ),
     workTimeBasis: WorkTimeBasis,
     jobFamily: JobFamily,
     companyStage: CompanyStage,

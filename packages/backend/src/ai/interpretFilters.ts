@@ -43,7 +43,7 @@ export async function interpretFilters(query: string): Promise<Filters> {
   }
 
   // Map content to Filters object
-  const extractIsRemote = extractedFilters.isRemote.trim().toLowerCase();
+  const extractIsRemote = extractedFilters.isRemote;
   const isRemote = !extractIsRemote ? undefined : extractIsRemote === "true";
   const mappedContent: Filters = {
     ...extractedFilters,
