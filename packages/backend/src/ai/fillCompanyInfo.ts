@@ -1,5 +1,5 @@
 import { jsonCompletion } from "dry-utils-openai";
-import { config } from "../config.ts";
+import { getLLMOptions } from "../config.ts";
 import { ExtractionCompany } from "../models/extractionModels.ts";
 import type { Company } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
@@ -21,14 +21,13 @@ export async function fillCompanyInfo(
   company: Context<Company>,
 ): Promise<boolean> {
   const { content } = await jsonCompletion(
-    "extractCompanyInfo",
+    "fillCompanyInfo",
     prompt,
     company.item,
     ExtractionCompany,
     {
       context: company.context,
-      model: config.LLM_MODEL,
-      reasoningEffort: config.LLM_REASONING_EFFORT,
+      ...getLLMOptions("fillCompanyInfo"),
     },
   );
 

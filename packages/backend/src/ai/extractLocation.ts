@@ -1,5 +1,5 @@
 import { jsonCompletion } from "dry-utils-openai";
-import { config } from "../config.ts";
+import { getLLMOptions } from "../config.ts";
 import { getCachedLocation, setCachedLocation } from "../db/cache.ts";
 import { ExtractionLocation } from "../models/extractionModels.ts";
 import type { Location } from "../models/models.ts";
@@ -29,7 +29,7 @@ export async function extractLocation(location: string): Promise<Location> {
     prompt,
     location,
     ExtractionLocation,
-    { model: config.LLM_MODEL, reasoningEffort: config.LLM_REASONING_EFFORT },
+    getLLMOptions("extractLocation"),
   );
 
   if (!content) return {};

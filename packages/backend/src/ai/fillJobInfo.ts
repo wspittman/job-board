@@ -1,5 +1,5 @@
 import { jsonCompletion } from "dry-utils-openai";
-import { config } from "../config.ts";
+import { getLLMOptions } from "../config.ts";
 import { ExtractionJob } from "../models/extractionModels.ts";
 import type { Job } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
@@ -37,14 +37,13 @@ const prompt = `You are an information-extraction engine. Your sole job is to re
  */
 export async function fillJobInfo(job: Context<Job>): Promise<boolean> {
   const { content } = await jsonCompletion(
-    "extractFacets",
+    "fillJobInfo",
     prompt,
     job.item,
     ExtractionJob,
     {
       context: job.context,
-      model: config.LLM_MODEL,
-      reasoningEffort: config.LLM_REASONING_EFFORT,
+      ...getLLMOptions("fillJobInfo"),
     },
   );
 

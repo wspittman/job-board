@@ -1,4 +1,5 @@
 import { jsonCompletion, z } from "dry-utils-openai";
+import { getLLMOptions } from "../config.ts";
 
 const prompt = `Below are example titles for “general-application” Job Descriptions (JDs). These JDs are not tied to a specific open role; their purpose is to collect resumes, maintain a talent community, or provide updates about current and future opportunities.
 
@@ -38,11 +39,7 @@ export async function isGeneralApplication(title: string): Promise<boolean> {
     prompt,
     title,
     z.object({ result: z.boolean() }),
-    {
-      // Always cheap model since this is a simple classification task
-      model: "gpt-5-nano",
-      reasoningEffort: "minimal",
-    },
+    getLLMOptions("isGeneralApplication"),
   );
 
   return content?.result ?? false;
