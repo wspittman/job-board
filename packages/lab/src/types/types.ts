@@ -3,7 +3,19 @@ import type { DataModel } from "../portal/pTypes.ts";
 export type Bag = Record<string, unknown>;
 export type NumBag = Record<string, number>;
 
-// #region Inputs
+// #region Commands
+
+export interface Command {
+  usage(): string | string[];
+  prerequisite?(): void;
+  run(args: string[]): Promise<void>;
+}
+
+export class CommandError extends Error {}
+
+// #endregion
+
+// #region Eval Inputs
 
 /**
  * Basic information about a particular evaluation run, which has many scenarios.

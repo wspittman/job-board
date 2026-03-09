@@ -6,8 +6,7 @@ import {
   LLM_REASONING_EFFORT,
   validateDataModel,
 } from "../portal/pFuncs.ts";
-import type { Command } from "../types.ts";
-import type { Run } from "../types/types.ts";
+import type { Command, Run } from "../types/types.ts";
 import { embedCache } from "../utils/embedCache.ts";
 import { readSources, writeObj } from "../utils/fileUtils.ts";
 

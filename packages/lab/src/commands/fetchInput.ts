@@ -3,7 +3,7 @@ import {
   validateAts,
   validateDataModel,
 } from "../portal/pFuncs.ts";
-import { CommandError, type Command } from "../types.ts";
+import { CommandError, type Command } from "../types/types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
 
 export const fetchInput: Command = {
