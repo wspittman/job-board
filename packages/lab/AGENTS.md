@@ -29,7 +29,7 @@ The `input` and `ground` folders must be populated before running an evaluation.
 Capture scenarios directly from an ATS:
 
 ```
-npm run lab -- fetch-input <dataModel> <ats> <companyId> [jobId]
+npm run lab -- fetchInput <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel`: `company` or `job`.

@@ -10,9 +10,9 @@ function asArray(value: string | string[]): string[] {
 
 const registry: Record<string, Command> = {
   evals,
-  "fetch-input": fetchInput,
+  fetchInput,
   playground,
-  "job-counts": jobCounts,
+  jobCounts,
 };
 
 /**

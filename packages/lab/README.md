@@ -31,7 +31,7 @@ created automatically the first time you save data.
 You can capture fresh scenarios directly from an Applicant Tracking System (ATS):
 
 ```bash
-npm run lab -- fetch-input <dataModel> <ats> <companyId> [jobId]
+npm run lab -- fetchInput <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel` must be either `company` or `job`.
