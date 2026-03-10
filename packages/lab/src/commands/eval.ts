@@ -6,9 +6,9 @@ import {
   LLM_REASONING_EFFORT,
   validateDataModel,
 } from "../portal/pFuncs.ts";
-import type { Command, Run } from "../types/types.ts";
+import type { Command, Run, Source } from "../types/types.ts";
 import { embedCache } from "../utils/embedCache.ts";
-import { readSources, writeObj } from "../utils/fileUtils.ts";
+import { readManyObj, writeObj, type Place } from "../utils/fileUtils.ts";
 
 subscribeAsyncLogging({
   log: ({ tag, val }) => console.log(tag, val),
@@ -42,10 +42,19 @@ async function runEval(run: Run): Promise<void> {
     `${runName}: Running eval for ${dataModel} with ${llmModel} ${llmReasoningEffort ?? ""}`.trim(),
   );
 
-  const sources = await readSources(dataModel);
+  const sources = await readManyObj<Source>({
+    group: "eval",
+    stage: "in",
+    folder: dataModel,
+  });
   console.log(`${runName}: Found ${sources.length} sources`);
 
   const outcomes: Outcome[] = [];
+  const outFolder: Place = {
+    group: "eval",
+    stage: "out",
+    folder: [dataModel, runName, llmModel, llmReasoningEffort ?? ""],
+  };
 
   await batch(
     `${runName}_${dataModel}_${llmModel}`,
@@ -57,25 +66,16 @@ async function runEval(run: Run): Promise<void> {
       const outcome = await evaluate(run, source);
       outcomes.push(outcome);
 
-      await writeObj(
-        outcome,
-        "Outcome",
-        dataModel,
-        runName,
-        llmModel,
-        llmReasoningEffort ?? "",
-        source.sourceName,
-      );
+      await writeObj(outcome, {
+        ...outFolder,
+        file: source.sourceName,
+      });
     },
   );
 
   const rep = report(run, outcomes);
-  await writeObj(
-    rep,
-    "Report",
-    dataModel,
-    runName,
-    llmModel,
-    llmReasoningEffort ?? "",
-  );
+  await writeObj(rep, {
+    ...outFolder,
+    file: "Report",
+  });
 }

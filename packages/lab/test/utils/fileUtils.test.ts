@@ -5,27 +5,27 @@ import path from "node:path";
 import { afterEach, suite, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { readObj, readSources, writeObj } from "../../src/utils/fileUtils.ts";
+import {
+  readObj,
+  readManyObj,
+  writeObj,
+  type Place,
+} from "../../src/utils/fileUtils.ts";
 
 const basePath = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
-  "../..",
+  "../../data",
 );
 
 const touchedDirs: string[] = [];
 
-const makeSubRole = async (): Promise<string> => {
+const makeSubFolder = async (group: Place["group"]): Promise<string> => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "file-utils-"));
-  const subRole = path.basename(tempDir);
+  const subFolder = path.basename(tempDir);
   await rm(tempDir, { recursive: true, force: true });
-  touchedDirs.push(
-    path.join(basePath, "input", subRole),
-    path.join(basePath, "ground", subRole),
-    path.join(basePath, "outcome", subRole),
-    path.join(basePath, "report", subRole),
-    path.join(basePath, "cache", subRole),
-  );
-  return subRole;
+  touchedDirs.push(path.join(basePath, group, "in", subFolder));
+  touchedDirs.push(path.join(basePath, group, "out", subFolder));
+  return subFolder;
 };
 
 afterEach(async () => {
@@ -37,12 +37,24 @@ afterEach(async () => {
 });
 
 suite("fileUtils", () => {
-  test("writeObj: writes a JSON file with evalTS and key-based filename", async () => {
-    const subRole = (await makeSubRole()) as Parameters<typeof readSources>[0];
+  test("writeObj: writes a JSON file with evalTS and correctly structured path", async () => {
+    const subFolder = await makeSubFolder("eval");
+    const place: Place = {
+      group: "eval",
+      stage: "out",
+      folder: subFolder,
+      file: "summary",
+    };
 
-    await writeObj({ status: "ok" }, "Report", subRole, "run", "summary");
+    await writeObj({ status: "ok" }, place);
 
-    const filePath = path.join(basePath, "report", subRole, "run_summary.json");
+    const filePath = path.join(
+      basePath,
+      "eval",
+      "out",
+      subFolder,
+      "summary.json",
+    );
     const file = JSON.parse(await readFile(filePath, "utf-8"));
 
     assert.equal(file.status, "ok");
@@ -50,63 +62,72 @@ suite("fileUtils", () => {
   });
 
   test("readObj: reads an existing JSON file and supports extensionless names", async () => {
-    const subRole = (await makeSubRole()) as Parameters<typeof readSources>[0];
-    const dir = path.join(basePath, "cache", subRole);
-    await writeObj({ total: 3 }, "Cache", subRole, "stats");
+    const subFolder = await makeSubFolder("cache");
+    const place: Place = {
+      group: "cache",
+      stage: "in",
+      folder: subFolder,
+      file: "stats",
+    };
 
-    const fromBareName = await readObj<{ total: number }>(
-      "Cache",
-      subRole,
-      "stats",
-    );
-    const fromJsonName = await readObj<{ total: number }>(
-      "Cache",
-      subRole,
-      "stats.json",
-    );
+    await writeObj({ total: 3 }, place);
+
+    const fromBareName = await readObj<{ total: number }>(place);
+    const fromJsonName = await readObj<{ total: number }>({
+      ...place,
+      file: "stats.json",
+    });
 
     assert.equal(fromBareName?.total, 3);
     assert.equal(fromJsonName?.total, 3);
-    await rm(dir, { recursive: true, force: true });
   });
 
   test("readObj: returns undefined for missing or invalid JSON files", async () => {
-    const subRole = (await makeSubRole()) as Parameters<typeof readSources>[0];
-    const dir = path.join(basePath, "cache", subRole);
+    const subFolder = await makeSubFolder("cache");
+    const dir = path.join(basePath, "cache", "in", subFolder);
 
-    await writeObj({ sentinel: true }, "Cache", subRole, "seed");
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, "broken.json"), "not-json");
 
-    assert.equal(await readObj("Cache", subRole, "does-not-exist"), undefined);
-    assert.equal(await readObj("Cache", subRole, "broken"), undefined);
+    assert.equal(
+      await readObj({
+        group: "cache",
+        stage: "in",
+        folder: subFolder,
+        file: "does-not-exist",
+      }),
+      undefined,
+    );
+    assert.equal(
+      await readObj({
+        group: "cache",
+        stage: "in",
+        folder: subFolder,
+        file: "broken",
+      }),
+      undefined,
+    );
   });
 
-  test("readSources: returns only sources that have both input and ground files", async () => {
-    const subRole = (await makeSubRole()) as Parameters<typeof readSources>[0];
+  test("readManyObj: returns all valid objects in a folder", async () => {
+    const subFolder = await makeSubFolder("playground");
+    const place: Place = {
+      group: "playground",
+      stage: "in",
+      folder: subFolder,
+    };
 
-    await writeObj({ id: 1 }, "Input", subRole, "complete");
-    await writeObj({ id: 1 }, "Ground", subRole, "complete");
-    await writeObj({ id: 2 }, "Input", subRole, "missing-ground");
+    await writeObj({ id: 1 }, { ...place, file: "one" });
+    await writeObj({ id: 2 }, { ...place, file: "two" });
 
-    const warnings: string[] = [];
-    const originalWarn = console.warn;
-    console.warn = (msg: string) => warnings.push(msg);
+    // Manually write a broken file
+    const folderPath = path.join(basePath, "playground", "in", subFolder);
+    await writeFile(path.join(folderPath, "broken.json"), "not-json");
 
-    let sources!: Awaited<ReturnType<typeof readSources>>;
-    try {
-      sources = await readSources(subRole);
-    } finally {
-      console.warn = originalWarn;
-    }
+    const objects = await readManyObj<{ id: number }>(place);
 
-    assert.equal(sources.length, 1);
-    assert.equal(sources[0]?.sourceName, "complete.json");
-    assert.deepEqual(sources[0]?.input, {
-      evalTS: sources[0]?.input.evalTS,
-      id: 1,
-    });
-    assert.equal(warnings.length, 1);
-    assert.match(warnings[0] ?? "", /missing-ground\.json/);
+    assert.equal(objects.length, 2);
+    const ids = objects.map((o) => o.id).sort();
+    assert.deepEqual(ids, [1, 2]);
   });
 });

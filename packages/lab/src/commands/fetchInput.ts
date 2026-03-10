@@ -25,5 +25,10 @@ async function run([
   }
 
   const result = await fetchInputPortal(dataModel, ats, companyId, jobId);
-  await writeObj(result, "Input", dataModel, ats, companyId, jobId!);
+  await writeObj(result, {
+    group: "eval",
+    stage: "in",
+    folder: dataModel,
+    file: [ats, companyId, jobId ?? ""],
+  });
 }

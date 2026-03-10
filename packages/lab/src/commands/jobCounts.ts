@@ -44,7 +44,14 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
     await timers.setTimeout(100); // Throttle requests
   }
 
-  await writeObj({ ats, counts }, "Outcome", "job_counts", `${Date.now()}`);
+  await writeObj(
+    { ats, counts },
+    {
+      group: "jobCounts",
+      stage: "out",
+      file: `${ats}_${Date.now()}`,
+    },
+  );
 
   if (companyIds.length < 5) {
     console.log("\nJob Counts:", counts);
