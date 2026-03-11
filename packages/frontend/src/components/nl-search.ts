@@ -1,9 +1,9 @@
-import "../../components/form-textarea";
+import "./form-textarea";
 
-import { api } from "../../api/api.ts";
-import { FilterModel } from "../../api/filterModel.ts";
-import { ComponentBase } from "../../components/componentBase.ts";
-import type { FormTextarea } from "../../components/form-textarea.ts";
+import { api } from "../api/api.ts";
+import { FilterModel } from "../api/filterModel.ts";
+import { ComponentBase } from "./componentBase.ts";
+import type { FormTextarea } from "./form-textarea.ts";
 
 import css from "./nl-search.css?raw";
 import html from "./nl-search.html?raw";
