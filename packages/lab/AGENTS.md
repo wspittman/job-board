@@ -37,7 +37,7 @@ npm run lab -- fetchInput <dataModel> <ats> <companyId> [jobId]
 - `dataModel`: `company` or `job`.
 - `ats`: `greenhouse` or `lever`.
 - `companyId`: ATS company slug/id.
-- `jobId`: required when `dataModel` is `job`.
+- `jobId`: is optional when `dataModel` is `job`; if omitted, a random job for the company is selected.
 
 Each run writes a JSON file under `data/eval/in/<dataModel>/` with a name based on the ATS and IDs. You can then review and create a matching companion file in the same directory before evaluation.
 

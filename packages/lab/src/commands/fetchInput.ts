@@ -20,15 +20,16 @@ async function run([
   const dataModel = validateDataModel(dataModelArg);
   const ats = validateAts(atsArg);
 
-  if (!companyId || (dataModel === "job" && !jobId)) {
-    throw new CommandError("Invalid argument: COMPANY_ID or JOB_ID");
+  if (!companyId) {
+    throw new CommandError("Invalid argument: COMPANY_ID");
   }
 
   const result = await fetchInputPortal(dataModel, ats, companyId, jobId);
+  const id = dataModel === "job" ? result.item.id : "";
   await writeObj(result, {
     group: "eval",
     stage: "in",
     folder: dataModel,
-    file: [ats, companyId, jobId ?? ""],
+    file: [ats, companyId, id],
   });
 }

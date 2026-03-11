@@ -39,7 +39,7 @@ npm run lab -- fetchInput <dataModel> <ats> <companyId> [jobId]
 - `dataModel` must be either `company` or `job`.
 - `ats` must be `greenhouse` or `lever`.
 - `companyId` identifies the ATS company slug/id.
-- `jobId` is required when `dataModel` is `job`.
+- `jobId` is optional when `dataModel` is `job`; if omitted, a random job for the company is selected.
 
 The command writes a JSON file under `data/eval/in/<dataModel>/` with a name based on the ATS and IDs. You can then inspect the payload, add or adjust ground-truth fields, and save the companion file in the same directory using the same base filename.
 
