@@ -71,7 +71,7 @@ async function runInference(
 ): Promise<[NumBag | undefined, Bag]> {
   // Use telemetryCatcher to mark the input and trace the LLM logs
   const [mark, markedInput] = catcher.createMarkedInput(source);
-  await infer(run.dataModel, markedInput);
+  await infer(run.llmAction, markedInput);
   const metrics = catcher.find(mark);
 
   return [metrics, markedInput["item"] as Bag];

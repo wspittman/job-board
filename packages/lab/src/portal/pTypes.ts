@@ -6,10 +6,8 @@ import type {
   ExtractionRemoteEligibility,
   ExtractionSalaryRange,
 } from "../../../backend/src/models/extractionModels.ts";
-import type { ATS } from "../../../backend/src/models/models.ts";
 
 export type {
-  ATS,
   ExtractionBenefitHighlights as BenefitHighlights,
   ExtractionCompany as Company,
   ExtractionJob as Job,
@@ -18,4 +16,17 @@ export type {
   ExtractionSalaryRange as SalaryRange,
 };
 
-export type DataModel = "company" | "job";
+export const atsTypes = ["greenhouse", "lever"] as const;
+export type ATS = (typeof atsTypes)[number];
+
+export const dataModelTypes = ["company", "job"] as const;
+export type DataModel = (typeof dataModelTypes)[number];
+
+export const llmActionTypes = [
+  "fillCompanyInfo",
+  "fillJobInfo",
+  "extractLocation",
+  "isGeneralApplication",
+  "interpretFilters",
+] as const;
+export type LLMAction = (typeof llmActionTypes)[number];

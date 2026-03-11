@@ -1,4 +1,4 @@
-import type { DataModel } from "../portal/pTypes.ts";
+import type { DataModel, LLMAction } from "../portal/pTypes.ts";
 
 export type Bag = Record<string, unknown>;
 export type NumBag = Record<string, number>;
@@ -23,6 +23,7 @@ export class CommandError extends Error {}
 export interface Run {
   runName: string;
   dataModel: DataModel;
+  llmAction: LLMAction;
   llmModel: string;
   llmReasoningEffort?: string;
 }

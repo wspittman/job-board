@@ -1,6 +1,6 @@
 import process from "node:process";
 import { getUsage, runCommand } from "./commands.ts";
-import { atsTypes, dataModelTypes } from "./portal/pFuncs.ts";
+import { atsTypes, dataModelTypes } from "./portal/pTypes.ts";
 import { CommandError } from "./types/types.ts";
 
 function usageReminder() {

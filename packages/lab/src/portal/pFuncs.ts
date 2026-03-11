@@ -3,7 +3,12 @@ import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
 import { config } from "../../../backend/src/config.ts";
 import type { Bag } from "../../../backend/src/types/types.ts";
 import { CommandError } from "../types/types.ts";
-import type { ATS, DataModel } from "./pTypes.ts";
+import {
+  llmActionTypes,
+  type ATS,
+  type DataModel,
+  type LLMAction,
+} from "./pTypes.ts";
 
 export const LLM_MODEL = config.LLM_MODEL;
 export const LLM_REASONING_EFFORT = config.LLM_REASONING_EFFORT;
@@ -43,6 +48,19 @@ export function validateDataModel(dataModel?: string): DataModel {
   return normalized as DataModel;
 }
 
+/**
+ * Validate LLM action argument.
+ * @param llmAction - LLM action identifier to validate.
+ * @returns LLM action identifier.
+ * @throws CommandError if the LLM action is invalid.
+ */
+export function validateLLMAction(llmAction?: string): LLMAction {
+  if (!llmActionTypes.includes(llmAction as LLMAction)) {
+    throw new CommandError("Invalid argument: LLM_ACTION");
+  }
+  return llmAction as LLMAction;
+}
+
 export async function fetchInput(
   dataModel: DataModel,
   ats: ATS,
@@ -60,17 +78,9 @@ export async function fetchInput(
   }
 }
 
-export async function infer(dataModel: DataModel, context: Bag) {
-  switch (dataModel) {
-    case "company":
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-      await llm.fillCompanyInfo(context as any);
-      break;
-    case "job":
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-      await llm.fillJobInfo(context as any);
-      break;
-  }
+export async function infer(llmAction: LLMAction, context: Bag) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+  await llm[llmAction](context as any);
 }
 
 /**

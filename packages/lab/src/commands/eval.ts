@@ -5,6 +5,7 @@ import {
   LLM_MODEL,
   LLM_REASONING_EFFORT,
   validateDataModel,
+  validateLLMAction,
 } from "../portal/pFuncs.ts";
 import type { Command, Run, Source } from "../types/types.ts";
 import { embedCache } from "../utils/embedCache.ts";
@@ -16,15 +17,17 @@ subscribeAsyncLogging({
 });
 
 export const evals: Command = {
-  usage: () => "<DATA_MODEL> [RUN_NAME]",
+  usage: () => "<DATA_MODEL> <LLM_ACTION> [RUN_NAME]",
   run,
 };
 
 async function run([
   dataModelArg,
+  llmActionArg,
   runName = `run_${Date.now()}`,
 ]: string[]): Promise<void> {
   const dataModel = validateDataModel(dataModelArg);
+  const llmAction = validateLLMAction(llmActionArg);
   const llmModel = LLM_MODEL;
   const llmReasoningEffort = LLM_REASONING_EFFORT;
 
@@ -32,14 +35,20 @@ async function run([
     throw new Error(`Config.LLM_MODEL ${llmModel} is not a known priced model`);
   }
 
-  await runEval({ runName, dataModel, llmModel, llmReasoningEffort });
+  await runEval({
+    runName,
+    dataModel,
+    llmAction,
+    llmModel,
+    llmReasoningEffort,
+  });
   await embedCache.saveCache();
 }
 
 async function runEval(run: Run): Promise<void> {
-  const { runName, dataModel, llmModel, llmReasoningEffort } = run;
+  const { runName, dataModel, llmAction, llmModel, llmReasoningEffort } = run;
   console.log(
-    `${runName}: Running eval for ${dataModel} with ${llmModel} ${llmReasoningEffort ?? ""}`.trim(),
+    `${runName}: Running eval for ${dataModel} with ${llmAction} ${llmModel} ${llmReasoningEffort ?? ""}`.trim(),
   );
 
   const sources = await readManyObj<Source>({
@@ -53,11 +62,11 @@ async function runEval(run: Run): Promise<void> {
   const outFolder: Place = {
     group: "eval",
     stage: "out",
-    folder: [dataModel, runName, llmModel, llmReasoningEffort ?? ""],
+    folder: [dataModel, runName, llmAction, llmModel, llmReasoningEffort ?? ""],
   };
 
   await batch(
-    `${runName}_${dataModel}_${llmModel}`,
+    `${runName}_${dataModel}_${llmAction}_${llmModel}`,
     sources,
     async (source) => {
       // Read a previously saved outcome, or if not available run the evaluation.
