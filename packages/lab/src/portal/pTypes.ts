@@ -22,11 +22,14 @@ export type ATS = (typeof atsTypes)[number];
 export const dataModelTypes = ["company", "job"] as const;
 export type DataModel = (typeof dataModelTypes)[number];
 
-export const llmActionTypes = [
-  "fillCompanyInfo",
-  "fillJobInfo",
-  "extractLocation",
-  "isGeneralApplication",
-  "interpretFilters",
-] as const;
-export type LLMAction = (typeof llmActionTypes)[number];
+export const llmActionTypes = {
+  company: ["fillCompanyInfo"] as const,
+  job: [
+    "fillJobInfo",
+    "extractLocation",
+    "isGeneralApplication",
+    "interpretFilters",
+  ] as const,
+};
+export type LLMAction =
+  (typeof llmActionTypes)[keyof typeof llmActionTypes][number];

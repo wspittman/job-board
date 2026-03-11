@@ -27,7 +27,7 @@ async function run([
   runName = `run_${Date.now()}`,
 ]: string[]): Promise<void> {
   const dataModel = validateDataModel(dataModelArg);
-  const llmAction = validateLLMAction(llmActionArg);
+  const llmAction = validateLLMAction(dataModel, llmActionArg);
   const llmModel = LLM_MODEL;
   const llmReasoningEffort = LLM_REASONING_EFFORT;
 

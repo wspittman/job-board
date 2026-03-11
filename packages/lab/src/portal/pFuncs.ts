@@ -50,14 +50,22 @@ export function validateDataModel(dataModel?: string): DataModel {
 
 /**
  * Validate LLM action argument.
+ * @param dataModel - Data model identifier to determine valid LLM actions.
  * @param llmAction - LLM action identifier to validate.
  * @returns LLM action identifier.
  * @throws CommandError if the LLM action is invalid.
  */
-export function validateLLMAction(llmAction?: string): LLMAction {
-  if (!llmActionTypes.includes(llmAction as LLMAction)) {
+export function validateLLMAction(
+  dataModel: DataModel,
+  llmAction?: string,
+): LLMAction {
+  // We need to retype this so that TS can understand how `includes` should work
+  const actionSet = llmActionTypes[dataModel] as readonly string[];
+
+  if (!actionSet.includes(llmAction as LLMAction)) {
     throw new CommandError("Invalid argument: LLM_ACTION");
   }
+
   return llmAction as LLMAction;
 }
 
