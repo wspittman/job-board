@@ -19,8 +19,8 @@ class TelemetryCatcher {
    * @returns A tuple containing the hash and the modified context.
    */
   createMarkedInput(source: Source): [string, Bag] {
-    const { sourceName, input } = source;
-    const v = this.hash(sourceName);
+    const { fileName, input } = source;
+    const v = this.hash(fileName);
 
     return [
       v,

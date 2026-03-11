@@ -66,9 +66,12 @@ export async function readManyObj<T>(place: Place): Promise<T[]> {
  * The JSON is pretty-printed with an indent of 2 spaces.
  */
 export async function writeObj(obj: object, place: Place): Promise<void> {
-  const markedObj = { evalTS: new Date().toISOString(), ...obj };
   const filePath = getFilePath(place);
+  const fileName = path.basename(filePath);
+  const dirPath = path.dirname(filePath);
+  const evalTS = new Date().toISOString();
+  const markedObj = { evalTS, fileName, ...obj };
 
-  await mkdir(path.dirname(filePath), { recursive: true });
+  await mkdir(dirPath, { recursive: true });
   await writeFile(filePath, JSON.stringify(markedObj, null, 2));
 }

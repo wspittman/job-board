@@ -77,7 +77,7 @@ async function runEval(run: Run): Promise<void> {
 
       await writeObj(outcome, {
         ...outFolder,
-        file: source.sourceName,
+        file: source.fileName,
       });
     },
   );

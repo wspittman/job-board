@@ -18,7 +18,7 @@ export interface Outcome extends Run, Judgement {
  * Evaluates a given scenario by running it and comparing the output against ground truth
  */
 export async function evaluate(run: Run, source: Source): Promise<Outcome> {
-  const prefix = `${run.runName} / ${source.sourceName}`;
+  const prefix = `${run.runName} / ${source.fileName}`;
 
   console.log(`${prefix}: Running inference`);
   const [metrics, output] = await runInference(run, source);
@@ -35,7 +35,7 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
 
   return {
     ...run,
-    sourceName: source.sourceName,
+    sourceName: source.fileName,
     metrics,
     cost: cost(
       metrics["inTokens"] ?? 0,

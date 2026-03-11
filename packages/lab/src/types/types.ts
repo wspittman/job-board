@@ -32,7 +32,7 @@ export interface Run {
  * A source consists of the input context and the ground truth for a particular scenario.
  */
 export interface Source {
-  sourceName: string;
+  fileName: string;
   input: Bag;
   ground: Bag;
 }
