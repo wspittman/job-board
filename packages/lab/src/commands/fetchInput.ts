@@ -3,6 +3,7 @@ import {
   validateAts,
   validateDataModel,
 } from "../portal/pFuncs.ts";
+import { llmActionTypes, type DataModel } from "../portal/pTypes.ts";
 import { CommandError, type Command } from "../types/types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
 
@@ -26,10 +27,19 @@ async function run([
 
   const result = await fetchInputPortal(dataModel, ats, companyId, jobId);
   const id = dataModel === "job" ? result.item.id : "";
-  await writeObj(result, {
+  const output = {
+    input: result,
+    ...groundTruthPlaceholders(dataModel),
+  };
+
+  await writeObj(output, {
     group: "eval",
     stage: "in",
     folder: dataModel,
     file: [ats, companyId, id],
   });
+}
+
+function groundTruthPlaceholders(dataModel: DataModel): Record<string, object> {
+  return Object.fromEntries(llmActionTypes[dataModel].map((x) => [x, {}]));
 }
