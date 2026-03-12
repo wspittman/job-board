@@ -12,4 +12,5 @@ const schedule = (callback: () => void): void => {
 schedule(() => {
   void import("./heroIcons.ts");
   void import("./stats.ts");
+  void import("../components/nl-search.ts");
 });

@@ -61,12 +61,19 @@
 }
 
 .hm-search-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
   margin: var(--space-xl) auto;
   text-align: center;
+
+  h2 {
+    margin: 0;
+  }
 }
 
 .chip-list {
-  margin: var(--space-lg);
+  margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
@@ -81,4 +88,5 @@
 
 .embiggen {
   padding: var(--space-sm) var(--space-lg);
+  align-self: center;
 }
