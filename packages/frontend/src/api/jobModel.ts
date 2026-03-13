@@ -106,7 +106,7 @@ export class JobModel {
     const { facets } = this.#job;
     const { experience } = facets ?? {};
 
-    if (!experience) return undefined;
+    if (experience == null) return undefined;
 
     return useShort
       ? `${experience} yrs exp`
