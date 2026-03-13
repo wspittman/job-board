@@ -1,6 +1,13 @@
 import { embed } from "dry-utils-openai";
 import { createHash } from "node:crypto";
-import { readObj, writeObj } from "./fileUtils.ts";
+import { readObj, writeObj, type Place } from "./fileUtils.ts";
+
+const inFile: Place = {
+  group: "cache",
+  stage: "in",
+  file: "embed",
+};
+const outFile: Place = { ...inFile, stage: "out" };
 
 class EmbedCache {
   #embeddingCache: Map<string, number[]> = new Map();
@@ -67,7 +74,7 @@ class EmbedCache {
   async saveCache() {
     if (!this.#changed) return;
     const cacheObject = Object.fromEntries(this.#embeddingCache);
-    await writeObj(cacheObject, "Cache", "", "embed");
+    await writeObj(cacheObject, outFile);
   }
 
   #hashInput(input: string): string {
@@ -103,7 +110,7 @@ class EmbedCache {
   async #initialize() {
     if (this.#initialized) return;
 
-    const cache = await readObj<Record<string, number[]>>("Cache", "", "embed");
+    const cache = await readObj<Record<string, number[]>>(inFile);
 
     if (cache) {
       this.#embeddingCache = new Map(Object.entries(cache));

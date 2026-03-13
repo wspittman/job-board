@@ -1,7 +1,7 @@
 import "../../components/form-combobox";
 import "../../components/form-input";
 import "../../components/form-select";
-import "./nl-search";
+import "../../components/nl-search";
 
 import {
   companyStageOptions,
@@ -18,7 +18,7 @@ import type {
   FormElement,
   FormElementProps,
 } from "../../components/form-element";
-import type { NLSearch } from "./nl-search";
+import type { NLSearch } from "../../components/nl-search";
 
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";

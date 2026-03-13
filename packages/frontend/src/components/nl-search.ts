@@ -1,14 +1,14 @@
-import "../../components/form-textarea";
+import "./form-textarea";
 
-import { api } from "../../api/api.ts";
-import { FilterModel } from "../../api/filterModel.ts";
-import { ComponentBase } from "../../components/componentBase.ts";
-import type { FormTextarea } from "../../components/form-textarea.ts";
+import { api } from "../api/api.ts";
+import { FilterModel } from "../api/filterModel.ts";
+import { ComponentBase } from "./componentBase.ts";
+import type { FormTextarea } from "./form-textarea.ts";
 
 import css from "./nl-search.css?raw";
 import html from "./nl-search.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
-const tag = "filters-nl-search";
+const tag = "jb-nl-search";
 
 interface Props {
   onFilters: (filters: FilterModel) => void;
@@ -33,18 +33,29 @@ export class NLSearch extends ComponentBase {
     this.#error = this.getEl("error")!;
   }
 
+  override onLoad(): Promise<void> {
+    if (this.hasAttribute("redirect")) {
+      this.init({
+        onFilters: (filters) => this.#navigateToExplore(filters),
+      });
+    }
+    return Promise.resolve();
+  }
+
   /**
    * Sets up the filter accessors
    * @param onFilters - Function that accepts an updated filter state to apply
    */
   init({ onFilters }: Props) {
+    const isRedirect = this.hasAttribute("redirect");
     this.#onFilters = onFilters;
 
     this.#query.init({
       label: "Describe the job you want",
       name: "query",
-      tooltip:
-        "Use natural language to update your filters. For example, 'A remote software engineering job posted in the last week'.",
+      tooltip: isRedirect
+        ? undefined
+        : "Use natural language to update your filters. For example, 'A remote software engineering job posted in the last week'.",
       rows: 3,
       maxLength: 200,
       onChange: () => this.#setNLUpdateState(),
@@ -73,7 +84,7 @@ export class NLSearch extends ComponentBase {
 
     this.#query.disabled = true;
     this.#update.disabled = true;
-    this.#update.textContent = "Adding...";
+    this.#update.textContent = "Searching...";
     this.#error.hidden = true;
 
     try {
@@ -86,8 +97,15 @@ export class NLSearch extends ComponentBase {
       this.#error.hidden = false;
     } finally {
       this.#query.disabled = false;
-      this.#update.textContent = "Add";
+      this.#update.textContent = "Search";
       this.#setNLUpdateState();
+    }
+  }
+
+  #navigateToExplore(filters: FilterModel): void {
+    const query = filters.toUrlSearchParams().toString();
+    if (query) {
+      window.location.assign(`/explore?${query}`);
     }
   }
 }

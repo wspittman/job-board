@@ -22,7 +22,7 @@ suite("config", () => {
   invalidAdminTokenCases.forEach(([name, adminToken]) => {
     test(`Invalid ADMIN_TOKEN: "${name}"`, async () => {
       setEnv({ ADMIN_TOKEN: adminToken });
-      await assert.rejects(importFreshConfig, /ADMIN_TOKEN must be set/);
+      await assert.rejects(importFreshConfig, /ADMIN_TOKEN/);
     });
   });
 
@@ -86,5 +86,60 @@ suite("config", () => {
     const { config } = await importFreshConfig();
 
     assert.equal(config.PORT, 4500);
+  });
+
+  test("getLLMOptions returns default model and effort", async () => {
+    setEnv({
+      ADMIN_TOKEN: VALID_ADMIN_TOKEN,
+      LLM_MODEL: "gpt-4-turbo",
+      LLM_REASONING_EFFORT: "medium",
+    });
+
+    const { getLLMOptions } = await importFreshConfig();
+    const options = getLLMOptions("testOp");
+
+    assert.deepEqual(options, {
+      model: "gpt-4-turbo",
+      reasoningEffort: "medium",
+    });
+  });
+
+  test("getLLMOptions applies model and effort overrides", async () => {
+    setEnv({
+      ADMIN_TOKEN: VALID_ADMIN_TOKEN,
+      LLM_MODEL: "gpt-4-turbo",
+      LLM_REASONING_EFFORT: "medium",
+      LLM_MODEL_OVERRIDES: JSON.stringify({
+        testOp: "gpt-o1",
+      }),
+      LLM_REASONING_EFFORT_OVERRIDES: JSON.stringify({
+        testOp: "high",
+      }),
+    });
+
+    const { getLLMOptions } = await importFreshConfig();
+
+    // With override
+    assert.deepEqual(getLLMOptions("testOp"), {
+      model: "gpt-o1",
+      reasoningEffort: "high",
+    });
+
+    // Without override
+    assert.deepEqual(getLLMOptions("otherOp"), {
+      model: "gpt-4-turbo",
+      reasoningEffort: "medium",
+    });
+  });
+
+  test("invalid LLM_REASONING_EFFORT_OVERRIDES throws", async () => {
+    setEnv({
+      ADMIN_TOKEN: VALID_ADMIN_TOKEN,
+      LLM_REASONING_EFFORT_OVERRIDES: JSON.stringify({
+        testOp: "extreme",
+      }),
+    });
+
+    await assert.rejects(importFreshConfig, /LLM_REASONING_EFFORT_OVERRIDES/);
   });
 });

@@ -1,7 +1,7 @@
 import timers from "node:timers/promises";
 import { fetchJobCount, validateAts } from "../portal/pFuncs.ts";
-import { CommandError, type Command } from "../types.ts";
 import type { Bag } from "../types/types.ts";
+import { CommandError, type Command } from "../types/types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
 
 export const jobCounts: Command = {
@@ -44,7 +44,14 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
     await timers.setTimeout(100); // Throttle requests
   }
 
-  await writeObj({ ats, counts }, "Outcome", "job_counts", `${Date.now()}`);
+  await writeObj(
+    { ats, counts },
+    {
+      group: "jobCounts",
+      stage: "out",
+      file: `${ats}_${Date.now()}`,
+    },
+  );
 
   if (companyIds.length < 5) {
     console.log("\nJob Counts:", counts);

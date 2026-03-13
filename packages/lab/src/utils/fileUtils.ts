@@ -1,66 +1,41 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { DataModel } from "../portal/pTypes.ts";
-import type { Bag, Source } from "../types/types.ts";
 
-type Role = "Input" | "Outcome" | "Ground" | "Report" | "Cache";
-type SubRole = DataModel | "playground" | "job_counts" | "";
+type Strings = string | string[] | undefined;
+
+export interface Place {
+  group: "cache" | "eval" | "jobCounts" | "playground";
+  stage: "in" | "out";
+  folder?: Strings;
+  file?: Strings;
+}
 
 // Base directory for all evaluation-related files.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const basePath = path.join(__dirname, "../..");
+const basePath = path.join(__dirname, "../../data");
 
-// Constructs a file path for a given action, role, and optional name.
-const getPath = (role: Role, subRole: SubRole, name = "") =>
-  path.join(basePath, role.toLowerCase(), subRole, name);
+const asArray = (val: Strings): string[] =>
+  val ? (Array.isArray(val) ? val : [val]) : [];
 
-/**
- * Reads all source files for a given action and baseline model.
- * Source files consist of an input file, a ground truth file, and optionally a baseline outcome file.
- */
-export async function readSources(subRole: SubRole): Promise<Source[]> {
-  const names = await readdir(getPath("Input", subRole));
-  // Read all sources in parallel and filter out any undefined results (e.g., due to missing files).
-  return (
-    await Promise.all(names.map((name) => readSource(subRole, name)))
-  ).filter((x) => !!x);
-}
+const getFolderPath = ({ group, stage, folder }: Place) =>
+  path.join(basePath, group, stage, ...asArray(folder));
 
-/**
- * Reads a single source, which includes input and ground truth
- * Returns undefined if any of the required files are missing.
- */
-async function readSource(
-  subRole: SubRole,
-  sourceName: string,
-): Promise<Source | undefined> {
-  const input = await readObj<Bag>("Input", subRole, sourceName);
-  const ground = await readObj<Bag>("Ground", subRole, sourceName);
-  // If any essential part of the source is missing, warn and return undefined.
-  if (!input || !ground) {
-    console.warn(`Missing a file for source: ${sourceName}`);
-    return undefined;
-  }
-
-  return { sourceName, input, ground };
-}
-
-/**
- * Reads and parses a JSON file from the specified path.
- * Returns undefined if the file does not exist or an error occurs during reading/parsing.
- */
-export async function readObj<T>(
-  role: Role,
-  subRole: SubRole,
-  name: string,
-): Promise<T | undefined> {
-  let filePath = getPath(role, subRole, name);
-
+const getFilePath = ({ file, ...rest }: Place) => {
+  let filePath = path.join(getFolderPath(rest), asArray(file).join("_"));
   if (!filePath.endsWith(".json")) {
     filePath += ".json";
   }
+  return filePath;
+};
+
+/**
+ * Reads and parses a JSON file from the specified file.
+ * Returns undefined if the file does not exist or an error occurs during reading/parsing.
+ */
+export async function readObj<T>(place: Place): Promise<T | undefined> {
+  const filePath = getFilePath(place);
 
   try {
     const file = await readFile(filePath, "utf-8");
@@ -70,24 +45,33 @@ export async function readObj<T>(
   }
 }
 
+export async function readManyObj<T>(place: Place): Promise<T[]> {
+  const folderPath = getFolderPath(place);
+
+  try {
+    const names = await readdir(folderPath);
+
+    return (
+      await Promise.all(
+        names.map((name) => readObj<T>({ ...place, file: name })),
+      )
+    ).filter(Boolean) as T[];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Writes an object to a JSON file, creating the directory if it doesn't exist.
  * The JSON is pretty-printed with an indent of 2 spaces.
  */
-export async function writeObj(
-  obj: object,
-  role: Role,
-  subRole: SubRole,
-  ...keys: string[]
-): Promise<void> {
-  const markedObj = { evalTS: new Date().toISOString(), ...obj };
-  const dir = getPath(role, subRole);
-  let filePath = path.join(dir, keys.filter(Boolean).join("_"));
+export async function writeObj(obj: object, place: Place): Promise<void> {
+  const filePath = getFilePath(place);
+  const fileName = path.basename(filePath);
+  const dirPath = path.dirname(filePath);
+  const evalTS = new Date().toISOString();
+  const markedObj = { evalTS, fileName, ...obj };
 
-  if (!filePath.endsWith(".json")) {
-    filePath += ".json";
-  }
-
-  await mkdir(dir, { recursive: true });
+  await mkdir(dirPath, { recursive: true });
   await writeFile(filePath, JSON.stringify(markedObj, null, 2));
 }

@@ -62,40 +62,10 @@ export class JobModel {
   }
 
   getDisplayFacets(useShort = false): string[] {
-    const {
-      isRemote,
-      location,
-      postTS,
-      facets,
-      workTimeBasis,
-      jobFamily,
-      companyStage,
-      minSalary,
-    } = this.#job;
-    const { experience } = facets ?? {};
+    const { workTimeBasis, jobFamily, minSalary } = this.#job;
 
-    let loc = location;
-    if (isRemote) {
-      loc = "Remote";
-    } else if (useShort) {
-      const locBreak = loc.lastIndexOf(",");
-      loc = locBreak === -1 ? loc : loc.slice(0, locBreak);
-    }
-
-    let exp: string | undefined = undefined;
-    if (experience != null) {
-      exp = useShort
-        ? `${experience} yrs exp`
-        : `${experience} years experience required`;
-    }
-
-    const post = useShort
-      ? this.#tsToDaysString(postTS)
-      : new Date(postTS).toLocaleDateString();
-
-    const stageLabel = toCompanyStageLabel(companyStage);
-    const stage =
-      useShort || !stageLabel ? stageLabel : `${stageLabel} Company`;
+    const loc = this.#getLocationFacet(useShort);
+    const post = this.#getPostFacet(useShort);
 
     const p1: string[] = [];
     const p2: string[] = [];
@@ -114,12 +84,41 @@ export class JobModel {
     pushIf(useShort && !post.endsWith("days ago"), p1, p3, post);
     pushIf(loc === "Remote", p1, p2, loc);
     pushIf(minSalary != null, p1, p3, this.#getCompString(useShort));
-    pushIf(true, p2, undefined, exp);
+    pushIf(true, p2, undefined, this.#getExperienceFacet(useShort));
     pushIf(true, p2, undefined, toJobFamilyLabel(jobFamily));
     pushIf(true, p2, undefined, toWorkTimeBasisLabel(workTimeBasis));
-    pushIf(true, p2, undefined, stage);
+    pushIf(true, p2, undefined, this.#getStageFacet(useShort));
 
     return [...p1, ...p2, ...p3.reverse()];
+  }
+
+  #getLocationFacet(useShort: boolean): string {
+    const { isRemote, location } = this.#job;
+
+    return isRemote
+      ? "Remote"
+      : useShort && location.includes(",")
+        ? location.slice(0, location.lastIndexOf(","))
+        : location;
+  }
+
+  #getExperienceFacet(useShort: boolean): string | undefined {
+    const { facets } = this.#job;
+    const { experience } = facets ?? {};
+
+    if (experience == null) return undefined;
+
+    return useShort
+      ? `${experience} yrs exp`
+      : `${experience} years experience required`;
+  }
+
+  #getPostFacet(useShort: boolean): string {
+    const { postTS } = this.#job;
+
+    return useShort
+      ? this.#tsToDaysString(postTS)
+      : new Date(postTS).toLocaleDateString();
   }
 
   #tsToDaysString(ts: number): string {
@@ -128,6 +127,13 @@ export class JobModel {
     if (days < 7) return "New";
     if (days < 30) return "Recent";
     return `${days} days ago`;
+  }
+
+  #getStageFacet(useShort: boolean): string | undefined {
+    const { companyStage } = this.#job;
+
+    const stageLabel = toCompanyStageLabel(companyStage);
+    return useShort || !stageLabel ? stageLabel : `${stageLabel} Company`;
   }
 
   #getCompString(useShort: boolean): string | undefined {

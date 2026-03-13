@@ -2,7 +2,7 @@ import { evals } from "./commands/eval.ts";
 import { fetchInput } from "./commands/fetchInput.ts";
 import { jobCounts } from "./commands/jobCounts.ts";
 import { playground } from "./commands/playground.ts";
-import { CommandError, type Command } from "./types.ts";
+import { CommandError, type Command } from "./types/types.ts";
 
 function asArray(value: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
@@ -10,9 +10,9 @@ function asArray(value: string | string[]): string[] {
 
 const registry: Record<string, Command> = {
   evals,
-  "fetch-input": fetchInput,
+  fetchInput,
   playground,
-  "job-counts": jobCounts,
+  jobCounts,
 };
 
 /**

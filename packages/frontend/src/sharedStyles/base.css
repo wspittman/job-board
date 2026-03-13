@@ -57,7 +57,10 @@
   );
 
   /* Typography */
-  --fonts: "Inter Variable", "Roboto", "Helvetica", "Arial", sans-serif;
+  --fonts:
+    "Helvetica Neue", Helvetica, Arial, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Liberation Sans",
+    sans-serif;
 
   --h1-size: clamp(1.875rem, 5vw, 2.5rem);
   --h2-size: clamp(1.5rem, 3vw, 1.875rem);

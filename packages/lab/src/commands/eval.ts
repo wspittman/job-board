@@ -5,11 +5,11 @@ import {
   LLM_MODEL,
   LLM_REASONING_EFFORT,
   validateDataModel,
+  validateLLMAction,
 } from "../portal/pFuncs.ts";
-import type { Command } from "../types.ts";
-import type { Run } from "../types/types.ts";
+import type { Command, Run, Source } from "../types/types.ts";
 import { embedCache } from "../utils/embedCache.ts";
-import { readSources, writeObj } from "../utils/fileUtils.ts";
+import { readManyObj, writeObj, type Place } from "../utils/fileUtils.ts";
 
 subscribeAsyncLogging({
   log: ({ tag, val }) => console.log(tag, val),
@@ -17,15 +17,17 @@ subscribeAsyncLogging({
 });
 
 export const evals: Command = {
-  usage: () => "<DATA_MODEL> [RUN_NAME]",
+  usage: () => "<DATA_MODEL> <LLM_ACTION> [RUN_NAME]",
   run,
 };
 
 async function run([
   dataModelArg,
+  llmActionArg,
   runName = `run_${Date.now()}`,
 ]: string[]): Promise<void> {
   const dataModel = validateDataModel(dataModelArg);
+  const llmAction = validateLLMAction(dataModel, llmActionArg);
   const llmModel = LLM_MODEL;
   const llmReasoningEffort = LLM_REASONING_EFFORT;
 
@@ -33,23 +35,38 @@ async function run([
     throw new Error(`Config.LLM_MODEL ${llmModel} is not a known priced model`);
   }
 
-  await runEval({ runName, dataModel, llmModel, llmReasoningEffort });
+  await runEval({
+    runName,
+    dataModel,
+    llmAction,
+    llmModel,
+    llmReasoningEffort,
+  });
   await embedCache.saveCache();
 }
 
 async function runEval(run: Run): Promise<void> {
-  const { runName, dataModel, llmModel, llmReasoningEffort } = run;
+  const { runName, dataModel, llmAction, llmModel, llmReasoningEffort } = run;
   console.log(
-    `${runName}: Running eval for ${dataModel} with ${llmModel} ${llmReasoningEffort ?? ""}`.trim(),
+    `${runName}: Running eval for ${dataModel} with ${llmAction} ${llmModel} ${llmReasoningEffort ?? ""}`.trim(),
   );
 
-  const sources = await readSources(dataModel);
+  const sources = await readManyObj<Source>({
+    group: "eval",
+    stage: "in",
+    folder: dataModel,
+  });
   console.log(`${runName}: Found ${sources.length} sources`);
 
   const outcomes: Outcome[] = [];
+  const outFolder: Place = {
+    group: "eval",
+    stage: "out",
+    folder: [dataModel, runName, llmAction, llmModel, llmReasoningEffort ?? ""],
+  };
 
   await batch(
-    `${runName}_${dataModel}_${llmModel}`,
+    `${runName}_${dataModel}_${llmAction}_${llmModel}`,
     sources,
     async (source) => {
       // Read a previously saved outcome, or if not available run the evaluation.
@@ -58,25 +75,16 @@ async function runEval(run: Run): Promise<void> {
       const outcome = await evaluate(run, source);
       outcomes.push(outcome);
 
-      await writeObj(
-        outcome,
-        "Outcome",
-        dataModel,
-        runName,
-        llmModel,
-        llmReasoningEffort ?? "",
-        source.sourceName,
-      );
+      await writeObj(outcome, {
+        ...outFolder,
+        file: source.fileName,
+      });
     },
   );
 
   const rep = report(run, outcomes);
-  await writeObj(
-    rep,
-    "Report",
-    dataModel,
-    runName,
-    llmModel,
-    llmReasoningEffort ?? "",
-  );
+  await writeObj(rep, {
+    ...outFolder,
+    file: "Report",
+  });
 }

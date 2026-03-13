@@ -1,5 +1,5 @@
 import { jsonCompletion } from "dry-utils-openai";
-import { config } from "../config.ts";
+import { getLLMOptions } from "../config.ts";
 import type { Filters } from "../models/clientModels.ts";
 import { ExtractionFilters } from "../models/extractionModels.ts";
 import { normalizedLocation } from "../utils/location.ts";
@@ -24,14 +24,11 @@ export async function interpretFilters(query: string): Promise<Filters> {
   if (!query) return {};
 
   const { content } = await jsonCompletion(
-    "interpretQuery",
+    "interpretFilters",
     prompt,
     query,
     ExtractionFilters,
-    {
-      model: config.LLM_MODEL,
-      reasoningEffort: config.LLM_REASONING_EFFORT,
-    },
+    getLLMOptions("interpretFilters"),
   );
 
   if (!content) return {};

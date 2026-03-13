@@ -13,35 +13,35 @@ that the backend uses and scoring model output against curated ground truth data
 
 ## Repository layout
 
-Evaluation artifacts live next to this README once they are generated:
+Evaluation artifacts live under the `data/` directory:
 
 ```
-packages/lab/
-  input/      # JSON inputs gathered from an ATS (one file per scenario)
-  ground/     # Ground-truth labels that evaluators maintain alongside each input
-  outcome/    # Model responses captured during a run
-  report/     # Aggregated metrics produced at the end of a run
+packages/lab/data/
+  cache/      # Cached LLM responses and embeddings
+  eval/
+    in/       # Input scenarios and ground-truth labels
+    out/      # Model outcomes and aggregate reports
+  jobCounts/  # Intermediate data for job count analysis
+  playground/ # Clustering and experimental data
 ```
 
-The `input` and `ground` folders must be populated before you execute an evaluation. They are
-created automatically the first time you save data.
+The `data/eval/in/` folder must be populated before you execute an evaluation. It is
+created automatically the first time you fetch or save data.
 
 ## Fetching input scenarios
 
 You can capture fresh scenarios directly from an Applicant Tracking System (ATS):
 
 ```bash
-npm run lab -- fetch-input <dataModel> <ats> <companyId> [jobId]
+npm run lab -- fetchInput <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel` must be either `company` or `job`.
 - `ats` must be `greenhouse` or `lever`.
 - `companyId` identifies the ATS company slug/id.
-- `jobId` is required when `dataModel` is `job`.
+- `jobId` is optional when `dataModel` is `job`; if omitted, a random job for the company is selected.
 
-The command writes a JSON file under `input/<dataModel>/` with a timestamped name. You can then
-inspect the payload, add or adjust ground-truth fields, and save the companion file in
-`ground/<dataModel>/` using the same base filename.
+The command writes a JSON file under `data/eval/in/<dataModel>/` with a name based on the ATS and IDs. You can then inspect the payload, add or adjust ground-truth fields, and save the companion file in the same directory using the same base filename.
 
 ## Running an evaluation
 
@@ -54,10 +54,10 @@ npm run lab -- evals <dataModel> [runName]
 - `dataModel` again selects `company` or `job`.
 - `runName` is optional; a timestamped name is generated when omitted.
 
-During the run, the harness loads every source in `input/<dataModel>/`, invokes the backend LLM
+During the run, the harness loads every source in `data/eval/in/<dataModel>/`, invokes the backend LLM
 helpers (which require your `.env` configuration), and stores the model output in
-`outcome/<dataModel>/`. After processing all scenarios it writes a summary report to
-`report/<dataModel>/`. Each saved JSON document includes an `evalTS` timestamp to simplify
+`data/eval/out/<dataModel>/<runName>/<llmModel>/`. After processing all scenarios it writes a summary report to
+the same directory. Each saved JSON document includes an `evalTS` timestamp to simplify
 versioning.
 
 ## Tips

@@ -12,32 +12,34 @@ Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stat
 
 ## Data layout expectations
 
-Evaluation artifacts are stored alongside this file:
+Evaluation artifacts are stored in the `data/` directory:
 
 ```
-packages/lab/
-  input/      # JSON inputs pulled from an ATS
-  ground/     # Ground-truth labels paired with each input
-  outcome/    # Model responses captured during evaluation
-  report/     # Aggregated metrics for each run
+packages/lab/data/
+  cache/      # Cached LLM responses and embeddings
+  eval/
+    in/       # Input scenarios and ground-truth labels
+    out/      # Model outcomes and aggregate reports
+  jobCounts/  # Intermediate data for job count analysis
+  playground/ # Clustering and experimental data
 ```
 
-The `input` and `ground` folders must be populated before running an evaluation. Directories are created automatically on first use.
+The `data/eval/in/` folder must be populated before running an evaluation. Directories are created automatically on first use.
 
 ## Fetching ATS inputs
 
 Capture scenarios directly from an ATS:
 
 ```
-npm run lab -- fetch-input <dataModel> <ats> <companyId> [jobId]
+npm run lab -- fetchInput <dataModel> <ats> <companyId> [jobId]
 ```
 
 - `dataModel`: `company` or `job`.
 - `ats`: `greenhouse` or `lever`.
 - `companyId`: ATS company slug/id.
-- `jobId`: required when `dataModel` is `job`.
+- `jobId`: is optional when `dataModel` is `job`; if omitted, a random job for the company is selected.
 
-Each run writes a timestamped JSON file under `input/<dataModel>/` so you can review and create a matching `ground/<dataModel>/` file before evaluation.
+Each run writes a JSON file under `data/eval/in/<dataModel>/` with a name based on the ATS and IDs. You can then review and create a matching companion file in the same directory before evaluation.
 
 ## Running evaluations
 
@@ -50,7 +52,7 @@ npm run lab -- evals <dataModel> [runName]
 - `dataModel`: `company` or `job`.
 - `runName`: optional label; a timestamp is used when omitted.
 
-Outputs are written to `outcome/<dataModel>/` (model responses) and `report/<dataModel>/` (summary metrics). Each JSON document includes an `evalTS` timestamp for traceability.
+Outputs are written to `data/eval/out/<dataModel>/<runName>/<llmModel>/` (model responses and summary metrics). Each JSON document includes an `evalTS` timestamp for traceability.
 
 ## Playground
 

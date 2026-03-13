@@ -1,7 +1,6 @@
-import type { Command } from "../types.ts";
-import type { Bag } from "../types/types.ts";
+import type { Bag, Command } from "../types/types.ts";
 import { embedCache } from "../utils/embedCache.ts";
-import { readObj, writeObj } from "../utils/fileUtils.ts";
+import { readObj, writeObj, type Place } from "../utils/fileUtils.ts";
 import {
   computeClusters,
   cosineDistanceAll,
@@ -16,7 +15,12 @@ interface GeneralInterest {
 
 type VEC = number[];
 
-const GI_FILE = "general_interest";
+const inFile: Place = {
+  group: "playground",
+  stage: "in",
+  file: "general_interest",
+};
+const outFile: Place = { ...inFile, stage: "out" };
 
 export const playground: Command = {
   usage: () => "(no arguments)",
@@ -80,9 +84,7 @@ async function run() {
       testNeg: sew(input.testNeg, negDistances),
       centroids,
     },
-    "Outcome",
-    "playground",
-    GI_FILE,
+    outFile,
   );
 
   await embedCache.saveCache();
@@ -90,7 +92,7 @@ async function run() {
 
 async function readInput() {
   const { train, testPos, testNeg } =
-    (await readObj<GeneralInterest>("Input", "playground", GI_FILE)) ?? {};
+    (await readObj<GeneralInterest>(inFile)) ?? {};
 
   if (!train?.length || !testPos?.length || !testNeg?.length) {
     return undefined;

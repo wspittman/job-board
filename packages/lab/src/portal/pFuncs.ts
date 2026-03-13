@@ -2,8 +2,13 @@ import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
 import { config } from "../../../backend/src/config.ts";
 import type { Bag } from "../../../backend/src/types/types.ts";
-import { CommandError } from "../types.ts";
-import type { ATS, DataModel } from "./pTypes.ts";
+import { CommandError } from "../types/types.ts";
+import {
+  llmActionTypes,
+  type ATS,
+  type DataModel,
+  type LLMAction,
+} from "./pTypes.ts";
 
 export const LLM_MODEL = config.LLM_MODEL;
 export const LLM_REASONING_EFFORT = config.LLM_REASONING_EFFORT;
@@ -43,6 +48,27 @@ export function validateDataModel(dataModel?: string): DataModel {
   return normalized as DataModel;
 }
 
+/**
+ * Validate LLM action argument.
+ * @param dataModel - Data model identifier to determine valid LLM actions.
+ * @param llmAction - LLM action identifier to validate.
+ * @returns LLM action identifier.
+ * @throws CommandError if the LLM action is invalid.
+ */
+export function validateLLMAction(
+  dataModel: DataModel,
+  llmAction?: string,
+): LLMAction {
+  // We need to retype this so that TS can understand how `includes` should work
+  const actionSet = llmActionTypes[dataModel] as readonly string[];
+
+  if (!actionSet.includes(llmAction as LLMAction)) {
+    throw new CommandError("Invalid argument: LLM_ACTION");
+  }
+
+  return llmAction as LLMAction;
+}
+
 export async function fetchInput(
   dataModel: DataModel,
   ats: ATS,
@@ -53,24 +79,42 @@ export async function fetchInput(
     case "company":
       return await atsObj.getCompany({ id: companyId, ats }, true);
     case "job":
-      return await atsObj.getJob(
-        { id: companyId, ats },
-        { id: jobId!, companyId },
-      );
+      return await getJob(ats, companyId, jobId);
   }
 }
 
-export async function infer(dataModel: DataModel, context: Bag) {
-  switch (dataModel) {
-    case "company":
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-      await llm.fillCompanyInfo(context as any);
-      break;
-    case "job":
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-      await llm.fillJobInfo(context as any);
-      break;
+/**
+ * Fetches a job from the ATS, either by a provided job ID or by randomly selecting one from the company's job listings.
+ * @param ats - ATS provider key.
+ * @param companyId - ATS company slug/id.
+ * @param jobId - Optional job ID to fetch. If not provided, a random job from the company's listings will be fetched.
+ * @returns A job object from the ATS.
+ * @throws CommandError when the company has no jobs.
+ */
+async function getJob(ats: ATS, companyId: string, jobId?: string) {
+  if (!jobId) {
+    const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
+
+    if (!jobs.length) {
+      throw new CommandError(`No jobs available for ${ats} / ${companyId}`);
+    }
+
+    const job = jobs[Math.floor(Math.random() * jobs.length)]!;
+
+    // If the ATS didn't support partial job fetching, we can skip the extra fetch
+    if (job.context) {
+      return job;
+    }
+
+    jobId = job.item.id;
   }
+
+  return await atsObj.getJob({ id: companyId, ats }, { id: jobId, companyId });
+}
+
+export async function infer(llmAction: LLMAction, context: Bag) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+  await llm[llmAction](context as any);
 }
 
 /**

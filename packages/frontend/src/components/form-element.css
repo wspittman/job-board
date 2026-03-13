@@ -116,6 +116,7 @@
   visibility: hidden;
   height: var(--space-sm);
   font-size: var(--font-size-xxs);
+  text-align: left;
   max-width: 0.01px;
   transition: max-width 50ms cubic-bezier(0, 0, 0.2, 1) 0ms;
 }
