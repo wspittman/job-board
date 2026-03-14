@@ -31,7 +31,7 @@ const inPlaces: Record<LLMAction, Place> = {
 
 const placeholders: Record<DataModel, object> = {
   company: { fillCompanyInfo: {} },
-  job: { isGeneralApplication: false, fillJobInfo: {} },
+  job: { fillJobInfo: {} },
 };
 
 export async function writeInFile(
@@ -85,7 +85,10 @@ export async function writeOutcome(
 ): Promise<void> {
   await writeObj(outcome, {
     ...outPlace,
-    folder: [llmAction, runName, model, reasoningEffort],
+    folder: [
+      llmAction,
+      [runName, model, reasoningEffort].filter(Boolean).join("_"),
+    ],
     file: source.name,
   });
 }
@@ -96,7 +99,10 @@ export async function writeReport(
 ): Promise<void> {
   await writeObj(report, {
     ...outPlace,
-    folder: [llmAction, runName, model, reasoningEffort],
+    folder: [
+      llmAction,
+      [runName, model, reasoningEffort].filter(Boolean).join("_"),
+    ],
     file: "zReport",
   });
 }

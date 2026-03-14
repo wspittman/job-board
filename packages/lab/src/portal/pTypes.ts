@@ -26,4 +26,6 @@ export const dataModelTypes = ["company", "job"] as const;
 export type DataModel = (typeof dataModelTypes)[number];
 
 export type LLMAction = keyof typeof llm;
-export const llmActionTypes = Object.keys(llm) as LLMAction[];
+export const llmActionTypes = Object.getOwnPropertyNames(
+  Object.getPrototypeOf(llm),
+) as LLMAction[];

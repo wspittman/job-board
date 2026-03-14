@@ -17,7 +17,7 @@ const __dirname = path.dirname(__filename);
 const basePath = path.join(__dirname, "../../data");
 
 const asArray = (val: Strings): string[] =>
-  val ? (Array.isArray(val) ? val : [val]) : [];
+  val ? (Array.isArray(val) ? val : [val]).filter(Boolean) : [];
 
 const getFolderPath = ({ group, stage, folder }: Place) =>
   path.join(basePath, group, stage, ...asArray(folder));
