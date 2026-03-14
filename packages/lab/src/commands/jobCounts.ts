@@ -53,7 +53,7 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
     },
   );
 
-  if (companyIds.length < 5) {
+  if (companyIds.length < 25) {
     console.log("\nJob Counts:", counts);
   }
 }
