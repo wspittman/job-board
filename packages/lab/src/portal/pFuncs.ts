@@ -1,20 +1,17 @@
 import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
-import { config } from "../../../backend/src/config.ts";
-import type { Bag } from "../../../backend/src/types/types.ts";
-import { CommandError } from "../types/types.ts";
+import { CommandError, type Bag } from "../types.ts";
 import {
+  atsTypes,
+  dataModelTypes,
   llmActionTypes,
   type ATS,
+  type Context,
   type DataModel,
   type LLMAction,
 } from "./pTypes.ts";
 
-export const LLM_MODEL = config.LLM_MODEL;
-export const LLM_REASONING_EFFORT = config.LLM_REASONING_EFFORT;
-
-export const atsTypes: ATS[] = ["greenhouse", "lever"];
-export const dataModelTypes: DataModel[] = ["company", "job"];
+export { getLLMOptions } from "../../../backend/src/config.ts";
 
 /**
  * Validate and normalize ATS argument.
@@ -50,19 +47,12 @@ export function validateDataModel(dataModel?: string): DataModel {
 
 /**
  * Validate LLM action argument.
- * @param dataModel - Data model identifier to determine valid LLM actions.
  * @param llmAction - LLM action identifier to validate.
  * @returns LLM action identifier.
  * @throws CommandError if the LLM action is invalid.
  */
-export function validateLLMAction(
-  dataModel: DataModel,
-  llmAction?: string,
-): LLMAction {
-  // We need to retype this so that TS can understand how `includes` should work
-  const actionSet = llmActionTypes[dataModel] as readonly string[];
-
-  if (!actionSet.includes(llmAction as LLMAction)) {
+export function validateLLMAction(llmAction?: string): LLMAction {
+  if (!llmActionTypes.includes(llmAction as LLMAction)) {
     throw new CommandError("Invalid argument: LLM_ACTION");
   }
 
@@ -112,9 +102,29 @@ async function getJob(ats: ATS, companyId: string, jobId?: string) {
   return await atsObj.getJob({ id: companyId, ats }, { id: jobId, companyId });
 }
 
-export async function infer(llmAction: LLMAction, context: Bag) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-  await llm[llmAction](context as any);
+export async function infer(
+  llmAction: LLMAction,
+  arg: string | Context<Bag>,
+): Promise<Bag> {
+  switch (llmAction) {
+    case "fillCompanyInfo":
+    case "fillJobInfo":
+      if (typeof arg === "string") {
+        throw new CommandError(`Expected Context<Bag> for ${llmAction}`);
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await llm[llmAction](arg as Context<any>);
+      return arg.item;
+    case "isGeneralApplication":
+    case "extractLocation":
+    case "interpretFilters": {
+      if (typeof arg === "object") {
+        throw new CommandError(`Expected string argument for ${llmAction}`);
+      }
+      const result = await llm[llmAction](arg);
+      return typeof result === "boolean" ? { bool: result } : (result as Bag);
+    }
+  }
 }
 
 /**

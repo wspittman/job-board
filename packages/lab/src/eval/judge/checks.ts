@@ -1,25 +1,7 @@
-import type { Bag } from "../types/types.ts";
-import { embedCache } from "../utils/embedCache.ts";
-import { cosineSimilarity } from "../utils/mathUtils.ts";
-
-interface CheckIn {
-  prop: string;
-  actual: unknown;
-  expected: unknown;
-}
-
-export interface CheckOut extends CheckIn {
-  check: string;
-  // Either score or omit will be set
-  omit?: "good" | "badFind" | "badOmit";
-  score?: number;
-}
-
-type CheckFunction = (input: CheckIn) => CheckOut | Promise<CheckOut>;
-
-export type Rubric<T> = {
-  [key in keyof T]: CheckFunction | Rubric<Bag>;
-};
+import type { Bag } from "../../types.ts";
+import { embedCache } from "../../utils/embedCache.ts";
+import { cosineSimilarity } from "../../utils/mathUtils.ts";
+import type { CheckFunction, CheckIn, CheckOut, Rubric } from "../evalTypes.ts";
 
 export async function runChecks(
   actual: Bag,

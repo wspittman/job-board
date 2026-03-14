@@ -1,21 +1,21 @@
+import type {
+  BenefitHighlights,
+  Company,
+  Job,
+  LLMAction,
+  Location,
+  RemoteEligibility,
+  SalaryRange,
+} from "../../portal/pTypes.ts";
+import type { Bag } from "../../types.ts";
+import type { Rubric } from "../evalTypes.ts";
 import {
   arrayExactMatcher,
   equals,
   equalsCasePreferred,
   equalsUrl,
-  type Rubric,
   similar,
-} from "./judge/checks.ts";
-import type {
-  BenefitHighlights,
-  Company,
-  DataModel,
-  Job,
-  Location,
-  RemoteEligibility,
-  SalaryRange,
-} from "./portal/pTypes.ts";
-import type { Bag } from "./types/types.ts";
+} from "./checks.ts";
 
 // Model costs per million tokens [input, output], last pulled 10/9/2025
 export const llmModelCost: Record<string, [number, number]> = {
@@ -98,11 +98,16 @@ const rubricJob: Rubric<Job> = {
   requiredEducation: equals,
   requiredExperience: equals,
   summary: similar,
+  jdLanguage: equals,
 };
 
 // #endregion
 
-export const rubrics: Record<DataModel, Rubric<Bag>> = {
-  company: rubricCompany,
-  job: rubricJob,
+export const rubrics: Record<LLMAction, Rubric<Bag>> = {
+  fillCompanyInfo: rubricCompany,
+  fillJobInfo: rubricJob,
+  extractLocation: rubricLocation,
+  isGeneralApplication: { bool: equals },
+  // TBD on a filters rubric
+  interpretFilters: {},
 };

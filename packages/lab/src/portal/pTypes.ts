@@ -1,3 +1,4 @@
+import { llm } from "../../../backend/src/ai/llm.ts";
 import type {
   ExtractionBenefitHighlights,
   ExtractionCompany,
@@ -6,10 +7,12 @@ import type {
   ExtractionRemoteEligibility,
   ExtractionSalaryRange,
 } from "../../../backend/src/models/extractionModels.ts";
+import type { Context } from "../../../backend/src/types/types.ts";
 
 export type {
   ExtractionBenefitHighlights as BenefitHighlights,
   ExtractionCompany as Company,
+  Context,
   ExtractionJob as Job,
   ExtractionLocation as Location,
   ExtractionRemoteEligibility as RemoteEligibility,
@@ -22,14 +25,5 @@ export type ATS = (typeof atsTypes)[number];
 export const dataModelTypes = ["company", "job"] as const;
 export type DataModel = (typeof dataModelTypes)[number];
 
-export const llmActionTypes = {
-  company: ["fillCompanyInfo"] as const,
-  job: [
-    "fillJobInfo",
-    "extractLocation",
-    "isGeneralApplication",
-    "interpretFilters",
-  ] as const,
-};
-export type LLMAction =
-  (typeof llmActionTypes)[keyof typeof llmActionTypes][number];
+export type LLMAction = keyof typeof llm;
+export const llmActionTypes = Object.keys(llm) as LLMAction[];

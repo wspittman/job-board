@@ -1,4 +1,4 @@
-import type { Bag, Command } from "../types/types.ts";
+import type { Bag, Command } from "../types.ts";
 import { embedCache } from "../utils/embedCache.ts";
 import { readObj, writeObj, type Place } from "../utils/fileUtils.ts";
 import {

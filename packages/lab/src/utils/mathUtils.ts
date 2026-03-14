@@ -1,5 +1,5 @@
 import { kmeans } from "ml-kmeans";
-import type { NumBag } from "../types/types.ts";
+import type { NumBag } from "../types.ts";
 
 export function addNumBags<T extends NumBag>(acc: T, b: T): T {
   for (const key in b) {

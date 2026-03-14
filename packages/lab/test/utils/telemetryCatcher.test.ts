@@ -1,53 +1,53 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 
-import type { Source } from "../../src/types/types.ts";
+import { Job } from "../../src/portal/pTypes.ts";
+import { Bag } from "../../src/types.ts";
 import { catcher } from "../../src/utils/telemetryCatcher.ts";
 
 suite("telemetryCatcher", () => {
-  test("createMarkedInput: returns a stable 32-char hash per sourceName", () => {
-    const source: Source = {
-      sourceName: "scenario-1",
-      input: { item: { title: "Engineer" }, extra: true },
-      ground: {},
-    };
+  test("createMarkedInput: returns a stable 8-char hash per key", () => {
+    const key = "scenario-1.json";
+    const val = { item: { title: "Engineer" } as unknown as Job };
 
-    const [firstV] = catcher.createMarkedInput(source);
-    const [secondV] = catcher.createMarkedInput(source);
+    const [firstV] = catcher.createMarkedInput(key, val);
+    const [secondV] = catcher.createMarkedInput(key, val);
 
     assert.equal(firstV, secondV);
-    assert.match(firstV, /^[a-f0-9]{32}$/);
+    assert.match(firstV, /^[a-f0-9]{8}$/);
   });
 
   test("createMarkedInput: injects v into item while preserving sibling fields", () => {
-    const source: Source = {
-      sourceName: "scenario-2",
-      input: { item: { title: "Designer" }, scope: "public" },
-      ground: {},
-    };
+    const key = "scenario-2.json";
+    const val = { item: { title: "Designer" } as unknown as Job };
 
-    const [v, marked] = catcher.createMarkedInput(source);
+    const [v, marked] = catcher.createMarkedInput(key, val);
 
+    assert.ok(typeof marked === "object" && marked !== null);
     assert.equal((marked.item as { v: string }).v, v);
     assert.equal((marked.item as { title: string }).title, "Designer");
-    assert.equal(marked.scope, "public");
   });
 
   test("catch/find: stores metrics using hash extracted from dense input tag", () => {
-    const source: Source = {
-      sourceName: "scenario-3",
-      input: { item: { title: "PM" } },
-      ground: {},
-    };
-    const [v] = catcher.createMarkedInput(source);
-    const metrics = { inTokens: 12, outTokens: 8 };
+    const key1 = "scenario-3a.json";
+    const key2 = "scenario-3b.json";
+    const val1 = { item: { title: "PM" } as unknown as Job };
+    const val2 = "Simple string input";
 
-    catcher.catch(`item: ${v}, payload`, metrics);
+    const [v1, marked1] = catcher.createMarkedInput(key1, val1);
+    const [v2, marked2] = catcher.createMarkedInput(key2, val2);
 
-    assert.deepEqual(catcher.find(v), metrics);
+    const metrics1 = { inTokens: 12, outTokens: 6 };
+    const metrics2 = { inTokens: 16, outTokens: 8 };
+
+    catcher.catch(JSON.stringify((marked1 as unknown as Bag).item), metrics1);
+    catcher.catch(JSON.stringify(marked2), metrics2);
+
+    assert.deepEqual(catcher.find(v1), metrics1);
+    assert.deepEqual(catcher.find(v2), metrics2);
   });
 
   test("find: returns undefined for unknown hash", () => {
-    assert.equal(catcher.find("00000000000000000000000000000000"), undefined);
+    assert.equal(catcher.find("00000000"), undefined);
   });
 });

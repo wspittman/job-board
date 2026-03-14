@@ -1,7 +1,7 @@
 import timers from "node:timers/promises";
 import { fetchJobCount, validateAts } from "../portal/pFuncs.ts";
-import type { Bag } from "../types/types.ts";
-import { CommandError, type Command } from "../types/types.ts";
+import type { Bag } from "../types.ts";
+import { CommandError, type Command } from "../types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
 
 export const jobCounts: Command = {

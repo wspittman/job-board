@@ -1,6 +1,7 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import { createHash } from "node:crypto";
-import type { Bag, NumBag, Source } from "../types/types.ts";
+import type { Context } from "../portal/pTypes.ts";
+import type { Bag, NumBag } from "../types.ts";
 
 /**
  * Catches and stores AI telemetry metrics.
@@ -12,26 +13,32 @@ class TelemetryCatcher {
   constructor() {}
 
   /**
-   * Creates a modified input context for a scenario.
+   * Creates a modified input for a scenario.
    * It adds a unique hash to the input item, which is used to identify the corresponding metrics later.
    * This hash is embedded in the data sent to the LLM.
-   * @param scenario The scenario for which to create the marked input.
-   * @returns A tuple containing the hash and the modified context.
+   * @param key A string key to generate the hash (e.g., scenario name).
+   * @param val The original input context or string to modify.
+   * @returns A tuple containing the hash and the modified input.
    */
-  createMarkedInput(source: Source): [string, Bag] {
-    const { fileName, input } = source;
-    const v = this.hash(fileName);
+  createMarkedInput(
+    key: string,
+    val: Context<Bag> | string,
+  ): [string, Context<Bag> | string] {
+    // Add a simple hash to differentiate parallel requests.
+    // This DOES affect what is sent to the LLM, but should be opaque to it.
+    const v = this.hash(key);
+
+    if (typeof val === "string") {
+      return [v, `[${v}] ${val}`];
+    }
+
+    const { item, context } = val;
 
     return [
       v,
       {
-        ...input,
-        item: {
-          // Add a simple hash to differentiate parallel requests.
-          // This DOES affect what is sent to the LLM, but should be opaque to it.
-          v,
-          ...(input["item"] as object),
-        },
+        item: { v, ...item },
+        context,
       },
     ];
   }
@@ -44,9 +51,11 @@ class TelemetryCatcher {
    * @param metrics The metrics to store.
    */
   catch(tag: string, metrics: NumBag): void {
-    // The key is the hash embedded in the input string (e.g., "item: { v: 'hash_value', ... }").
-    // This extracts the 32-character hash.
-    const key = tag.slice(6, 38);
+    // The key is the hash embedded in the input string
+    // For Context objects this is `{ v: 'hash_value', ... }`
+    // For string inputs this is `"[hash_value] rest of string"`
+    // This extracts the 8-character hash.
+    const key = tag[0] === "{" ? tag.slice(6, 14) : tag.slice(2, 10);
     this.logs[key] = metrics;
   }
 
@@ -61,15 +70,12 @@ class TelemetryCatcher {
   }
 
   /**
-   * Generates a SHA256 hash from the given arguments and truncates it.
-   * @param args Strings to include in the hash.
-   * @returns A 32-character hexadecimal hash string.
+   * Generates a SHA256 hash from the given key and truncates it.
+   * @param key The key to include in the hash.
+   * @returns An 8-character hexadecimal hash string.
    */
-  private hash(...args: string[]): string {
-    return createHash("sha256")
-      .update(args.join(""))
-      .digest("hex")
-      .slice(0, 32);
+  private hash(key: string): string {
+    return createHash("sha256").update(key).digest("hex").slice(0, 8);
   }
 }
 

@@ -1,24 +1,16 @@
-import { llmModelCost, rubrics } from "./evalConfig.ts";
-import { aggregate, judge, type Judgement } from "./judge/judge.ts";
-import { infer } from "./portal/pFuncs.ts";
-import type { Bag, NumBag, Run, Source } from "./types/types.ts";
-import { addNumBags, cost, truncate } from "./utils/mathUtils.ts";
-import { catcher } from "./utils/telemetryCatcher.ts";
-
-export interface Outcome extends Run, Judgement {
-  sourceName: string;
-  metrics: NumBag;
-  cost: number;
-  avgCost?: number;
-  output: Bag;
-  costPerMillion?: number;
-}
+import { infer } from "../portal/pFuncs.ts";
+import type { Bag, NumBag } from "../types.ts";
+import { addNumBags, cost, truncate } from "../utils/mathUtils.ts";
+import { catcher } from "../utils/telemetryCatcher.ts";
+import type { Outcome, Report, Run, Source } from "./evalTypes.ts";
+import { aggregate, judge } from "./judge.ts";
+import { llmModelCost, rubrics } from "./judge/rubrics.ts";
 
 /**
  * Evaluates a given scenario by running it and comparing the output against ground truth
  */
 export async function evaluate(run: Run, source: Source): Promise<Outcome> {
-  const prefix = `${run.runName} / ${source.fileName}`;
+  const prefix = `${run.runName} / ${source.name}`;
 
   console.log(`${prefix}: Running inference`);
   const [metrics, output] = await runInference(run, source);
@@ -28,14 +20,14 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
   }
 
   console.log(`${prefix}: Comparing ground truth`);
-  const judgement = await judge(output, source.ground, rubrics[run.dataModel]);
+  const judgement = await judge(output, source.truth, rubrics[run.llmAction]);
 
   console.log(`${prefix}: Building outcome`);
-  const [inCost, outCost] = llmModelCost[run.llmModel] || [0, 0];
+  const [inCost, outCost] = llmModelCost[run.model] || [0, 0];
 
   return {
     ...run,
-    sourceName: source.fileName,
+    sourceName: source.name,
     metrics,
     cost: cost(
       metrics["inTokens"] ?? 0,
@@ -48,7 +40,7 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
   };
 }
 
-export function report(run: Run, outcomes: Outcome[]) {
+export function report(run: Run, outcomes: Outcome[]): Report {
   console.log(`Combining ${outcomes.length} outcomes`);
 
   const cost = outcomes.reduce((a, o) => a + o.cost, 0);
@@ -70,9 +62,12 @@ async function runInference(
   source: Source,
 ): Promise<[NumBag | undefined, Bag]> {
   // Use telemetryCatcher to mark the input and trace the LLM logs
-  const [mark, markedInput] = catcher.createMarkedInput(source);
-  await infer(run.llmAction, markedInput);
+  const [mark, markedInput] = catcher.createMarkedInput(
+    source.name,
+    source.input,
+  );
+  const result = await infer(run.llmAction, markedInput);
   const metrics = catcher.find(mark);
 
-  return [metrics, markedInput["item"] as Bag];
+  return [metrics, result];
 }

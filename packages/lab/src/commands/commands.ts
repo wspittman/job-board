@@ -1,8 +1,8 @@
-import { evals } from "./commands/eval.ts";
-import { fetchInput } from "./commands/fetchInput.ts";
-import { jobCounts } from "./commands/jobCounts.ts";
-import { playground } from "./commands/playground.ts";
-import { CommandError, type Command } from "./types/types.ts";
+import { CommandError, type Command } from "../types.ts";
+import { evals } from "./eval.ts";
+import { fetchInput } from "./fetchInput.ts";
+import { jobCounts } from "./jobCounts.ts";
+import { playground } from "./playground.ts";
 
 function asArray(value: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
