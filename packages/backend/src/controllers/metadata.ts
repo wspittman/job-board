@@ -79,8 +79,7 @@ async function getClientMetadata(): Promise<ClientMetadata> {
     cacheJobMeta(),
   ]);
 
-  const companyQuickRef =
-    companyMetadata?.companyQuickRef ?? companyMetadata?.companyNames ?? [];
+  const companyQuickRef = companyMetadata?.companyQuickRef ?? [];
   const companyNames = companyQuickRef.map(
     ([id, name]) => [id, name] as [string, string],
   );
