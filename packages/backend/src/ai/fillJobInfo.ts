@@ -20,11 +20,7 @@ const prompt = `You are an information-extraction engine. Your sole job is to re
    - "context": Contains additional company or job context
    - Ignore boilerplate EEO text
 
-2. WRITE your findings in the schema 'scratchpad'
-   - Note any ambiguous or conflicting information
-   - Prefer the most recent/most specific mention if the document has duplicates.
-
-3. EXTRACT specific data points in the schema 'job'
+2. EXTRACT specific data points in the schema 'job'
    - Provide the response JSON in the provided schema.
    - Follow the format guidelines strictly
    - Be strict: reject values that don't match schema type/enum constraints rather than coercing them incorrectly.
