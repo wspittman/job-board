@@ -41,7 +41,7 @@ suite("telemetryCatcher", () => {
     const metrics2 = { inTokens: 16, outTokens: 8 };
 
     catcher.catch(JSON.stringify((marked1 as unknown as Bag).item), metrics1);
-    catcher.catch(JSON.stringify(marked2), metrics2);
+    catcher.catch(marked2 as string, metrics2);
 
     assert.deepEqual(catcher.find(v1), metrics1);
     assert.deepEqual(catcher.find(v2), metrics2);

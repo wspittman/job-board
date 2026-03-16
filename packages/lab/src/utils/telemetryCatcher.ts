@@ -53,9 +53,9 @@ class TelemetryCatcher {
   catch(tag: string, metrics: NumBag): void {
     // The key is the hash embedded in the input string
     // For Context objects this is `{ v: 'hash_value', ... }`
-    // For string inputs this is `"[hash_value] rest of string"`
+    // For string inputs this is `[hash_value] rest of string`
     // This extracts the 8-character hash.
-    const key = tag[0] === "{" ? tag.slice(6, 14) : tag.slice(2, 10);
+    const key = tag[0] === "{" ? tag.slice(6, 14) : tag.slice(1, 9);
     this.logs[key] = metrics;
   }
 

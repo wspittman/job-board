@@ -14,8 +14,12 @@ interface File {
 interface StringsFile extends File {
   values: {
     input: string;
-    truth: Bag | boolean;
+    truth: Bag;
   }[];
+}
+interface BoolFile extends File {
+  yes: string[];
+  no: string[];
 }
 type ContextFile = File & Context<Bag> & Record<LLMAction, Bag>;
 
@@ -51,6 +55,7 @@ export async function readSources(llmAction: LLMAction): Promise<Source[]> {
     case "fillJobInfo":
       return await loadContextFolder(llmAction);
     case "isGeneralApplication":
+      return await loadBoolFile(llmAction);
     case "extractLocation":
     case "interpretFilters":
       return await loadStringsFile(llmAction);
@@ -71,11 +76,35 @@ async function loadStringsFile(llmAction: LLMAction): Promise<Source[]> {
     (await readObj<StringsFile>({ ...inPlace, file: llmAction })) ?? {};
   if (!fileName || !values) return [];
 
-  return values.map(({ input, truth }, i) => ({
-    name: `${fileName}_${i}`,
+  return values.map(({ input, truth }) => ({
+    name: toFileName(input),
     input,
-    truth: typeof truth === "boolean" ? { bool: truth } : truth,
+    truth,
   }));
+}
+
+async function loadBoolFile(llmAction: LLMAction): Promise<Source[]> {
+  const { fileName, yes, no } =
+    (await readObj<BoolFile>({ ...inPlace, file: llmAction })) ?? {};
+  if (!fileName || !yes || !no) return [];
+
+  const y = { truth: { bool: true } };
+  const n = { truth: { bool: false } };
+
+  return [
+    ...yes.map((input) => ({ name: toFileName(input), input, ...y })),
+    ...no.map((input) => ({ name: toFileName(input), input, ...n })),
+  ];
+}
+
+function toFileName(str: string): string {
+  return (
+    str
+      .slice(0, 50)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "") ?? "invalid"
+  );
 }
 
 export async function writeOutcome(
@@ -83,6 +112,8 @@ export async function writeOutcome(
   source: Source,
   outcome: Outcome,
 ): Promise<void> {
+  if (llmAction === "isGeneralApplication" && outcome.overall === 1) return;
+
   await writeObj(outcome, {
     ...outPlace,
     folder: [
