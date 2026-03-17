@@ -1,31 +1,25 @@
 import { jsonCompletion, z } from "dry-utils-openai";
 import { getLLMOptions } from "../config.ts";
 
-const prompt = `Below are example titles for “general-application” Job Descriptions (JDs). These JDs are not tied to a specific open role; their purpose is to collect resumes, maintain a talent community, or provide updates about current and future opportunities.
+const prompt = `A "general-application" Job Description (JD) allows candidates to apply when there is no specific open role. It is usually broad and flexible.
 
-Examples of titles that *do* indicate a general-application JD:
-- "Submit Your Application for Future Consideration"
-- "General Interest - PcD"
-- "No roles that match our current openings? We still want to hear from you—join the [COMPANY] Talent Community!"
-- "Create your own job description"
-- "Join [COMPANY]"
-- "Talent pool"
-- "Build the Future with Us! | [COMPANY] Talent Community"
-- "Join Our Talent Community"
-- "Engineering (General Application)"
-- "Future Opportunities with [COMPANY] Companies"
-- "General Submission"
-- "Don’t see what you’re looking for?"
-- "Join our Talent Community!"
-- "Styling Talent Community- Join Today!"
-- "Future Opportunities: Senior Recruiter"
-- "Join Our Community"
-- "General Applications"
+Indications of a general-application JD:
+- Talent Pool building: "Talent Community", "Talent Network", "Talent Pool", "Join our Talent Pool as a Designer", "Software Engineer Talent Pool"
+- General (non-specific) roles: "General Application", "General Interest", "General Submission", "Expression of Interest", "Expression of Interest - Talent Acquisition", "Other Careers"
+- Future roles: "Future Consideration", "Future Opportunities", "Demand Analyst (Future Consideration)", "Future Opportunities - Sales"
+- Company connection: "Connect with [Company]", "Join [Company]", "Apply to us"
+- No role matches: "Didn't See What You Are Looking For?", "Create your own job description", "My Role is not listed here"
+- The above phrases when combined with a job function or title: 
 
-**Your task:**
-The user will provide additional JD titles.
-Respond with { result: true } if the title indicates a general-application JD.
-Respond with { result: false } if it does not.
+Contrary indications (not general-application):
+- Internships: "General Engineering Internship", "Business Development Intern"
+- Specific roles that include the word "general": "Founding Demand Generation", "HR Operations Generalist", "Junior Consultant - Generalist"
+- Specific recruiting roles that include the word "talent": "Talent Acquisition, USA", "Talent Agent", "Talent Strategist"
+
+Your task:
+- You will be provided a JD title.
+- If the title indicates a general-application JD, respond with { result: true }.
+- Respond with { result: false } if it does not.
 `;
 
 /**
