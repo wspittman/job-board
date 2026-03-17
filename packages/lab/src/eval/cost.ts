@@ -12,7 +12,9 @@ interface ModelCost {
 const llmModelCostData: [string, number, number, number][] = [
   // Reasoning Effort allowed
   ["gpt-5-nano", 0.05, 0.005, 0.4],
+  ["gpt-5.4-nano", 0.2, 0.02, 1.25],
   ["gpt-5-mini", 0.25, 0.025, 2.0],
+  ["gpt-5.4-mini", 0.75, 0.075, 4.5],
   ["gpt-5", 1.25, 0.125, 10.0],
   ["gpt-5.1", 1.25, 0.125, 10.0],
   ["gpt-5.2", 1.75, 0.175, 14.0],
