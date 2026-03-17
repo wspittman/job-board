@@ -1,6 +1,13 @@
 import path from "node:path";
 
-const reasoningEffortOptions = ["minimal", "low", "medium", "high"] as const;
+const reasoningEffortOptions = [
+  "none",
+  "minimal",
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+] as const;
 type ReasoningEffort = (typeof reasoningEffortOptions)[number];
 function isReasoningEffort(val?: string): val is ReasoningEffort {
   return !!val && reasoningEffortOptions.includes(val as ReasoningEffort);
