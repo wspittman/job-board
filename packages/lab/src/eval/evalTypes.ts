@@ -25,6 +25,7 @@ export interface Report extends Run, Judgement {
   cost: number;
   avgCost: number;
   costPerMillion?: number;
+  costPerYear?: number;
 }
 
 export interface Outcome extends Run, Judgement {

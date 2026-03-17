@@ -16,19 +16,6 @@ export function calcF1(precision: number, recall: number): number {
   return truncate((2 * (precision * recall)) / (precision + recall || 1));
 }
 
-export function cost(
-  inTokens: number,
-  outTokens: number,
-  inCost: number,
-  outCost: number,
-) {
-  return truncate(
-    // Cost is per million tokens
-    (inTokens * inCost) / 1_000_000 + (outTokens * outCost) / 1_000_000,
-    8,
-  );
-}
-
 /**
  * Calculates the cosine similarity between two vectors.
  * @param vecA The first vector.

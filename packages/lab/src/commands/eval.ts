@@ -1,10 +1,10 @@
 import { batch, subscribeAsyncLogging } from "dry-utils-async";
+import { isCostAvailable } from "../eval/cost.ts";
 import { readSources, writeOutcome, writeReport } from "../eval/evalFiles.ts";
 import type { Outcome, Run } from "../eval/evalTypes.ts";
 import { evaluate, report } from "../eval/evaluate.ts";
-import { llmModelCost } from "../eval/judge/rubrics.ts";
 import { getLLMOptions, validateLLMAction } from "../portal/pFuncs.ts";
-import type { Command } from "../types.ts";
+import { CommandError, type Command } from "../types.ts";
 import { embedCache } from "../utils/embedCache.ts";
 
 subscribeAsyncLogging({
@@ -24,8 +24,10 @@ async function run([
   const llmAction = validateLLMAction(llmActionArg);
   const { model, reasoningEffort } = getLLMOptions(llmAction);
 
-  if (!llmModelCost[model]) {
-    throw new Error(`${model} is not a known priced model`);
+  if (!isCostAvailable(model, llmAction)) {
+    throw new CommandError(
+      `${model} / ${llmAction} does not have cost data available`,
+    );
   }
 
   await runEval({ runName, llmAction, model, reasoningEffort });

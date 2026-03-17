@@ -1,10 +1,11 @@
 import { infer } from "../portal/pFuncs.ts";
 import type { Bag, NumBag } from "../types.ts";
-import { addNumBags, cost, truncate } from "../utils/mathUtils.ts";
+import { addNumBags } from "../utils/mathUtils.ts";
 import { catcher } from "../utils/telemetryCatcher.ts";
+import { cost, costAg } from "./cost.ts";
 import type { Outcome, Report, Run, Source } from "./evalTypes.ts";
 import { aggregate, judge } from "./judge.ts";
-import { llmModelCost, rubrics } from "./judge/rubrics.ts";
+import { rubrics } from "./judge/rubrics.ts";
 
 /**
  * Evaluates a given scenario by running it and comparing the output against ground truth
@@ -23,18 +24,12 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
   const judgement = await judge(output, source.truth, rubrics[run.llmAction]);
 
   console.log(`${prefix}: Building outcome`);
-  const [inCost, outCost] = llmModelCost[run.model] || [0, 0];
 
   return {
     ...run,
     sourceName: source.name,
     metrics,
-    cost: cost(
-      metrics["inTokens"] ?? 0,
-      metrics["outTokens"] ?? 0,
-      inCost,
-      outCost,
-    ),
+    cost: cost(run.model, run.llmAction, metrics),
     ...judgement,
     output,
   };
@@ -43,17 +38,19 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
 export function report(run: Run, outcomes: Outcome[]): Report {
   console.log(`Combining ${outcomes.length} outcomes`);
 
-  const cost = outcomes.reduce((a, o) => a + o.cost, 0);
-  const avgCost = cost / (outcomes.length || 1);
-  const costPerMillion = avgCost * 1_000_000;
+  const { cost, avgCost, costPerYear, costPerMillion } = costAg(
+    run.llmAction,
+    outcomes.map((o) => o.cost),
+  );
 
   return {
     ...run,
     metrics: outcomes.reduce((a, o) => addNumBags(a, o.metrics), {} as NumBag),
-    cost: truncate(cost, 8),
-    avgCost: truncate(avgCost, 8),
+    cost,
+    avgCost,
+    costPerMillion,
     ...aggregate(outcomes),
-    costPerMillion: truncate(costPerMillion, 2),
+    costPerYear,
   };
 }
 
