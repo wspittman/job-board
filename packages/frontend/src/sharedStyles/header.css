@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  font-size: var(--h3-size);
+  font-size: var(--font-size-lg);
   height: 100%;
 }
 
