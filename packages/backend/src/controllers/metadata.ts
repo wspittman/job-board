@@ -36,7 +36,8 @@ async function refreshInternal() {
   ]);
 
   // Only include quick refs for companies that have jobs
-  const validRefs = quickRefs.filter(([id]) => companyIds.includes(id));
+  const companyIdSet = new Set(companyIds);
+  const validRefs = quickRefs.filter(([id]) => companyIdSet.has(id));
 
   await Promise.all([
     db.metadata.upsertItem({ id: "job", jobCount }),

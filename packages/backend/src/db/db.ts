@@ -48,7 +48,7 @@ class CompanyContainer extends Container<Company> {
   }
 
   async getQuickRefs(): Promise<CompanyQuickRef[]> {
-    const refObjs = await db.company.query<{
+    const refObjs = await this.query<{
       id: string;
       name: string;
       website?: string;
@@ -103,7 +103,7 @@ class JobContainer extends Container<Job> {
     );
   }
 
-  async getCompanyIds() {
+  async getCompanyIds(): Promise<string[]> {
     return await this.query<string>("SELECT DISTINCT VALUE c.companyId FROM c");
   }
 
