@@ -19,7 +19,7 @@
   position: absolute;
   max-width: 90%;
 
-  font-size: var(--font-size-6);
+  font-size: var(--font-size-5);
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;

@@ -33,7 +33,7 @@
 }
 
 .explain {
-  font-size: var(--font-size-6);
+  font-size: var(--font-size-5);
   line-height: 1.4;
 }
 
@@ -58,7 +58,7 @@
 
 .group-label {
   color: var(--text-muted);
-  font-size: var(--font-size-6);
+  font-size: var(--font-size-5);
   text-transform: uppercase;
   padding-block-end: var(--space-md);
 }
