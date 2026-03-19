@@ -104,10 +104,7 @@ class JobContainer extends Container<Job> {
   }
 
   async getCompanyIds() {
-    const results = await this.query<{ companyId: string }>(
-      "SELECT DISTINCT VALUE c.companyId FROM c",
-    );
-    return results.map(({ companyId }) => companyId);
+    return await this.query<string>("SELECT DISTINCT VALUE c.companyId FROM c");
   }
 
   async upsert(job: Job) {

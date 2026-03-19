@@ -192,7 +192,7 @@ const companies: Step[] = [
   addCompanyStep("lever", lvIds[0]!),
   // Add multiple companies from each ATS
   addCompaniesStep("greenhouse", ghIds),
-  addCompaniesStep("lever", lvIds, "Verify company metadata executor"),
+  addCompaniesStep("lever", lvIds, "Verify RefreshCompanyInfo actions"),
   // Metadata check would go here
   formAsyncStep("refresh/companies", "Refresh All Companies"),
   // Metadata check would go here
@@ -206,7 +206,7 @@ const manual = [
     body: {
       ats: "greenhouse",
       companyId: "noxgroup",
-      replaceJobsOlderThan: Date.now(),
+      replaceJobsOlderThan: Date.now() - 1000 * 60 * 60 * 24 * 365, // 1 year ago
     },
   }),
 ];
