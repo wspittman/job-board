@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-3);
   height: 100%;
 }
 
@@ -208,6 +208,7 @@
   }
 
   .nav-link {
+    font-size: var(--font-size-3);
     padding: var(--space-md);
     border-radius: var(--radius);
     transition: background-color 150ms ease-in-out;

@@ -15,7 +15,7 @@
   padding: var(--space-xs) var(--space-md);
   background: var(--primary-main);
   color: var(--text-contrast);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-6);
 
   &:hover {
     background: var(--primary-dark);
@@ -29,5 +29,5 @@
 
 .error {
   color: var(--error-main);
-  font-size: var(--font-size-xxs);
+  font-size: var(--font-size-6);
 }

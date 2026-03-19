@@ -24,7 +24,7 @@
 
 .title {
   color: var(--primary-dark);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-3);
   font-weight: 600;
   line-height: var(--heading-line-height);
 }
@@ -38,5 +38,5 @@
 }
 
 .summary {
-  font-size: var(--font-size-xxs);
+  font-size: var(--font-size-6);
 }

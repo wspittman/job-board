@@ -2,5 +2,5 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-xs);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-6);
 }

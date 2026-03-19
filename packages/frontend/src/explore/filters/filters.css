@@ -22,7 +22,7 @@
   padding: 0 var(--space-sm);
   border: none;
   background: none;
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-3);
   color: var(--primary-main);
 
   &:focus-visible,
@@ -33,7 +33,7 @@
 }
 
 .explain {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-6);
   line-height: 1.4;
 }
 
@@ -58,7 +58,7 @@
 
 .group-label {
   color: var(--text-muted);
-  font-size: var(--font-size-xxs);
+  font-size: var(--font-size-6);
   text-transform: uppercase;
   padding-block-end: var(--space-md);
 }
