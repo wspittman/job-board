@@ -72,9 +72,6 @@ export interface Metadata {
   // For company type
   companyCount?: number;
   companyQuickRef?: CompanyQuickRef[];
-  // Remove from dev after 2/27/26
-  /** @deprecated companyNames deprecated but kept until next release for backward compatibility. */
-  companyNames?: [string, string][];
 
   // For job type
   jobCount?: number;

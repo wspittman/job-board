@@ -23,46 +23,35 @@ export async function getCompanyQuickRef(
   return companyMap.get(id);
 }
 
-export const refreshCompanyMetadata = debounceAsync(
+export const refreshMetadata = debounceAsync(
   "RefreshMetadata",
-  refreshCompanyInternal,
+  refreshInternal,
 );
 
-export const refreshJobMetadata = debounceAsync(
-  "RefreshMetadata",
-  refreshJobInternal,
-);
+async function refreshInternal() {
+  const [quickRefs, companyIds, jobCount] = await Promise.all([
+    db.company.getQuickRefs(),
+    db.job.getCompanyIds(),
+    db.job.getCount(),
+  ]);
 
-async function refreshCompanyInternal() {
-  const refs = await db.company.query<{
-    id: string;
-    name: string;
-    website?: string;
-  }>("SELECT c.id, c.name, c.website FROM c");
+  // Only include quick refs for companies that have jobs
+  const companyIdSet = new Set(companyIds);
+  const validRefs = quickRefs.filter(([id]) => companyIdSet.has(id));
 
-  await db.metadata.upsertItem({
-    id: "company",
-    companyCount: refs.length,
-    companyQuickRef: refs.map(({ id, name, website }) => [id, name, website]),
-  });
+  await Promise.all([
+    db.metadata.upsertItem({ id: "job", jobCount }),
+    db.metadata.upsertItem({
+      id: "company",
+      companyCount: validRefs.length,
+      companyQuickRef: validRefs,
+    }),
+  ]);
 
-  logProperty("Metadata", { companyCount: refs.length });
+  logProperty("Metadata", { jobCount, companyCount: validRefs.length });
 
   cacheCompanyMeta.clear();
   cacheQuickRefMap.clear();
-  cachedClientMetadata.clear();
-}
-
-async function refreshJobInternal() {
-  const jobCount = await db.job.getCount();
-
-  await db.metadata.upsertItem({
-    id: "job",
-    jobCount,
-  });
-
-  logProperty("Metadata", { jobCount });
-
   cacheJobMeta.clear();
   cachedClientMetadata.clear();
 }
@@ -79,8 +68,7 @@ async function getClientMetadata(): Promise<ClientMetadata> {
     cacheJobMeta(),
   ]);
 
-  const companyQuickRef =
-    companyMetadata?.companyQuickRef ?? companyMetadata?.companyNames ?? [];
+  const companyQuickRef = companyMetadata?.companyQuickRef ?? [];
   const companyNames = companyQuickRef.map(
     ([id, name]) => [id, name] as [string, string],
   );

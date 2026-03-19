@@ -1,15 +1,21 @@
+import timers from "node:timers/promises";
+import { writeInFile } from "../eval/evalFiles.ts";
 import {
   fetchInput as fetchInputPortal,
   validateAts,
   validateDataModel,
 } from "../portal/pFuncs.ts";
-import { llmActionTypes, type DataModel } from "../portal/pTypes.ts";
-import { CommandError, type Command } from "../types/types.ts";
-import { writeObj } from "../utils/fileUtils.ts";
+import { CommandError, type Command } from "../types.ts";
+import { validateIds } from "../utils/utils.ts";
 
 export const fetchInput: Command = {
   usage: () => "<DATA_MODEL> <ATS> <COMPANY_ID> [JOB_ID]",
   run,
+};
+
+export const fetchInputMany: Command = {
+  usage: () => "<DATA_MODEL> <ATS> <COMPANY_ID[, ...]>",
+  run: runMany,
 };
 
 async function run([
@@ -27,19 +33,27 @@ async function run([
 
   const result = await fetchInputPortal(dataModel, ats, companyId, jobId);
   const id = dataModel === "job" ? result.item.id : "";
-  const output = {
-    input: result,
-    ...groundTruthPlaceholders(dataModel),
-  };
-
-  await writeObj(output, {
-    group: "eval",
-    stage: "in",
-    folder: dataModel,
-    file: [ats, companyId, id],
-  });
+  await writeInFile(result, dataModel, ats, companyId, id);
 }
 
-function groundTruthPlaceholders(dataModel: DataModel): Record<string, object> {
-  return Object.fromEntries(llmActionTypes[dataModel].map((x) => [x, {}]));
+async function runMany([
+  dataModelArg,
+  atsArg,
+  ...companyArgs
+]: string[]): Promise<void> {
+  const dataModel = validateDataModel(dataModelArg);
+  const ats = validateAts(atsArg);
+  const companyIds = validateIds("COMPANY_IDs", companyArgs);
+
+  console.log(
+    `Fetch ${dataModel} input for ${companyIds.length} ${ats} companies...`,
+  );
+
+  for (const companyId of companyIds) {
+    const result = await fetchInputPortal(dataModel, ats, companyId);
+    const id = dataModel === "job" ? result.item.id : "";
+    await writeInFile(result, dataModel, ats, companyId, id);
+    process.stdout.write(".");
+    await timers.setTimeout(100); // Throttle requests
+  }
 }

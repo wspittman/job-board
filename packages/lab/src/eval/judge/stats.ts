@@ -1,24 +1,5 @@
-import { addNumBags, calcF1, truncate } from "../utils/mathUtils.ts";
-import type { CheckOut } from "./checks.ts";
-
-export interface Stats {
-  match?: {
-    good: number;
-    bad: number;
-    total: number;
-    score: number;
-  };
-  omit?: {
-    good: number;
-    badFind: number;
-    badOmit: number;
-    total: number;
-    precision?: number;
-    recall?: number;
-    f1?: number;
-  };
-  overall?: number;
-}
+import { addNumBags, calcF1, truncate } from "../../utils/mathUtils.ts";
+import type { CheckOut, Stats } from "../evalTypes.ts";
 
 export function checksToStats(results: CheckOut[]): Stats {
   const statList = results.map(checkToStat);

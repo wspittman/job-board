@@ -58,19 +58,15 @@
 
   /* Typography */
   --fonts:
-    "Helvetica Neue", Helvetica, Arial, system-ui, -apple-system,
-    BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Liberation Sans",
-    sans-serif;
+    system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Noto Sans",
+    "Liberation Sans", "Apple Color Emoji", "Segoe UI Emoji";
 
-  --h1-size: clamp(1.875rem, 5vw, 2.5rem);
-  --h2-size: clamp(1.5rem, 3vw, 1.875rem);
-  --h3-size: clamp(1.25rem, 2vw, 1.5rem);
-
-  --font-size-lg: clamp(1.375rem, 1.75vw, 1.5rem);
-  --font-size-md: clamp(1.25rem, 1.5vw, 1.375rem);
-  --font-size-sm: clamp(1.125rem, 1.25vw, 1.25rem);
-  --font-size-xs: clamp(1rem, 1vw, 1.125rem);
-  --font-size-xxs: clamp(0.875rem, 1vw, 1rem);
+  --font-size-1: calc(var(--font-size-5) * 2.5);
+  --font-size-2: calc(var(--font-size-5) * 1.75);
+  --font-size-3: calc(var(--font-size-5) * 1.4);
+  --font-size-4: calc(var(--font-size-5) * 1.125);
+  --font-size-5: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --font-size-6: calc(var(--font-size-5) * 0.9);
 
   --heading-line-height: 1.2;
 
@@ -99,7 +95,7 @@ body {
   background: var(--bg-default);
   color: var(--text-default);
   font-family: var(--fonts);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-4);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

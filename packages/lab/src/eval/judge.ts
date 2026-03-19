@@ -1,10 +1,7 @@
-import type { Bag } from "../types/types.ts";
-import { type CheckOut, type Rubric, runChecks } from "./checks.ts";
-import { checksToStats, combineStats, type Stats } from "./stats.ts";
-
-export interface Judgement extends Stats {
-  suboptimal?: CheckOut[];
-}
+import type { Bag } from "../types.ts";
+import type { Judgement, Rubric } from "./evalTypes.ts";
+import { runChecks } from "./judge/checks.ts";
+import { checksToStats, combineStats } from "./judge/stats.ts";
 
 export async function judge(
   actual: Bag,

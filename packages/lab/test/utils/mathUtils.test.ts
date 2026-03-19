@@ -7,7 +7,6 @@ import {
   computeClusters,
   cosineDistanceAll,
   cosineSimilarity,
-  cost,
   truncate,
 } from "../../src/utils/mathUtils.ts";
 
@@ -36,14 +35,6 @@ suite("mathUtils", () => {
 
   test("calcF1: returns zero when precision and recall are zero", () => {
     assert.equal(calcF1(0, 0), 0);
-  });
-
-  test("cost: calculates million-token scaled and rounded cost", () => {
-    assert.equal(cost(1_000_000, 500_000, 2.5, 10), 7.5);
-  });
-
-  test("cost: supports tiny values via 8-digit precision", () => {
-    assert.equal(cost(100, 100, 0.1, 0.2), 0.00003);
   });
 
   test("cosineSimilarity: returns 1 for identical vectors", () => {

@@ -7,6 +7,7 @@ import { config } from "../config.ts";
 import type {
   Company,
   CompanyKey,
+  CompanyQuickRef,
   Job,
   JobKey,
   Location,
@@ -44,6 +45,16 @@ class CompanyContainer extends Container<Company> {
 
   async getKeys() {
     return this.query<CompanyKey>(`SELECT c.id, c.ats FROM c`);
+  }
+
+  async getQuickRefs(): Promise<CompanyQuickRef[]> {
+    const refObjs = await this.query<{
+      id: string;
+      name: string;
+      website?: string;
+    }>("SELECT c.id, c.name, c.website FROM c");
+
+    return refObjs.map(({ id, name, website }) => [id, name, website]);
   }
 
   async upsert(company: Company) {
@@ -90,6 +101,10 @@ class JobContainer extends Container<Job> {
       "SELECT c.id, c._ts FROM c",
       { partitionKey: companyId },
     );
+  }
+
+  async getCompanyIds(): Promise<string[]> {
+    return await this.query<string>("SELECT DISTINCT VALUE c.companyId FROM c");
   }
 
   async upsert(job: Job) {
