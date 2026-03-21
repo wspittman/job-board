@@ -48,20 +48,6 @@ export abstract class ComponentBase extends HTMLElement {
     return Promise.resolve();
   }
 
-  /**
-   * Hides the component by setting display to none.
-   */
-  hide() {
-    this.style.display = "none";
-  }
-
-  /**
-   * Shows the component by setting display to block.
-   */
-  show() {
-    this.style.display = "block";
-  }
-
   // #region Element Actions
 
   /**
@@ -82,19 +68,6 @@ export abstract class ComponentBase extends HTMLElement {
   protected setText(id: string, value: string = "") {
     const el = this.getEl(id);
     if (el) el.textContent = value;
-  }
-
-  /**
-   * Attaches a click handler to an element by its ID.
-   * @param id - The ID of the element within the shadow root
-   * @param onClick - The click handler function
-   */
-  protected setOnClick(id: string, onClick?: () => void) {
-    if (!onClick) return;
-    const el = this.getEl(id);
-    if (el) {
-      el.onclick = () => onClick();
-    }
   }
 
   /**

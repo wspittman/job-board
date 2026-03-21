@@ -39,8 +39,9 @@ export class JobCard extends ComponentBase {
       summary,
     });
 
-    const realOnClick = onClick ? () => onClick(job.id) : undefined;
-    element.setOnClick("container", realOnClick);
+    if (onClick) {
+      element.onclick = () => onClick(job.id);
+    }
 
     element.isSelected = !!isSelected;
     element.#jobId = job.id;

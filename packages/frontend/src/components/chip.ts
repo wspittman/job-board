@@ -42,7 +42,7 @@ export class Chip extends ComponentBase {
       const deleteBtn = element.getEl<HTMLButtonElement>("delete")!;
       deleteBtn.style.display = "inline-flex";
       deleteBtn.onclick = () => {
-        element.hide();
+        element.style.visibility = "hidden";
         onDelete();
       };
     }
