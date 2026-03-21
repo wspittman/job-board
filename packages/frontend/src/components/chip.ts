@@ -5,9 +5,11 @@ import html from "./chip.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "jb-chip";
 
+export const CHIP_DELETE = `${tag}-delete`;
+
 interface Props {
   label: string;
-  onDelete?: () => void;
+  deleteKey?: string;
   filled?: boolean;
 }
 
@@ -26,11 +28,11 @@ export class Chip extends ComponentBase {
   /**
    * Creates a chip element with the provided configuration.
    * @param label - Text to display within the chip body
-   * @param onDelete - Optional callback invoked when the delete button is clicked
+   * @param deleteKey - Key to identify the chip for deletion
    * @param filled - Whether to render the chip using the filled visual style
    * @returns A fully configured chip custom element ready for insertion
    */
-  static create({ label, onDelete, filled }: Props) {
+  static create({ label, deleteKey, filled }: Props) {
     const element = document.createElement(tag);
     element.setText("label", label);
 
@@ -38,12 +40,12 @@ export class Chip extends ComponentBase {
       element.getEl("container")!.classList.add("filled");
     }
 
-    if (onDelete) {
+    if (deleteKey) {
       const deleteBtn = element.getEl<HTMLButtonElement>("delete")!;
       deleteBtn.style.display = "inline-flex";
       deleteBtn.onclick = () => {
-        element.style.visibility = "hidden";
-        onDelete();
+        element.style.display = "none";
+        element.emit(CHIP_DELETE, deleteKey);
       };
     }
 

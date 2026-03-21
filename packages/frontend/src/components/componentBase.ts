@@ -79,6 +79,30 @@ export abstract class ComponentBase extends HTMLElement {
     return this.root.getElementById(id) as T | null;
   }
 
+  /**
+   * Dispatches a bubbling custom event from the host element.
+   * @param type - Event name exposed by the component
+   * @param detail - Optional payload included with the event
+   */
+  protected emit(type: string, detail?: unknown): void {
+    this.dispatchEvent(
+      new CustomEvent(type, { bubbles: true, composed: true, detail }),
+    );
+  }
+
+  /**
+   * Adds an event listener for a custom event type, with a typed detail payload.
+   * @param type - The custom event name to listen for
+   * @param fn - Callback function invoked with the event detail when the event is fired
+   */
+  protected listen<T>(type: string, fn: (detail: T) => void) {
+    this.addEventListener(type, (event) => {
+      if (event instanceof CustomEvent) {
+        fn(event.detail as T);
+      }
+    });
+  }
+
   // #endregion
 
   // #region Static Methods

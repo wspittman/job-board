@@ -12,13 +12,14 @@ import {
 } from "../../api/apiEnums";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
-import { Chip } from "../../components/chip";
+import { Chip, CHIP_DELETE } from "../../components/chip";
 import { ComponentBase } from "../../components/componentBase";
-import type {
-  FormElement,
-  FormElementProps,
+import {
+  FORM_ELEMENT_UPDATE,
+  type FormElement,
+  type FormElementProps,
 } from "../../components/form-element";
-import type { NLSearch } from "../../components/nl-search";
+import { NL_SEARCH_RESULT } from "../../components/nl-search";
 
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
@@ -159,7 +160,6 @@ export class Filters extends ComponentBase {
   readonly #chips: HTMLElement;
   readonly #form: HTMLFormElement;
   readonly #inputs = new Map<FilterModelKey, FormElement>();
-  readonly #nlSearch: NLSearch;
 
   #debounceTimer: number | undefined;
   #onChange?: (filters: FilterModel) => Promise<void>;
@@ -174,7 +174,6 @@ export class Filters extends ComponentBase {
     this.#container = this.getEl("container")!;
     this.#toggle = this.getEl<HTMLButtonElement>("toggle")!;
     this.#chips = this.getEl("chips")!;
-    this.#nlSearch = this.getEl<NLSearch>("nl-search")!;
     this.#form = this.getEl<HTMLFormElement>("form")!;
 
     this.#toggle.addEventListener("click", () => this.#handleToggle());
@@ -190,10 +189,6 @@ export class Filters extends ComponentBase {
   init({ onChange, initialFilters }: Props) {
     this.#onChange = onChange;
     this.#initialFilters = initialFilters;
-
-    this.#nlSearch.init({
-      onFilters: (filters) => this.#handleNLUpdate(filters),
-    });
 
     if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
       this.#setCollapsed(true);
@@ -216,11 +211,19 @@ export class Filters extends ComponentBase {
       this.#inputs.get("companyId")?.init({
         ...def,
         options,
-        onChange: () => this.#debounceOnChange(),
       });
     } catch {
       // ignore
     }
+
+    this.listen(CHIP_DELETE, (key: FilterModelKey) => {
+      this.#inputs.get(key)!.value = "";
+    });
+
+    this.listen(FORM_ELEMENT_UPDATE, () => this.#debounceOnChange());
+    this.listen(NL_SEARCH_RESULT, (filters: FilterModel) =>
+      this.#handleNLUpdate(filters),
+    );
 
     if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
       for (const [key, value] of this.#initialFilters.toEntries()) {
@@ -233,7 +236,6 @@ export class Filters extends ComponentBase {
   }
 
   #appendInputs(): void {
-    const onChange = () => this.#debounceOnChange();
     const fragment = document.createDocumentFragment();
 
     for (const [groupLabel, defs] of Object.entries(filterDefs)) {
@@ -248,7 +250,7 @@ export class Filters extends ComponentBase {
       fields.className = "group-fields";
 
       for (const props of defs) {
-        const el = this.#createFromFilterDef({ ...props, onChange });
+        const el = this.#createFromFilterDef(props);
         fields.append(el);
         this.#inputs.set(props.name as FilterModelKey, el);
       }
@@ -294,7 +296,7 @@ export class Filters extends ComponentBase {
       fragment.appendChild(
         Chip.create({
           label,
-          onDelete: () => (this.#inputs.get(key)!.value = ""),
+          deleteKey: key,
           filled: true,
         }),
       );
