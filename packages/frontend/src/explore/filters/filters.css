@@ -1,14 +1,14 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-2);
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
+  gap: var(--space-2);
 }
 
 .heading {
@@ -19,7 +19,7 @@
 
 .toggle {
   display: none;
-  padding: 0 var(--space-sm);
+  padding: 0 var(--space-1);
   border: none;
   background: none;
   font-size: var(--font-size-3);
@@ -41,14 +41,14 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: var(--space-sm);
-  margin-block-end: var(--space-sm);
+  gap: var(--space-1);
+  margin-block-end: var(--space-1);
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-2);
 
   /* Hidden field for saved job */
   & [name="jobId"] {
@@ -60,13 +60,13 @@
   color: var(--text-muted);
   font-size: var(--font-size-5);
   text-transform: uppercase;
-  padding-block-end: var(--space-md);
+  padding-block-end: var(--space-2);
 }
 
 .group-fields {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: var(--space-3);
 }
 
 @media (min-width: 901px) {
@@ -80,7 +80,7 @@
       width 150ms ease;
 
     &.collapsed {
-      padding: var(--space-md);
+      padding: var(--space-2);
     }
   }
 
@@ -105,6 +105,6 @@
 
 @media (min-width: 901px) and (orientation: landscape) {
   .container {
-    padding: var(--space-md);
+    padding: var(--space-2);
   }
 }

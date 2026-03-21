@@ -3,16 +3,16 @@
   flex-direction: column;
   max-width: none;
   height: calc(100dvh - var(--header-height));
-  padding: var(--space-md);
-  padding-bottom: max(var(--space-md), env(safe-area-inset-bottom, 0px));
-  gap: var(--space-md);
+  padding: var(--space-2);
+  padding-bottom: max(var(--space-2), env(safe-area-inset-bottom, 0px));
+  gap: var(--space-2);
 }
 
 .noscript-message {
   max-width: 720px;
   background: var(--bg-error);
   color: var(--text-error);
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--bg-border);
   border-radius: var(--radius);
   justify-self: center;
@@ -22,7 +22,7 @@
 .explore-layout {
   display: flex;
   height: 100%;
-  gap: var(--space-md);
+  gap: var(--space-2);
   align-items: flex-start;
 }
 
@@ -56,18 +56,18 @@ explore-details[empty] {
 
 @media (max-width: 900px) {
   .explore-layout {
-    height: calc(100% - var(--space-xl));
+    height: calc(100% - var(--space-6));
   }
 
   .action-button {
     display: inline-flex;
     min-width: 300px;
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-1) var(--space-2);
     background: var(--secondary-gradient-btn);
     color: var(--text-contrast);
     justify-content: center;
     align-self: center;
-    margin: calc(var(--space-sm) - var(--space-md)) 0;
+    margin: calc(0px - var(--space-1)) 0;
 
     &:hover,
     &:focus-visible {
@@ -95,10 +95,10 @@ explore-details[empty] {
 
 @media (min-width: 901px) and (orientation: landscape) {
   .explore-page {
-    padding: var(--space-sm);
+    padding: var(--space-1);
   }
 
   .explore-layout {
-    gap: var(--space-sm);
+    gap: var(--space-1);
   }
 }

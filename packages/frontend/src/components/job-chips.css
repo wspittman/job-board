@@ -1,6 +1,6 @@
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-xs);
+  gap: var(--space-1);
   font-size: var(--font-size-6);
 }

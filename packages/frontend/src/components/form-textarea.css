@@ -1,10 +1,10 @@
 .intake-wrap {
-  padding: 0 var(--space-md);
+  padding: 0 var(--space-2);
 }
 
 .intake {
   resize: none;
   overflow-y: hidden;
-  min-height: var(--space-xl);
-  padding-block-start: var(--space-md);
+  min-height: var(--space-6);
+  padding-block-start: var(--space-4);
 }

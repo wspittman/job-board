@@ -1,9 +1,9 @@
 .container {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-1);
   color: var(--primary-dark);
-  padding: 0 var(--space-sm);
+  padding: 0 var(--space-1);
   border: 1px solid var(--primary-dark);
   border-radius: var(--radius);
   font-size: var(--font-size-6);

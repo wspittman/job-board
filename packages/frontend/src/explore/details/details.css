@@ -5,7 +5,7 @@
   background: inherit;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-1);
 }
 
 .title {
@@ -20,7 +20,7 @@
   &:hover {
     color: var(--primary-dark);
     text-decoration: underline;
-    text-underline-offset: var(--space-xs);
+    text-underline-offset: var(--space-1);
   }
 
   &[aria-disabled="true"] {
@@ -28,19 +28,19 @@
   }
 
   & svg {
-    width: var(--space-md);
-    height: var(--space-md);
+    width: var(--space-2);
+    height: var(--space-2);
   }
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-1);
 }
 
 .copy {
-  padding: var(--space-xs);
+  padding: var(--space-1);
   background: var(--secondary-gradient-btn);
 
   & svg {
@@ -74,7 +74,7 @@
 
 @media (min-width: 901px) and (orientation: landscape) {
   .container {
-    padding: var(--space-md);
+    padding: var(--space-2);
   }
 }
 

@@ -14,7 +14,7 @@ h1,
 h2,
 h3 {
   line-height: var(--heading-line-height);
-  margin: 0 0 var(--space-md) 0;
+  margin: 0 0 var(--space-2) 0;
   color: var(--primary-main);
 }
 h1 {
@@ -35,7 +35,7 @@ button,
 
 .abtn {
   display: inline-flex;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius);
   background: var(--primary-gradient-btn);
   color: var(--text-contrast);
@@ -44,7 +44,7 @@ button,
   &:hover,
   &:focus-visible {
     text-decoration: underline;
-    text-underline-offset: var(--space-xs);
+    text-underline-offset: var(--space-1);
     box-shadow: var(--shadow-focus);
     color: var(--text-contrast);
   }
@@ -54,5 +54,5 @@ button,
   background: var(--bg-surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
-  padding: var(--space-lg);
+  padding: var(--space-3) var(--space-4);
 }

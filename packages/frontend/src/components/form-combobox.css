@@ -1,29 +1,29 @@
 .intake-wrap {
-  padding: 0 var(--space-md);
+  padding: 0 var(--space-2);
 }
 
 .intake-wrap::after {
   content: "";
   position: absolute;
   pointer-events: none;
-  right: var(--space-md);
+  right: var(--space-2);
   border-inline-start: 5px solid transparent;
   border-inline-end: 5px solid transparent;
   border-block-start: 5px solid var(--text-muted);
 }
 
 .intake {
-  padding: var(--space-lg) 0;
+  padding: var(--space-4) 0;
 }
 
 .options {
   position: absolute;
   z-index: 2;
-  top: calc(100% + var(--space-xs));
+  top: calc(100% + var(--space-1));
   left: 0;
   right: 0;
   margin: 0;
-  padding: var(--space-xs) 0;
+  padding: var(--space-1) 0;
   list-style: none;
   border: 1px solid var(--bg-border);
   border-radius: var(--radius);
@@ -38,7 +38,7 @@
 }
 
 .option {
-  padding: var(--space-xs) var(--space-md);
+  padding: var(--space-1) var(--space-2);
   cursor: pointer;
 }
 
