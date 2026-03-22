@@ -9,8 +9,6 @@ class HeroIcons extends ComponentBase {
   constructor() {
     super(html, cssSheet);
   }
-
-  override async onLoad() {}
 }
 
 ComponentBase.register(tag, HeroIcons);

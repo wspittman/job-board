@@ -7,9 +7,10 @@ import html from "./job-card.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "explore-job-card";
 
+export const JOB_CARD_SELECTED = `${tag}-selected`;
+
 interface Props {
   job: JobModel;
-  onClick?: (id: string) => void;
 
   // editable
   isSelected?: boolean;
@@ -22,11 +23,10 @@ export class JobCard extends ComponentBase {
   /**
    * Factory helper that builds a job card element populated with job details.
    * @param job - Job information to display.
-   * @param onClick - Optional click handler invoked with the job ID.
    * @param isSelected - Whether the card should start in the selected state.
    * @returns A fully configured job card element.
    */
-  static create({ job, onClick, isSelected }: Props) {
+  static create({ job, isSelected }: Props) {
     const element = document.createElement(tag);
 
     element.getEl<JobChips>("chips")?.init({ job, useShort: true });
@@ -39,12 +39,9 @@ export class JobCard extends ComponentBase {
       summary,
     });
 
-    if (onClick) {
-      element.onclick = () => onClick(job.id);
-    }
-
     element.isSelected = !!isSelected;
     element.#jobId = job.id;
+    element.onclick = () => element.emit(JOB_CARD_SELECTED, job.id);
 
     return element;
   }

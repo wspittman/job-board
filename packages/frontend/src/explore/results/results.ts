@@ -8,10 +8,6 @@ import html from "./results.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "explore-results";
 
-interface Props {
-  onSelect?: (jobId: string) => void;
-}
-
 /**
  * Custom element responsible for rendering job results and coordinating selection events.
  */
@@ -19,7 +15,6 @@ export class Results extends ComponentBase {
   #listEl: HTMLElement;
   #cards: JobCard[] = [];
   #selectedCard?: JobCard;
-  #onSelect?: (jobId: string) => void;
 
   /**
    * Initializes the results list container and associated template.
@@ -27,14 +22,6 @@ export class Results extends ComponentBase {
   constructor() {
     super(html, cssSheet);
     this.#listEl = this.getEl("list")!;
-  }
-
-  /**
-   * Sets up the selection callback and resets the results list.
-   * @param onSelect - Handler invoked when a job card is selected.
-   */
-  init({ onSelect }: Props) {
-    this.#onSelect = onSelect;
     this.updateJobs(undefined);
   }
 
@@ -43,12 +30,11 @@ export class Results extends ComponentBase {
    * @param value - Array of job models to render, or undefined to clear the list.
    */
   updateJobs(value: JobModel[] | undefined, isSavedJob = false) {
-    const onClick = (id: string) => this.#selectCard(id);
     this.#clearCards();
 
     this.#cards = (value ?? []).map((job, index) => {
       const isSelected = index === 0;
-      return JobCard.create({ job, isSelected, onClick });
+      return JobCard.create({ job, isSelected });
     });
 
     this.#selectedCard = this.#cards.at(0);
@@ -84,11 +70,8 @@ export class Results extends ComponentBase {
     this.#selectedCard = undefined;
   }
 
-  #selectCard(selectedId: string) {
+  selectCard(selectedId: string) {
     if (!selectedId) return;
-
-    // Notify the details pane of the selection change, even if the same card is re-selected
-    this.#onSelect?.(selectedId);
 
     if (this.#selectedCard?.jobId === selectedId) return;
 

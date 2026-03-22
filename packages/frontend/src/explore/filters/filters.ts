@@ -27,9 +27,10 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "explore-filters";
 const DEBOUNCE_DELAY = 500;
 
+export const FILTERS_UPDATED = `${tag}-updated`;
+
 interface Props {
   initialFilters?: FilterModel;
-  onChange?: (filters: FilterModel) => Promise<void>;
 }
 
 interface FormElementDef extends FormElementProps {
@@ -162,7 +163,6 @@ export class Filters extends ComponentBase {
   readonly #inputs = new Map<FilterModelKey, FormElement>();
 
   #debounceTimer: number | undefined;
-  #onChange?: (filters: FilterModel) => Promise<void>;
   #isCollapsed = false;
   #initialFilters: FilterModel | undefined;
 
@@ -183,11 +183,9 @@ export class Filters extends ComponentBase {
 
   /**
    * Initializes the component with callbacks and optional preset filters.
-   * @param onChange - Callback fired after debounced filter updates.
    * @param initialFilters - Filters to preload into the form inputs.
    */
-  init({ onChange, initialFilters }: Props) {
-    this.#onChange = onChange;
+  init({ initialFilters }: Props) {
     this.#initialFilters = initialFilters;
 
     if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
@@ -270,8 +268,6 @@ export class Filters extends ComponentBase {
   }
 
   #debounceOnChange(): void {
-    if (!this.#onChange) return;
-
     if (this.#debounceTimer) {
       window.clearTimeout(this.#debounceTimer);
     }
@@ -279,7 +275,7 @@ export class Filters extends ComponentBase {
     this.#debounceTimer = window.setTimeout(() => {
       const data = this.#getFilterData();
       this.#renderChips(data);
-      void this.#onChange?.(data);
+      this.emit(FILTERS_UPDATED, data);
     }, DEBOUNCE_DELAY);
   }
 
