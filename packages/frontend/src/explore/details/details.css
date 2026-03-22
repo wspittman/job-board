@@ -1,3 +1,8 @@
+:host {
+  container-type: inline-size;
+  container-name: explore-details;
+}
+
 .header {
   display: flex;
   position: sticky;
@@ -72,13 +77,13 @@
   }
 }
 
-@media (min-width: 901px) and (orientation: landscape) {
+@container explore-details (min-width: 901px) {
   .container {
     padding: var(--space-2);
   }
 }
 
-@media (max-width: 600px) {
+@container explore-details (max-width: 600px) {
   .actions {
     flex-direction: column-reverse;
   }

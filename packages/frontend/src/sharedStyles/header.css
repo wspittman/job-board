@@ -9,6 +9,8 @@
   color: var(--text-contrast);
   align-items: center;
   box-shadow: var(--shadow-soft);
+  container-type: inline-size;
+  container-name: appbar;
 }
 
 .nav {
@@ -131,18 +133,6 @@
   transform: scale(1) rotate(0deg);
 }
 
-@media (max-width: 600px) {
-  .menu-toggle:checked ~ .menu-backdrop {
-    display: block;
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .hamburger {
-    display: flex;
-  }
-}
-
 .menu-backdrop {
   display: none;
   position: fixed;
@@ -180,9 +170,19 @@
 
 /* Mobile Nav */
 
-@media (max-width: 600px) {
+@container appbar (max-width: 600px) {
   .menu-toggle {
     display: block;
+  }
+
+  .menu-toggle:checked ~ .menu-backdrop {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .hamburger {
+    display: flex;
   }
 
   .nav-links {

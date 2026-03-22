@@ -1,3 +1,8 @@
+:host {
+  container-type: inline-size;
+  container-name: filters-panel;
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -69,7 +74,7 @@
   gap: var(--space-3);
 }
 
-@media (min-width: 901px) {
+@container filters-panel (min-width: 901px) {
   .toggle {
     display: inline-flex;
   }
@@ -78,6 +83,7 @@
     transition:
       padding 150ms ease,
       width 150ms ease;
+    padding: var(--space-2);
 
     &.collapsed {
       padding: var(--space-2);
@@ -100,11 +106,5 @@
 
   .hide-large {
     display: none;
-  }
-}
-
-@media (min-width: 901px) and (orientation: landscape) {
-  .container {
-    padding: var(--space-2);
   }
 }

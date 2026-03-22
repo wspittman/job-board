@@ -54,7 +54,7 @@ explore-details[empty] {
   visibility: hidden;
 }
 
-@media (max-width: 900px) {
+@container page (max-width: 900px) {
   .explore-layout {
     height: calc(100% - var(--space-6));
   }
@@ -93,7 +93,7 @@ explore-details[empty] {
   }
 }
 
-@media (min-width: 901px) and (orientation: landscape) {
+@container page (min-width: 901px) {
   .explore-page {
     padding: var(--space-1);
   }

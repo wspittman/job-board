@@ -22,6 +22,8 @@
 .faq-item {
   overflow: hidden;
   padding: 0;
+  container-type: inline-size;
+  container-name: faq-item;
 
   & summary {
     display: flex;
@@ -79,7 +81,7 @@
   margin-block-end: var(--space-1);
 }
 
-@media (max-width: 600px) {
+@container faq-item (max-width: 600px) {
   .faq-item summary {
     padding: var(--space-1) var(--space-2);
   }
