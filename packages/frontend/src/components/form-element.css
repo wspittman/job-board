@@ -48,6 +48,7 @@
     border-color: var(--primary-main);
     color: var(--primary-main);
     box-shadow: var(--shadow-focus);
+    outline: none;
 
     & + .tooltip {
       display: block;
