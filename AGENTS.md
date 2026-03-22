@@ -21,7 +21,7 @@ Run the following commands from the root of the repository:
 - `npm run lint`: Lint all workspaces.
 - `npm run format`: Check formatting for all workspaces.
 - `npm run format:write`: Apply formatting fixes for all workspaces.
-- `npm test`: Run tests for backend workspace (the only workspace with tests currently).
+- `npm test`: Run tests for the backend, frontend, and lab workspaces.
 - `npm run start:backend`: Start the backend API in watch mode.
 - `npm run start:frontend`: Start the frontend development server.
 - `npm run lab -- <command>`: Run a lab CLI command (see `packages/lab/AGENTS.md`).

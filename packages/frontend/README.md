@@ -19,9 +19,10 @@ cd packages/frontend
 ### Available scripts
 
 - `npm run dev` – Starts the Vite development server on `http://localhost:5173` with hot module reloading.
-- `npm run build` – Type-checks the project and builds an optimized production bundle in `dist/`.
-- `npm run preview` – Serves the previously built bundle locally for verification.
+- `npm run test` – Runs the Vitest suite for frontend TypeScript modules.
+- `npm run build` – Type-checks the project and builds an optimized production bundle in `deploy/dist/`.
 - `npm run start` – Launches the minimal Express server (`server.js`) used to host the built assets.
+- `npm run start:local` – Serves the built output from `deploy/server.js` for local production verification.
 
 ## Project structure
 
