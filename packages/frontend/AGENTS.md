@@ -16,10 +16,3 @@ Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stat
 ## Quality checks
 
 In addition to running `npm run pre-checkin` from the repo root, validate UI changes with a development server if possible.
-
-## Testing style
-
-- Tests run via `npm test --workspace=frontend`.
-- Tests use vitest with the `jsdom` environment. This allows testing of DOM-related logic and simulating browser APIs.
-- The shared `src/utils/testSetup.ts` file sets any necessary global stubs (e.g., `navigator.sendBeacon`)
-- Use `suite`/`test` blocks.

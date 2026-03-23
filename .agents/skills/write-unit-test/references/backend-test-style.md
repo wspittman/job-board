@@ -10,6 +10,6 @@ Use this reference when editing `packages/backend/test/*`.
 
 ## Environment-sensitive modules
 
-- Respect the defaults established in `packages/backend/test/setup.ts`.
+- The shared `test/setup.ts` file sets default env vars and stubs telemetry/database/server bootstrapping; keep new tests compatible with those defaults.
 - For config or import-time env behavior, reset `process.env` and import the module with a cache-busting query string.
 - Do not re-bootstrap telemetry, database connections, or `app.listen` in individual tests unless the existing suite already does so.

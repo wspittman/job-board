@@ -27,20 +27,25 @@ Run the following commands from the root of the repository:
 - `npm run lab -- <command>`: Run a lab CLI command (see `packages/lab/AGENTS.md`).
 - `npm run ops -- <command>`: Run an ops CLI command (see `packages/ops/AGENTS.md`).
 
+# Available Skills
+
+In addition to built-in skills, this repository includes custom skills.
+
+- `write-unit-test`: Use when you must write or update unit tests. This skill helps to ensure that tests are written to match the surrounding workspace conventions.
+
 # Development Conventions
 
 - Workspace-specific tools and workflows are described in the corresponding `AGENTS.md` files.
-- Documentation: Keep `README.md` and any relevant `AGENTS.md` files updated when code or workflow changes affect them.
 - Dependencies: Avoid adding new dependencies and warn when you do.
+- Docs-only changes do not require tests, but note that testing was skipped in your summary.
+- Use red/green TDD for new features and bug fixes when practical.
 - Quality checks: Always run `npm run pre-checkin` before committing code.
-- Knowledge sharing: If you learn something that wasn't obvious, add it to a root level `Learnings.md` file for review and inclusion in the main `AGENTS.md` docs.
 
 ## Comments
 
 Use JSDoc comments for all public APIs and complex logic. This helps with code readability and provides useful information for developers using the code. Go light on comments otherwise. Never put comments at the end of lines. When writing @returns comments for async functions, prefer to describe the resolved value rather than the promise itself.
 
-## Testing expectations
+## Documentation
 
-- Use red/green TDD for new features and bug fixes when practical.
-- Follow workspace-specific linting, formatting, and testing guidance for code changes.
-- Docs-only changes do not require tests, but note that testing was skipped in your summary.
+- Keep `README.md` and any relevant `AGENTS.md` files updated when code or workflow changes affect them.
+- If you learn something that wasn't obvious, add it to a root level `Learnings.md` file for review and inclusion in the main `AGENTS.md` docs.
