@@ -41,5 +41,6 @@ Use JSDoc comments for all public APIs and complex logic. This helps with code r
 
 ## Testing expectations
 
+- Use red/green TDD for new features and bug fixes when practical.
 - Follow workspace-specific linting, formatting, and testing guidance for code changes.
 - Docs-only changes do not require tests, but note that testing was skipped in your summary.
