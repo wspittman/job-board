@@ -31,9 +31,9 @@ Write the smallest useful test that matches the target workspace's existing patt
 
 ## Workspace Specifics
 
-When the target is `packages/backend`, read `references/node-test-style.md` and `references/backend-test-style.md` before editing tests.
-When the target is `packages/frontend`, use `vitest` with the `jsdom` environment.
-When the target is `packages/lab` or `packages/ops`, read `references/node-test-style.md` before editing tests.
+When the target is `packages/backend`, use `node:test` and read `references/node-test-style.md` and `references/backend-test-style.md` before editing tests.
+When the target is `packages/frontend`, use `vitest` with the `jsdom` environment and read `references/frontend-test-style.md` before editing tests.
+When the target is `packages/lab` or `packages/ops`, use `node:test` and read `references/node-test-style.md` before editing tests.
 
 ## Validation
 
