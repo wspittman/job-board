@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { beforeEach, vi } from "vitest";
 
 export const spies = {
   sendBeacon: vi.fn(),
@@ -12,3 +12,9 @@ Object.defineProperty(global.navigator, "sendBeacon", {
 Object.defineProperty(HTMLElement.prototype, "attachInternals", {
   value: vi.fn(() => ({ setFormValue: spies.setFormValue })),
 });
+
+Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+  value: vi.fn(),
+});
+
+beforeEach(vi.clearAllMocks);

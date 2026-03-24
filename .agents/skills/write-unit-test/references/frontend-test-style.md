@@ -20,6 +20,7 @@ Use this reference when editing `packages/frontend/src/**/*.test.ts`.
 ## Fixtures and helpers
 
 - Keep helpers file-local.
+- If a test needs to define a property that is not available through JSDOM, define the property as part of testSetup.ts.
 
 ## Non-idiomatic but accepted local patterns
 
