@@ -1,10 +1,9 @@
 import { expect, suite, test } from "vitest";
 import { createComponent } from "../utils/testUtils";
-import { FormElement } from "./form-element";
 import { FormSelect } from "./form-select";
 
 type Testable = FormSelect & {
-  intake: FormElement["intake"];
+  intake: FormSelect["intake"];
 };
 
 function readOptions(element: HTMLSelectElement) {

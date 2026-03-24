@@ -1,6 +1,5 @@
 import { expect, suite, test, vi } from "vitest";
 import { createComponent, spies } from "../utils/testUtils";
-import { ComponentBase } from "./componentBase";
 import { FORM_ELEMENT_UPDATE, FormElement } from "./form-element";
 
 class TestFormElement extends FormElement {
@@ -14,7 +13,7 @@ type Testable = TestFormElement & {
   shadowRoot: ShadowRoot;
   intake: FormElement["intake"];
   getFormValue: FormElement["getFormValue"];
-  getEl: ComponentBase["getEl"];
+  getEl: FormElement["getEl"];
 };
 
 suite("FormElement", () => {

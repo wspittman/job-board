@@ -1,9 +1,8 @@
 import { expect, suite, test, vi } from "vitest";
 import { CHIP_DELETE, Chip } from "./chip";
-import type { ComponentBase } from "./componentBase";
 
 type Testable = Chip & {
-  getEl: ComponentBase["getEl"];
+  getEl: Chip["getEl"];
 };
 
 suite("Chip", () => {
