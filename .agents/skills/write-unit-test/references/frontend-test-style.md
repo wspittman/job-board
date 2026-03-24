@@ -15,7 +15,7 @@ Use this reference when editing `packages/frontend/src/**/*.test.ts`.
   - This is used even when the case matrix gets fairly large or slightly hard to scan.
 - Generate practical test names from case data when that keeps the file compact.
   - It is normal to build names from inputs
-  - Example: test(`Invalid location: "${name}"`, ...)
+  - Example: test("Invalid location: $loc", ...)
 
 ## Fixtures and helpers
 
