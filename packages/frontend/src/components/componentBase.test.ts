@@ -1,9 +1,8 @@
 import { expect, suite, test, vi } from "vitest";
+import { createComponent } from "../utils/testUtils";
 import { ComponentBase } from "./componentBase";
 
 class TestComponent extends ComponentBase {
-  readonly onLoadSpy = vi.fn(() => Promise.resolve());
-
   constructor(options?: { omitPartsCss?: boolean }) {
     super(
       '<div id="title"></div><div id="subtitle"></div>',
@@ -11,112 +10,70 @@ class TestComponent extends ComponentBase {
       options,
     );
   }
-
-  protected override onLoad(): Promise<void> {
-    return this.onLoadSpy();
-  }
-
-  setTextValue(id: string, value?: string) {
-    this.setText(id, value);
-  }
-
-  setManyTextValues(values: Record<string, string | undefined>) {
-    this.setManyTexts(values);
-  }
-
-  getElement<T extends HTMLElement>(id: string): T | null {
-    return this.getEl<T>(id);
-  }
-
-  emitEvent(type: string, detail?: unknown) {
-    this.emit(type, detail);
-  }
-
-  listenFor<T>(type: string, fn: (detail: T) => void) {
-    this.listen(type, fn);
-  }
 }
 
-let componentCounter = 0;
-
-function createComponentClass(options?: { omitPartsCss?: boolean }) {
-  return class ConfiguredTestComponent extends TestComponent {
-    constructor() {
-      super(options);
-    }
-  };
-}
-
-function createRegisteredComponent(options?: {
-  omitPartsCss?: boolean;
-}): TestComponent {
-  const tag = `component-base-test-${componentCounter++}`;
-  const ComponentClass = createComponentClass(options);
-
-  ComponentBase.register(tag, ComponentClass);
-
-  return document.createElement(tag) as TestComponent;
-}
+// Type for accessing protected members of ComponentBase in tests
+type Testable = TestComponent & {
+  onLoad: ComponentBase["onLoad"];
+  setText: ComponentBase["setText"];
+  setManyTexts: ComponentBase["setManyTexts"];
+  getEl: ComponentBase["getEl"];
+  emit: ComponentBase["emit"];
+  listen: ComponentBase["listen"];
+};
 
 suite("ComponentBase", () => {
-  test.each([
-    { omitPartsCss: false, expectedSheets: 3 },
-    { omitPartsCss: true, expectedSheets: 2 },
-  ])(
-    "creates a shadow root with the expected adopted stylesheets when omitPartsCss=$omitPartsCss",
-    ({ omitPartsCss, expectedSheets }) => {
-      const component = createRegisteredComponent({ omitPartsCss });
+  test("creates a shadow root with the expected adopted stylesheets", () => {
+    const omit = { omitPartsCss: true };
+    const allow = { omitPartsCss: false };
+    const omitEl = createComponent(TestComponent, omit) as Testable;
+    const allowEl = createComponent(TestComponent, allow) as Testable;
 
-      expect(component.shadowRoot).not.toBeNull();
-      expect(component.shadowRoot?.innerHTML).toContain(
-        '<div id="title"></div>',
-      );
-      expect(component.shadowRoot?.adoptedStyleSheets).toHaveLength(
-        expectedSheets,
-      );
-    },
-  );
+    expect(omitEl.shadowRoot).not.toBeNull();
+    expect(allowEl.shadowRoot).not.toBeNull();
+    expect(omitEl.shadowRoot?.innerHTML).toContain('<div id="title"></div>');
+    expect(allowEl.shadowRoot?.innerHTML).toContain('<div id="title"></div>');
+    expect(omitEl.shadowRoot?.adoptedStyleSheets).toHaveLength(2);
+    expect(allowEl.shadowRoot?.adoptedStyleSheets).toHaveLength(3);
+  });
 
   test("sets and gets elements inside the shadow root", () => {
-    const component = createRegisteredComponent();
+    const component = createComponent(TestComponent) as Testable;
 
-    component.setTextValue("title", "Senior Engineer");
-    component.setManyTextValues({
+    component.setText("title", "Senior Engineer");
+    component.setManyTexts({
       subtitle: undefined,
       missing: "ignored",
     });
 
-    expect(component.getElement<HTMLDivElement>("title")?.textContent).toBe(
-      "Senior Engineer",
-    );
-    expect(component.getElement<HTMLDivElement>("subtitle")?.textContent).toBe(
-      "",
-    );
-    expect(component.getElement("missing")).toBeNull();
+    expect(component.getEl("title")?.textContent).toBe("Senior Engineer");
+    expect(component.getEl("subtitle")?.textContent).toBe("");
+    expect(component.getEl("missing")).toBeNull();
   });
 
   test("dispatches listened custom events with detail payloads", () => {
-    const component = createRegisteredComponent();
-    const detailSpy = vi.fn<(detail: { jobId: string }) => void>();
+    const component = createComponent(TestComponent) as Testable;
+    const detailSpy = vi.fn();
     const bubbleSpy = vi.fn();
 
-    component.listenFor<{ jobId: string }>("saved", detailSpy);
+    component.listen("saved", detailSpy);
     document.body.addEventListener("saved", bubbleSpy);
     document.body.appendChild(component);
 
-    component.emitEvent("saved", { jobId: "job-123" });
+    component.emit("saved", { jobId: "job-123" });
 
     expect(detailSpy).toHaveBeenCalledWith({ jobId: "job-123" });
     expect(bubbleSpy).toHaveBeenCalledTimes(1);
   });
 
   test("calls onLoad when connected to the DOM", async () => {
-    const component = createRegisteredComponent();
+    const component = createComponent(TestComponent) as Testable;
+    const onLoadSpy = vi.spyOn(component, "onLoad");
 
     document.body.appendChild(component);
     await Promise.resolve();
 
-    expect(component.onLoadSpy).toHaveBeenCalledTimes(1);
+    expect(onLoadSpy).toHaveBeenCalledTimes(1);
   });
 
   test("register defines a custom element only once", () => {
