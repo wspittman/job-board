@@ -11,7 +11,7 @@ Use this reference when editing `packages/frontend/src/**/*.test.ts`.
 
 - Group tests with `suite(...)`.
 - Prefer dense, table-driven cases over many small bespoke tests
-  - Lean on arrays `test.each(...)` when several variants exercise the same behavior.
+  - Lean on arrays `test.for(...)` when several variants exercise the same behavior.
   - This is used even when the case matrix gets fairly large or slightly hard to scan.
 - Generate practical test names from case data when that keeps the file compact.
   - It is normal to build names from inputs
