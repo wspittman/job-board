@@ -33,6 +33,29 @@ suite("FormInput", () => {
     expect(suffix?.className).toBe("adornment");
   });
 
+  test("does not duplicate adornments on subsequent init calls", () => {
+    const element = createComponent(FormInput) as Testable;
+
+    element.init({
+      label: "Salary",
+      name: "salary",
+      prefix: "$",
+      suffix: "USD",
+    });
+
+    element.init({
+      label: "Salary",
+      name: "salary",
+      prefix: "$",
+      suffix: "USD",
+    });
+
+    const intakeWrap = element.getEl("intake-wrap");
+    const adornments = intakeWrap?.querySelectorAll(".adornment") ?? [];
+
+    expect(adornments).toHaveLength(2);
+  });
+
   test("leaves inputMode and maxLength untouched without integer validation or maxLength", () => {
     const element = createComponent(FormInput) as Testable;
 
