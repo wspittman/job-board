@@ -1,10 +1,10 @@
 import { expect, suite, test } from "vitest";
-import { createComponent } from "../utils/testUtils";
+import type { XrayFormElement } from "../utils/testUtils";
 import { FormSelect } from "./form-select";
 
-type Testable = FormSelect & {
-  intake: FormSelect["intake"];
-};
+type Xray = XrayFormElement<FormSelect>;
+
+const create = () => document.createElement("jb-form-select") as Xray;
 
 function readOptions(element: HTMLSelectElement) {
   return [...element.options].map((option) => ({
@@ -15,8 +15,7 @@ function readOptions(element: HTMLSelectElement) {
 
 suite("FormSelect", () => {
   test("adds an Any option before provided options and stringifies values", () => {
-    const element = createComponent(FormSelect) as Testable;
-
+    const element = create();
     element.init({
       label: "Employment type",
       name: "employmentType",
@@ -38,8 +37,7 @@ suite("FormSelect", () => {
   });
 
   test("renders only the default Any option when options are omitted", () => {
-    const element = createComponent(FormSelect) as Testable;
-
+    const element = create();
     element.init({
       label: "Experience",
       name: "experience",
@@ -51,8 +49,7 @@ suite("FormSelect", () => {
   });
 
   test("replaces existing options on subsequent init calls", () => {
-    const element = createComponent(FormSelect) as Testable;
-
+    const element = create();
     element.init({
       label: "Team",
       name: "team",

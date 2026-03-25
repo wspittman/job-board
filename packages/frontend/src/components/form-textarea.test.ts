@@ -1,15 +1,14 @@
 import { expect, suite, test } from "vitest";
-import { createComponent } from "../utils/testUtils";
+import type { XrayFormElement } from "../utils/testUtils";
 import { FormTextarea } from "./form-textarea";
 
-type Testable = FormTextarea & {
-  intake: FormTextarea["intake"];
-};
+type Xray = XrayFormElement<FormTextarea>;
+
+const create = () => document.createElement("jb-form-textarea") as Xray;
 
 suite("FormTextarea", () => {
   test("applies textarea-specific rows and maxLength when provided", () => {
-    const element = createComponent(FormTextarea) as Testable;
-
+    const element = create();
     element.init({
       label: "Description",
       name: "description",
@@ -23,8 +22,7 @@ suite("FormTextarea", () => {
   });
 
   test("keeps default rows and maxLength when textarea-specific props are omitted", () => {
-    const element = createComponent(FormTextarea) as Testable;
-
+    const element = create();
     element.init({
       label: "Notes",
       name: "notes",
@@ -36,8 +34,7 @@ suite("FormTextarea", () => {
   });
 
   test("clear resets value and textarea height", () => {
-    const element = createComponent(FormTextarea) as Testable;
-
+    const element = create();
     element.init({
       label: "Summary",
       name: "summary",
@@ -53,8 +50,7 @@ suite("FormTextarea", () => {
   });
 
   test("auto-resizes to scrollHeight on input", () => {
-    const element = createComponent(FormTextarea) as Testable;
-
+    const element = create();
     element.init({
       label: "Details",
       name: "details",

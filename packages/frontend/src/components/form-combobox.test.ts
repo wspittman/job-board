@@ -1,13 +1,12 @@
 import { expect, suite, test } from "vitest";
-import { createComponent } from "../utils/testUtils";
+import type { XrayFormElement } from "../utils/testUtils";
 import { FormCombobox } from "./form-combobox";
 
-type Testable = FormCombobox & {
-  intake: FormCombobox["intake"];
-  getEl: FormCombobox["getEl"];
-};
+type Xray = XrayFormElement<FormCombobox>;
 
-function readMenuOptions(element: Testable) {
+const create = () => document.createElement("jb-form-combobox") as Xray;
+
+function readMenuOptions(element: Xray) {
   return Array.from(element.shadowRoot?.querySelectorAll(".option") ?? []).map(
     (option) => ({
       text: option.textContent,
@@ -17,13 +16,13 @@ function readMenuOptions(element: Testable) {
   );
 }
 
-function getMenuEl(element: Testable) {
+function getMenuEl(element: Xray) {
   return element.shadowRoot?.querySelector(".options") as HTMLUListElement;
 }
 
 suite("FormCombobox", () => {
   test("initializes combobox semantics and menu container", () => {
-    const element = createComponent(FormCombobox) as Testable;
+    const element = create();
     const menu = getMenuEl(element);
 
     expect(element.intake.getAttribute("autocomplete")).toBe("off");
@@ -34,8 +33,7 @@ suite("FormCombobox", () => {
   });
 
   test("maps selected option labels to a submitted form value", () => {
-    const element = createComponent(FormCombobox) as Testable;
-
+    const element = create();
     element.init({
       label: "Team",
       name: "team",
@@ -53,8 +51,7 @@ suite("FormCombobox", () => {
   });
 
   test("filters menu options on input with case-insensitive trimmed matching", () => {
-    const element = createComponent(FormCombobox) as Testable;
-
+    const element = create();
     element.init({
       label: "Role",
       name: "role",
@@ -78,8 +75,7 @@ suite("FormCombobox", () => {
   });
 
   test("renders the empty menu option when filtering yields no matches", () => {
-    const element = createComponent(FormCombobox) as Testable;
-
+    const element = create();
     element.init({
       label: "Role",
       name: "role",
@@ -97,8 +93,7 @@ suite("FormCombobox", () => {
   });
 
   test("selects the active option on Enter and closes the menu", () => {
-    const element = createComponent(FormCombobox) as Testable;
-
+    const element = create();
     element.init({
       label: "Role",
       name: "role",
@@ -122,8 +117,7 @@ suite("FormCombobox", () => {
   });
 
   test("keeps menu open for internal focus moves and closes for external focus", () => {
-    const element = createComponent(FormCombobox) as Testable;
-
+    const element = create();
     element.init({
       label: "Role",
       name: "role",

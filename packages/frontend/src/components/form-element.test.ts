@@ -1,20 +1,21 @@
 import { expect, suite, test, vi } from "vitest";
-import { createComponent, spies } from "../utils/testUtils";
+import {
+  createComponent,
+  spies,
+  type XrayFormElement,
+} from "../utils/testUtils";
 import { FORM_ELEMENT_UPDATE, FormElement } from "./form-element";
 
+type IntakeType = "input" | "select" | "textarea";
+
 class TestFormElement extends FormElement {
-  constructor(intakeType: "input" | "select" | "textarea") {
+  constructor(intakeType: IntakeType = "input") {
     super(intakeType, new CSSStyleSheet());
   }
 }
 
-// Type for accessing protected members of FormElement in tests
-type Testable = TestFormElement & {
-  shadowRoot: ShadowRoot;
-  intake: FormElement["intake"];
-  getFormValue: FormElement["getFormValue"];
-  getEl: FormElement["getEl"];
-};
+const create = (intakeType?: IntakeType) =>
+  createComponent(TestFormElement, intakeType) as XrayFormElement;
 
 suite("FormElement", () => {
   test.for(["input", "textarea", "select"] as const)(
@@ -24,7 +25,7 @@ suite("FormElement", () => {
       const expectedPlaceholder = intakeType == "select" ? null : " ";
       const expectedType = intakeType === "input" ? "text" : null;
 
-      const element = createComponent(TestFormElement, intakeType) as Testable;
+      const element = create(intakeType);
       const intakeWrap = element.getEl("intake-wrap");
 
       expect(element.intake.tagName).toBe(expectedIntakeTag);
@@ -40,8 +41,7 @@ suite("FormElement", () => {
   );
 
   test("initializes label, name, tooltip state, and value", () => {
-    const element = createComponent(TestFormElement, "input") as Testable;
-
+    const element = create();
     element.init({
       label: "Salary",
       name: "salary",
@@ -61,8 +61,7 @@ suite("FormElement", () => {
   });
 
   test("keeps help hidden when tooltip is omitted", () => {
-    const element = createComponent(TestFormElement, "input") as Testable;
-
+    const element = create();
     element.init({
       label: "Keywords",
       name: "keywords",
@@ -73,7 +72,7 @@ suite("FormElement", () => {
   });
 
   test("syncs value changes through the custom form value contract", () => {
-    const element = createComponent(TestFormElement, "input") as Testable;
+    const element = create();
     vi.spyOn(element, "getFormValue").mockImplementation(
       () => `serialized:${element.intake.value}`,
     );
@@ -94,8 +93,7 @@ suite("FormElement", () => {
   });
 
   test("clears the synced value state for undefined values", () => {
-    const element = createComponent(TestFormElement, "input") as Testable;
-
+    const element = create();
     element.value = "hello";
     element.value = undefined;
 
@@ -106,8 +104,7 @@ suite("FormElement", () => {
   });
 
   test("responds to bubbling input events from the native intake", () => {
-    const element = createComponent(TestFormElement, "textarea") as Testable;
-
+    const element = create("textarea");
     element.intake.value = "new text";
     element.intake.dispatchEvent(
       new InputEvent("input", { bubbles: true, composed: true }),
@@ -118,7 +115,7 @@ suite("FormElement", () => {
   });
 
   test("toggles the disabled attribute on the native intake", () => {
-    const element = createComponent(TestFormElement, "select") as Testable;
+    const element = create("select");
 
     element.disabled = true;
     expect(element.intake.getAttribute("disabled")).toBe("true");

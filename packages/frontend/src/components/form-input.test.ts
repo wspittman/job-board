@@ -1,17 +1,15 @@
 import { expect, suite, test, vi } from "vitest";
-import { createComponent } from "../utils/testUtils";
-import { FORM_ELEMENT_UPDATE, type FormElement } from "./form-element";
+import type { XrayFormElement } from "../utils/testUtils";
+import { FORM_ELEMENT_UPDATE } from "./form-element";
 import { FormInput } from "./form-input";
 
-type Testable = FormInput & {
-  intake: FormElement["intake"];
-  getEl: FormElement["getEl"];
-};
+type Xray = XrayFormElement<FormInput>;
+
+const create = () => document.createElement("jb-form-input") as Xray;
 
 suite("FormInput", () => {
   test("applies input constraints and renders optional adornments", () => {
-    const element = createComponent(FormInput) as Testable;
-
+    const element = create();
     element.init({
       label: "Salary",
       name: "salary",
@@ -34,7 +32,7 @@ suite("FormInput", () => {
   });
 
   test("does not duplicate adornments on subsequent init calls", () => {
-    const element = createComponent(FormInput) as Testable;
+    const element = create();
 
     element.init({
       label: "Salary",
@@ -57,8 +55,7 @@ suite("FormInput", () => {
   });
 
   test("leaves inputMode and maxLength untouched without integer validation or maxLength", () => {
-    const element = createComponent(FormInput) as Testable;
-
+    const element = create();
     element.init({
       label: "Keywords",
       name: "keywords",
@@ -72,8 +69,7 @@ suite("FormInput", () => {
     ["keeps valid integer value", "15", "15"],
     ["normalizes whitespace and leading zeroes", " 007 ", "7"],
   ])("integer validation %s", ([, value, expected]) => {
-    const element = createComponent(FormInput) as Testable;
-
+    const element = create();
     element.init({
       label: "Openings",
       name: "openings",
@@ -91,8 +87,7 @@ suite("FormInput", () => {
     ["rejects values above max", "21"],
     ["rejects values below min", "9"],
   ])("integer validation %s and preserves previous value", ([, value]) => {
-    const element = createComponent(FormInput) as Testable;
-
+    const element = create();
     element.init({
       label: "Openings",
       name: "openings",
@@ -107,9 +102,8 @@ suite("FormInput", () => {
   });
 
   test("restores prior valid value on invalid input events without emitting update", () => {
-    const element = createComponent(FormInput) as Testable;
+    const element = create();
     const updateSpy = vi.fn();
-
     element.init({
       label: "Openings",
       name: "openings",

@@ -1,13 +1,12 @@
 import { expect, suite, test, vi } from "vitest";
+import type { XrayComponent } from "../utils/testUtils";
 import { CHIP_DELETE, Chip } from "./chip";
 
-type Testable = Chip & {
-  getEl: Chip["getEl"];
-};
+type Xray = XrayComponent<Chip>;
 
 suite("Chip", () => {
   test("creates a chip with the provided label", () => {
-    const element = Chip.create({ label: "Remote" }) as Testable;
+    const element = Chip.create({ label: "Remote" }) as Xray;
 
     const label = element.getEl("label");
     const deleteButton = element.getEl("delete");
@@ -20,7 +19,7 @@ suite("Chip", () => {
   test.for([true, false, undefined])(
     "Proper fill variant if filled=%s",
     (filled) => {
-      const element = Chip.create({ label: "Hybrid", filled }) as Testable;
+      const element = Chip.create({ label: "Hybrid", filled }) as Xray;
       const container = element.getEl("container");
 
       expect(container?.classList.contains("filled")).toBe(!!filled);
@@ -31,7 +30,7 @@ suite("Chip", () => {
     "Delete affordance if deleteKey=%s",
     (deleteKey) => {
       const expected = deleteKey ? "inline-flex" : "";
-      const element = Chip.create({ label: "Hybrid", deleteKey }) as Testable;
+      const element = Chip.create({ label: "Hybrid", deleteKey }) as Xray;
       const deleteButton = element.getEl("delete") as HTMLButtonElement;
 
       expect(deleteButton.style.display).toBe(expected);
@@ -42,7 +41,7 @@ suite("Chip", () => {
     const element = Chip.create({
       label: "Remote",
       deleteKey: "location",
-    }) as Testable;
+    }) as Xray;
     const handler = vi.fn();
     const deleteButton = element.getEl("delete") as HTMLButtonElement;
 

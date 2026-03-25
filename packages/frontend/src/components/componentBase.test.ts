@@ -1,9 +1,11 @@
 import { expect, suite, test, vi } from "vitest";
-import { createComponent } from "../utils/testUtils";
+import { createComponent, type XrayComponent } from "../utils/testUtils";
 import { ComponentBase } from "./componentBase";
 
+type Options = ConstructorParameters<typeof ComponentBase>[2];
+
 class TestComponent extends ComponentBase {
-  constructor(options?: { omitPartsCss?: boolean }) {
+  constructor(options?: Options) {
     super(
       '<div id="title"></div><div id="subtitle"></div>',
       ComponentBase.createCSSSheet(":host { display: block; }"),
@@ -12,22 +14,13 @@ class TestComponent extends ComponentBase {
   }
 }
 
-// Type for accessing protected members of ComponentBase in tests
-type Testable = TestComponent & {
-  onLoad: ComponentBase["onLoad"];
-  setText: ComponentBase["setText"];
-  setManyTexts: ComponentBase["setManyTexts"];
-  getEl: ComponentBase["getEl"];
-  emit: ComponentBase["emit"];
-  listen: ComponentBase["listen"];
-};
+const create = (params?: Options) =>
+  createComponent(TestComponent, params) as XrayComponent;
 
 suite("ComponentBase", () => {
   test("creates a shadow root with the expected adopted stylesheets", () => {
-    const omit = { omitPartsCss: true };
-    const allow = { omitPartsCss: false };
-    const omitEl = createComponent(TestComponent, omit) as Testable;
-    const allowEl = createComponent(TestComponent, allow) as Testable;
+    const omitEl = create({ omitPartsCss: true });
+    const allowEl = create({ omitPartsCss: false });
 
     expect(omitEl.shadowRoot).not.toBeNull();
     expect(allowEl.shadowRoot).not.toBeNull();
@@ -38,8 +31,7 @@ suite("ComponentBase", () => {
   });
 
   test("sets and gets elements inside the shadow root", () => {
-    const component = createComponent(TestComponent) as Testable;
-
+    const component = create();
     component.setText("title", "Senior Engineer");
     component.setManyTexts({
       subtitle: undefined,
@@ -52,7 +44,7 @@ suite("ComponentBase", () => {
   });
 
   test("dispatches listened custom events with detail payloads", () => {
-    const component = createComponent(TestComponent) as Testable;
+    const component = create();
     const detailSpy = vi.fn();
     const bubbleSpy = vi.fn();
 
@@ -67,7 +59,7 @@ suite("ComponentBase", () => {
   });
 
   test("calls onLoad when connected to the DOM", async () => {
-    const component = createComponent(TestComponent) as Testable;
+    const component = create();
     const onLoadSpy = vi.spyOn(component, "onLoad");
 
     document.body.appendChild(component);
