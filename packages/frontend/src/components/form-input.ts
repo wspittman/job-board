@@ -46,6 +46,7 @@ export class FormInput extends FormElement {
       intake.maxLength = maxLength;
     }
 
+    this.#removeAdornments();
     this.#createAdornment(true, prefix);
     this.#createAdornment(false, suffix);
   }
@@ -68,6 +69,12 @@ export class FormInput extends FormElement {
       return;
     }
     super.onInput();
+  }
+
+  #removeAdornments() {
+    this.getEl("intake-wrap")
+      ?.querySelectorAll(".adornment")
+      .forEach((adornment) => adornment.remove());
   }
 
   #createAdornment(isPrefix: boolean, text?: string) {
