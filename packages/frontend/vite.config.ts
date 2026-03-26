@@ -38,6 +38,7 @@ export default defineConfig({
   ],
   build: {
     outDir: "../deploy/dist",
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         ...getHtmlEntries(),
