@@ -1,13 +1,14 @@
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import compression from "vite-plugin-compression2";
 import { htmlPartials } from "./plugins/htmlPartials.ts";
 import { inlineLucideIcons } from "./plugins/inlineLucideIcons.ts";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = join(dirname(fileURLToPath(import.meta.url)), "src");
 
 export default defineConfig({
+  root: "src",
   appType: "mpa",
   plugins: [
     htmlPartials(),
@@ -23,7 +24,7 @@ export default defineConfig({
     }),
   ],
   build: {
-    outDir: "deploy/dist",
+    outDir: "../deploy/dist",
     rollupOptions: {
       input: {
         index: resolve(__dirname, "index.html"),
@@ -35,7 +36,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
+      // Proxy API requests to the backend server during development
+      // But don't confuse with the /api code folder
+      "^/api/.*[^ts]$": {
         // For external device testing, replace localhost with your machine's local IP address (ipconfig)
         target: "http://localhost:3000",
         changeOrigin: true,
