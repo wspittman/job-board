@@ -1,3 +1,4 @@
+import { markdownToHtml } from "dry-utils-text";
 import { CommandError, type Command } from "../types.ts";
 import { readText, writeText, type Place } from "../utils/fileUtils.ts";
 
@@ -22,7 +23,7 @@ async function run([file = ""]: string[]): Promise<void> {
     throw new CommandError(`File not found: ${file}`);
   }
 
-  // TODO stuff here
+  const html = markdownToHtml(text);
 
-  await writeText(text, { ...outPlace, file });
+  await writeText(html, { ...outPlace, file });
 }
