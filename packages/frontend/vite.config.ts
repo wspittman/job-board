@@ -1,3 +1,4 @@
+import { readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -6,6 +7,18 @@ import { htmlPartials } from "./plugins/htmlPartials.ts";
 import { inlineLucideIcons } from "./plugins/inlineLucideIcons.ts";
 
 const __dirname = join(dirname(fileURLToPath(import.meta.url)), "src");
+
+function getHtmlEntries(folder?: string) {
+  const input: Record<string, string> = {};
+  const dir = resolve(__dirname, folder ?? "");
+  const files = readdirSync(dir).filter((f) => f.endsWith(".html"));
+
+  for (const file of files) {
+    const fullPath = join(dir, file);
+    input[file.replace(/\.html$/, "")] = fullPath;
+  }
+  return input;
+}
 
 export default defineConfig({
   root: "src",
@@ -27,10 +40,7 @@ export default defineConfig({
     outDir: "../deploy/dist",
     rollupOptions: {
       input: {
-        index: resolve(__dirname, "index.html"),
-        faq: resolve(__dirname, "faq.html"),
-        404: resolve(__dirname, "404.html"),
-        explore: resolve(__dirname, "explore.html"),
+        ...getHtmlEntries(),
       },
     },
   },
