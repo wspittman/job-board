@@ -1,6 +1,6 @@
 .container {
   background: var(--bg-surface);
-  padding: var(--space-md);
+  padding: var(--space-2);
   box-shadow: var(--shadow-soft);
   border-radius: var(--radius);
 }
@@ -31,8 +31,8 @@
 
 .spinner {
   display: block;
-  width: var(--space-lg);
-  height: var(--space-lg);
+  width: var(--space-4);
+  height: var(--space-4);
   border: 0.2rem solid var(--bg-border);
   border-block-start-color: var(--primary-main);
   border-radius: 50%;

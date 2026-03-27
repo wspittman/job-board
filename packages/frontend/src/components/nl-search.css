@@ -1,18 +1,18 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-1);
 }
 
 .controls {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-  gap: var(--space-sm);
+  gap: var(--space-1);
 }
 
 .update {
-  padding: var(--space-xs) var(--space-md);
+  padding: var(--space-1) var(--space-2);
   background: var(--primary-main);
   color: var(--text-contrast);
   font-size: var(--font-size-6);

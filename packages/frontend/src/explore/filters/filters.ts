@@ -12,13 +12,14 @@ import {
 } from "../../api/apiEnums";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
-import { Chip } from "../../components/chip";
+import { Chip, CHIP_DELETE } from "../../components/chip";
 import { ComponentBase } from "../../components/componentBase";
-import type {
-  FormElement,
-  FormElementProps,
+import {
+  FORM_ELEMENT_UPDATE,
+  type FormElement,
+  type FormElementProps,
 } from "../../components/form-element";
-import type { NLSearch } from "../../components/nl-search";
+import { NL_SEARCH_RESULT } from "../../components/nl-search";
 
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
@@ -26,9 +27,10 @@ const cssSheet = ComponentBase.createCSSSheet(css);
 const tag = "explore-filters";
 const DEBOUNCE_DELAY = 500;
 
+export const FILTERS_UPDATED = `${tag}-updated`;
+
 interface Props {
   initialFilters?: FilterModel;
-  onChange?: (filters: FilterModel) => Promise<void>;
 }
 
 interface FormElementDef extends FormElementProps {
@@ -159,10 +161,8 @@ export class Filters extends ComponentBase {
   readonly #chips: HTMLElement;
   readonly #form: HTMLFormElement;
   readonly #inputs = new Map<FilterModelKey, FormElement>();
-  readonly #nlSearch: NLSearch;
 
   #debounceTimer: number | undefined;
-  #onChange?: (filters: FilterModel) => Promise<void>;
   #isCollapsed = false;
   #initialFilters: FilterModel | undefined;
 
@@ -174,7 +174,6 @@ export class Filters extends ComponentBase {
     this.#container = this.getEl("container")!;
     this.#toggle = this.getEl<HTMLButtonElement>("toggle")!;
     this.#chips = this.getEl("chips")!;
-    this.#nlSearch = this.getEl<NLSearch>("nl-search")!;
     this.#form = this.getEl<HTMLFormElement>("form")!;
 
     this.#toggle.addEventListener("click", () => this.#handleToggle());
@@ -184,16 +183,10 @@ export class Filters extends ComponentBase {
 
   /**
    * Initializes the component with callbacks and optional preset filters.
-   * @param onChange - Callback fired after debounced filter updates.
    * @param initialFilters - Filters to preload into the form inputs.
    */
-  init({ onChange, initialFilters }: Props) {
-    this.#onChange = onChange;
+  init({ initialFilters }: Props) {
     this.#initialFilters = initialFilters;
-
-    this.#nlSearch.init({
-      onFilters: (filters) => this.#handleNLUpdate(filters),
-    });
 
     if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
       this.#setCollapsed(true);
@@ -204,6 +197,15 @@ export class Filters extends ComponentBase {
    * Loads dynamic metadata and applies any initial filters once the component is connected.
    */
   protected override async onLoad() {
+    this.listen(CHIP_DELETE, (key: FilterModelKey) => {
+      this.#inputs.get(key)!.value = "";
+    });
+
+    this.listen(FORM_ELEMENT_UPDATE, () => this.#debounceOnChange());
+    this.listen(NL_SEARCH_RESULT, (filters: FilterModel) =>
+      this.#handleNLUpdate(filters),
+    );
+
     try {
       const options = await metadataModel.getCompanyFormOptions();
       if (!this.isConnected) return;
@@ -216,7 +218,6 @@ export class Filters extends ComponentBase {
       this.#inputs.get("companyId")?.init({
         ...def,
         options,
-        onChange: () => this.#debounceOnChange(),
       });
     } catch {
       // ignore
@@ -233,7 +234,6 @@ export class Filters extends ComponentBase {
   }
 
   #appendInputs(): void {
-    const onChange = () => this.#debounceOnChange();
     const fragment = document.createDocumentFragment();
 
     for (const [groupLabel, defs] of Object.entries(filterDefs)) {
@@ -248,7 +248,7 @@ export class Filters extends ComponentBase {
       fields.className = "group-fields";
 
       for (const props of defs) {
-        const el = this.#createFromFilterDef({ ...props, onChange });
+        const el = this.#createFromFilterDef(props);
         fields.append(el);
         this.#inputs.set(props.name as FilterModelKey, el);
       }
@@ -268,8 +268,6 @@ export class Filters extends ComponentBase {
   }
 
   #debounceOnChange(): void {
-    if (!this.#onChange) return;
-
     if (this.#debounceTimer) {
       window.clearTimeout(this.#debounceTimer);
     }
@@ -277,7 +275,7 @@ export class Filters extends ComponentBase {
     this.#debounceTimer = window.setTimeout(() => {
       const data = this.#getFilterData();
       this.#renderChips(data);
-      void this.#onChange?.(data);
+      this.emit(FILTERS_UPDATED, data);
     }, DEBOUNCE_DELAY);
   }
 
@@ -294,7 +292,7 @@ export class Filters extends ComponentBase {
       fragment.appendChild(
         Chip.create({
           label,
-          onDelete: () => (this.#inputs.get(key)!.value = ""),
+          deleteKey: key,
           filled: true,
         }),
       );

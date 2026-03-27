@@ -1,4 +1,5 @@
 import { CommandError, type Command } from "../types.ts";
+import { blogBuild } from "./blogBuild.ts";
 import { evals } from "./eval.ts";
 import { fetchInput, fetchInputMany } from "./fetchInput.ts";
 import { jobCounts } from "./jobCounts.ts";
@@ -9,11 +10,12 @@ function asArray(value: string | string[]): string[] {
 }
 
 const registry: Record<string, Command> = {
+  blogBuild,
   evals,
   fetchInput,
   fetchInputMany,
-  playground,
   jobCounts,
+  playground,
 };
 
 /**

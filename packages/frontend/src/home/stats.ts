@@ -18,7 +18,7 @@ class Stats extends ComponentBase {
 
       this.setText("job-count", jobCount);
       this.setText("company-count", companyCount);
-      this.show();
+      this.style.display = "block";
     } catch {
       // ignore
     }

@@ -1,10 +1,10 @@
 .faq-page {
-  padding: var(--space-xl) 0;
+  padding: var(--space-6) 0;
 }
 
 .faq-hero {
   text-align: center;
-  margin-block-end: var(--space-lg);
+  margin-block-end: var(--space-4);
 }
 
 .faq-intro {
@@ -16,7 +16,7 @@
 .faq-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-2);
 }
 
 .faq-item {
@@ -27,7 +27,7 @@
     display: flex;
     align-items: center;
     cursor: pointer;
-    padding: 0 var(--space-md);
+    padding: 0 var(--space-2);
     font-size: var(--font-size-3);
     font-weight: 600;
     color: var(--primary-main);
@@ -61,7 +61,7 @@
 }
 
 .faq-content {
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-1) var(--space-2);
 
   & p:last-child {
     margin-block-end: 0;
@@ -75,12 +75,12 @@
 }
 
 .section-header {
-  margin-block-start: var(--space-md);
-  margin-block-end: var(--space-sm);
+  margin-block-start: var(--space-2);
+  margin-block-end: var(--space-1);
 }
 
 @media (max-width: 600px) {
   .faq-item summary {
-    padding: var(--space-xs) var(--space-md);
+    padding: var(--space-1) var(--space-2);
   }
 }

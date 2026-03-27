@@ -4,6 +4,8 @@ import html from "./form-element.html?raw";
 
 const cssSheet = ComponentBase.createCSSSheet(css);
 
+export const FORM_ELEMENT_UPDATE = "jb-form-element-update";
+
 export type FormValue = string | number | boolean | undefined;
 
 export interface FormOption {
@@ -15,7 +17,6 @@ export interface FormElementProps {
   label: string;
   name: string;
   tooltip?: string;
-  onChange?: () => void;
 
   // For input and textarea
   maxLength?: number;
@@ -48,7 +49,6 @@ export abstract class FormElement extends ComponentBase {
 
   protected intake!: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
   #internals = this.attachInternals();
-  #onChange?: () => void;
 
   /**
    * Returns the list of attributes that trigger attributeChangedCallback.
@@ -82,15 +82,14 @@ export abstract class FormElement extends ComponentBase {
 
     // Keep the external form value attribute in sync with the internal input value
     const update = () => this.onInput();
-    this.intake.addEventListener("input", update);
+    this.addEventListener("input", update);
   }
 
   /**
    * Initializes the component's public state and wiring.
    * @param props - Incoming configuration values for the element
    */
-  init({ label, name, tooltip, onChange, value }: FormElementProps) {
-    this.#onChange = onChange;
+  init({ label, name, tooltip, value }: FormElementProps) {
     this.setManyTexts({ label, legend: label, tooltip });
     this.setAttribute("name", name);
     this.value = value;
@@ -136,6 +135,6 @@ export abstract class FormElement extends ComponentBase {
     const formValue = this.getFormValue();
     this.setAttribute("value", formValue);
     this.#internals.setFormValue(formValue);
-    this.#onChange?.();
+    this.emit(FORM_ELEMENT_UPDATE, formValue);
   }
 }

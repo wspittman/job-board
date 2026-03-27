@@ -2,7 +2,7 @@ import { ComponentBase } from "../../components/componentBase";
 
 const html = '<div id="content"></div>';
 const cssSheet = ComponentBase.createCSSSheet(
-  "* { font: 14px/1.5 system-ui, sans-serif; }",
+  "* { font: var(--font-size-6)/1.5 var(--fonts); }",
 );
 
 /**

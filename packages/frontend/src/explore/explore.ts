@@ -7,6 +7,8 @@ import "./results/results.ts";
 
 import { FilterModel } from "../api/filterModel.ts";
 import { JobModel } from "../api/jobModel.ts";
+import { FILTERS_UPDATED } from "./filters/filters.ts";
+import { JOB_CARD_SELECTED } from "./results/job-card.ts";
 
 // Top-level state
 const jobMap = new Map<string, JobModel>();
@@ -27,8 +29,19 @@ const panes = {
 };
 type Pane = keyof typeof panes;
 
-panes.filters.init({ onChange: onFilterChange, initialFilters });
-panes.results.init({ onSelect: onJobSelect });
+panes.filters.init({ initialFilters });
+
+addEventListener(JOB_CARD_SELECTED, (event) => {
+  if (event instanceof CustomEvent) {
+    onJobSelect(event.detail as string);
+  }
+});
+
+addEventListener(FILTERS_UPDATED, (event) => {
+  if (event instanceof CustomEvent) {
+    void onFilterChange(event.detail as FilterModel);
+  }
+});
 
 /**
  * Toggles between the filters and results panes when the primary action button is pressed.
@@ -43,6 +56,7 @@ function onActionClick() {
  * @param jobId - Identifier of the job chosen from the results list.
  */
 function onJobSelect(jobId: string) {
+  panes.results.selectCard(jobId);
   panes.details.updateJob(jobMap.get(jobId));
   setActivePane("details");
 }

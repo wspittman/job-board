@@ -48,20 +48,6 @@ export abstract class ComponentBase extends HTMLElement {
     return Promise.resolve();
   }
 
-  /**
-   * Hides the component by setting display to none.
-   */
-  hide() {
-    this.style.display = "none";
-  }
-
-  /**
-   * Shows the component by setting display to block.
-   */
-  show() {
-    this.style.display = "block";
-  }
-
   // #region Element Actions
 
   /**
@@ -85,25 +71,36 @@ export abstract class ComponentBase extends HTMLElement {
   }
 
   /**
-   * Attaches a click handler to an element by its ID.
-   * @param id - The ID of the element within the shadow root
-   * @param onClick - The click handler function
-   */
-  protected setOnClick(id: string, onClick?: () => void) {
-    if (!onClick) return;
-    const el = this.getEl(id);
-    if (el) {
-      el.onclick = () => onClick();
-    }
-  }
-
-  /**
    * Gets an element from the shadow root by its ID.
    * @param id - The ID of the element to retrieve
    * @returns The element cast to the specified type, or null if not found
    */
   protected getEl<T extends HTMLElement>(id: string): T | null {
     return this.root.getElementById(id) as T | null;
+  }
+
+  /**
+   * Dispatches a bubbling custom event from the host element.
+   * @param type - Event name exposed by the component
+   * @param detail - Optional payload included with the event
+   */
+  protected emit(type: string, detail?: unknown): void {
+    this.dispatchEvent(
+      new CustomEvent(type, { bubbles: true, composed: true, detail }),
+    );
+  }
+
+  /**
+   * Adds an event listener for a custom event type, with a typed detail payload.
+   * @param type - The custom event name to listen for
+   * @param fn - Callback function invoked with the event detail when the event is fired
+   */
+  protected listen<T>(type: string, fn: (detail: T) => void) {
+    this.addEventListener(type, (event) => {
+      if (event instanceof CustomEvent) {
+        fn(event.detail as T);
+      }
+    });
   }
 
   // #endregion

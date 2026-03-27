@@ -12,13 +12,13 @@
   content: "";
   position: absolute;
   pointer-events: none;
-  right: var(--space-md);
+  right: var(--space-2);
   border-inline-start: 5px solid transparent;
   border-inline-end: 5px solid transparent;
   border-block-start: 5px solid var(--text-muted);
 }
 
 .intake {
-  padding: var(--space-lg) var(--space-md);
+  padding: var(--space-4) var(--space-2);
   color: transparent;
 }
