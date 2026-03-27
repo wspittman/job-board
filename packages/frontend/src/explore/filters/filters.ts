@@ -197,6 +197,15 @@ export class Filters extends ComponentBase {
    * Loads dynamic metadata and applies any initial filters once the component is connected.
    */
   protected override async onLoad() {
+    this.listen(CHIP_DELETE, (key: FilterModelKey) => {
+      this.#inputs.get(key)!.value = "";
+    });
+
+    this.listen(FORM_ELEMENT_UPDATE, () => this.#debounceOnChange());
+    this.listen(NL_SEARCH_RESULT, (filters: FilterModel) =>
+      this.#handleNLUpdate(filters),
+    );
+
     try {
       const options = await metadataModel.getCompanyFormOptions();
       if (!this.isConnected) return;
@@ -213,15 +222,6 @@ export class Filters extends ComponentBase {
     } catch {
       // ignore
     }
-
-    this.listen(CHIP_DELETE, (key: FilterModelKey) => {
-      this.#inputs.get(key)!.value = "";
-    });
-
-    this.listen(FORM_ELEMENT_UPDATE, () => this.#debounceOnChange());
-    this.listen(NL_SEARCH_RESULT, (filters: FilterModel) =>
-      this.#handleNLUpdate(filters),
-    );
 
     if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
       for (const [key, value] of this.#initialFilters.toEntries()) {
