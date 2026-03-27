@@ -13,7 +13,7 @@ export const blogBuild: Command = {
 async function run([file = ""]: string[]): Promise<void> {
   file = file.trim();
 
-  if (!file) {
+  if (!file || file.match(/[^a-zA-Z0-9_-]/)) {
     throw new CommandError("Invalid argument: POST_NAME");
   }
 
