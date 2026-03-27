@@ -49,7 +49,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to the backend server during development
       // But don't confuse with the /api code folder
-      "^/api/.*[^ts]$": {
+      "^/api/.*(?<!\\.ts)$": {
         // For external device testing, replace localhost with your machine's local IP address (ipconfig)
         target: "http://localhost:3000",
         changeOrigin: true,
