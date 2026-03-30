@@ -42,6 +42,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         ...getHtmlEntries(),
+        ...getHtmlEntries("blog"),
       },
     },
   },
