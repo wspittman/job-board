@@ -137,9 +137,9 @@ async function getAtsJobs(
   const getFullJobInfo = !currentIds.length;
   let atsJobs = await ats.getJobs(key, getFullJobInfo);
 
-  // Remove any jobs that are more than 1 year old to avoid processing stale listings
-  const oneYearAgo = Date.now() - 365 * 24 * 60 * 60 * 1000;
-  atsJobs = atsJobs.filter(({ item: { postTS } }) => postTS >= oneYearAgo);
+  // Remove any jobs that are more than 90 days old to avoid processing stale listings
+  const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
+  atsJobs = atsJobs.filter(({ item: { postTS } }) => postTS >= ninetyDaysAgo);
 
   // Create sets for faster comparisons
   const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
