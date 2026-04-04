@@ -88,7 +88,7 @@ suite("config", () => {
     assert.equal(config.PORT, 4500);
   });
 
-  test("getLLMOptions returns default model and effort", async () => {
+  test("getLLMOptions returns defaults", async () => {
     setEnv({
       ADMIN_TOKEN: VALID_ADMIN_TOKEN,
       LLM_MODEL: "gpt-4-turbo",
@@ -101,10 +101,11 @@ suite("config", () => {
     assert.deepEqual(options, {
       model: "gpt-4-turbo",
       reasoningEffort: "medium",
+      preferFlexProcessing: false,
     });
   });
 
-  test("getLLMOptions applies model and effort overrides", async () => {
+  test("getLLMOptions applies overrides", async () => {
     setEnv({
       ADMIN_TOKEN: VALID_ADMIN_TOKEN,
       LLM_MODEL: "gpt-4-turbo",
@@ -115,6 +116,7 @@ suite("config", () => {
       LLM_REASONING_EFFORT_OVERRIDES: JSON.stringify({
         testOp: "high",
       }),
+      LLM_PREFER_FLEX: JSON.stringify(["testOp"]),
     });
 
     const { getLLMOptions } = await importFreshConfig();
@@ -123,12 +125,14 @@ suite("config", () => {
     assert.deepEqual(getLLMOptions("testOp"), {
       model: "gpt-o1",
       reasoningEffort: "high",
+      preferFlexProcessing: true,
     });
 
     // Without override
     assert.deepEqual(getLLMOptions("otherOp"), {
       model: "gpt-4-turbo",
       reasoningEffort: "medium",
+      preferFlexProcessing: false,
     });
   });
 
