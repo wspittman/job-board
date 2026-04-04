@@ -1,0 +1,18 @@
+.blog-article {
+  padding: var(--space-6) 0;
+  line-height: 1.4;
+}
+
+.blog-header {
+  text-align: center;
+  margin-block-end: var(--space-4);
+}
+
+p {
+  padding: var(--space-1) 0;
+}
+
+h2,
+h3 {
+  margin: var(--space-2) 0;
+}

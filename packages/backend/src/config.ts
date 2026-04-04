@@ -1,15 +1,15 @@
+import type { ReasoningEffort } from "dry-utils-openai";
 import path from "node:path";
 
-const reasoningEffortOptions = [
+const reasoningEffortOptions: ReasoningEffort[] = [
   "none",
   "minimal",
   "low",
   "medium",
   "high",
   "xhigh",
-] as const;
-type ReasoningEffort = (typeof reasoningEffortOptions)[number];
-function isReasoningEffort(val?: string): val is ReasoningEffort {
+];
+function isReasoningEffort(val: unknown): val is ReasoningEffort {
   return !!val && reasoningEffortOptions.includes(val as ReasoningEffort);
 }
 function isRecord(val: unknown): val is Record<string, string> {
@@ -41,6 +41,7 @@ interface Config {
   LLM_REASONING_EFFORT?: ReasoningEffort;
   LLM_MODEL_OVERRIDES: Record<string, string>;
   LLM_REASONING_EFFORT_OVERRIDES: Record<string, ReasoningEffort>;
+  LLM_PREFER_FLEX: Set<string>;
 
   // Auth configs
   ADMIN_TOKEN: string;
@@ -84,24 +85,39 @@ const getReqEnv = (key: KEY): string => {
 
 const getFlag = (key: KEY): boolean => getEnv(key)?.toLowerCase() === "true";
 
-const getBag = <T>(key: KEY, mutate: (x: string) => T): Record<string, T> => {
+const getParsed = (key: KEY): unknown => {
   const val = getEnv(key);
-  if (!val) return {};
+  if (!val) return undefined;
 
-  let parsed: unknown;
   try {
-    parsed = JSON.parse(val) as unknown;
+    return JSON.parse(val);
   } catch {
-    throw new Error(`Env: ${key} must be JSON string.`);
+    throw new Error(`Env: ${key} must be JSON.`);
+  }
+};
+
+const getSet = (key: KEY): Set<string> => {
+  const val = getParsed(key);
+  if (!val) return new Set();
+
+  if (!Array.isArray(val) || !val.every((x) => typeof x === "string")) {
+    throw new Error(`Env: ${key} must be a JSON array of strings.`);
   }
 
-  if (!isRecord(parsed)) {
+  return new Set(val);
+};
+
+const getBag = <T>(key: KEY, mutate: (x: string) => T): Record<string, T> => {
+  const val = getParsed(key);
+  if (!val) return {};
+
+  if (!isRecord(val)) {
     throw new Error(`Env: ${key} must be a JSON Record<string, string>.`);
   }
 
   const result: Record<string, T> = {};
-  for (const key in parsed) {
-    result[key] = mutate(parsed[key]!);
+  for (const key in val) {
+    result[key] = mutate(val[key]!);
   }
   return result;
 };
@@ -127,6 +143,8 @@ const reasoningOverrides = getBag("LLM_REASONING_EFFORT_OVERRIDES", (val) => {
   return v;
 });
 
+const preferFlex = getSet("LLM_PREFER_FLEX");
+
 export const config: Config = {
   PORT: parseInt(getReqEnv("PORT"), 10),
   NODE_ENV: getReqEnv("NODE_ENV").toLowerCase(),
@@ -148,6 +166,7 @@ export const config: Config = {
   LLM_REASONING_EFFORT: reasoningEffort,
   LLM_MODEL_OVERRIDES: modelOverrides,
   LLM_REASONING_EFFORT_OVERRIDES: reasoningOverrides,
+  LLM_PREFER_FLEX: preferFlex,
 
   // Auth configs
   ADMIN_TOKEN: adminToken,
@@ -162,7 +181,7 @@ export const config: Config = {
 /**
  * Gets the common LLM options for jsonCompletion.
  * @param opName - Operation name.
- * @returns An object with model and reasoningEffort.
+ * @returns An object with model, reasoningEffort, and preferFlex.
  */
 export function getLLMOptions(opName: string) {
   if (!opName) {
@@ -174,5 +193,6 @@ export function getLLMOptions(opName: string) {
     reasoningEffort:
       config.LLM_REASONING_EFFORT_OVERRIDES[opName] ||
       config.LLM_REASONING_EFFORT,
+    preferFlexProcessing: config.LLM_PREFER_FLEX.has(opName),
   };
 }

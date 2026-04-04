@@ -21,6 +21,7 @@ interface UrlParts {
   dir: string;
   base: string;
   ext: string;
+  urlPath: string;
   compEnc?: "br" | "gzip";
 }
 
@@ -37,7 +38,7 @@ declare module "express-serve-static-core" {
 
 // #endregion
 
-const PAGES = new Set(["index", "faq", "404", "explore"]);
+const PAGES = new Set(["blog", "index", "faq", "404", "explore"]);
 const METHOD_ALLOWED = new Set(["GET", "HEAD", "POST"]);
 const POST_ALLOWED = new Set(["/api/beacon", "/api/interpret"]);
 
@@ -134,8 +135,9 @@ app.use(async (req, res, next) => {
     return res.redirect("/404");
   }
 
+  await setCompressionUrl(urlParts, encodings);
   req._urlParts = urlParts;
-  req.url = await getCompressionUrl(urlParts, encodings);
+  req.url = urlParts.urlPath;
   next();
 });
 
@@ -209,43 +211,38 @@ async function getUrlParts(req: Request): Promise<UrlParts | T404> {
   const dir = dirnameURL(urlPath);
   const ext = extnameURL(urlPath) || ".html";
   const base = basenameURL(urlPath, ext) || "index";
-  const isHtml = ext === ".html";
+  const urlParts = { dir, base, ext, urlPath: joinURL(dir, `${base}${ext}`) };
 
-  if (isHtml) {
-    const isRootPage = dir === "/" && PAGES.has(base);
-    return isRootPage ? { dir, base, ext } : "404_soft";
+  if (ext !== ".html") {
+    return (await fileExists(urlParts)) ? urlParts : "404_hard";
   }
 
-  const filePath = joinFS(__dist, dir, `${base}${ext}`);
-  if (await fileExists(filePath)) {
-    return { dir, base, ext };
+  if (dir === "/blog") {
+    return (await fileExists(urlParts)) ? urlParts : "404_soft";
   }
 
-  return "404_hard";
+  const isRootPage = dir === "/" && PAGES.has(base);
+  return isRootPage ? urlParts : "404_soft";
 }
 
-async function getCompressionUrl(
+async function setCompressionUrl(
   urlParts: UrlParts,
   { useBrotli, useGzip }: Encodings,
 ) {
-  const { base, ext, dir } = urlParts;
-  const filePath = joinFS(__dist, dir, `${base}${ext}`);
-  const urlPath = joinURL(dir, `${base}${ext}`);
-
-  if (useBrotli && (await fileExists(filePath + ".br"))) {
+  if (useBrotli && (await fileExists(urlParts, ".br"))) {
+    urlParts.urlPath += ".br";
     urlParts.compEnc = "br";
-    return urlPath + ".br";
-  }
-
-  if (useGzip && (await fileExists(filePath + ".gz"))) {
+  } else if (useGzip && (await fileExists(urlParts, ".gz"))) {
+    urlParts.urlPath += ".gz";
     urlParts.compEnc = "gzip";
-    return urlPath + ".gz";
   }
-
-  return urlPath;
 }
 
-async function fileExists(filePath: string): Promise<boolean> {
+async function fileExists(
+  { dir, base, ext }: UrlParts,
+  enc: string = "",
+): Promise<boolean> {
+  const filePath = joinFS(__dist, dir, `${base}${ext}`) + enc;
   return access(filePath, constants.F_OK)
     .then(() => true)
     .catch(() => false);

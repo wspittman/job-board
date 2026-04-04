@@ -28,24 +28,26 @@ cd packages/frontend
 
 ```
 packages/frontend/
+├── plugins/          # Vite plugins and supporting utilities
 ├── public/           # Static assets copied as-is during build
+├── server/           # Express server source for production hosting
 ├── src/
+│   ├── 404/          # 404 page logic and styles
 │   ├── api/          # Data-fetching utilities shared across pages
+│   ├── blog/         # Blog page logic and styles
 │   ├── components/   # Reusable UI building blocks
-│   ├── home/         # Home page logic and styles
 │   ├── explore/      # Explore page logic and styles
 │   ├── faq/          # FAQ page logic and styles
-│   ├── 404/          # 404 page logic and styles
+│   ├── home/         # Home page logic and styles
 │   ├── partials/     # Layout pieces such as headers, footers, and hero sections
-│   └── sharedStyles/ # Global CSS modules and tokens
-├── plugins/          # Vite plugins and supporting utilities
-├── server.js         # Express wrapper for production hosting
+│   ├── sharedStyles/ # Global CSS modules and tokens
+│   └── utils/         # General-purpose utilities and helpers
 └── vite.config.ts    # Vite configuration for the workspace
 ```
 
 ## Environment variables
 
-The development server relies on the backend proxy defined in `vite.config.ts`. For production, `server.js` reads these variables:
+The development server relies on the backend proxy defined in `vite.config.ts`. For production, `deploy/server.js` (compiled from `server/server.ts`) reads these variables:
 
 | Variable  | Description                                                                                               |
 | --------- | --------------------------------------------------------------------------------------------------------- |
