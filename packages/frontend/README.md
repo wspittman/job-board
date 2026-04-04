@@ -40,14 +40,14 @@ packages/frontend/
 │   ├── faq/          # FAQ page logic and styles
 │   ├── home/         # Home page logic and styles
 │   ├── partials/     # Layout pieces such as headers, footers, and hero sections
-│   └── sharedStyles/ # Global CSS modules and tokens
+│   ├── sharedStyles/ # Global CSS modules and tokens
 │   └── utils/         # General-purpose utilities and helpers
 └── vite.config.ts    # Vite configuration for the workspace
 ```
 
 ## Environment variables
 
-The development server relies on the backend proxy defined in `vite.config.ts`. For production, `server/server.js` reads these variables:
+The development server relies on the backend proxy defined in `vite.config.ts`. For production, `deploy/server.js` (compiled from `server/server.ts`) reads these variables:
 
 | Variable  | Description                                                                                               |
 | --------- | --------------------------------------------------------------------------------------------------------- |
