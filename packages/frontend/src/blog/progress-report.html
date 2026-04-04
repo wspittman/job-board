@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- @include: ../partials/head.html -->
+    <title>Progress Report | Better Job Board</title>
+    <meta
+      name="description"
+      content="A running record of what we've improved on as we do our best to put the 'better' in Better Job Board."
+    />
+    <meta name="robots" content="index, follow" />
+    <link
+      rel="canonical"
+      href="https://betterjobboard.net/blog/progress-report"
+    />
+  </head>
+  <body>
+    <!-- @include: ../partials/header.html -->
+    <main class="blog-article">
+      <article>
+        <header class="blog-header">
+          <h1>Progress Report</h1>
+          <p>Last Updated: April 3, 2026</p>
+          <p>
+            A running record of what we've improved on as we do our best to put
+            the "better" in Better Job Board.
+          </p>
+        </header>
+        <section>
+          <h2>April 3, 2026</h2>
+          <ul>
+            <li>Added a new Blog section to the site. Hello 👋</li>
+            <li>
+              Added this Progress Report as a way to share updates on what we've
+              been working on.
+            </li>
+            <li>
+              Jobs posts expire and are removed after 90 days, down from 365
+              days.
+              <ul>
+                <li>
+                  See
+                  <a href="./moving-to-90-day-expiration"
+                    >Why We're Moving to 90-Day Job Expiration</a
+                  >
+                  for more on why we're making this change.
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <h2>March 26, 2026</h2>
+          <ul>
+            <li>
+              Simplified and updated spacing across the site for a cleaner, more
+              modern look.
+            </li>
+            <li>Job Details: Updated fonts to match the rest of the site.</li>
+          </ul>
+          <h2>March 19, 2026</h2>
+          <ul>
+            <li>
+              Simplified and updated font sizing across the site for better
+              readability.
+            </li>
+            <li>Switched fully to default device fonts.</li>
+            <li>
+              Data: Updated the company filter and home page count to list only
+              companies with active jobs.
+            </li>
+            <li>
+              Data: Improved logic for screening out "general application"
+              roles.
+              <ul>
+                <li>
+                  Accuracy improved from 72% to 91% in our test sample of about
+                  125 postings.
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <h2>March 12, 2026</h2>
+          <ul>
+            <li>
+              Home page: Added natural language search as a main entry point.
+            </li>
+          </ul>
+          <h3>Replacing the Web Font</h3>
+          <p>This change deserves a little explanation.</p>
+          <p>
+            Previously, we used a web font: a custom font downloaded by the
+            browser when you visit the site. This is common on many websites
+            because it makes typography more consistent across devices. Of
+            course, many sites are also so bloated with frameworks and
+            third-party trackers that an extra 40 KB font file barely matters.
+          </p>
+          <p>
+            Since we built Better Job Board to be fast and lightweight, the font
+            download mattered more to us. In our testing, it accounted for about
+            <strong>55% of the home page download size</strong>. On a slower 4G
+            connection, the home page took about <strong>40% longer</strong> to
+            load with the web font than without it, which was not a tradeoff we
+            wanted to keep making.
+          </p>
+          <p>
+            We've now switched to default system fonts that are already on your
+            device. This helps the site load faster, especially on slower
+            connections. There may be small differences between operating
+            systems, but unless you're actively looking for them, you probably
+            won't notice.
+          </p>
+          <h2>Before</h2>
+          <p>
+            There were earlier changes too, but when we launched the Blog
+            section and this Progress Report, we only went back a few weeks.
+          </p>
+          <p>
+            We'd rather spend our time improving the site going forward than
+            trying to reconstruct every past update.
+          </p>
+          <p>
+            If you're curious about the project's history, you can browse the
+            full change history on the
+            <a
+              href="https://github.com/wspittman/job-board"
+              target="_blank"
+              rel="noopener noreferrer"
+              >GitHub repository</a
+            >.
+          </p>
+        </section>
+      </article>
+    </main>
+    <script type="module" src="./blog-article.ts"></script>
+  </body>
+</html>
