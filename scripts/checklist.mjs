@@ -19,12 +19,8 @@ function npmCommand(cmd, ...args) {
   }
 }
 
-const d = new Date();
-d.setDate(d.getDate() - 7);
-const lastWeek = d.toISOString().slice(0, 10);
-
 if (!!isFull) {
-  npmCommand("update", "--before", lastWeek);
+  npmCommand("update", "--min-release-age", 5);
   npmCommand("run", "clean");
   npmCommand("install");
 }
