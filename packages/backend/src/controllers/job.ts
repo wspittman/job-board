@@ -185,12 +185,13 @@ async function getAtsJobs(
 async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   logProperty("Input", { ...companyKey, jobId: job.item.id });
 
-  if (await llm.isGeneralApplication(job.item.title)) {
-    logProperty("Skipped_GeneralApplication", job.item.title);
+  const skip = async (reason: string, value: string) => {
+    logProperty(`Skipped_${reason}`, value);
+    return await db.ignoreJob.upsert(job.item.id, companyKey, reason);
+  };
 
-    // Add to ignore records to prevent future processing
-    await db.ignoreJob.upsert(job.item.id, companyKey);
-    return;
+  if (await llm.isGeneralApplication(job.item.title)) {
+    return await skip("GeneralApplication", job.item.title);
   }
 
   if (!job.context) {
@@ -202,6 +203,20 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   // Do not add a job that failed to extract facets
   if (!success) {
     return;
+  }
+
+  // This is a stopgap until we can add better US-only filters prior to main LLM processing.
+  const language = job.item.jdLanguage || "en";
+  const currency = job.item.salaryRange?.currency || "USD";
+  const location = job.item.primaryLocation?.countryCode || "US";
+  if (language.toLowerCase() !== "en") {
+    return await skip("NonEnglish", language);
+  }
+  if (currency.toUpperCase() !== "USD") {
+    return await skip("NonUSD", currency);
+  }
+  if (location.toUpperCase() !== "US") {
+    return await skip("NonUS", location);
   }
 
   await db.job.upsert(job.item);

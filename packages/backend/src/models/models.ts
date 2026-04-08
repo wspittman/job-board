@@ -76,6 +76,7 @@ export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
 export interface IgnoreJob {
   id: string;
   atsCompany: string;
+  reason: string;
 }
 
 /**

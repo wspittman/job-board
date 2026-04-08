@@ -132,14 +132,18 @@ class IgnoreJobContainer extends Container<IgnoreJob> {
     return this.getIdsByPartitionKey(this.#asPKey(key));
   }
 
-  async upsert(jobId: string, key: CompanyKey) {
-    return this.upsertItem({ id: jobId, atsCompany: this.#asPKey(key) });
+  async upsert(jobId: string, key: CompanyKey, reason: string) {
+    return this.upsertItem({
+      id: jobId,
+      atsCompany: this.#asPKey(key),
+      reason,
+    });
   }
 
-  async upsertMany(jobIds: string[], key: CompanyKey) {
+  async upsertMany(jobIds: string[], key: CompanyKey, reason: string) {
     const atsCompany = this.#asPKey(key);
     return await batch("UpsertIgnoreJob", jobIds, (id) =>
-      this.upsertItem({ id, atsCompany }),
+      this.upsertItem({ id, atsCompany, reason }),
     );
   }
 

@@ -148,7 +148,7 @@ export async function syncCompanyJobs(key: CompanyKey) {
  */
 export async function ignoreJob({ companyKey, jobKey }: FullJobKey) {
   await Promise.all([
-    db.ignoreJob.upsert(jobKey.id, companyKey),
+    db.ignoreJob.upsert(jobKey.id, companyKey, "Manual"),
     db.job.remove(jobKey),
   ]);
 }
