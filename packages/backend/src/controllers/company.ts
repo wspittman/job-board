@@ -147,8 +147,10 @@ export async function syncCompanyJobs(key: CompanyKey) {
  * @returns Promise resolving when the job is deleted
  */
 export async function ignoreJob({ companyKey, jobKey }: FullJobKey) {
-  await db.company.ignoreJobUpsert(companyKey, jobKey);
-  await db.job.remove(jobKey);
+  await Promise.all([
+    db.ignoreJob.upsert(jobKey.id, companyKey),
+    db.job.remove(jobKey),
+  ]);
 }
 
 async function addCompanyInternal(key: CompanyKey) {

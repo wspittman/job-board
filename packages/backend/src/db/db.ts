@@ -1,3 +1,4 @@
+import { batch } from "dry-utils-async";
 import {
   Container,
   connectDB,
@@ -8,6 +9,7 @@ import type {
   Company,
   CompanyKey,
   CompanyQuickRef,
+  IgnoreJob,
   Job,
   JobKey,
   Location,
@@ -64,19 +66,6 @@ class CompanyContainer extends Container<Company> {
   async remove({ id, ats }: CompanyKey) {
     return this.deleteItem(id, ats);
   }
-
-  async ignoreJobUpsert(key: CompanyKey, { id }: JobKey) {
-    const company = await this.get(key);
-    if (!company) return false;
-
-    company.ignoreJobIds ??= [];
-    if (!company.ignoreJobIds.includes(id)) {
-      company.ignoreJobIds.push(id);
-      await this.upsert(company);
-    }
-
-    return true;
-  }
 }
 
 class JobContainer extends Container<Job> {
@@ -122,40 +111,68 @@ class JobContainer extends Container<Job> {
   async remove({ id, companyId }: JobKey) {
     return this.deleteItem(id, companyId);
   }
+
+  async removeMany(jobIds: string[], companyId: string) {
+    return await batch("DeleteJob", jobIds, (id) =>
+      this.remove({ id, companyId }),
+    );
+  }
+}
+
+class IgnoreJobContainer extends Container<IgnoreJob> {
+  constructor(container: Container<IgnoreJob>) {
+    super("ignoreJob", container.container);
+  }
+
+  async get(jobId: string, key: CompanyKey) {
+    return this.getItem(jobId, this.#asPKey(key));
+  }
+
+  async getIds(key: CompanyKey) {
+    return this.getIdsByPartitionKey(this.#asPKey(key));
+  }
+
+  async upsert(jobId: string, key: CompanyKey) {
+    return this.upsertItem({ id: jobId, atsCompany: this.#asPKey(key) });
+  }
+
+  async upsertMany(jobIds: string[], key: CompanyKey) {
+    const atsCompany = this.#asPKey(key);
+    return await batch("UpsertIgnoreJob", jobIds, (id) =>
+      this.upsertItem({ id, atsCompany }),
+    );
+  }
+
+  #asPKey({ ats, id }: CompanyKey) {
+    return `${ats}+${id}`;
+  }
 }
 
 class DB {
-  private _company: CompanyContainer | undefined;
-  private _job: JobContainer | undefined;
-  private _metadata: Container<Metadata> | undefined;
-  private _locationCache: Container<Location> | undefined;
+  #company: CompanyContainer | undefined;
+  #job: JobContainer | undefined;
+  #ignoreJob: IgnoreJobContainer | undefined;
+  #metadata: Container<Metadata> | undefined;
+  #locationCache: Container<Location> | undefined;
 
   get company() {
-    if (!this._company) {
-      throw new Error("DB not connected yet. Call connect() first.");
-    }
-    return this._company;
+    return this.#validate(this.#company);
   }
 
   get job() {
-    if (!this._job) {
-      throw new Error("DB not connected yet. Call connect() first.");
-    }
-    return this._job;
+    return this.#validate(this.#job);
+  }
+
+  get ignoreJob() {
+    return this.#validate(this.#ignoreJob);
   }
 
   get metadata() {
-    if (!this._metadata) {
-      throw new Error("DB not connected yet. Call connect() first.");
-    }
-    return this._metadata;
+    return this.#validate(this.#metadata);
   }
 
   get locationCache() {
-    if (!this._locationCache) {
-      throw new Error("DB not connected yet. Call connect() first.");
-    }
-    return this._locationCache;
+    return this.#validate(this.#locationCache);
   }
 
   /**
@@ -186,6 +203,12 @@ class DB {
           partitionKey: "companyId",
         },
         {
+          name: "ignoreJob",
+          partitionKey: "atsCompany",
+          ttlSeconds: 90 * 24 * 60 * 60,
+          indexExclusions: "all",
+        },
+        {
           name: "metadata",
           partitionKey: "id",
           indexExclusions: "all",
@@ -198,12 +221,22 @@ class DB {
       ],
     });
 
-    this._company = new CompanyContainer(
+    this.#company = new CompanyContainer(
       containers["company"] as Container<Company>,
     );
-    this._job = new JobContainer(containers["job"] as Container<Job>);
-    this._metadata = containers["metadata"] as Container<Metadata>;
-    this._locationCache = containers["locationCache"] as Container<Location>;
+    this.#job = new JobContainer(containers["job"] as Container<Job>);
+    this.#ignoreJob = new IgnoreJobContainer(
+      containers["ignoreJob"] as Container<IgnoreJob>,
+    );
+    this.#metadata = containers["metadata"] as Container<Metadata>;
+    this.#locationCache = containers["locationCache"] as Container<Location>;
+  }
+
+  #validate<T>(container: T | undefined): T {
+    if (!container) {
+      throw new Error(`DB not connected yet. Call connect() first.`);
+    }
+    return container;
   }
 }
 

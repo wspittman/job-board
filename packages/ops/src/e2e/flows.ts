@@ -200,15 +200,24 @@ const companies: Step[] = [
 
 const manual = [
   //addCompanyStep("greenhouse", "noxgroup"),
-  formSucStep("refresh/jobs", "Refresh Nox Group Jobs", {
+  formSucStep("refresh/jobs", "Refresh Company", {
     method: "POST",
     asAdmin: true,
     body: {
       ats: "greenhouse",
-      companyId: "noxgroup",
-      replaceJobsOlderThan: Date.now() - 1000 * 60 * 60 * 24 * 365, // 1 year ago
+      companyId: "propublica",
+      //replaceJobsOlderThan: Date.now() - 1000 * 60 * 60 * 24 * 90, // 90 days
     },
   }),
+  /*formSucStep("company/job", "Ignore Job", {
+    method: "DELETE",
+    asAdmin: true,
+    body: {
+      ats: "greenhouse",
+      companyId: "propublica",
+      jobId: "4053828006",
+    },
+  }),*/
 ];
 
 /*

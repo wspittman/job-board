@@ -1,4 +1,3 @@
-import { batch } from "dry-utils-async";
 import { Query } from "dry-utils-cosmosdb";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
@@ -10,6 +9,8 @@ import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { refreshMetadata } from "./metadata.ts";
+
+const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 
 type EnhancedFilters = Omit<Filters, "location"> & {
   location?: Location;
@@ -85,28 +86,29 @@ export async function refreshJobsForCompany(
 ) {
   logProperty("Input", key);
   const companyId = key.id;
-  const [company, currentIds] = await Promise.all([
-    db.company.get(key),
+
+  const [currentIds, ignoreIds] = await Promise.all([
     getJobIds(companyId, key.replaceJobsOlderThan),
+    db.ignoreJob.getIds(key),
   ]);
 
-  if (!company) {
-    logProperty("CompanyNotFound", companyId);
-    return;
-  }
-
-  const { ignoreJobIds, stage, size } = company;
-  const [add, remove, ignore] = await getAtsJobs(key, currentIds, ignoreJobIds);
-
-  logProperty("Ignored", ignore);
+  const [add, remove] = await getAtsJobs(key, currentIds, ignoreIds);
 
   if (remove.length) {
-    await batch("DeleteJob", remove, (id) =>
-      db.job.remove({ id, companyId: key.id }),
-    );
+    await db.job.removeMany(remove, companyId);
   }
 
   if (add.length) {
+    const company = await db.company.get(key);
+
+    if (!company) {
+      // Unexpected but could happen if the company was deleted after we fetched the keys but before we refreshed the jobs.
+      logProperty("CompanyNotFound", companyId);
+      return;
+    }
+
+    const { stage, size } = company;
+
     add.forEach(({ item }) => {
       if (stage) item.companyStage = stage;
       if (size) item.companySize = size;
@@ -133,26 +135,34 @@ async function getAtsJobs(
   currentIds: string[],
   ignoreIds: string[] = [],
 ) {
+  const idSet = (x: Context<Job>[]) => new Set(x.map(({ item: { id } }) => id));
+
   // If there are no current jobs, assume newly added company and get full job data for all jobs
-  const getFullJobInfo = !currentIds.length;
-  let atsJobs = await ats.getJobs(key, getFullJobInfo);
+  const atsJobs = await ats.getJobs(key, !currentIds.length);
+  logProperty("ATS_Jobs_All", atsJobs.length);
 
-  // Remove any jobs that are more than 90 days old to avoid processing stale listings
-  const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
-  atsJobs = atsJobs.filter(({ item: { postTS } }) => postTS >= ninetyDaysAgo);
+  // Filter out any jobs that are more than 90 days old to avoid processing stale listings
+  const ninetyDaysAgo = Date.now() - NINETY_DAYS_MS;
+  const freshJobs = atsJobs.filter(
+    ({ item: { postTS } }) => postTS >= ninetyDaysAgo,
+  );
+  logProperty("ATS_Jobs_Stale", atsJobs.length - freshJobs.length);
 
-  // Create sets for faster comparisons
-  const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
-  const ignoreIdSet = new Set([...currentIds, ...ignoreIds]);
+  // Filter out jobs that are in the ignore set
+  const ignoreIdSet = new Set(ignoreIds);
+  const validJobs = freshJobs.filter(
+    ({ item: { id } }) => !ignoreIdSet.has(id),
+  );
+  logProperty("ATS_Jobs_Ignored", freshJobs.length - validJobs.length);
 
-  // Any ATS job not in the ignore set needs to be added
-  let add = atsJobs.filter(({ item: { id } }) => !ignoreIdSet.has(id));
+  // Filter out jobs that are already saved
+  const currentIdSet = new Set(currentIds);
+  let newJobs = validJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
+  logProperty("ATS_Jobs_Known", validJobs.length - newJobs.length);
 
-  // Any jobs in the current set but not in the ATS need to be removed
-  const remove = currentIds.filter((id) => !jobIdSet.has(id));
-
-  // The difference between the ATS job set and the add set is the ignored jobs
-  const ignore = jobIdSet.size - add.length;
+  // Any jobs in the current set but not in valid group need to be removed
+  const validJobIdSet = idSet(validJobs);
+  const removeJobs = currentIds.filter((id) => !validJobIdSet.has(id));
 
   // Get the full job data for all jobs if
   // - There is more than 1 added job
@@ -160,15 +170,16 @@ async function getAtsJobs(
   // - We don't already have full job data
   // Better to do one big API call with unnecessary data than many small API calls
   if (
-    add.length > 1 &&
-    9 * add.length > remove.length + ignore &&
+    newJobs.length &&
+    newJobs.length > 0.1 * atsJobs.length &&
     !atsJobs[0]?.context
   ) {
-    atsJobs = await ats.getJobs(key, true);
-    add = atsJobs.filter(({ item: { id } }) => !ignoreIdSet.has(id));
+    const atsJobsFull = await ats.getJobs(key, true);
+    const newIdSet = idSet(newJobs);
+    newJobs = atsJobsFull.filter(({ item: { id } }) => newIdSet.has(id));
   }
 
-  return [add, remove, ignore] as const;
+  return [newJobs, removeJobs] as const;
 }
 
 async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
@@ -177,8 +188,8 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   if (await llm.isGeneralApplication(job.item.title)) {
     logProperty("Skipped_GeneralApplication", job.item.title);
 
-    // Add to company ignore list to prevent future processing
-    await db.company.ignoreJobUpsert(companyKey, job.item);
+    // Add to ignore records to prevent future processing
+    await db.ignoreJob.upsert(job.item.id, companyKey);
     return;
   }
 
