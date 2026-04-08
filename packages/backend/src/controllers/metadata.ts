@@ -39,6 +39,14 @@ async function refreshInternal() {
   const companyIdSet = new Set(companyIds);
   const validRefs = quickRefs.filter(([id]) => companyIdSet.has(id));
 
+  const emptyIds = quickRefs.filter(([id]) => !companyIdSet.has(id));
+  if (emptyIds.length) {
+    logProperty(
+      "EmptyCompanies",
+      emptyIds.map(([id]) => id),
+    );
+  }
+
   await Promise.all([
     db.metadata.upsertItem({ id: "job", jobCount }),
     db.metadata.upsertItem({
