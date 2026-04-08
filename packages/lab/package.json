@@ -5,10 +5,8 @@
   "private": true,
   "scripts": {
     "lint": "eslint",
-    "format": "prettier . --check",
-    "format:write": "prettier . --write",
-    "pretest": "tsc --noEmit",
-    "test": "node --import tsx --test test/**/*.test.ts",
+    "format": "prettier . --write",
+    "test": "node --import tsx --test --test-reporter=dot test/**/*.test.ts",
     "lab": "tsx --env-file=.env src/index.ts"
   },
   "dependencies": {

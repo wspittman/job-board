@@ -9,9 +9,8 @@
   "scripts": {
     "clean": "git clean -fdx -- \":(glob)**/node_modules/**\" \":(glob)**/deploy/**\" \":(glob)**/dist/**\" \":(glob)**/*.tsbuildinfo\"",
     "lint": "npm run lint --workspaces",
-    "format": "npm run format --workspaces",
-    "format:write": "npm run format:write --workspaces",
-    "test": "npm run test --workspaces",
+    "format": "npm run format --workspaces -- --log-level silent",
+    "test": "npm run test --workspaces --if-present",
     "pre-checkin": "node scripts/checklist.mjs",
     "pre-deploy": "node scripts/checklist.mjs -- full",
     "start:backend": "npm run dev --workspace=backend",

@@ -25,5 +25,5 @@ if (!!isFull) {
   npmCommand("install");
 }
 npmCommand("run", "lint");
-npmCommand("run", "format:write");
+npmCommand("run", "format");
 npmCommand("run", "test");
