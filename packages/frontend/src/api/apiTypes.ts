@@ -53,7 +53,6 @@ export interface FilterModelApi {
   jobFamily?: JobFamily;
   companyStage?: CompanyStage;
   payCadence?: PayCadence;
-  currency?: Currency;
   // Substring Match
   title?: string;
   location?: string;

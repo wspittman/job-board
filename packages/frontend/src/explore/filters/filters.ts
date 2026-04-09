@@ -5,7 +5,6 @@ import "../../components/nl-search";
 
 import {
   companyStageOptions,
-  currencyOptions,
   jobFamilyOptions,
   payCadenceOptions,
   workTimeBasisOptions,
@@ -79,12 +78,6 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "payCadence",
       label: "Pay By",
       options: payCadenceOptions,
-    },
-    {
-      type: "jb-form-select",
-      name: "currency",
-      label: "Pay In",
-      options: currencyOptions,
     },
     {
       type: "jb-form-input",

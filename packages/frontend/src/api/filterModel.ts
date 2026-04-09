@@ -1,7 +1,6 @@
 import {
   toCompanyStage,
   toCompanyStageLabel,
-  toCurrency,
   toJobFamily,
   toJobFamilyLabel,
   toPayCadence,
@@ -115,8 +114,6 @@ export class FilterModel {
           return [key, `${toCompanyStageLabel(value)} Company`];
         case "payCadence":
           return [key, `Pay by: ${toPayCadenceLabel(value)}`];
-        case "currency":
-          return [key, `Pay in: ${toCurrency(value)}`];
         case "isRemote":
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
@@ -168,7 +165,6 @@ export class FilterModel {
     this.#filters.jobFamily = toJobFamily(get("jobFamily"));
     this.#filters.companyStage = toCompanyStage(get("companyStage"));
     this.#filters.payCadence = toPayCadence(get("payCadence"));
-    this.#filters.currency = toCurrency(get("currency"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
     this.#filters.location = normSearchString(get("location"));
     this.#filters.minSalary = normNumber(get("minSalary"));
