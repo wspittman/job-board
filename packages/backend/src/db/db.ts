@@ -15,6 +15,7 @@ import type {
   Location,
   Metadata,
 } from "../models/models.ts";
+import { JOB_EXPIRY_SEC } from "../utils/constants.ts";
 import {
   createSubscribeAggregator,
   subscribeError,
@@ -209,7 +210,7 @@ class DB {
         {
           name: "ignoreJob",
           partitionKey: "atsCompany",
-          ttlSeconds: 90 * 24 * 60 * 60,
+          ttlSeconds: JOB_EXPIRY_SEC,
           indexExclusions: "all",
         },
         {

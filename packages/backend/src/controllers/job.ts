@@ -7,10 +7,9 @@ import type { CompanyKey, Job, JobKey, Location } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
+import { JOB_EXPIRY_MS, MS_PER_DAY } from "../utils/constants.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { refreshMetadata } from "./metadata.ts";
-
-const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
 
 type EnhancedFilters = Omit<Filters, "location"> & {
   location?: Location;
@@ -141,10 +140,10 @@ async function getAtsJobs(
   const atsJobs = await ats.getJobs(key, !currentIds.length);
   logProperty("ATS_Jobs_All", atsJobs.length);
 
-  // Filter out any jobs that are more than 90 days old to avoid processing stale listings
-  const ninetyDaysAgo = Date.now() - NINETY_DAYS_MS;
+  // Filter out any jobs that are beyond the expiry window to avoid processing stale listings
+  const expiryWindow = Date.now() - JOB_EXPIRY_MS;
   const freshJobs = atsJobs.filter(
-    ({ item: { postTS } }) => postTS >= ninetyDaysAgo,
+    ({ item: { postTS } }) => postTS >= expiryWindow,
   );
   logProperty("ATS_Jobs_Stale", atsJobs.length - freshJobs.length);
 
@@ -279,8 +278,7 @@ async function readJobsByFilters({
   // Range Matches
 
   if (daysSince) {
-    const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const sinceTS = Date.now() - daysSince * millisecondsPerDay;
+    const sinceTS = Date.now() - daysSince * MS_PER_DAY;
     query.whereCondition("postTS", ">=", sinceTS);
   }
 

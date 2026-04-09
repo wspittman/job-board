@@ -140,7 +140,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       validation: {
         type: "int",
         min: 1,
-        max: 999,
+        max: 99,
       },
     },
     {
