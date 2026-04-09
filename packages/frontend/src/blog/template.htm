@@ -2,20 +2,22 @@
 <html lang="en">
   <head>
     <!-- @include: ../partials/head.html -->
-    <title>
-      FIRST, UPDATE THE TITLE, DESCRIPTION META, AND CANONICAL LINK TAGS IN THE
-      HEAD | Better Job Board
-    </title>
-    <meta name="description" content="DESCRIPTION" />
+    <title>{UPDATE THE TITLE} | Better Job Board</title>
+    <meta name="description" content="{UPDATE THE DESCRIPTION}" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://betterjobboard.net/blog/SLUG" />
+    <link
+      rel="canonical"
+      href="https://betterjobboard.net/blog/{UPDATE THE SLUG}"
+    />
   </head>
   <body>
     <!-- @include: ../partials/header.html -->
     <main class="blog-article">
       <article>
-        <header class="blog-header">THEN COPY TITLE AND DATE HTML HERE</header>
-        <section>THEN COPY BLOG CONTENT HTML HERE</section>
+        <header class="blog-header">{COPY TITLE AND DATE HTML HERE}</header>
+        <section>{COPY BLOG CONTENT HTML HERE}</section>
+        <!-- THEN UPDATE BLOG.HTML WITH A LINK TO THIS BLOG POST -->
+        <!-- THEN UPDATE SITEMAP.XML WITH A LINK TO THIS BLOG POST -->
       </article>
     </main>
     <script type="module" src="./blog-article.ts"></script>
