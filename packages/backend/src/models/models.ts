@@ -11,30 +11,30 @@ export const AtsSchema = z.enum(["greenhouse", "lever"] as const);
 export type ATS = z.infer<typeof AtsSchema>;
 export type CompanyQuickRef = [id: string, name: string, website?: string];
 
+// #region Keys
+
+export const CompanyKeySchema = z.object({ id: IdSchema, ats: AtsSchema });
 /**
- * - id: The ATS company name
+ * - id: The companyId (ATS slug)
  * - pKey: ats
  */
-export const CompanyKeySchema = z.object({ id: IdSchema, ats: AtsSchema });
 export type CompanyKey = z.infer<typeof CompanyKeySchema>;
 
 export const CompanyKeysSchema = z.object({
   ids: z.array(IdSchema).nonempty().max(50),
   ats: AtsSchema,
 });
+/**
+ * - ids: An array of companyIds (ATS slugs)
+ * - ats: The ATS type for all provided company ids
+ */
 export type CompanyKeys = z.infer<typeof CompanyKeysSchema>;
 
-export interface Company
-  extends CompanyKey, DeepPartialNullToUndef<ExtractionCompany> {
-  name: string;
-  ignoreJobIds?: string[];
-}
-
+export const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
 /**
- * - id: The ATS-granted job id
+ * - id: The ATS-granted jobId
  * - pKey: companyId
  */
-export const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
 export type JobKey = z.infer<typeof JobKeySchema>;
 
 export const FullJobKeySchema = z.object({
@@ -42,8 +42,15 @@ export const FullJobKeySchema = z.object({
   jobId: IdSchema,
   ats: AtsSchema,
 });
-// Not inferred -> this get split on validation into separate company and job keys
+// Not inferred -> this is split on validation into separate company and job keys
 export type FullJobKey = { jobKey: JobKey; companyKey: CompanyKey };
+
+// #endregion
+
+export interface Company
+  extends CompanyKey, DeepPartialNullToUndef<ExtractionCompany> {
+  name: string;
+}
 
 export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
   title: string;
@@ -60,10 +67,23 @@ export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
 }
 
 /**
+ * Job to ignore during ATS refresh.
+ * - id: The ATS-granted job id
+ * - atsCompany: `${ats}+${companyId}`
+ * - Index: Point reads only
+ * - TTL: 90 Days
+ */
+export interface IgnoreJob {
+  id: string;
+  atsCompany: string;
+  reason: string;
+}
+
+/**
  * Aggregated metadata for other containers. Cached in the backend service.
  * - id: The type of metadata
  * - pKey: id
- * Only indexed for point reads.
+ * - Index: Point reads only
  */
 export interface Metadata {
   // Keys

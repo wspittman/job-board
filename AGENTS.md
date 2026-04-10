@@ -17,10 +17,9 @@ Each workspace has its own `README.md` and `AGENTS.md` with more details on setu
 
 Run the following commands from the root of the repository:
 
-- `npm run pre-checkin`: Run lint, format check, and tests.
+- `npm run pre-checkin`: Run lint, format, and tests.
 - `npm run lint`: Lint all workspaces.
-- `npm run format`: Check formatting for all workspaces.
-- `npm run format:write`: Apply formatting fixes for all workspaces.
+- `npm run format`: Apply formatting fixes for all workspaces.
 - `npm test`: Run tests for the backend, frontend, and lab workspaces.
 - `npm run start:backend`: Start the backend API in watch mode.
 - `npm run start:frontend`: Start the frontend development server.

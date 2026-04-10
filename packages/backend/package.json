@@ -4,10 +4,8 @@
   "type": "module",
   "scripts": {
     "lint": "eslint",
-    "format": "prettier . --check",
-    "format:write": "prettier . --write",
-    "pretest": "tsc --noEmit",
-    "test": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
+    "format": "prettier . --write",
+    "test": "node --import tsx --import ./test/setup.ts --test --test-reporter=dot test/**/*.test.ts",
     "dev": "tsx watch --env-file=./.env ./src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js"

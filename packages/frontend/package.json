@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "lint": "eslint",
-    "format": "prettier . --check",
-    "format:write": "prettier . --write",
-    "test": "vitest run",
+    "format": "prettier . --write",
+    "test": "vitest --reporter=dot run",
     "dev": "vite",
     "build": "tsc --noEmit && tsc -p server/tsconfig.json && vite build",
     "start": "node server.js",

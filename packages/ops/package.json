@@ -5,9 +5,7 @@
   "private": true,
   "scripts": {
     "lint": "eslint",
-    "format": "prettier . --check",
-    "format:write": "prettier . --write",
-    "test": "echo \"No tests for ops\"",
+    "format": "prettier . --write",
     "ops": "tsx --env-file=.env src/index.ts"
   },
   "devDependencies": {

@@ -1,4 +1,3 @@
-import { batch } from "dry-utils-async";
 import { Query } from "dry-utils-cosmosdb";
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
@@ -8,6 +7,7 @@ import type { CompanyKey, Job, JobKey, Location } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
+import { JOB_EXPIRY_MS, MS_PER_DAY } from "../utils/constants.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { refreshMetadata } from "./metadata.ts";
 
@@ -85,28 +85,29 @@ export async function refreshJobsForCompany(
 ) {
   logProperty("Input", key);
   const companyId = key.id;
-  const [company, currentIds] = await Promise.all([
-    db.company.get(key),
+
+  const [currentIds, ignoreIds] = await Promise.all([
     getJobIds(companyId, key.replaceJobsOlderThan),
+    db.ignoreJob.getIds(key),
   ]);
 
-  if (!company) {
-    logProperty("CompanyNotFound", companyId);
-    return;
-  }
-
-  const { ignoreJobIds, stage, size } = company;
-  const [add, remove, ignore] = await getAtsJobs(key, currentIds, ignoreJobIds);
-
-  logProperty("Ignored", ignore);
+  const [add, remove] = await getAtsJobs(key, currentIds, ignoreIds);
 
   if (remove.length) {
-    await batch("DeleteJob", remove, (id) =>
-      db.job.remove({ id, companyId: key.id }),
-    );
+    await db.job.removeMany(remove, companyId);
   }
 
   if (add.length) {
+    const company = await db.company.get(key);
+
+    if (!company) {
+      // Unexpected but could happen if the company was deleted after we fetched the keys but before we refreshed the jobs.
+      logProperty("CompanyNotFound", companyId);
+      return;
+    }
+
+    const { stage, size } = company;
+
     add.forEach(({ item }) => {
       if (stage) item.companyStage = stage;
       if (size) item.companySize = size;
@@ -133,26 +134,34 @@ async function getAtsJobs(
   currentIds: string[],
   ignoreIds: string[] = [],
 ) {
+  const idSet = (x: Context<Job>[]) => new Set(x.map(({ item: { id } }) => id));
+
   // If there are no current jobs, assume newly added company and get full job data for all jobs
-  const getFullJobInfo = !currentIds.length;
-  let atsJobs = await ats.getJobs(key, getFullJobInfo);
+  const atsJobs = await ats.getJobs(key, !currentIds.length);
+  logProperty("ATS_Jobs_All", atsJobs.length);
 
-  // Remove any jobs that are more than 90 days old to avoid processing stale listings
-  const ninetyDaysAgo = Date.now() - 90 * 24 * 60 * 60 * 1000;
-  atsJobs = atsJobs.filter(({ item: { postTS } }) => postTS >= ninetyDaysAgo);
+  // Filter out any jobs that are beyond the expiry window to avoid processing stale listings
+  const expiryWindow = Date.now() - JOB_EXPIRY_MS;
+  const freshJobs = atsJobs.filter(
+    ({ item: { postTS } }) => postTS >= expiryWindow,
+  );
+  logProperty("ATS_Jobs_Stale", atsJobs.length - freshJobs.length);
 
-  // Create sets for faster comparisons
-  const jobIdSet = new Set(atsJobs.map(({ item: { id } }) => id));
-  const ignoreIdSet = new Set([...currentIds, ...ignoreIds]);
+  // Filter out jobs that are in the ignore set
+  const ignoreIdSet = new Set(ignoreIds);
+  const validJobs = freshJobs.filter(
+    ({ item: { id } }) => !ignoreIdSet.has(id),
+  );
+  logProperty("ATS_Jobs_Ignored", freshJobs.length - validJobs.length);
 
-  // Any ATS job not in the ignore set needs to be added
-  let add = atsJobs.filter(({ item: { id } }) => !ignoreIdSet.has(id));
+  // Filter out jobs that are already saved
+  const currentIdSet = new Set(currentIds);
+  let newJobs = validJobs.filter(({ item: { id } }) => !currentIdSet.has(id));
+  logProperty("ATS_Jobs_Known", validJobs.length - newJobs.length);
 
-  // Any jobs in the current set but not in the ATS need to be removed
-  const remove = currentIds.filter((id) => !jobIdSet.has(id));
-
-  // The difference between the ATS job set and the add set is the ignored jobs
-  const ignore = jobIdSet.size - add.length;
+  // Any jobs in the current set but not in valid group need to be removed
+  const validJobIdSet = idSet(validJobs);
+  const removeJobs = currentIds.filter((id) => !validJobIdSet.has(id));
 
   // Get the full job data for all jobs if
   // - There is more than 1 added job
@@ -160,26 +169,28 @@ async function getAtsJobs(
   // - We don't already have full job data
   // Better to do one big API call with unnecessary data than many small API calls
   if (
-    add.length > 1 &&
-    9 * add.length > remove.length + ignore &&
+    newJobs.length &&
+    newJobs.length > 0.1 * atsJobs.length &&
     !atsJobs[0]?.context
   ) {
-    atsJobs = await ats.getJobs(key, true);
-    add = atsJobs.filter(({ item: { id } }) => !ignoreIdSet.has(id));
+    const atsJobsFull = await ats.getJobs(key, true);
+    const newIdSet = idSet(newJobs);
+    newJobs = atsJobsFull.filter(({ item: { id } }) => newIdSet.has(id));
   }
 
-  return [add, remove, ignore] as const;
+  return [newJobs, removeJobs] as const;
 }
 
 async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   logProperty("Input", { ...companyKey, jobId: job.item.id });
 
-  if (await llm.isGeneralApplication(job.item.title)) {
-    logProperty("Skipped_GeneralApplication", job.item.title);
+  const skip = async (reason: string, value: string) => {
+    logProperty(`Skipped_${reason}`, value);
+    return await db.ignoreJob.upsert(job.item.id, companyKey, reason);
+  };
 
-    // Add to company ignore list to prevent future processing
-    await db.company.ignoreJobUpsert(companyKey, job.item);
-    return;
+  if (await llm.isGeneralApplication(job.item.title)) {
+    return await skip("GeneralApplication", job.item.title);
   }
 
   if (!job.context) {
@@ -191,6 +202,20 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   // Do not add a job that failed to extract facets
   if (!success) {
     return;
+  }
+
+  // This is a stopgap until we can add better US-only filters prior to main LLM processing.
+  const language = job.item.jdLanguage || "en";
+  const currency = job.item.salaryRange?.currency || "USD";
+  const location = job.item.primaryLocation?.countryCode || "US";
+  if (language.toLowerCase() !== "en") {
+    return await skip("NonEnglish", language);
+  }
+  if (currency.toUpperCase() !== "USD") {
+    return await skip("NonUSD", currency);
+  }
+  if (location.toUpperCase() !== "US") {
+    return await skip("NonUS", location);
   }
 
   await db.job.upsert(job.item);
@@ -253,8 +278,7 @@ async function readJobsByFilters({
   // Range Matches
 
   if (daysSince) {
-    const millisecondsPerDay = 24 * 60 * 60 * 1000;
-    const sinceTS = Date.now() - daysSince * millisecondsPerDay;
+    const sinceTS = Date.now() - daysSince * MS_PER_DAY;
     query.whereCondition("postTS", ">=", sinceTS);
   }
 

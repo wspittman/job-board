@@ -19,6 +19,7 @@ import {
   type JobKey,
 } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
+import { JOB_EXPIRY_DAYS } from "../utils/constants.ts";
 import { stripObj } from "../utils/objUtils.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
@@ -66,7 +67,7 @@ const FiltersSchema = z.object({
   ),
   title: soft(SearchSchema),
   location: soft(SearchSchema),
-  daysSince: coerceInt(z.int().positive().max(365)),
+  daysSince: coerceInt(z.int().positive().max(JOB_EXPIRY_DAYS)),
   maxExperience: coerceInt(z.int().nonnegative().max(100)),
   minSalary: coerceInt(z.int().positive().max(10_000_000)),
 });

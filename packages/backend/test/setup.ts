@@ -2,7 +2,6 @@ import express from "express";
 import { mock } from "node:test";
 
 process.env.ADMIN_TOKEN ??= "test-admin-token-123456";
-process.env.APPLICATIONINSIGHTS_CONNECTION_STRING ??= "";
 process.env.NODE_ENV ??= "test";
 
 const telemetryWorkaround = (

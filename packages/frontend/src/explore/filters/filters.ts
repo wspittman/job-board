@@ -5,7 +5,6 @@ import "../../components/nl-search";
 
 import {
   companyStageOptions,
-  currencyOptions,
   jobFamilyOptions,
   payCadenceOptions,
   workTimeBasisOptions,
@@ -81,12 +80,6 @@ const filterDefs: Record<string, FormElementDef[]> = {
       options: payCadenceOptions,
     },
     {
-      type: "jb-form-select",
-      name: "currency",
-      label: "Pay In",
-      options: currencyOptions,
-    },
-    {
       type: "jb-form-input",
       name: "minSalary",
       label: "Minimum Rate",
@@ -140,7 +133,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       validation: {
         type: "int",
         min: 1,
-        max: 999,
+        max: 99,
       },
     },
     {

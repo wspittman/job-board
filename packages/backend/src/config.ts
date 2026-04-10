@@ -69,6 +69,9 @@ const Defaults: Partial<Record<KEY, string>> = {
 
   // LLM
   LLM_MODEL: "gpt-5-nano",
+
+  // App Insights configs
+  APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=dummy_key",
 };
 
 const getEnv = (key: KEY): string | undefined => {
@@ -173,8 +176,9 @@ export const config: Config = {
 
   // App Insights configs
   // In theory App Insights SDK should pick up this env var automatically, but it doesn't
-  APPLICATIONINSIGHTS_CONNECTION_STRING:
-    getEnv("APPLICATIONINSIGHTS_CONNECTION_STRING") ?? "",
+  APPLICATIONINSIGHTS_CONNECTION_STRING: getReqEnv(
+    "APPLICATIONINSIGHTS_CONNECTION_STRING",
+  ),
   ENABLE_VERBOSE_BLOB_LOGGING: getFlag("ENABLE_VERBOSE_BLOB_LOGGING"),
 };
 
