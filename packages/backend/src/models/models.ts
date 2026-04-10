@@ -13,37 +13,37 @@ export type CompanyQuickRef = [id: string, name: string, website?: string];
 
 // #region Keys
 
+export const CompanyKeySchema = z.object({ id: IdSchema, ats: AtsSchema });
 /**
  * - id: The companyId (ATS slug)
  * - pKey: ats
  */
 export type CompanyKey = z.infer<typeof CompanyKeySchema>;
-export const CompanyKeySchema = z.object({ id: IdSchema, ats: AtsSchema });
 
+export const CompanyKeysSchema = z.object({
+  ids: z.array(IdSchema).nonempty().max(50),
+  ats: AtsSchema,
+});
 /**
  * - ids: An array of companyIds (ATS slugs)
  * - ats: The ATS type for all provided company ids
  */
 export type CompanyKeys = z.infer<typeof CompanyKeysSchema>;
-export const CompanyKeysSchema = z.object({
-  ids: z.array(IdSchema).nonempty().max(50),
-  ats: AtsSchema,
-});
 
+export const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
 /**
  * - id: The ATS-granted jobId
  * - pKey: companyId
  */
 export type JobKey = z.infer<typeof JobKeySchema>;
-export const JobKeySchema = z.object({ id: IdSchema, companyId: IdSchema });
 
-// Not inferred -> this is split on validation into separate company and job keys
-export type FullJobKey = { jobKey: JobKey; companyKey: CompanyKey };
 export const FullJobKeySchema = z.object({
   companyId: IdSchema,
   jobId: IdSchema,
   ats: AtsSchema,
 });
+// Not inferred -> this is split on validation into separate company and job keys
+export type FullJobKey = { jobKey: JobKey; companyKey: CompanyKey };
 
 // #endregion
 
