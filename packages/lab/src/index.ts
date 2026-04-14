@@ -1,10 +1,11 @@
+import { logger } from "dry-utils-logger";
 import process from "node:process";
 import { getUsage, runCommand } from "./commands/commands.ts";
 import { atsTypes, dataModelTypes } from "./portal/pTypes.ts";
 import { CommandError } from "./types.ts";
 
 function usageReminder() {
-  console.log(
+  logger.info(
     [
       "Usage:",
       "  npm run lab -- <COMMAND> <ARGS>",
@@ -22,6 +23,7 @@ function usageReminder() {
 
 async function main() {
   const [command, ...args] = process.argv.slice(2);
+  logger.info(`Running command "${command}"`, args);
   await runCommand(command, args);
 }
 
@@ -29,7 +31,6 @@ main().catch((err) => {
   if (err instanceof CommandError) {
     usageReminder();
   }
-  console.error(err instanceof Error ? err.message : err);
-  console.error();
+  logger.error("Main:", err);
   process.exitCode = 1;
 });

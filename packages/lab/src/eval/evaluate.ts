@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import { infer } from "../portal/pFuncs.ts";
 import type { Bag, NumBag } from "../types.ts";
 import { addNumBags } from "../utils/mathUtils.ts";
@@ -13,17 +14,17 @@ import { rubrics } from "./judge/rubrics.ts";
 export async function evaluate(run: Run, source: Source): Promise<Outcome> {
   const prefix = `${run.runName} / ${source.name}`;
 
-  console.log(`${prefix}: Running inference`);
+  logger.info(`${prefix}: Running inference`);
   const [metrics, output] = await runInference(run, source);
 
   if (!metrics) {
     throw new Error(`${prefix}: No metrics found`);
   }
 
-  console.log(`${prefix}: Comparing ground truth`);
+  logger.info(`${prefix}: Comparing ground truth`);
   const judgement = await judge(output, source.truth, rubrics[run.llmAction]);
 
-  console.log(`${prefix}: Building outcome`);
+  logger.info(`${prefix}: Building outcome`);
 
   return {
     ...run,
@@ -36,7 +37,7 @@ export async function evaluate(run: Run, source: Source): Promise<Outcome> {
 }
 
 export function report(run: Run, outcomes: Outcome[]): Report {
-  console.log(`Combining ${outcomes.length} outcomes`);
+  logger.info(`Combining ${outcomes.length} outcomes`);
 
   const { cost, avgCost, costPerYear, costPerMillion } = costAg(
     run.llmAction,

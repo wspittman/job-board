@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import { embed } from "dry-utils-openai";
 import { createHash } from "node:crypto";
 import { readObj, writeObj, type Place } from "./fileUtils.ts";
@@ -95,12 +96,12 @@ class EmbedCache {
     const { embeddings, error } = await embed(action, input);
 
     if (error || !embeddings?.length) {
-      console.error("Error calling embeddings API:", error);
+      logger.error("Error calling embeddings API:", error);
       return undefined;
     }
 
     if (embeddings.length !== input.length) {
-      console.error("Embeddings length mismatch");
+      logger.error("Embeddings length mismatch");
       return undefined;
     }
 
