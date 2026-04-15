@@ -83,8 +83,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-input",
       name: "minSalary",
       label: "Minimum Rate",
-      tooltip:
-        "This may have unexpected results if Pay By and Pay In are not also specified.",
+      tooltip: "This may have unexpected results if Pay By is not specified.",
       prefix: "$",
       validation: {
         type: "int",
@@ -127,7 +126,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "daysSince",
       label: "Posted Since",
       tooltip:
-        "Filters to jobs posted within the specified number of days. Some data source only provide last updated date, so we use the earliest date we've seen.",
+        "Jobs posted within the specified number of days. Some sources only provide last updated date, so we use the earliest date we've seen.",
       prefix: "Posted within",
       suffix: "days ago",
       validation: {

@@ -149,9 +149,9 @@ export class JobModel {
     if (useShort && (!payCadence || payCadence === "salary")) return undefined;
 
     if (cadence) {
-      return `Per ${cadence}${currency ? ` (${currency})` : ""}`;
+      return `Per ${cadence}`;
     }
 
-    return currency;
+    return undefined;
   }
 }

@@ -22,8 +22,8 @@ interface Props {
 const messageContent: Record<Message, [string, string, string]> = {
   AddFilters: [
     "Add Filters To Begin",
-    "Start with a couple of filters to see tailored jobs",
-    "As you apply filters, we'll show the first 24 matching jobs. There are many filters, and you do not need to use every one. Instead, pick the ones that are most important to you. You can continue to adjust your filters until you have a great set of matches.",
+    "Start with filters to see matching jobs",
+    "As you apply filters, we'll show the first 24 matching US-based jobs. There are many filters, and you do not need to use every one. Instead, pick the ones that are most important to you. You can continue to adjust your filters until you have a great set of matches.",
   ],
   NoMatches: [
     "No Matches Found",
