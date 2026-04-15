@@ -46,9 +46,23 @@ export async function getJobs(filterInput: Filters) {
     return result;
   }
 
+  // US-only transition:
+  // If no location provided, assume US-based
+  const queryLocation: Location = filterInput.location
+    ? await llm.extractLocation(filterInput.location)
+    : { countryCode: "US" };
+
+  const country = queryLocation.countryCode;
+  if (country && country !== "US") {
+    // US-only transition:
+    // If a user searches for a non-US location, return no results (even though they may exist in the DB for now).
+    logProperty("GetJobs_NonUSCountry", country);
+    return [];
+  }
+
   const filters: EnhancedFilters = {
     ...filterInput,
-    location: await llm.extractLocation(filterInput.location ?? ""),
+    location: queryLocation,
   };
 
   const result = await readJobsByFilters(filters);
@@ -300,22 +314,22 @@ async function readJobsByFilters({
     const remoteMatch = "c.presence = 'remote'";
     // Comment out for now since it doesn't take RemoteEligibility into account
     //const noLocationMatch = "c.locationSearchKey = '||||'";
-    const countryMatch = `c.locationSearchKey = CONCAT('|||', @countryCode, '|')`;
-    const regionMatch = `c.locationSearchKey = CONCAT('||', @regionCode, '|', @countryCode, '|')`;
+    const countryMatch = `c.locationSearchKey = '|||US|'`;
+    const regionMatch = `c.locationSearchKey = CONCAT('||', @regionCode, '|US|')`;
 
     let locClause = "";
     let remoteMatches: string[] = [];
 
     if (location.city) {
-      locClause = `c.locationSearchKey = CONCAT('|', @city, '|', @regionCode, '|', @countryCode, '|')`;
+      locClause = `c.locationSearchKey = CONCAT('|', @city, '|', @regionCode, '|US|')`;
       remoteMatches = [regionMatch, countryMatch];
       //remoteMatches = [regionMatch, countryMatch, noLocationMatch];
     } else if (location.regionCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @regionCode, '|', @countryCode, '|'))`;
+      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @regionCode, '|US|'))`;
       remoteMatches = [countryMatch];
       //remoteMatches = [countryMatch, noLocationMatch];
     } else if (location.countryCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @countryCode, '|'))`;
+      locClause = `ENDSWITH(c.locationSearchKey, '|US|')`;
       remoteMatches = [];
       //remoteMatches = [noLocationMatch];
     }
@@ -330,7 +344,6 @@ async function readJobsByFilters({
         {
           "@city": location.city ?? "",
           "@regionCode": location.regionCode ?? "",
-          "@countryCode": location.countryCode ?? "",
         },
       ]);
     }
