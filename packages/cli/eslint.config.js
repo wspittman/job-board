@@ -1,0 +1,9 @@
+// @ts-check
+
+import { defineConfig } from "eslint/config";
+import baseConfig from "../../eslint.base.config.js";
+
+export default defineConfig(
+  { ignores: ["src/lab/**", "src/ops/**", "src/index.ts"] },
+  ...baseConfig,
+);

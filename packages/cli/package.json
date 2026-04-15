@@ -1,0 +1,27 @@
+{
+  "name": "cli",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier . --write",
+    "cli": "tsx --env-file=.env src/index.ts"
+  },
+  "dependencies": {
+    "dry-utils-async": "^0.3.2",
+    "dry-utils-logger": "^0.1.1",
+    "dry-utils-openai": "^0.4.2",
+    "dry-utils-text": "^0.2.1",
+    "ml-kmeans": "^7.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.10.0",
+    "eslint": "^10.0.0",
+    "prettier": "^3.7.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.56.0"
+  }
+}

@@ -19,6 +19,7 @@
     "link-dry-utils": "npm link dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "unlink-dry-utils": "npm unlink dry-utils-async dry-utils-text dry-utils-openai dry-utils-cosmosdb",
     "lab": "npm run lab --workspace=lab",
-    "ops": "npm run ops --workspace=ops"
+    "ops": "npm run ops --workspace=ops",
+    "cli": "npm run cli --workspace=cli"
   }
 }

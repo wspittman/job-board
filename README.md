@@ -27,8 +27,9 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
 - **Workspaces**
   - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
-  - [`packages/ops`](packages/ops/README.md): TypeScript CLI for operational scripts that take actions against a running backend API, such as adding/deleting companies from supported ATS providers.
-  - [`packages/lab`](packages/lab/README.md): Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
+  - [`packages/cli`](packages/cli/README.md): Unified TypeScript CLI for both operational backend actions and local eval/data workflows.
+  - [`packages/ops`](packages/ops/README.md): Legacy TypeScript CLI for operational scripts against a running backend API.
+  - [`packages/lab`](packages/lab/README.md): Legacy script lab for evals and intermediate data collection with backend-internal access.
 - **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
 - **Install once from the repo root**: `npm install`
 - **Dev servers**: `npm run start:backend` and `npm run start:frontend`
@@ -70,33 +71,25 @@ Most commands are exposed via the root `package.json`:
 | Launch the frontend                 | `npm run start:frontend`             |
 | Build the backend for production    | `npm run build --workspace=backend`  |
 | Build the frontend for production   | `npm run build --workspace=frontend` |
+| Run the unified CLI                 | `npm run cli -- <command> [args]`    |
 
 Refer to package-specific READMEs for additional scripts such as previews, linting, and
 production server wrappers.
 
-## Ops CLI
+## Unified CLI
 
-The ops CLI provides scripted access to backend operations against a running API instance. Invoke it from the repo root as:
-
-```bash
-npm run ops -- <command> [args]
-```
-
-Configure `PROD_API_TOKEN` and `LOCAL_API_TOKEN` (and their corresponding base URLs if not using defaults) in `packages/ops/.env` (or your shell)
-before invoking the CLI. Available commands include importing companies from Greenhouse or
-Lever and deleting individual job postings.
-
-## Evaluation harness
-
-The evaluation workspace reproduces the backend’s extraction logic locally. After preparing
-input and ground-truth data under `packages/lab/`, run:
+The unified CLI provides both operational backend actions and local evaluation/data workflows from a single package. Invoke it from the repo root as:
 
 ```bash
-npm run lab -- evals <dataModel> [runName]
+npm run cli -- <command> [args]
 ```
 
-Outputs are written beside the source data (inputs, ground truth, outcomes, and reports)
-to support reproducible experiments when tuning LLM configuration.
+Use `packages/cli/.env` for configuration. It includes the union of env vars needed by both legacy command families (API auth/base URLs plus backend/LLM settings).
+
+Legacy entry points are still available during migration:
+
+- `npm run ops -- <command> [args]`
+- `npm run lab -- <command> [args]`
 
 ## Screenshots
 
