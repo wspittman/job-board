@@ -64,8 +64,8 @@ versioning.
 
 - Verify that the configured `LLM_MODEL` is included in `src/evalConfig.ts`. The script aborts
   early if pricing information for the selected model is unavailable.
-- The evaluation code logs progress and errors to stdout/stderr. Use `runName` to differentiate
-  concurrent experiments.
+- Run information is logged to the console and detailed log output is saved to `packages/lab/logs/app.log` for later troubleshooting.
+  - Use `runName` to differentiate concurrent experiments.
 - Keep input and ground files in private version control so that future runs can reproduce prior
   baselines.
 

@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import { e2e } from "./e2e/e2e.ts";
 import { fetcher } from "./fetcher.ts";
 import { atsTypes, CommandError, type ATS, type Command } from "./types.ts";
@@ -31,10 +32,10 @@ const addCompanies: Command = {
     ats = validateAts(ats);
     companyIds = validateIds("COMPANY_ID", ...companyIds);
 
-    console.log(`Adding ${companyIds.length} companies from ${ats}`);
+    logger.info(`Adding ${companyIds.length} companies from ${ats}`);
     const body = { ats, ids: companyIds };
     const result = await fetcher("PUT", "companies", { body });
-    console.log("Success", result);
+    logger.info("Success", result);
   },
 };
 
@@ -45,10 +46,10 @@ const ignoreJob: Command = {
     [companyId] = validateIds("COMPANY_ID", companyId);
     [jobId] = validateIds("JOB_ID", jobId);
 
-    console.log(`Ignoring job ${jobId} for company ${companyId} from ${ats}`);
+    logger.info(`Ignoring job ${jobId} for company ${companyId} from ${ats}`);
     const body = { ats, companyId, jobId };
     const result = await fetcher("DELETE", "company/job", { body });
-    console.log("Success", result);
+    logger.info("Success", result);
   },
 };
 
@@ -58,10 +59,10 @@ const deleteCompany: Command = {
     ats = validateAts(ats);
     [companyId] = validateIds("COMPANY_ID", companyId);
 
-    console.log(`Deleting company ${companyId} from ${ats}`);
+    logger.info(`Deleting company ${companyId} from ${ats}`);
     const body = { ats, id: companyId };
     const result = await fetcher("DELETE", "company", { body });
-    console.log("Success", result);
+    logger.info("Success", result);
   },
 };
 
@@ -71,10 +72,10 @@ const syncCompanyJobs: Command = {
     ats = validateAts(ats);
     [companyId] = validateIds("COMPANY_ID", companyId);
 
-    console.log(`Syncing jobs for company ${companyId} from ${ats}`);
+    logger.info(`Syncing jobs for company ${companyId} from ${ats}`);
     const body = { ats, id: companyId };
     const result = await fetcher("POST", "company/jobs/sync", { body });
-    console.log("Success", result);
+    logger.info("Success", result);
   },
 };
 
