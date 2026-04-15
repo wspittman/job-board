@@ -33,13 +33,13 @@ export class FilterModel {
   }
 
   /**
-   * Creates a FilterModel instance from URLSearchParams.
-   * @param params - The URLSearchParams object.
+   * Creates a FilterModel instance from a URL query string.
+   * @param searchString - The URL query string.
    * @returns A new FilterModel instance.
    */
-  static fromUrlSearchParams(params: URLSearchParams): FilterModel {
+  static fromLocationSearchString(searchString: string): FilterModel {
     const model = new FilterModel();
-    model.#fromUrlSearchParams(params);
+    model.#fromLocationSearchString(searchString);
     return model;
   }
 
@@ -71,10 +71,10 @@ export class FilterModel {
   }
 
   /**
-   * Converts the filter model to URLSearchParams.
-   * @returns A URLSearchParams object representing the filters.
+   * Converts the filter model to a URL query string.
+   * @returns A string representing the filters suitable for use in a URL.
    */
-  toUrlSearchParams(): URLSearchParams {
+  toLocationSearchString(): string {
     const entries = this.toEntries();
     const params = new URLSearchParams();
 
@@ -82,7 +82,7 @@ export class FilterModel {
       params.append(key, String(value));
     }
 
-    return params;
+    return params.toString();
   }
 
   /**
@@ -147,8 +147,12 @@ export class FilterModel {
     this.#fromGeneric((key) => formData.get(key) as string);
   }
 
-  #fromUrlSearchParams(params: URLSearchParams): void {
-    this.#fromGeneric((key) => params.get(key));
+  #fromLocationSearchString(searchString: string): void {
+    const params = new URLSearchParams(searchString);
+    const normalized = new URLSearchParams(
+      [...params].map(([key, value]) => [key.toLowerCase(), value]),
+    );
+    this.#fromGeneric((key) => normalized.get(key.toLowerCase()));
   }
 
   #fromApi(apiFilters: FilterModelApi): void {

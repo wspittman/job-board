@@ -6,7 +6,7 @@ import { MessageCard } from "./message-card.ts";
 import css from "./results.css?raw";
 import html from "./results.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
-const tag = "explore-results";
+const tag = "jobs-results";
 
 /**
  * Custom element responsible for rendering job results and coordinating selection events.

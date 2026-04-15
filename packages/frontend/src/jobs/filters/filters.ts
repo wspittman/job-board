@@ -23,7 +23,7 @@ import { NL_SEARCH_RESULT } from "../../components/nl-search";
 import css from "./filters.css?raw";
 import html from "./filters.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
-const tag = "explore-filters";
+const tag = "jobs-filters";
 const DEBOUNCE_DELAY = 500;
 
 export const FILTERS_UPDATED = `${tag}-updated`;

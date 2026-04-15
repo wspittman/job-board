@@ -3,7 +3,7 @@ import { ComponentBase } from "../../components/componentBase.ts";
 import css from "./message-card.css?raw";
 import html from "./message-card.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
-const tag = "explore-message-card";
+const tag = "jobs-message-card";
 
 type Message =
   | "AddFilters"

@@ -36,7 +36,7 @@ packages/frontend/
 │   ├── api/          # Data-fetching utilities shared across pages
 │   ├── blog/         # Blog page logic and styles
 │   ├── components/   # Reusable UI building blocks
-│   ├── explore/      # Explore page logic and styles
+│   ├── jobs/         # Jobs page logic and styles
 │   ├── faq/          # FAQ page logic and styles
 │   ├── home/         # Home page logic and styles
 │   ├── partials/     # Layout pieces such as headers, footers, and hero sections

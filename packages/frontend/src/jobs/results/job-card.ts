@@ -5,7 +5,7 @@ import { JobChips } from "../../components/job-chips.ts";
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
-const tag = "explore-job-card";
+const tag = "jobs-job-card";
 
 export const JOB_CARD_SELECTED = `${tag}-selected`;
 
