@@ -1,6 +1,6 @@
 # Job Board
 
-Next-generation job board focused on the job seeker experience. The monorepo houses the Vite/Vanilla frontend, an Express 5 + TypeScript API, a TypeScript ops CLI for running operational scripts against a live backend API, and an evaluation harness for the LLM-powered extraction logic.
+Next-generation job board focused on the job seeker experience. The monorepo houses the Vite/Vanilla frontend, an Express 5 + TypeScript API, a unified TypeScript CLI for operational scripts plus LLM evaluation workflows, and the supporting frontend experience.
 
 > Status: active development. Expect breaking changes as the product evolves.
 
@@ -27,8 +27,9 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
 - **Workspaces**
   - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
-  - [`packages/ops`](packages/ops/README.md): TypeScript CLI for operational scripts that take actions against a running backend API, such as adding/deleting companies from supported ATS providers.
-  - [`packages/lab`](packages/lab/README.md): Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
+  - [`packages/cli`](packages/cli/README.md): Unified TypeScript CLI that combines operational commands against a running backend API with local evaluation/data-collection workflows that use backend-internal logic.
+  - [`packages/ops`](packages/ops/README.md): Legacy operational CLI retained during migration.
+  - [`packages/lab`](packages/lab/README.md): Legacy evaluation CLI retained during migration.
 - **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
 - **Install once from the repo root**: `npm install`
 - **Dev servers**: `npm run start:backend` and `npm run start:frontend`
@@ -70,33 +71,24 @@ Most commands are exposed via the root `package.json`:
 | Launch the frontend                 | `npm run start:frontend`             |
 | Build the backend for production    | `npm run build --workspace=backend`  |
 | Build the frontend for production   | `npm run build --workspace=frontend` |
+| Run unified CLI commands           | `npm run cli -- <command> [args]`   |
 
 Refer to package-specific READMEs for additional scripts such as previews, linting, and
 production server wrappers.
 
-## Ops CLI
+## Unified CLI
 
-The ops CLI provides scripted access to backend operations against a running API instance. Invoke it from the repo root as:
-
-```bash
-npm run ops -- <command> [args]
-```
-
-Configure `PROD_API_TOKEN` and `LOCAL_API_TOKEN` (and their corresponding base URLs if not using defaults) in `packages/ops/.env` (or your shell)
-before invoking the CLI. Available commands include importing companies from Greenhouse or
-Lever and deleting individual job postings.
-
-## Evaluation harness
-
-The evaluation workspace reproduces the backend’s extraction logic locally. After preparing
-input and ground-truth data under `packages/lab/`, run:
+The unified CLI provides both operational backend actions and local evaluation harness workflows from one command:
 
 ```bash
-npm run lab -- evals <dataModel> [runName]
+npm run cli -- <command> [args]
 ```
 
-Outputs are written beside the source data (inputs, ground truth, outcomes, and reports)
-to support reproducible experiments when tuning LLM configuration.
+Configure environment variables in `packages/cli/.env` (or your shell). This file should include both
+API credentials for ops-style commands and LLM/backend config for lab-style commands.
+
+Legacy entry points (`npm run ops -- ...` and `npm run lab -- ...`) remain available during migration, but new workflows
+should target `packages/cli`.
 
 ## Screenshots
 

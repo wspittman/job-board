@@ -1,0 +1,113 @@
+import { logger } from "dry-utils-logger";
+import { e2e } from "./e2e/e2e.ts";
+import { fetcher } from "./fetcher.ts";
+import { atsTypes, CommandError, type ATS, type Command } from "./types.ts";
+import { asArray } from "./utils.ts";
+
+function validateAts(ats?: string): ATS {
+  const vATS = ats?.toLowerCase() as ATS;
+
+  if (!vATS || !atsTypes.includes(vATS)) {
+    throw new CommandError("Invalid argument: ATS");
+  }
+
+  return vATS;
+}
+
+function validateIds(name: string, ...ids: (string | undefined)[]): string[] {
+  const validIds = ids
+    .map((id) => id?.replace(",", "").trim() || "")
+    .filter((id) => !!id);
+
+  if (!validIds.length) {
+    throw new CommandError(`Invalid argument: ${name}`);
+  }
+
+  return validIds;
+}
+
+const addCompanies: Command = {
+  usage: () => "<ATS> <COMPANY_ID> [...COMPANY_ID]",
+  run: async ([ats, ...companyIds]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    companyIds = validateIds("COMPANY_ID", ...companyIds);
+
+    logger.info(`Adding ${companyIds.length} companies from ${ats}`);
+    const body = { ats, ids: companyIds };
+    const result = await fetcher("PUT", "companies", { body });
+    logger.info("Success", result);
+  },
+};
+
+const ignoreJob: Command = {
+  usage: () => "<ATS> <COMPANY_ID> <JOB_ID>",
+  run: async ([ats, companyId, jobId]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    [companyId] = validateIds("COMPANY_ID", companyId);
+    [jobId] = validateIds("JOB_ID", jobId);
+
+    logger.info(`Ignoring job ${jobId} for company ${companyId} from ${ats}`);
+    const body = { ats, companyId, jobId };
+    const result = await fetcher("DELETE", "company/job", { body });
+    logger.info("Success", result);
+  },
+};
+
+const deleteCompany: Command = {
+  usage: () => "<ATS> <COMPANY_ID>",
+  run: async ([ats, companyId]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    [companyId] = validateIds("COMPANY_ID", companyId);
+
+    logger.info(`Deleting company ${companyId} from ${ats}`);
+    const body = { ats, id: companyId };
+    const result = await fetcher("DELETE", "company", { body });
+    logger.info("Success", result);
+  },
+};
+
+const syncCompanyJobs: Command = {
+  usage: () => "<ATS> <COMPANY_ID>",
+  run: async ([ats, companyId]: string[]): Promise<void> => {
+    ats = validateAts(ats);
+    [companyId] = validateIds("COMPANY_ID", companyId);
+
+    logger.info(`Syncing jobs for company ${companyId} from ${ats}`);
+    const body = { ats, id: companyId };
+    const result = await fetcher("POST", "company/jobs/sync", { body });
+    logger.info("Success", result);
+  },
+};
+
+export const opsRegistry: Record<string, Command> = {
+  addCompanies,
+  ignoreJob,
+  deleteCompany,
+  syncCompanyJobs,
+  e2e,
+};
+
+export const opsCommandNames = Object.keys(opsRegistry);
+
+export async function runCommand(
+  name = "",
+  args: string[] = [],
+): Promise<void> {
+  const cmd = opsRegistry[name];
+
+  if (!cmd) {
+    throw new CommandError(`Invalid Command "${name}"`);
+  }
+
+  cmd.prerequisite?.();
+
+  await cmd.run(args);
+}
+
+export function getUsage(indent = ""): string[] {
+  return Object.entries(opsRegistry).flatMap(([name, cmd]) => [
+    ...asArray(cmd.usage()).map(
+      (line, i) => `${i === 0 ? `${indent}${name} ` : `${indent}  `}${line}`,
+    ),
+  ]);
+}
