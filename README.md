@@ -1,6 +1,6 @@
 # Job Board
 
-Next-generation job board focused on the job seeker experience. The monorepo houses the Vite/Vanilla frontend, an Express 5 + TypeScript API, a TypeScript ops CLI for running operational scripts against a live backend API, and an evaluation harness for the LLM-powered extraction logic.
+Next-generation job board focused on the job seeker experience. The monorepo houses the Vite/Vanilla frontend, an Express 5 + TypeScript API, and a unified TypeScript CLI for backend operations plus LLM evaluation workflows.
 
 > Status: active development. Expect breaking changes as the product evolves.
 
@@ -27,8 +27,9 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
 - **Workspaces**
   - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
-  - [`packages/ops`](packages/ops/README.md): TypeScript CLI for operational scripts that take actions against a running backend API, such as adding/deleting companies from supported ATS providers.
-  - [`packages/lab`](packages/lab/README.md): Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
+  - [`packages/cli`](packages/cli/README.md): Unified TypeScript CLI for operational scripts against a running backend API and local eval/data workflows using backend-internal logic.
+  - [`packages/ops`](packages/ops/README.md): Legacy operational CLI retained during migration.
+  - [`packages/lab`](packages/lab/README.md): Legacy lab CLI retained during migration.
 - **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
 - **Install once from the repo root**: `npm install`
 - **Dev servers**: `npm run start:backend` and `npm run start:frontend`
@@ -74,28 +75,26 @@ Most commands are exposed via the root `package.json`:
 Refer to package-specific READMEs for additional scripts such as previews, linting, and
 production server wrappers.
 
-## Ops CLI
+## Unified CLI
 
-The ops CLI provides scripted access to backend operations against a running API instance. Invoke it from the repo root as:
-
-```bash
-npm run ops -- <command> [args]
-```
-
-Configure `PROD_API_TOKEN` and `LOCAL_API_TOKEN` (and their corresponding base URLs if not using defaults) in `packages/ops/.env` (or your shell)
-before invoking the CLI. Available commands include importing companies from Greenhouse or
-Lever and deleting individual job postings.
-
-## Evaluation harness
-
-The evaluation workspace reproduces the backend’s extraction logic locally. After preparing
-input and ground-truth data under `packages/lab/`, run:
+The unified CLI provides both backend operations and local evaluation workflows. Invoke it from the repo root as:
 
 ```bash
-npm run lab -- evals <dataModel> [runName]
+npm run cli -- <command> [args]
 ```
 
-Outputs are written beside the source data (inputs, ground truth, outcomes, and reports)
+Configure command-specific variables in `packages/cli/.env`:
+
+- Ops-style commands use API connection variables (`PROD_API_TOKEN`, `LOCAL_API_TOKEN`, and base URLs).
+- Eval-style commands use backend/lab variables (`OPENAI_API_KEY`, `LLM_MODEL`, and related backend settings).
+
+For example, after preparing input and ground-truth data under `packages/cli/data/eval/in/`, run:
+
+```bash
+npm run cli -- evals <dataModel> [runName]
+```
+
+Outputs are written under `packages/cli/data/` (inputs, ground truth, outcomes, and reports)
 to support reproducible experiments when tuning LLM configuration.
 
 ## Screenshots
