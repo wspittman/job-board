@@ -29,6 +29,7 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
   - [`packages/ops`](packages/ops/README.md): TypeScript CLI for operational scripts that take actions against a running backend API, such as adding/deleting companies from supported ATS providers.
   - [`packages/lab`](packages/lab/README.md): Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
+  - [`packages/cli`](packages/cli/README.md): Unified CLI for API operations and local evaluation/data workflows.
 - **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
 - **Install once from the repo root**: `npm install`
 - **Dev servers**: `npm run start:backend` and `npm run start:frontend`
@@ -70,9 +71,20 @@ Most commands are exposed via the root `package.json`:
 | Launch the frontend                 | `npm run start:frontend`             |
 | Build the backend for production    | `npm run build --workspace=backend`  |
 | Build the frontend for production   | `npm run build --workspace=frontend` |
+| Run unified CLI commands             | `npm run cli -- <group> <command>`   |
 
 Refer to package-specific READMEs for additional scripts such as previews, linting, and
 production server wrappers.
+
+## Unified CLI
+
+Use the unified CLI for both remote API operations and local workflows:
+
+```bash
+npm run cli -- <group> <command> [args] [--flags]
+```
+
+API commands default to local execution. Production execution is blocked unless `--env prod`, `--allow-production`, and `--confirm-production I_UNDERSTAND_PRODUCTION_CHANGES` are all provided.
 
 ## Ops CLI
 

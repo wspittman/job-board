@@ -10,6 +10,7 @@ Common Tech Stack: TypeScript, Node, Eslint, Prettier, Tsx
 - `packages/frontend`: MPA site client with server-side wrapper for production hosting.
 - `packages/ops`: CLI for operational scripts that take actions against a running backend API instance.
 - `packages/lab`: CLI for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
+- `packages/cli`: Unified CLI for both API-driven operations and local evaluation/data workflows.
 
 Each workspace has its own `README.md` and `AGENTS.md` with more details on setup, commands, and conventions. Refer to those for workspace-specific guidance.
 
@@ -25,6 +26,7 @@ Run the following commands from the root of the repository:
 - `npm run start:frontend`: Start the frontend development server.
 - `npm run lab -- <command>`: Run a lab CLI command (see `packages/lab/AGENTS.md`).
 - `npm run ops -- <command>`: Run an ops CLI command (see `packages/ops/AGENTS.md`).
+- `npm run cli -- <group> <command>`: Run a unified CLI command (see `packages/cli/AGENTS.md`).
 
 # Available Skills
 
