@@ -8,6 +8,7 @@ Common Tech Stack: TypeScript, Node, Eslint, Prettier, Tsx
 
 - `packages/backend`: REST service that integrates with Azure Cosmos DB, Application Insights telemetry, LLM provider, and public ATS APIs.
 - `packages/frontend`: MPA site client with server-side wrapper for production hosting.
+- `packages/cli`: Unified CLI for API operations and backend-internal workflows.
 - `packages/ops`: CLI for operational scripts that take actions against a running backend API instance.
 - `packages/lab`: CLI for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
 
@@ -23,6 +24,7 @@ Run the following commands from the root of the repository:
 - `npm test`: Run tests for the backend, frontend, and lab workspaces.
 - `npm run start:backend`: Start the backend API in watch mode.
 - `npm run start:frontend`: Start the frontend development server.
+- `npm run cli -- <command>`: Run a unified CLI command (see `packages/cli/README.md`).
 - `npm run lab -- <command>`: Run a lab CLI command (see `packages/lab/AGENTS.md`).
 - `npm run ops -- <command>`: Run an ops CLI command (see `packages/ops/AGENTS.md`).
 

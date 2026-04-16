@@ -27,6 +27,7 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
 - **Workspaces**
   - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
+  - [`packages/cli`](packages/cli/README.md): Unified TypeScript CLI for API operations plus backend-internal automation workflows.
   - [`packages/ops`](packages/ops/README.md): TypeScript CLI for operational scripts that take actions against a running backend API, such as adding/deleting companies from supported ATS providers.
   - [`packages/lab`](packages/lab/README.md): Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
 - **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
@@ -68,6 +69,7 @@ Most commands are exposed via the root `package.json`:
 | ----------------------------------- | ------------------------------------ |
 | Start the backend API in watch mode | `npm run start:backend`              |
 | Launch the frontend                 | `npm run start:frontend`             |
+| Run the unified CLI                 | `npm run cli -- <command> [args]`    |
 | Build the backend for production    | `npm run build --workspace=backend`  |
 | Build the frontend for production   | `npm run build --workspace=frontend` |
 
