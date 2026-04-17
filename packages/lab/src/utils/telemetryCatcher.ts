@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import { createHash } from "node:crypto";
 import type { Context } from "../portal/pTypes.ts";
@@ -84,8 +85,8 @@ export const catcher = new TelemetryCatcher();
 // Configure AI logging to use the TelemetryCatcher instance.
 // This subscribes to logs from AI calls made via dry-utils-openai.
 subscribeOpenAILogging({
-  log: ({ tag, val }) => console.log(tag, val),
-  error: ({ tag, val }) => console.error(new Error(tag, { cause: val })),
+  log: ({ tag, val }) => logger.info(tag, val),
+  error: ({ tag, val }) => logger.error(tag, val),
   aggregate: ({ dense, metrics }) =>
     catcher.catch(dense["in"] as string, metrics),
 });

@@ -1,4 +1,5 @@
 import { batch, subscribeAsyncLogging } from "dry-utils-async";
+import { logger } from "dry-utils-logger";
 import { isCostAvailable } from "../eval/cost.ts";
 import { readSources, writeOutcome, writeReport } from "../eval/evalFiles.ts";
 import type { Outcome, Run } from "../eval/evalTypes.ts";
@@ -8,8 +9,8 @@ import { CommandError, type Command } from "../types.ts";
 import { embedCache } from "../utils/embedCache.ts";
 
 subscribeAsyncLogging({
-  log: ({ tag, val }) => console.log(tag, val),
-  error: ({ tag, val }) => console.error(new Error(tag, { cause: val })),
+  log: ({ tag, val }) => logger.info(tag, val),
+  error: ({ tag, val }) => logger.error(tag, val),
 });
 
 export const evals: Command = {
@@ -36,12 +37,12 @@ async function run([
 
 async function runEval(run: Run): Promise<void> {
   const { runName, llmAction, model, reasoningEffort = "" } = run;
-  console.log(
+  logger.info(
     `${runName}: Run eval for ${llmAction} with ${model} ${reasoningEffort}`,
   );
 
   const sources = await readSources(llmAction);
-  console.log(`${runName}: Found ${sources.length} sources`);
+  logger.info(`${runName}: Found ${sources.length} sources`);
 
   const outcomes: Outcome[] = [];
   await batch(`${runName}_${llmAction}_${model}`, sources, async (source) => {

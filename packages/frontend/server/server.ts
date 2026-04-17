@@ -15,8 +15,6 @@ import { fileURLToPath } from "node:url";
 
 // #region Types
 
-type T404 = "404_soft" | "404_hard";
-
 interface UrlParts {
   dir: string;
   base: string;
@@ -38,7 +36,7 @@ declare module "express-serve-static-core" {
 
 // #endregion
 
-const PAGES = new Set(["blog", "index", "faq", "404", "explore"]);
+const PAGES = new Set(["blog", "index", "faq", "404", "jobs"]);
 const METHOD_ALLOWED = new Set(["GET", "HEAD", "POST"]);
 const POST_ALLOWED = new Set(["/api/beacon", "/api/interpret"]);
 
@@ -131,8 +129,8 @@ app.use(async (req, res, next) => {
 
   if (urlParts === "404_hard") {
     return res.status(404).send("Not Found");
-  } else if (urlParts === "404_soft") {
-    return res.redirect("/404");
+  } else if (typeof urlParts === "string") {
+    return res.redirect(urlParts);
   }
 
   await setCompressionUrl(urlParts, encodings);
@@ -202,12 +200,17 @@ function getEncodings(req: Request): Encodings {
   };
 }
 
-async function getUrlParts(req: Request): Promise<UrlParts | T404> {
-  const url = URL.parse(req.url.toLowerCase(), "http://does.not.matter");
+/**
+ * Given a request, determines the corresponding file to serve based on URL patterns and available files.
+ * @param req The incoming HTTP request object.
+ * @returns The URL parts if a corresponding file is found, otherwise a redirect path or "404_hard"
+ */
+async function getUrlParts(req: Request): Promise<UrlParts | string> {
+  const url = URL.parse(req.url, "http://does.not.matter");
 
   if (!url) return "404_hard";
 
-  const urlPath = url.pathname;
+  const urlPath = url.pathname.toLowerCase();
   const dir = dirnameURL(urlPath);
   const ext = extnameURL(urlPath) || ".html";
   const base = basenameURL(urlPath, ext) || "index";
@@ -218,11 +221,16 @@ async function getUrlParts(req: Request): Promise<UrlParts | T404> {
   }
 
   if (dir === "/blog") {
-    return (await fileExists(urlParts)) ? urlParts : "404_soft";
+    return (await fileExists(urlParts)) ? urlParts : "/404";
+  }
+
+  // The /jobs path was previously /explore, so we want to support old links.
+  if (dir === "/" && base === "explore") {
+    return "/jobs" + url.search;
   }
 
   const isRootPage = dir === "/" && PAGES.has(base);
-  return isRootPage ? urlParts : "404_soft";
+  return isRootPage ? urlParts : "/404";
 }
 
 async function setCompressionUrl(

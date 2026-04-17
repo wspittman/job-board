@@ -52,7 +52,7 @@ export class NLSearch extends ComponentBase {
 
     if (isRedirect) {
       this.listen(NL_SEARCH_RESULT, (filters: FilterModel) =>
-        this.#navigateToExplore(filters),
+        this.#navigateToJobs(filters),
       );
     }
 
@@ -95,10 +95,10 @@ export class NLSearch extends ComponentBase {
     }
   }
 
-  #navigateToExplore(filters: FilterModel): void {
-    const query = filters.toUrlSearchParams().toString();
+  #navigateToJobs(filters: FilterModel): void {
+    const query = filters.toLocationSearchString();
     if (query) {
-      window.location.assign(`/explore?${query}`);
+      window.location.assign(`/jobs?${query}`);
     }
   }
 }

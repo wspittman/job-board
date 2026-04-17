@@ -49,6 +49,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  padding-block-end: var(--space-6);
 
   /* Hidden field for saved job */
   & [name="jobId"] {

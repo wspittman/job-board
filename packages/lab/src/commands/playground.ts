@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import type { Bag, Command } from "../types.ts";
 import { embedCache } from "../utils/embedCache.ts";
 import { readObj, writeObj, type Place } from "../utils/fileUtils.ts";
@@ -58,10 +59,10 @@ async function run() {
   const negStats = stats(negDistances);
 
   clusterData.forEach((cs, i) =>
-    console.log(`Cluster${i} Distances:`, cs.cStats),
+    logger.info(`Cluster${i} Distances`, cs.cStats),
   );
-  console.log("Pos Test Distances", posStats);
-  console.log("Neg Test Distances", negStats);
+  logger.info("Pos Test Distances", posStats);
+  logger.info("Neg Test Distances", negStats);
 
   const sew = (t: string[], d: number[]) =>
     t

@@ -6,7 +6,7 @@ import { DetailEmbed } from "./detail-embed.ts";
 import css from "./details.css?raw";
 import html from "./details.html?raw";
 const cssSheet = ComponentBase.createCSSSheet(css);
-const tag = "explore-details";
+const tag = "jobs-details";
 
 type CopyButtonState = "idle" | "copied" | "error";
 const copyButtonAriaText: Record<CopyButtonState, string> = {

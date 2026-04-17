@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "dry-utils-async": "^0.3.2",
+    "dry-utils-logger": "^0.1.1",
     "dry-utils-openai": "^0.4.2",
     "dry-utils-text": "^0.2.1",
     "ml-kmeans": "^7.0.0"

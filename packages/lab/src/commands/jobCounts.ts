@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import timers from "node:timers/promises";
 import { fetchJobCount, validateAts } from "../portal/pFuncs.ts";
 import type { Bag } from "../types.ts";
@@ -15,7 +16,7 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
   const companyIds = validateIds("COMPANY_IDs", companyArgs);
   const counts: Bag = {};
 
-  console.log(`Get job counts for ${companyIds.length} ${ats} companies...`);
+  logger.info(`Get job counts for ${companyIds.length} ${ats} companies...`);
 
   for (const companyId of companyIds) {
     try {
@@ -27,6 +28,7 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
     process.stdout.write(".");
     await timers.setTimeout(100); // Throttle requests
   }
+  process.stdout.write("\n");
 
   await writeObj(
     { ats, counts },
@@ -38,6 +40,6 @@ async function run([atsArg, ...companyArgs]: string[]): Promise<void> {
   );
 
   if (companyIds.length < 25) {
-    console.log("\nJob Counts:", counts);
+    logger.info("Job Counts", counts);
   }
 }

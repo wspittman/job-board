@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import timers from "node:timers/promises";
 import { writeInFile } from "../eval/evalFiles.ts";
 import {
@@ -45,7 +46,7 @@ async function runMany([
   const ats = validateAts(atsArg);
   const companyIds = validateIds("COMPANY_IDs", companyArgs);
 
-  console.log(
+  logger.info(
     `Fetch ${dataModel} input for ${companyIds.length} ${ats} companies...`,
   );
 

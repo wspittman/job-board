@@ -1,3 +1,4 @@
+import { logger } from "dry-utils-logger";
 import assert from "node:assert/strict";
 import { config } from "../config.ts";
 import { fetcher } from "../fetcher.ts";
@@ -37,7 +38,7 @@ async function runFlow(name: string): Promise<void> {
     throw new Error(`Unknown flow "${name}".`);
   }
 
-  console.log(`Running flow "${name}"`);
+  logger.info(`Running flow "${name}"`);
 
   try {
     for (let i = 0; i < flow.length; i++) {
@@ -45,13 +46,13 @@ async function runFlow(name: string): Promise<void> {
     }
   } catch (err) {
     if (err instanceof assert.AssertionError) {
-      console.error(`\n${err.message}`);
+      logger.error("Assertion Error", err.message);
       return;
     }
     throw err;
   }
 
-  console.log(`\nFlow "${name}" completed successfully.`);
+  logger.info(`Flow "${name}" completed successfully.`);
 }
 
 async function runStep(
@@ -59,7 +60,7 @@ async function runStep(
   total: number,
   { name, method, path, expectStatus, expectBody, asyncWait, ...opts }: Step,
 ): Promise<void> {
-  console.log(`\n[${n}/${total}] ${method} ${path}: ${name}`);
+  logger.info(`[${n}/${total}] ${method} ${path}: ${name}`);
 
   const { status, value } = await fetcher(method, path, {
     ...opts,
@@ -67,8 +68,7 @@ async function runStep(
     throwOnError: false,
   });
 
-  console.log(`Status: ${status}`);
-  console.dir(value, { depth: null });
+  logger.info(`[${status}]`, value);
 
   assert.equal(status, expectStatus, `FAIL: Step ${n} Wrong Status`);
   if (expectBody != undefined) {
@@ -80,7 +80,7 @@ async function runStep(
   }
 
   if (asyncWait) {
-    console.log(`\n${asyncWait}, then press Enter to continue...`);
+    logger.info(`${asyncWait}, then press Enter to continue...`);
     await new Promise<void>((resolve) => {
       // When you attach a data listener to process.stdin, it switches the stream into "flowing" mode.
       // To allow the script to exit, you need to explicitly pause() the stdin stream after receiving the data.

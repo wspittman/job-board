@@ -16,7 +16,7 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 export class JobModel {
   static async search(filters: FilterModel): Promise<JobModel[]> {
     if (filters.isEmpty()) return [];
-    const params = filters.toUrlSearchParams().toString();
+    const params = filters.toLocationSearchString();
     const jobsApi = await api.fetchJobs(params);
     return jobsApi.map((jobApi) => new JobModel(jobApi));
   }
@@ -149,9 +149,9 @@ export class JobModel {
     if (useShort && (!payCadence || payCadence === "salary")) return undefined;
 
     if (cadence) {
-      return `Per ${cadence}${currency ? ` (${currency})` : ""}`;
+      return `Per ${cadence}`;
     }
 
-    return currency;
+    return undefined;
   }
 }

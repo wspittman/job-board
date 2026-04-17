@@ -1,3 +1,4 @@
+import type { ReasoningEffort } from "dry-utils-openai";
 import type { Context, LLMAction } from "../portal/pTypes.ts";
 import type { Bag, NumBag } from "../types.ts";
 
@@ -8,7 +9,7 @@ export interface Run {
   runName: string;
   llmAction: LLMAction;
   model: string;
-  reasoningEffort?: string;
+  reasoningEffort?: ReasoningEffort;
 }
 
 /**

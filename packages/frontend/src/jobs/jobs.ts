@@ -1,5 +1,5 @@
 import "../sharedStyles/all.css";
-import "./explore.css";
+import "./jobs.css";
 
 import "./details/details.ts";
 import "./filters/filters.ts";
@@ -12,8 +12,7 @@ import { JOB_CARD_SELECTED } from "./results/job-card.ts";
 
 // Top-level state
 const jobMap = new Map<string, JobModel>();
-const urlParams = new URLSearchParams(location.search);
-const initialFilters = FilterModel.fromUrlSearchParams(urlParams);
+const initialFilters = FilterModel.fromLocationSearchString(location.search);
 let activePane: Pane = initialFilters.isEmpty() ? "filters" : "results";
 let lastRequestId = 0;
 
@@ -23,9 +22,9 @@ const actionButton = document.getElementById("action-button")!;
 actionButton.addEventListener("click", onActionClick);
 
 const panes = {
-  filters: document.querySelector("explore-filters")!,
-  results: document.querySelector("explore-results")!,
-  details: document.querySelector("explore-details")!,
+  filters: document.querySelector("jobs-filters")!,
+  results: document.querySelector("jobs-results")!,
+  details: document.querySelector("jobs-details")!,
 };
 type Pane = keyof typeof panes;
 
@@ -102,7 +101,7 @@ async function onFilterChange(filters: FilterModel) {
  * @param filters - Filter set to serialize into the URL.
  */
 function updateQueryString(filters: FilterModel) {
-  const query = filters.toUrlSearchParams().toString();
+  const query = filters.toLocationSearchString();
   const newUrl = query ? `${location.pathname}?${query}` : location.pathname;
   history.replaceState({}, "", newUrl);
 }

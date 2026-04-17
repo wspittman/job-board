@@ -1,4 +1,4 @@
-.explore-page {
+.jobs-page {
   display: flex;
   flex-direction: column;
   max-width: none;
@@ -19,14 +19,14 @@
   text-align: center;
 }
 
-.explore-layout {
+.jobs-layout {
   display: flex;
   height: 100%;
   gap: var(--space-2);
   align-items: flex-start;
 }
 
-explore-filters {
+jobs-filters {
   flex-basis: max-content;
   max-width: max(20%, 300px);
   height: 100%;
@@ -34,15 +34,15 @@ explore-filters {
   scrollbar-width: thin;
 }
 
-explore-results,
-explore-details {
+jobs-results,
+jobs-details {
   flex: 2;
   height: 100%;
   overflow: auto;
   scrollbar-width: thin;
 }
 
-explore-results[smallen] {
+jobs-results[smallen] {
   flex: 1;
 }
 
@@ -50,12 +50,12 @@ explore-results[smallen] {
   display: none;
 }
 
-explore-details[empty] {
+jobs-details[empty] {
   visibility: hidden;
 }
 
 @media (max-width: 900px) {
-  .explore-layout {
+  .jobs-layout {
     height: calc(100% - var(--space-6));
   }
 
@@ -81,24 +81,24 @@ explore-details[empty] {
     }
   }
 
-  explore-filters {
+  jobs-filters {
     flex: 2;
     max-width: none;
   }
 
-  explore-filters[inactive],
-  explore-results[inactive],
-  explore-details[inactive] {
+  jobs-filters[inactive],
+  jobs-results[inactive],
+  jobs-details[inactive] {
     display: none;
   }
 }
 
 @media (min-width: 901px) and (orientation: landscape) {
-  .explore-page {
+  .jobs-page {
     padding: var(--space-1);
   }
 
-  .explore-layout {
+  .jobs-layout {
     gap: var(--space-1);
   }
 }

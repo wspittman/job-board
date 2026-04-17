@@ -38,7 +38,7 @@ npm install
 | `syncCompanyJobs <ats> <companyId>`   | Syncs job postings for a company from the requested ATS.                        | `npm run ops -- syncCompanyJobs greenhouse 123`   |
 | `e2e <flow>`                          | Runs a predefined end-to-end flow against the backend API.                      | `npm run ops -- e2e smoke`                        |
 
-Each command prints a success or error message based on the API response.
+Run information is logged to the console and detailed log output is saved to `packages/ops/logs/app.log` for later troubleshooting.
 
 ## How it works
 

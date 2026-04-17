@@ -8,6 +8,9 @@
     "format": "prettier . --write",
     "ops": "tsx --env-file=.env src/index.ts"
   },
+  "dependencies": {
+    "dry-utils-logger": "^0.1.1"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.10.0",
