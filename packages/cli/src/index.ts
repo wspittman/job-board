@@ -1,16 +1,26 @@
 import { logger } from "dry-utils-logger";
 import process from "node:process";
 import { atsTypes, dataModelTypes } from "./portal/pTypes.ts";
-import { CommandError } from "./types.ts";
+import { CommandError, type Command } from "./types.ts";
+import { asArray } from "./utils/utils.ts";
+
+const registry: Record<string, Command> = {};
 
 function usageReminder() {
+  const indent = "    ";
+  const commandUsage = Object.entries(registry).flatMap(([name, cmd]) =>
+    asArray(cmd.usage()).map(
+      (line, i) => `${i === 0 ? `${indent}${name} ` : `${indent}  `}${line}`,
+    ),
+  );
+
   logger.info(
     [
       "Usage:",
       "  npm run cli -- <COMMAND> <ARGS>",
       "",
       "  COMMAND:",
-      //...getUsage("    "),
+      ...commandUsage,
       "",
       "  COMMON ARGUMENTS:",
       `    DATA_MODEL: ${dataModelTypes.join("|")}`,
@@ -20,20 +30,30 @@ function usageReminder() {
   );
 }
 
-function main() {
+async function main() {
   const [command, ...args] = process.argv.slice(2);
-  logger.info(`Running command "${command}"`, args);
-  //await runCommand(command, args);
-  if (command === "testOK") {
-    return Promise.resolve();
+
+  if (!command) {
+    throw new CommandError("No command provided");
   }
-  throw new CommandError("No commands implemented yet");
+
+  const cmd = registry[command];
+
+  if (!cmd) {
+    throw new CommandError(`Invalid Command "${command}"`);
+  }
+
+  logger.info(`Running command "${command}"`, args);
+  cmd.prerequisite?.();
+
+  await cmd.run(args);
 }
 
 main().catch((err) => {
   if (err instanceof CommandError) {
     usageReminder();
+  } else {
+    process.exitCode = 1;
   }
   logger.error("Main:", err);
-  process.exitCode = 1;
 });
