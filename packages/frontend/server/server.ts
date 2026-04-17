@@ -206,11 +206,11 @@ function getEncodings(req: Request): Encodings {
  * @returns The URL parts if a corresponding file is found, otherwise a redirect path or "404_hard"
  */
 async function getUrlParts(req: Request): Promise<UrlParts | string> {
-  const url = URL.parse(req.url.toLowerCase(), "http://does.not.matter");
+  const url = URL.parse(req.url, "http://does.not.matter");
 
   if (!url) return "404_hard";
 
-  const urlPath = url.pathname;
+  const urlPath = url.pathname.toLowerCase();
   const dir = dirnameURL(urlPath);
   const ext = extnameURL(urlPath) || ".html";
   const base = basenameURL(urlPath, ext) || "index";
