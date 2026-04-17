@@ -48,12 +48,13 @@ export async function getJobs(filterInput: Filters) {
 
   // US-only transition:
   // If no location provided, assume US-based
-  const queryLocation: Location = filterInput.location
-    ? await llm.extractLocation(filterInput.location)
-    : { countryCode: "US" };
+  const queryLocation: Location = await llm.extractLocation(
+    filterInput.location ?? "",
+  );
+  queryLocation.countryCode ||= "US";
 
   const country = queryLocation.countryCode;
-  if (country && country !== "US") {
+  if (country && country.toUpperCase() !== "US") {
     // US-only transition:
     // If a user searches for a non-US location, return no results (even though they may exist in the DB for now).
     logProperty("GetJobs_NonUSCountry", country);
