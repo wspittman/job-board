@@ -1,11 +1,28 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
+import { after, suite, test } from "node:test";
 
-process.env.ADMIN_TOKEN ??= "test-admin-token-1";
+const originalAdminToken = process.env.ADMIN_TOKEN;
+const originalProdAdminToken = process.env.PROD_ADMIN_TOKEN;
+process.env.ADMIN_TOKEN = "test-admin-token-1";
+process.env.PROD_ADMIN_TOKEN = "test-prod-token-1";
 
 const { apiCall } = await import("../../src/utils/http.ts");
 
 suite("http apiCall", () => {
+  after(() => {
+    if (originalAdminToken === undefined) {
+      delete process.env.ADMIN_TOKEN;
+    } else {
+      process.env.ADMIN_TOKEN = originalAdminToken;
+    }
+
+    if (originalProdAdminToken === undefined) {
+      delete process.env.PROD_ADMIN_TOKEN;
+    } else {
+      process.env.PROD_ADMIN_TOKEN = originalProdAdminToken;
+    }
+  });
+
   test("builds request with query params, admin auth, and JSON body", async () => {
     const originalFetch = globalThis.fetch;
     let calledUrl: URL | undefined;
@@ -92,7 +109,7 @@ suite("http apiCall", () => {
         "https://api.betterjobboard.net/api/jobs",
       );
       assert.deepEqual(calledInit?.headers, {
-        Authorization: "Bearer ",
+        Authorization: "Bearer test-prod-token-1",
       });
       assert.deepEqual(result, { status: 200, value: "ok" });
     } finally {
