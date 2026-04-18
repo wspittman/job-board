@@ -1,5 +1,6 @@
 import { logger } from "dry-utils-logger";
-import { type Command, type Registry } from "../types.ts";
+import { type Command, type ENV, type Registry } from "../types.ts";
+import { apiCall } from "../utils/http.ts";
 import {
   commandUsage,
   runCommand,
@@ -7,13 +8,7 @@ import {
   validateIds,
 } from "../utils/utils.ts";
 
-// Placeholder
-async function fetcher(a: string, b: string, c: unknown) {
-  logger.info(`Placeholder Fetcher Call: ${a} ${b}`, c);
-  return Promise.resolve({ success: true });
-}
-
-const addCompany = (env?: string): Command => ({
+const addCompany = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID[, ...]>",
   run: async ([ats, ...companyIds]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -21,12 +16,12 @@ const addCompany = (env?: string): Command => ({
 
     logger.info(`Adding ${ats} companies`, companyIds);
     const body = { ats, ids: companyIds };
-    const result = await fetcher("PUT", "companies", { body, env });
+    const result = await apiCall("PUT", "companies", { body, env });
     logger.info("Done", result);
   },
 });
 
-const deleteCompany = (env?: string): Command => ({
+const deleteCompany = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID>",
   run: async ([ats, companyId]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -34,12 +29,12 @@ const deleteCompany = (env?: string): Command => ({
 
     logger.info(`Deleting ${ats}/${companyId}`);
     const body = { ats, id: companyId };
-    const result = await fetcher("DELETE", "company", { body, env });
+    const result = await apiCall("DELETE", "company", { body, env });
     logger.info("Done", result);
   },
 });
 
-const ignoreJob = (env?: string): Command => ({
+const ignoreJob = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID> <JOB_ID>",
   run: async ([ats, companyId, jobId]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -48,12 +43,12 @@ const ignoreJob = (env?: string): Command => ({
 
     logger.info(`Ignoring ${ats}/${companyId}/${jobId}`);
     const body = { ats, companyId, jobId };
-    const result = await fetcher("DELETE", "company/job", { body, env });
+    const result = await apiCall("DELETE", "company/job", { body, env });
     logger.info("Done", result);
   },
 });
 
-const syncCompanyJobs = (env?: string): Command => ({
+const syncCompanyJobs = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID>",
   run: async ([ats, companyId]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -61,7 +56,7 @@ const syncCompanyJobs = (env?: string): Command => ({
 
     logger.info(`Syncing jobs for ${ats}/${companyId}`);
     const body = { ats, id: companyId };
-    const result = await fetcher("POST", "company/jobs/sync", { body, env });
+    const result = await apiCall("POST", "company/jobs/sync", { body, env });
     logger.info("Done", result);
   },
 });
