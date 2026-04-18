@@ -1,6 +1,7 @@
 import { logger } from "dry-utils-logger";
 import process from "node:process";
 import { apiCommands } from "./api/commands.ts";
+import { atsCommands } from "./ats/commands.ts";
 import { e2e } from "./e2e/commands.ts";
 import { atsTypes } from "./portal/pTypes.ts";
 import { CommandError, type Registry } from "./types.ts";
@@ -8,6 +9,7 @@ import { commandUsage, runCommand } from "./utils/utils.ts";
 
 const registry: Registry = {
   api: apiCommands,
+  ats: atsCommands,
   e2e,
 };
 

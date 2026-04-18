@@ -3,11 +3,9 @@ import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
 import { CommandError, type Bag } from "../types.ts";
 import {
   atsTypes,
-  dataModelTypes,
   llmActionTypes,
   type ATS,
   type Context,
-  type DataModel,
   type LLMAction,
 } from "./pTypes.ts";
 
@@ -30,22 +28,6 @@ export function validateAts(ats?: string): ATS {
 }
 
 /**
- * Validate and normalize data model argument.
- * @param dataModel - Data model identifier to validate.
- * @returns Normalized data model identifier.
- * @throws CommandError if the data model is invalid.
- */
-export function validateDataModel(dataModel?: string): DataModel {
-  const normalized = dataModel?.toLowerCase();
-
-  if (!dataModelTypes.includes(normalized as DataModel)) {
-    throw new CommandError("Invalid argument: DATA_MODEL");
-  }
-
-  return normalized as DataModel;
-}
-
-/**
  * Validate LLM action argument.
  * @param llmAction - LLM action identifier to validate.
  * @returns LLM action identifier.
@@ -60,7 +42,7 @@ export function validateLLMAction(llmAction?: string): LLMAction {
 }
 
 export async function fetchInput(
-  dataModel: DataModel,
+  dataModel: "company" | "job",
   ats: ATS,
   companyId: string,
   jobId?: string,
