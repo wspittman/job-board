@@ -31,11 +31,12 @@ export function validateIds(
 }
 
 export function commandUsage(registry: Registry, indent = ""): string[] {
-  return Object.entries(registry).flatMap(([name, cmd]) =>
-    asArray(cmd.usage()).map(
+  return Object.entries(registry).flatMap(([name, cmd]) => [
+    "",
+    ...asArray(cmd.usage()).map(
       (line, i) => `${i === 0 ? `${indent}${name} ` : `${indent}  `}${line}`,
     ),
-  );
+  ]);
 }
 
 export async function runCommand(

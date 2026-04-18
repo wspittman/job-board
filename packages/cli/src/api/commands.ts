@@ -78,7 +78,6 @@ export const apiCommands: Command = {
     "",
     "Local requires a running local server",
     "Prod requires a valid PROD_ADMIN_TOKEN",
-    "",
     ...commandUsage(registry),
   ],
   run: (args: string[]) => runCommand(registry, args),
