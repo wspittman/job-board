@@ -13,7 +13,7 @@ async function fetcher(a: string, b: string, c: unknown) {
   return Promise.resolve({ success: true });
 }
 
-const addCompany: Command = {
+const addCompany = (env?: string): Command => ({
   usage: () => "<ATS> <COMPANY_ID[, ...]>",
   run: async ([ats, ...companyIds]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -21,12 +21,12 @@ const addCompany: Command = {
 
     logger.info(`Adding ${ats} companies`, companyIds);
     const body = { ats, ids: companyIds };
-    const result = await fetcher("PUT", "companies", { body });
+    const result = await fetcher("PUT", "companies", { body, env });
     logger.info("Done", result);
   },
-};
+});
 
-const deleteCompany: Command = {
+const deleteCompany = (env?: string): Command => ({
   usage: () => "<ATS> <COMPANY_ID>",
   run: async ([ats, companyId]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -34,12 +34,12 @@ const deleteCompany: Command = {
 
     logger.info(`Deleting ${ats}/${companyId}`);
     const body = { ats, id: companyId };
-    const result = await fetcher("DELETE", "company", { body });
+    const result = await fetcher("DELETE", "company", { body, env });
     logger.info("Done", result);
   },
-};
+});
 
-const ignoreJob: Command = {
+const ignoreJob = (env?: string): Command => ({
   usage: () => "<ATS> <COMPANY_ID> <JOB_ID>",
   run: async ([ats, companyId, jobId]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -48,12 +48,12 @@ const ignoreJob: Command = {
 
     logger.info(`Ignoring ${ats}/${companyId}/${jobId}`);
     const body = { ats, companyId, jobId };
-    const result = await fetcher("DELETE", "company/job", { body });
+    const result = await fetcher("DELETE", "company/job", { body, env });
     logger.info("Done", result);
   },
-};
+});
 
-const syncCompanyJobs: Command = {
+const syncCompanyJobs = (env?: string): Command => ({
   usage: () => "<ATS> <COMPANY_ID>",
   run: async ([ats, companyId]: string[]): Promise<void> => {
     ats = validateAts(ats);
@@ -61,22 +61,29 @@ const syncCompanyJobs: Command = {
 
     logger.info(`Syncing jobs for ${ats}/${companyId}`);
     const body = { ats, id: companyId };
-    const result = await fetcher("POST", "company/jobs/sync", { body });
+    const result = await fetcher("POST", "company/jobs/sync", { body, env });
     logger.info("Done", result);
   },
-};
+});
 
 const registry: Registry = {
-  addCompany,
-  ignoreJob,
-  deleteCompany,
-  syncCompanyJobs,
+  addCompany: addCompany(),
+  addCompanyProd: addCompany("prod"),
+  ignoreJob: ignoreJob(),
+  ignoreJobProd: ignoreJob("prod"),
+  deleteCompany: deleteCompany(),
+  deleteCompanyProd: deleteCompany("prod"),
+  syncCompanyJobs: syncCompanyJobs(),
+  syncCompanyJobsProd: syncCompanyJobs("prod"),
 };
 
 export const apiCommands: Command = {
   usage: () => [
     "<SUBCOMMAND> <ARGS>",
-    "These commands interact with the API and require a running server.",
+    "",
+    "Local requires a running local server",
+    "Prod requires a valid PROD_ADMIN_TOKEN",
+    "",
     ...commandUsage(registry),
   ],
   run: (args: string[]) => runCommand(registry, args),
