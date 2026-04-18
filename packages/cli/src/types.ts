@@ -7,4 +7,6 @@ export interface Command {
   run(args: string[]): Promise<void>;
 }
 
+export type Registry = Record<string, Command>;
+
 export class CommandError extends Error {}
