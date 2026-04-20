@@ -6,6 +6,7 @@
     "lint": "eslint",
     "format": "prettier . --write",
     "test": "node --import tsx --import ./test/setup.ts --test --test-reporter=dot test/**/*.test.ts",
+    "test-details": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
     "dev": "tsx watch --env-file=./.env ./src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js"

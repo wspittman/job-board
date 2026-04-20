@@ -96,7 +96,8 @@ packages/backend/
 - `npm run dev --workspace=backend` – Start the service with automatic reloads via `tsx watch`.
 - `npm run build --workspace=backend` – Compile TypeScript to JavaScript in `dist/`.
 - `npm run start --workspace=backend` – Run the compiled server from `dist/app.js`.
-- `npm run test --workspace=backend` – Execute the Node test runner with `tsx` so TypeScript specs run without precompiling.
+- `npm run test --workspace=backend` – Execute the Node test runner. Note: until Node v26, the concise dot reporter does not show details for failed tests, so if you need full output, use the following command
+- `npm run test-details --workspace=backend` – This command runs with the default reporter for full (but more verbose) output.
 
 ## Testing Notes
 

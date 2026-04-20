@@ -20,7 +20,8 @@ Run the following commands from the root of the repository:
 - `npm run pre-checkin`: Run lint, format, and tests.
 - `npm run lint`: Lint all workspaces.
 - `npm run format`: Apply formatting fixes for all workspaces.
-- `npm test`: Run tests for the backend, frontend, and lab workspaces.
+- `npm run test`: Run tests for the backend, frontend, and lab workspaces. Note: until Node v26, the concise dot reporter for node:test does not show details for failed tests, so if you need full output for backend or cli, use the following command.
+- `npm run test-details --workspace=<workspace>`: Run tests for a specific workspace with the default reporter for full (but more verbose) output.
 - `npm run start:backend`: Start the backend API in watch mode.
 - `npm run start:frontend`: Start the frontend development server.
 - `npm run lab -- <command>`: Run a lab CLI command (see `packages/lab/AGENTS.md`).
