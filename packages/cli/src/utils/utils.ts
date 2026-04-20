@@ -5,7 +5,24 @@ export function asArray(value: string | string[]): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-export function validateAts(ats?: string): ATS {
+export function validateCompanyArgs([ats, ...companyIds]: string[]) {
+  const ids = validateIds("COMPANY_IDs", companyIds);
+  return {
+    ats: validateAts(ats),
+    companyId: ids[0]!,
+    companyIds: ids,
+  };
+}
+
+export function validateJobArgs([ats, companyId, jobId]: string[]) {
+  return {
+    ats: validateAts(ats),
+    companyId: validateIds("COMPANY_ID", [companyId])[0]!,
+    jobId: validateIds("JOB_ID", [jobId])[0]!,
+  };
+}
+
+function validateAts(ats?: string): ATS {
   const vATS = ats?.toLowerCase() as ATS;
 
   if (!vATS || !atsTypes.includes(vATS)) {
@@ -15,10 +32,7 @@ export function validateAts(ats?: string): ATS {
   return vATS;
 }
 
-export function validateIds(
-  name: string,
-  ...ids: (string | undefined)[]
-): string[] {
+function validateIds(name: string, ids: (string | undefined)[]): string[] {
   const validIds = ids
     .map((id) => id?.replace(",", "").trim() || "")
     .filter((id) => !!id);

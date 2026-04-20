@@ -4,15 +4,14 @@ import { apiCall } from "../utils/http.ts";
 import {
   commandUsage,
   runCommand,
-  validateAts,
-  validateIds,
+  validateCompanyArgs,
+  validateJobArgs,
 } from "../utils/utils.ts";
 
 const addCompany = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID[, ...]>",
-  run: async ([ats, ...companyIds]: string[]): Promise<void> => {
-    ats = validateAts(ats);
-    companyIds = validateIds("COMPANY_ID", ...companyIds);
+  run: async (args: string[]): Promise<void> => {
+    const { ats, companyIds } = validateCompanyArgs(args);
 
     logger.info(`Adding ${ats} companies`, companyIds);
     const body = { ats, ids: companyIds };
@@ -23,9 +22,8 @@ const addCompany = (env?: ENV): Command => ({
 
 const deleteCompany = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID>",
-  run: async ([ats, companyId]: string[]): Promise<void> => {
-    ats = validateAts(ats);
-    [companyId] = validateIds("COMPANY_ID", companyId);
+  run: async (args: string[]): Promise<void> => {
+    const { ats, companyId } = validateCompanyArgs(args);
 
     logger.info(`Deleting ${ats}/${companyId}`);
     const body = { ats, id: companyId };
@@ -36,10 +34,8 @@ const deleteCompany = (env?: ENV): Command => ({
 
 const ignoreJob = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID> <JOB_ID>",
-  run: async ([ats, companyId, jobId]: string[]): Promise<void> => {
-    ats = validateAts(ats);
-    [companyId] = validateIds("COMPANY_ID", companyId);
-    [jobId] = validateIds("JOB_ID", jobId);
+  run: async (args: string[]): Promise<void> => {
+    const { ats, companyId, jobId } = validateJobArgs(args);
 
     logger.info(`Ignoring ${ats}/${companyId}/${jobId}`);
     const body = { ats, companyId, jobId };
@@ -50,9 +46,8 @@ const ignoreJob = (env?: ENV): Command => ({
 
 const syncCompanyJobs = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID>",
-  run: async ([ats, companyId]: string[]): Promise<void> => {
-    ats = validateAts(ats);
-    [companyId] = validateIds("COMPANY_ID", companyId);
+  run: async (args: string[]): Promise<void> => {
+    const { ats, companyId } = validateCompanyArgs(args);
 
     logger.info(`Syncing jobs for ${ats}/${companyId}`);
     const body = { ats, id: companyId };

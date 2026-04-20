@@ -1,69 +1,29 @@
 import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
 import { CommandError, type Bag } from "../types.ts";
-import {
-  atsTypes,
-  llmActionTypes,
-  type ATS,
-  type Context,
-  type LLMAction,
-} from "./pTypes.ts";
+import { type ATS, type Context, type LLMAction } from "./pTypes.ts";
 
 export { getLLMOptions } from "../../../backend/src/config.ts";
 
 /**
- * Validate and normalize ATS argument.
- * @param ats - ATS identifier to validate.
- * @returns Normalized ATS identifier.
- * @throws CommandError if the ATS is invalid.
+ * Fetches company information from the ATS based on the provided company ID and ATS provider key.
+ * @param ats ATS provider key
+ * @param companyId ATS company slug/id
+ * @returns A company object from the ATS
  */
-export function validateAts(ats?: string): ATS {
-  const normalized = ats?.toLowerCase();
-
-  if (!atsTypes.includes(normalized as ATS)) {
-    throw new CommandError("Invalid argument: ATS");
-  }
-
-  return normalized as ATS;
-}
-
-/**
- * Validate LLM action argument.
- * @param llmAction - LLM action identifier to validate.
- * @returns LLM action identifier.
- * @throws CommandError if the LLM action is invalid.
- */
-export function validateLLMAction(llmAction?: string): LLMAction {
-  if (!llmActionTypes.includes(llmAction as LLMAction)) {
-    throw new CommandError("Invalid argument: LLM_ACTION");
-  }
-
-  return llmAction as LLMAction;
-}
-
-export async function fetchInput(
-  dataModel: "company" | "job",
-  ats: ATS,
-  companyId: string,
-  jobId?: string,
-) {
-  switch (dataModel) {
-    case "company":
-      return await atsObj.getCompany({ id: companyId, ats }, true);
-    case "job":
-      return await getJob(ats, companyId, jobId);
-  }
+export async function fetchCompany(ats: ATS, companyId: string) {
+  return await atsObj.getCompany({ id: companyId, ats }, true);
 }
 
 /**
  * Fetches a job from the ATS, either by a provided job ID or by randomly selecting one from the company's job listings.
- * @param ats - ATS provider key.
- * @param companyId - ATS company slug/id.
- * @param jobId - Optional job ID to fetch. If not provided, a random job from the company's listings will be fetched.
+ * @param ats ATS provider key.
+ * @param companyId ATS company slug/id.
+ * @param jobId Optional job ID to fetch. If not provided, a random job from the company's listings will be fetched.
  * @returns A job object from the ATS.
  * @throws CommandError when the company has no jobs.
  */
-async function getJob(ats: ATS, companyId: string, jobId?: string) {
+export async function fetchJob(ats: ATS, companyId: string, jobId?: string) {
   if (!jobId) {
     const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
 
@@ -82,6 +42,20 @@ async function getJob(ats: ATS, companyId: string, jobId?: string) {
   }
 
   return await atsObj.getJob({ id: companyId, ats }, { id: jobId, companyId });
+}
+
+/**
+ * Fetches the job count for a company from the ATS.
+ * @param ats - ATS provider key
+ * @param companyId - ATS company slug/id
+ * @returns The number of jobs for the company
+ */
+export async function fetchJobCount(
+  ats: ATS,
+  companyId: string,
+): Promise<number> {
+  const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
+  return jobs.length;
 }
 
 export async function infer(
@@ -107,18 +81,4 @@ export async function infer(
       return typeof result === "boolean" ? { bool: result } : (result as Bag);
     }
   }
-}
-
-/**
- * Fetches the job count for a company from the ATS.
- * @param ats - ATS provider key
- * @param companyId - ATS company slug/id
- * @returns The number of jobs for the company
- */
-export async function fetchJobCount(
-  ats: ATS,
-  companyId: string,
-): Promise<number> {
-  const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
-  return jobs.length;
 }
