@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 
 import {
+  addNumBags,
+  calcF1,
   computeClusters,
   cosineDistanceAll,
   cosineSimilarity,
@@ -9,12 +11,30 @@ import {
 } from "../../src/utils/mathUtils.ts";
 
 suite("mathUtils", () => {
+  test("addNumBags: adds matching keys and handles missing values", () => {
+    const base = { total: 2, pass: 1, skip: 0 };
+    const toAdd = { total: 3, fail: 4 };
+
+    const out = addNumBags(base, toAdd as unknown as typeof base);
+
+    assert.equal(out, base);
+    assert.deepEqual(out, { total: 5, pass: 1, skip: 0, fail: 4 });
+  });
+
   test("truncate: rounds to four digits by default", () => {
     assert.equal(truncate(1.234567), 1.2346);
   });
 
   test("truncate: rounds to a provided number of digits", () => {
     assert.equal(truncate(9.87654, 2), 9.88);
+  });
+
+  test("calcF1: returns rounded harmonic mean", () => {
+    assert.equal(calcF1(0.5, 0.75), 0.6);
+  });
+
+  test("calcF1: returns zero when precision and recall are zero", () => {
+    assert.equal(calcF1(0, 0), 0);
   });
 
   test("cosineSimilarity: returns 1 for identical vectors", () => {

@@ -3,6 +3,7 @@ import process from "node:process";
 import { apiCommands } from "./api/commands.ts";
 import { atsCommands } from "./ats/commands.ts";
 import { e2e } from "./e2e/commands.ts";
+import { evals } from "./eval/eval.ts";
 import { html } from "./html/html.ts";
 import { playground } from "./playground/playground.ts";
 import { atsTypes } from "./portal/pTypes.ts";
@@ -13,6 +14,7 @@ const registry: Registry = {
   api: apiCommands,
   ats: atsCommands,
   e2e,
+  evals,
   html,
   playground,
 };

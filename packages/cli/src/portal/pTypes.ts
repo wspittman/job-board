@@ -25,4 +25,4 @@ export type ATS = (typeof atsTypes)[number];
 export type LLMAction = keyof typeof llm;
 export const llmActionTypes = Object.getOwnPropertyNames(
   Object.getPrototypeOf(llm),
-) as LLMAction[];
+).slice(1) as LLMAction[];

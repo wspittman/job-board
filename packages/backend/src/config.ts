@@ -37,6 +37,7 @@ interface Config {
   LEVER_URL: string;
 
   // LLM
+  OPENAI_API_KEY: string;
   LLM_MODEL: string;
   LLM_REASONING_EFFORT?: ReasoningEffort;
   LLM_MODEL_OVERRIDES: Record<string, string>;
@@ -164,7 +165,8 @@ export const config: Config = {
   LEVER_URL: getReqEnv("LEVER_URL"),
 
   // AI configs
-  // OPENAI_API_KEY present in .env, referenced directly in OpenAI SDK
+  // OPENAI_API_KEY referenced directly in OpenAI SDK, but we still want to validate presence at startup
+  OPENAI_API_KEY: getReqEnv("OPENAI_API_KEY"),
   LLM_MODEL: getReqEnv("LLM_MODEL").toLowerCase(),
   LLM_REASONING_EFFORT: reasoningEffort,
   LLM_MODEL_OVERRIDES: modelOverrides,

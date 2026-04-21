@@ -1,9 +1,28 @@
 import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
 import { CommandError, type Bag } from "../types.ts";
-import { type ATS, type Context, type LLMAction } from "./pTypes.ts";
+import {
+  llmActionTypes,
+  type ATS,
+  type Context,
+  type LLMAction,
+} from "./pTypes.ts";
 
 export { getLLMOptions } from "../../../backend/src/config.ts";
+
+/**
+ * Validate LLM action argument.
+ * @param llmAction - LLM action identifier to validate.
+ * @returns LLM action identifier.
+ * @throws CommandError if the LLM action is invalid.
+ */
+export function validateLLMAction(llmAction?: string): LLMAction {
+  if (!llmActionTypes.includes(llmAction as LLMAction)) {
+    throw new CommandError("Invalid argument: LLM_ACTION");
+  }
+
+  return llmAction as LLMAction;
+}
 
 /**
  * Fetches company information from the ATS based on the provided company ID and ATS provider key.
