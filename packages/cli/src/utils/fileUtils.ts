@@ -7,7 +7,7 @@ type Strings = string | string[] | undefined;
 type Ext = "json" | "md" | "html";
 
 export interface Place {
-  group: "blog" | "cache" | "eval";
+  group: "html" | "cache" | "eval";
   stage: "in" | "out";
   folder?: Strings;
   file?: Strings;

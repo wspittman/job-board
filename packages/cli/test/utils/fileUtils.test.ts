@@ -2,41 +2,27 @@ import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { after, afterEach, suite, test } from "node:test";
-import { fileURLToPath } from "node:url";
+import { after, suite, test } from "node:test";
 import {
   readManyObj,
   readObj,
   writeObj,
   type Place,
 } from "../../src/utils/fileUtils.ts";
-import { afterReset } from "../setup.ts";
+import { afterReset, logBasePath, makeDirTracker } from "../setup.ts";
 
 after(afterReset);
 
-const basePath = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../logs",
-);
-
-const touchedDirs: string[] = [];
+const touchedDirs = makeDirTracker();
 
 const makeSubFolder = async (group: Place["group"]): Promise<string> => {
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "file-utils-"));
   const subFolder = path.basename(tempDir);
   await rm(tempDir, { recursive: true, force: true });
-  touchedDirs.push(path.join(basePath, group, "in", subFolder));
-  touchedDirs.push(path.join(basePath, group, "out", subFolder));
+  touchedDirs.push(path.join(logBasePath, group, "in", subFolder));
+  touchedDirs.push(path.join(logBasePath, group, "out", subFolder));
   return subFolder;
 };
-
-afterEach(async () => {
-  await Promise.all(
-    touchedDirs
-      .splice(0)
-      .map((dir) => rm(dir, { recursive: true, force: true })),
-  );
-});
 
 suite("fileUtils", () => {
   test("writeObj: writes a JSON file with evalTS and correctly structured path", async () => {
@@ -51,7 +37,7 @@ suite("fileUtils", () => {
     await writeObj({ status: "ok" }, place);
 
     const filePath = path.join(
-      basePath,
+      logBasePath,
       "eval",
       "out",
       subFolder,
@@ -86,7 +72,7 @@ suite("fileUtils", () => {
 
   test("readObj: returns undefined for missing or invalid JSON files", async () => {
     const subFolder = await makeSubFolder("cache");
-    const dir = path.join(basePath, "cache", "in", subFolder);
+    const dir = path.join(logBasePath, "cache", "in", subFolder);
 
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, "broken.json"), "not-json");
@@ -123,7 +109,7 @@ suite("fileUtils", () => {
     await writeObj({ id: 2 }, { ...place, file: "two" });
 
     // Manually write a broken file
-    const folderPath = path.join(basePath, "cache", "in", subFolder);
+    const folderPath = path.join(logBasePath, "cache", "in", subFolder);
     await writeFile(path.join(folderPath, "broken.json"), "not-json");
 
     const objects = await readManyObj<{ id: number }>(place);
