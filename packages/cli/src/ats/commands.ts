@@ -2,6 +2,7 @@ import { logger } from "dry-utils-logger";
 import timers from "node:timers/promises";
 import { fetchCompany, fetchJob, fetchJobCount } from "../portal/pFuncs.ts";
 import type { Command, Registry } from "../types.ts";
+import { writeObj } from "../utils/fileUtils.ts";
 import {
   commandUsage,
   runCommand,
@@ -22,6 +23,20 @@ async function runMany(
     // Throttle requests
     await timers.setTimeout(100);
   }
+}
+
+async function save(
+  folder: "company" | "job",
+  obj: object,
+  ...keys: string[]
+): Promise<void> {
+  logger.info(`Saving ${keys.join("/")} to file`);
+  const placeholder =
+    folder === "job" ? { fillJobInfo: {} } : { fillCompanyInfo: {} };
+  await writeObj(
+    { ...obj, ...placeholder },
+    { group: "eval", stage: "in", folder, file: keys },
+  );
 }
 
 const counts: Command = {
@@ -45,8 +60,7 @@ const company: Command = {
     logger.info(`Fetching ${ats} companies`, companyIds);
     await runMany(companyIds, async (companyId) => {
       const result = await fetchCompany(ats, companyId);
-      // temp, replace with write file in a few
-      logger.info(`  ${companyId}`, result.item);
+      await save("company", result, ats, companyId);
     });
   },
 };
@@ -59,8 +73,7 @@ const job: Command = {
     logger.info(`Fetching ${ats} jobs`, companyIds);
     await runMany(companyIds, async (companyId) => {
       const result = await fetchJob(ats, companyId);
-      // temp, replace with write file in a few
-      logger.info(`  ${companyId}`, result.item);
+      await save("job", result, ats, companyId, result.item.id);
     });
   },
 };
@@ -72,8 +85,7 @@ const exactJob: Command = {
 
     logger.info(`Fetching job ${ats}/${companyId}/${jobId}`);
     const result = await fetchJob(ats, companyId, jobId);
-    // temp, replace with write file in a few
-    logger.info(`  ${companyId}/${jobId}`, result.item);
+    await save("job", result, ats, companyId, jobId);
   },
 };
 
