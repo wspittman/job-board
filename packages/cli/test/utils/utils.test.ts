@@ -1,12 +1,10 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
-
+import { after, suite, test } from "node:test";
 import { CommandError, type Registry } from "../../src/types.ts";
+import { asArray, commandUsage, runCommand } from "../../src/utils/utils.ts";
+import { afterReset } from "../setup.ts";
 
-process.env.ADMIN_TOKEN ??= "test-admin-token-1";
-
-const { asArray, commandUsage, runCommand } =
-  await import("../../src/utils/utils.ts");
+after(afterReset);
 
 suite("utils", () => {
   test("asArray: wraps a string into an array", () => {

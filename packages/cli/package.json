@@ -6,8 +6,8 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier . --write",
-    "test": "node --import tsx --test --test-reporter=dot test/**/*.test.ts",
-    "test-details": "node --import tsx --test test/**/*.test.ts",
+    "test": "node --import tsx --test --import ./test/setup.ts --test-reporter=dot test/**/*.test.ts",
+    "test-details": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
     "cli": "tsx --env-file=.env src/index.ts"
   },
   "dependencies": {
