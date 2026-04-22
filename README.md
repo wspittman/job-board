@@ -1,6 +1,6 @@
 # Job Board
 
-Next-generation job board focused on the job seeker experience. The monorepo houses the Vite/Vanilla frontend, an Express 5 + TypeScript API, a TypeScript ops CLI for running operational scripts against a live backend API, and an evaluation harness for the LLM-powered extraction logic.
+Next-generation job board focused on the job seeker experience. The monorepo houses the Vite/Vanilla frontend, an Express 5 + TypeScript API, a TypeScript CLI for running operational scripts against a live backend API, and an evaluation harness for the LLM-powered extraction logic.
 
 > Status: active development. Expect breaking changes as the product evolves.
 
@@ -27,8 +27,7 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
 - **Workspaces**
   - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
-  - [`packages/ops`](packages/ops/README.md): TypeScript CLI for operational scripts that take actions against a running backend API, such as adding/deleting companies from supported ATS providers.
-  - [`packages/lab`](packages/lab/README.md): Script lab for evals and intermediate data collection that need direct access to backend-only logic or data (not surfaced via API).
+  - [`packages/cli`](packages/cli/README.md): General-purpose CLI for development and operational tasks, including API interaction, direct ATS data fetching, end-to-end testing, LLM evaluations, and playground experiments.
 - **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
 - **Install once from the repo root**: `npm install`
 - **Dev servers**: `npm run start:backend` and `npm run start:frontend`
@@ -74,29 +73,11 @@ Most commands are exposed via the root `package.json`:
 Refer to package-specific READMEs for additional scripts such as previews, linting, and
 production server wrappers.
 
-## Ops CLI
+## CLI
 
-The ops CLI provides scripted access to backend operations against a running API instance. Invoke it from the repo root as:
+[`packages/cli`](packages/cli/README.md) is a general-purpose CLI for development and operational tasks, including API interaction, direct ATS data fetching, end-to-end testing, LLM evaluations, and playground experiments.
 
-```bash
-npm run ops -- <command> [args]
-```
-
-Configure `PROD_API_TOKEN` and `LOCAL_API_TOKEN` (and their corresponding base URLs if not using defaults) in `packages/ops/.env` (or your shell)
-before invoking the CLI. Available commands include importing companies from Greenhouse or
-Lever and deleting individual job postings.
-
-## Evaluation harness
-
-The evaluation workspace reproduces the backend’s extraction logic locally. After preparing
-input and ground-truth data under `packages/lab/`, run:
-
-```bash
-npm run lab -- evals <dataModel> [runName]
-```
-
-Outputs are written beside the source data (inputs, ground truth, outcomes, and reports)
-to support reproducible experiments when tuning LLM configuration.
+`npm run cli` will print usage instructions.
 
 ## Screenshots
 
