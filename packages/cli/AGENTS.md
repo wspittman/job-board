@@ -11,7 +11,7 @@ Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stat
 
 ## Running commands
 
-`npm run cli` will print usage instructions.
+`npm run cli -- help` will print usage instructions.
 
 ## Logs and output
 

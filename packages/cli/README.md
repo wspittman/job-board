@@ -11,17 +11,6 @@ providers, running end-to-end tests, running LLM evaluations, and running playgr
 - Copy `.env.example` to `.env` inside `packages/cli/` and supply the required environment variables.
   - The cli package has commands that directly use code from the backend package. For those commands, any environment variables documented for the backend also apply here.
 
-## Environment variables
-
-| Variable           | Description                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------- |
-| `API_URL`          | Base URL for the local backend API (default: `http://localhost:3000/api/`).                       |
-| `ADMIN_TOKEN`      | Bearer token with admin privileges for the local backend API.                                     |
-| `PROD_API_URL`     | Base URL for the production backend API (default: `https://api.betterjobboard.net/api/`).         |
-| `PROD_ADMIN_TOKEN` | Bearer token with admin privileges for the production backend API. Required for `*Prod` commands. |
-| `GREENHOUSE_IDS`   | Comma-separated list of Greenhouse company IDs used by e2e tests.                                 |
-| `LEVER_IDS`        | Comma-separated list of Lever company IDs used by e2e tests.                                      |
-
 ## Available commands
 
 Run all commands from the repository root:
@@ -29,8 +18,8 @@ Run all commands from the repository root:
 ```bash
 npm run cli -- <COMMAND> <ARGS>
 
-# Running with no arguments will print usage instructions
-npm run cli
+# To see usage information for all commands:
+npm run cli -- help
 ```
 
 ### `api` — Interact with the backend API
