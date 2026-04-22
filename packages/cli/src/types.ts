@@ -6,9 +6,8 @@ export type ENV = "prod" | "local";
 export interface Command {
   usage(): string | string[];
   prerequisite?(): void;
-  run(args: string[]): Promise<void>;
+  subCommands?: Record<string, Command>;
+  run?(args: string[]): Promise<void>;
 }
-
-export type Registry = Record<string, Command>;
 
 export class CommandError extends Error {}

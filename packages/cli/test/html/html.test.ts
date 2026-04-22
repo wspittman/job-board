@@ -20,7 +20,7 @@ suite("html command", () => {
     await mkdir(path.dirname(outPath), { recursive: true });
     await writeFile(inPath, "# Hello World\n\nSome content.", "utf-8");
 
-    await html.run(["test-post"]);
+    await html.run!(["test-post"]);
 
     const output = await readFile(outPath, "utf-8");
     assert.ok(output.includes("Hello World"));
@@ -31,7 +31,7 @@ suite("html command", () => {
 
   invalidFileNames.forEach((fileName) => {
     test(`run: throws CommandError for invalid file name "${fileName}"`, async () => {
-      await assert.rejects(() => html.run([fileName]), CommandError);
+      await assert.rejects(() => html.run!([fileName]), CommandError);
     });
   });
 });

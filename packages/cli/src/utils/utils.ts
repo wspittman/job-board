@@ -1,9 +1,6 @@
+import { logger } from "dry-utils-logger";
 import { atsTypes, type ATS } from "../portal/pTypes.ts";
-import { CommandError, type Registry } from "../types.ts";
-
-export function asArray(value: string | string[]): string[] {
-  return Array.isArray(value) ? value : [value];
-}
+import { CommandError, type Command } from "../types.ts";
 
 export function validateCompanyArgs([ats, ...companyIds]: string[]) {
   const ids = validateIds("COMPANY_IDs", companyIds);
@@ -44,27 +41,56 @@ function validateIds(name: string, ids: (string | undefined)[]): string[] {
   return validIds;
 }
 
-export function commandUsage(registry: Registry, indent = ""): string[] {
-  return Object.entries(registry).flatMap(([name, cmd]) => [
+function commandUsage(cName: string, cmd: Command, indent: string): string[] {
+  const usage = cmd.usage();
+  let [title, ...rest] = Array.isArray(usage) ? usage : [usage];
+  title = `${indent}${cName} ${title}`;
+  rest = rest.map((line) => `${indent + "  "}${line}`);
+  const cmdUsage = [title, ...rest];
+
+  const subCommands = Object.entries(cmd.subCommands ?? {});
+  const subCommandUsage = subCommands.flatMap(([name, subCmd]) => [
     "",
-    ...asArray(cmd.usage()).map(
-      (line, i) => `${i === 0 ? `${indent}${name} ` : `${indent}  `}${line}`,
-    ),
+    ...commandUsage(name, subCmd, indent + "  "),
   ]);
+
+  return [...cmdUsage, ...subCommandUsage];
+}
+
+function logCommandUsage(parent: string, cmd: Command): void {
+  logger.info(["Usage:", ...commandUsage(parent, cmd, "  "), ""].join("\n"));
 }
 
 export async function runCommand(
-  registry: Registry,
-  [command, ...args]: string[],
+  parent: string,
+  cmd: Command,
+  args: string[],
 ): Promise<void> {
-  if (!command) {
-    throw new CommandError("No command provided");
-  }
-  const cmd = registry[command];
+  try {
+    cmd.prerequisite?.();
 
-  if (!cmd) {
-    throw new CommandError(`Invalid Command "${command}"`);
+    if (cmd.subCommands) {
+      const [subCommand, ...subArgs] = args;
+      const subCmd = cmd.subCommands[subCommand!];
+
+      if (!subCmd) {
+        logCommandUsage(parent, cmd);
+        logger.error(`Invalid Command "${subCommand ?? ""}"`);
+        return;
+      }
+
+      await runCommand(`${parent} ${subCommand}`, subCmd, subArgs);
+    } else if (cmd.run) {
+      await cmd.run(args);
+    } else {
+      throw new CommandError("No subCommand or run() defined for this command");
+    }
+  } catch (err) {
+    if (err instanceof CommandError) {
+      logCommandUsage(parent, cmd);
+      logger.error("Command Error", err);
+    } else {
+      throw err;
+    }
   }
-  cmd.prerequisite?.();
-  await cmd.run(args);
 }

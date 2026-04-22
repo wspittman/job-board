@@ -1,14 +1,9 @@
 import { logger } from "dry-utils-logger";
 import timers from "node:timers/promises";
 import { fetchCompany, fetchJob, fetchJobCount } from "../portal/pFuncs.ts";
-import type { Command, Registry } from "../types.ts";
+import type { Command } from "../types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
-import {
-  commandUsage,
-  runCommand,
-  validateCompanyArgs,
-  validateJobArgs,
-} from "../utils/utils.ts";
+import { validateCompanyArgs, validateJobArgs } from "../utils/utils.ts";
 
 async function runMany(
   ids: string[],
@@ -89,19 +84,15 @@ const exactJob: Command = {
   },
 };
 
-const registry: Registry = {
-  counts,
-  company,
-  job,
-  exactJob,
-};
-
 export const atsCommands: Command = {
   usage: () => [
     "<SUBCOMMAND> <ARGS>",
-    "",
     "Requests information from external ATS using backend code",
-    ...commandUsage(registry),
   ],
-  run: (args: string[]) => runCommand(registry, args),
+  subCommands: {
+    counts,
+    company,
+    job,
+    exactJob,
+  },
 };

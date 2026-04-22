@@ -17,9 +17,7 @@ subscribeAsyncLogging({
 export const evals: Command = {
   usage: () => [
     "<LLM_ACTION> [RUN_NAME]",
-    "",
     "Run evaluation for the specified LLM action and save the outcomes and report",
-    "",
     `LLM_ACTION: ${llmActionTypes.join("|")}`,
   ],
   run,

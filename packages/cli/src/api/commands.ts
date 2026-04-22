@@ -1,12 +1,7 @@
 import { logger } from "dry-utils-logger";
-import { type Command, type ENV, type Registry } from "../types.ts";
+import { type Command, type ENV } from "../types.ts";
 import { apiCall } from "../utils/http.ts";
-import {
-  commandUsage,
-  runCommand,
-  validateCompanyArgs,
-  validateJobArgs,
-} from "../utils/utils.ts";
+import { validateCompanyArgs, validateJobArgs } from "../utils/utils.ts";
 
 const addCompany = (env?: ENV): Command => ({
   usage: () => "<ATS> <COMPANY_ID[, ...]>",
@@ -56,24 +51,20 @@ const syncCompanyJobs = (env?: ENV): Command => ({
   },
 });
 
-const registry: Registry = {
-  addCompany: addCompany(),
-  addCompanyProd: addCompany("prod"),
-  ignoreJob: ignoreJob(),
-  ignoreJobProd: ignoreJob("prod"),
-  deleteCompany: deleteCompany(),
-  deleteCompanyProd: deleteCompany("prod"),
-  syncCompanyJobs: syncCompanyJobs(),
-  syncCompanyJobsProd: syncCompanyJobs("prod"),
-};
-
 export const apiCommands: Command = {
   usage: () => [
     "<SUBCOMMAND> <ARGS>",
-    "",
     "Local requires a running local server",
     "Prod requires a valid PROD_ADMIN_TOKEN",
-    ...commandUsage(registry),
   ],
-  run: (args: string[]) => runCommand(registry, args),
+  subCommands: {
+    addCompany: addCompany(),
+    addCompanyProd: addCompany("prod"),
+    ignoreJob: ignoreJob(),
+    ignoreJobProd: ignoreJob("prod"),
+    deleteCompany: deleteCompany(),
+    deleteCompanyProd: deleteCompany("prod"),
+    syncCompanyJobs: syncCompanyJobs(),
+    syncCompanyJobsProd: syncCompanyJobs("prod"),
+  },
 };

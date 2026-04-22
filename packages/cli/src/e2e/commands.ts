@@ -12,9 +12,7 @@ const FLOW_NAMES = Object.keys(flows);
 export const e2e: Command = {
   usage: () => [
     "<FLOW>",
-    "",
     "Run the e2e tests against a running local server",
-    "",
     `FLOW: ${FLOW_NAMES.join("|")}`,
   ],
   prerequisite,

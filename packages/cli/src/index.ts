@@ -6,46 +6,28 @@ import { e2e } from "./e2e/commands.ts";
 import { evals } from "./eval/eval.ts";
 import { html } from "./html/html.ts";
 import { playground } from "./playground/playground.ts";
-import { atsTypes } from "./portal/pTypes.ts";
-import { CommandError, type Registry } from "./types.ts";
-import { commandUsage, runCommand } from "./utils/utils.ts";
+import { type Command } from "./types.ts";
+import { runCommand } from "./utils/utils.ts";
 
-const registry: Registry = {
-  api: apiCommands,
-  ats: atsCommands,
-  e2e,
-  evals,
-  html,
-  playground,
+const cmd: Command = {
+  usage: () => "<COMMAND> <ARGS>",
+  subCommands: {
+    api: apiCommands,
+    ats: atsCommands,
+    e2e,
+    evals,
+    html,
+    playground,
+  },
 };
-
-function usageReminder() {
-  logger.info(
-    [
-      "Usage:",
-      "  npm run cli -- <COMMAND> <ARGS>",
-      "",
-      "  COMMAND:",
-      ...commandUsage(registry, "    "),
-      "",
-      "  COMMON ARGUMENTS:",
-      `    ATS: ${atsTypes.join("|")}`,
-      "",
-    ].join("\n"),
-  );
-}
 
 async function main() {
   const args = process.argv.slice(2);
   logger.info(`Running CLI with args`, args);
-  await runCommand(registry, args);
+  await runCommand("npm run cli --", cmd, args);
 }
 
 main().catch((err) => {
-  if (err instanceof CommandError) {
-    usageReminder();
-  } else {
-    process.exitCode = 1;
-  }
+  process.exitCode = 1;
   logger.error("Main:", err);
 });

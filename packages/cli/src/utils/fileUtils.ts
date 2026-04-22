@@ -1,7 +1,6 @@
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { asArray } from "./utils.ts";
 
 type Strings = string | string[] | undefined;
 type Ext = "json" | "md" | "html";
@@ -18,7 +17,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const basePath = path.join(__dirname, "../../logs");
 
-const toArray = (val: Strings): string[] => asArray(val ?? []).filter(Boolean);
+const toArray = (val: Strings): string[] => {
+  if (!val) return [];
+  return (Array.isArray(val) ? val : [val]).filter(Boolean);
+};
 
 const getFolderPath = ({ group, stage, folder }: Place) =>
   path.join(basePath, group, stage, ...toArray(folder));
