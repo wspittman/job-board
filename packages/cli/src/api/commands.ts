@@ -4,7 +4,8 @@ import { apiCall } from "../utils/http.ts";
 import { validateCompanyArgs, validateJobArgs } from "../utils/utils.ts";
 
 const addCompany = (env?: ENV): Command => ({
-  usage: () => "<ATS> <COMPANY_ID[, ...]>",
+  args: "<ATS> <COMPANY_ID[, ...]>",
+  usage: "Add companies",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyIds } = validateCompanyArgs(args);
 
@@ -16,7 +17,8 @@ const addCompany = (env?: ENV): Command => ({
 });
 
 const deleteCompany = (env?: ENV): Command => ({
-  usage: () => "<ATS> <COMPANY_ID>",
+  args: "<ATS> <COMPANY_ID>",
+  usage: "Delete a company",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyId } = validateCompanyArgs(args);
 
@@ -28,7 +30,8 @@ const deleteCompany = (env?: ENV): Command => ({
 });
 
 const ignoreJob = (env?: ENV): Command => ({
-  usage: () => "<ATS> <COMPANY_ID> <JOB_ID>",
+  args: "<ATS> <COMPANY_ID> <JOB_ID>",
+  usage: "Mark a job as ignored",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyId, jobId } = validateJobArgs(args);
 
@@ -40,7 +43,8 @@ const ignoreJob = (env?: ENV): Command => ({
 });
 
 const syncCompanyJobs = (env?: ENV): Command => ({
-  usage: () => "<ATS> <COMPANY_ID>",
+  args: "<ATS> <COMPANY_ID>",
+  usage: "Sync denormalized fields from a company to its jobs",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyId } = validateCompanyArgs(args);
 
@@ -52,8 +56,9 @@ const syncCompanyJobs = (env?: ENV): Command => ({
 });
 
 export const apiCommands: Command = {
-  usage: () => [
-    "<SUBCOMMAND> <ARGS>",
+  args: "<SUBCOMMAND> <ARGS>",
+  usage: [
+    "Make API calls for testing or operations purposes",
     "Local requires a running local server",
     "Prod requires a valid PROD_ADMIN_TOKEN",
   ],

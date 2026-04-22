@@ -6,7 +6,8 @@ const inPlace: Place = { group: "html", stage: "in" };
 const outPlace: Place = { group: "html", stage: "out" };
 
 export const html: Command = {
-  usage: () => "<FILE_NAME>",
+  args: "<FILE_NAME>",
+  usage: "Convert a markdown file in logs/html/in to HTML in logs/html/out",
   run,
 };
 

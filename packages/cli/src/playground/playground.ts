@@ -24,7 +24,8 @@ const inFile: Place = {
 const outFile: Place = { ...inFile, stage: "out" };
 
 export const playground: Command = {
-  usage: () => "(no arguments)",
+  args: "(no arguments)",
+  usage: "Run the playground experiment",
   run,
 };
 

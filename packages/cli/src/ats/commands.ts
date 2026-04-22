@@ -35,7 +35,8 @@ async function save(
 }
 
 const counts: Command = {
-  usage: () => "<ATS> <COMPANY_ID[, ...]>",
+  args: "<ATS> <COMPANY_ID[, ...]>",
+  usage: "Get job counts for one or more companies",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyIds } = validateCompanyArgs(args);
 
@@ -48,7 +49,8 @@ const counts: Command = {
 };
 
 const company: Command = {
-  usage: () => "<ATS> <COMPANY_ID[, ...]>",
+  args: "<ATS> <COMPANY_ID[, ...]>",
+  usage: "Fetch and save company data",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyIds } = validateCompanyArgs(args);
 
@@ -61,7 +63,8 @@ const company: Command = {
 };
 
 const job: Command = {
-  usage: () => "<ATS> <COMPANY_ID[, ...]>",
+  args: "<ATS> <COMPANY_ID[, ...]>",
+  usage: "Fetch and save job data for a random job from each company",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyIds } = validateCompanyArgs(args);
 
@@ -74,7 +77,8 @@ const job: Command = {
 };
 
 const exactJob: Command = {
-  usage: () => "<ATS> <COMPANY_ID> <JOB_ID>",
+  args: "<ATS> <COMPANY_ID> <JOB_ID>",
+  usage: "Fetch and save a job data for a specific job",
   run: async (args: string[]): Promise<void> => {
     const { ats, companyId, jobId } = validateJobArgs(args);
 
@@ -85,10 +89,8 @@ const exactJob: Command = {
 };
 
 export const atsCommands: Command = {
-  usage: () => [
-    "<SUBCOMMAND> <ARGS>",
-    "Requests information from external ATS using backend code",
-  ],
+  args: "<SUBCOMMAND> <ARGS>",
+  usage: "Requests information from external ATS using backend code",
   subCommands: {
     counts,
     company,

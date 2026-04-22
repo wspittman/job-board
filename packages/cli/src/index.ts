@@ -9,23 +9,28 @@ import { playground } from "./playground/playground.ts";
 import { CommandError, type Command } from "./types.ts";
 
 function commandUsage(cName: string, cmd: Command, indent: string): string[] {
-  const usage = cmd.usage();
-  let [title, ...rest] = Array.isArray(usage) ? usage : [usage];
-  title = `${indent}${cName} ${title}`;
-  rest = rest.map((line) => `${indent + "  "}${line}`);
-  const cmdUsage = [title, ...rest];
-
+  const title = `${indent}${cName} ${cmd.args}`;
+  const usageLines = Array.isArray(cmd.usage) ? cmd.usage : [cmd.usage];
   const subCommands = Object.entries(cmd.subCommands ?? {});
   const subCommandUsage = subCommands.flatMap(([name, subCmd]) => [
     "",
     ...commandUsage(name, subCmd, indent + "  "),
   ]);
 
-  return [...cmdUsage, ...subCommandUsage];
+  return [
+    title,
+    ...usageLines.map((line) => `${indent + "  "}${line}`),
+    ...subCommandUsage,
+  ];
 }
 
+// Don't log usage more than once
+let usageLogged = false;
+
 function logCommandUsage(parent: string, cmd: Command): void {
+  if (usageLogged) return;
   logger.info(["Usage:", ...commandUsage(parent, cmd, "  "), ""].join("\n"));
+  usageLogged = true;
 }
 
 export async function runCommand(
@@ -59,7 +64,8 @@ export async function runCommand(
 }
 
 const cmd: Command = {
-  usage: () => "<COMMAND> <ARGS>",
+  args: "<COMMAND> <ARGS>",
+  usage: "General-purpose CLI for development and operational tasks",
   subCommands: {
     api: apiCommands,
     ats: atsCommands,

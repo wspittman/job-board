@@ -10,8 +10,8 @@ const { GREENHOUSE_IDS, LEVER_IDS } = config;
 const FLOW_NAMES = Object.keys(flows);
 
 export const e2e: Command = {
-  usage: () => [
-    "<FLOW>",
+  args: "<FLOW>",
+  usage: [
     "Run the e2e tests against a running local server",
     `FLOW: ${FLOW_NAMES.join("|")}`,
   ],
