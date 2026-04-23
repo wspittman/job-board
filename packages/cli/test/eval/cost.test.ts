@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
+import { after, suite, test } from "node:test";
 import { cost, costAg, isCostAvailable } from "../../src/eval/cost.ts";
 import { LLMAction } from "../../src/portal/pTypes.ts";
+import { afterReset } from "../setup.ts";
+
+after(afterReset);
 
 const MODEL = "gpt-5-nano";
 const COMPANY = "fillCompanyInfo";

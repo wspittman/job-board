@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
+import { after, suite, test } from "node:test";
 import type { CheckIn, CheckOut, Rubric } from "../../../src/eval/evalTypes.ts";
 import {
   arrayExactMatcher,
@@ -9,6 +9,9 @@ import {
   runChecks,
 } from "../../../src/eval/judge/checks.ts";
 import { Bag } from "../../../src/types.ts";
+import { afterReset } from "../../setup.ts";
+
+after(afterReset);
 
 const BAD_OMIT: Partial<CheckOut> = { check: "omit", omit: "badOmit" };
 

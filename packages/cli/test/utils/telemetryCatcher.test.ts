@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
-
+import { after, suite, test } from "node:test";
 import { Job } from "../../src/portal/pTypes.ts";
 import { Bag } from "../../src/types.ts";
 import { catcher } from "../../src/utils/telemetryCatcher.ts";
+import { afterReset } from "../setup.ts";
+
+after(afterReset);
 
 suite("telemetryCatcher", () => {
   test("createMarkedInput: returns a stable 8-char hash per key", () => {

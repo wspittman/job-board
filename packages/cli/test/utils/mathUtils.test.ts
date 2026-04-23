@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
-
+import { after, suite, test } from "node:test";
 import {
   addNumBags,
   calcF1,
@@ -9,6 +8,9 @@ import {
   cosineSimilarity,
   truncate,
 } from "../../src/utils/mathUtils.ts";
+import { afterReset } from "../setup.ts";
+
+after(afterReset);
 
 suite("mathUtils", () => {
   test("addNumBags: adds matching keys and handles missing values", () => {

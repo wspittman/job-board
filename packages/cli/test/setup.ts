@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 export const TEST_ADMIN_TOKEN = "test-admin-token-123456";
 export const TEST_PROD_ADMIN_TOKEN = "test-prod-token-123456";
+export const TEST_OPENAI_API_KEY = "test-openai-api-key-123456";
 
 const originalEnv = { ...process.env };
 const originalFetch = globalThis.fetch;
@@ -15,6 +16,7 @@ export function setEnv(extras: Record<string, string | undefined> = {}) {
     ...originalEnv,
     ADMIN_TOKEN: TEST_ADMIN_TOKEN,
     PROD_ADMIN_TOKEN: TEST_PROD_ADMIN_TOKEN,
+    OPENAI_API_KEY: TEST_OPENAI_API_KEY,
     ...extras,
   };
 }
