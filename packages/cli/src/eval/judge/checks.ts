@@ -101,7 +101,7 @@ export function equalsUrl(input: CheckIn): CheckOut {
     score = 0.25;
   }
 
-  return { check: equals.name, score, ...input };
+  return { check: equalsUrl.name, score, ...input };
 }
 
 /**
