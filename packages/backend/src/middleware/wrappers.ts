@@ -119,5 +119,5 @@ function convertQuery(req: Request): Record<string, string> {
       (entry): entry is [string, string] =>
         typeof entry[1] === "string" && entry[1].length > 0,
     ),
-  ) as Record<string, string>;
+  );
 }

@@ -234,7 +234,7 @@ class DB {
       containers["ignoreJob"] as Container<IgnoreJob>,
     );
     this.#metadata = containers["metadata"] as Container<Metadata>;
-    this.#locationCache = containers["locationCache"] as Container<Location>;
+    this.#locationCache = containers["locationCache"];
   }
 
   #validate<T>(container: T | undefined): T {
