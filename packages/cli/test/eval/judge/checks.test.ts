@@ -7,8 +7,10 @@ import {
   equalsCasePreferred,
   equalsUrl,
   runChecks,
+  similar,
 } from "../../../src/eval/judge/checks.ts";
 import { Bag } from "../../../src/types.ts";
+import { embedCache } from "../../../src/utils/embedCache.ts";
 import { afterReset } from "../../setup.ts";
 
 after(afterReset);
@@ -80,6 +82,28 @@ suite("checks", () => {
   arrayExactMatcherCases.forEach(([input, expected]) => {
     test(`arrayExactMatcher: ${input.prop}`, () => {
       const result = arrayExactMatcher(input);
+      assert.deepEqual(result, expected);
+    });
+  });
+
+  const similarCases: [CheckIn, CheckOut][] = formChecks(
+    "similar",
+    "[0.6, -0.8]",
+    // This case might cause problems re: rounding
+    ["[-0.3855, -0.9145]", 0.5003],
+    ["[0.8, 0.6]", 0],
+    ["[-0.6, 0.8]", 0],
+    ["[]", 0],
+  );
+
+  similarCases.forEach(([input, expected]) => {
+    test(`similar: ${input.prop}`, async (t) => {
+      t.mock.method(embedCache, "getEmbeddings", async () => [
+        JSON.parse(input.actual as string),
+        JSON.parse(input.expected as string),
+      ]);
+
+      const result = await similar(input);
       assert.deepEqual(result, expected);
     });
   });

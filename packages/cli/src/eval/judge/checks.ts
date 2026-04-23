@@ -124,7 +124,9 @@ export async function similar(input: CheckIn): Promise<CheckOut> {
 
   // If either embedding failed, return 0 similarity.
   const eitherFails = !actualEmb.length || !expectedEmb.length;
-  const score = eitherFails ? 0 : cosineSimilarity(actualEmb, expectedEmb);
+  const score = eitherFails
+    ? 0
+    : Math.max(cosineSimilarity(actualEmb, expectedEmb), 0);
 
   return { check: similar.name, score, ...input };
 }

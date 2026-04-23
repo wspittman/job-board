@@ -40,11 +40,11 @@ suite("mathUtils", () => {
   });
 
   test("cosineSimilarity: returns 1 for identical vectors", () => {
-    assert.equal(cosineSimilarity([1, 2, 3], [1, 2, 3]), 1);
+    assert.equal(cosineSimilarity([0.6, -0.8], [0.6, -0.8]), 1);
   });
 
   test("cosineSimilarity: treats missing values in the second vector as zero", () => {
-    assert.equal(cosineSimilarity([1, 2], [1]), 1 / Math.sqrt(5));
+    assert.equal(cosineSimilarity([0.6, -0.8], [0.6]), 0.36);
   });
 
   test("cosineDistanceAll: returns distance for each vector", () => {

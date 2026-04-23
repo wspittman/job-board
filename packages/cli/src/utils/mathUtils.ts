@@ -17,28 +17,32 @@ export function truncate(n: number, digits: number = 4): number {
 }
 
 /**
- * Calculates the cosine similarity between two vectors.
- * @param vecA The first vector.
- * @param vecB The second vector.
+ * Calculates the cosine similarity between two embeddings (normalized vectors).
+ * @param embA The first embedding.
+ * @param embB The second embedding.
  * @returns The cosine similarity score, a value between -1 and 1 (typically 0 to 1 for positive embeddings).
  */
-export function cosineSimilarity(vecA: number[], vecB: number[]): number {
-  const dotProduct = vecA.reduce(
-    (sum, val, i) => sum + val * (vecB[i] ?? 0),
+export function cosineSimilarity(embA: number[], embB: number[]): number {
+  const dotProduct = embA.reduce(
+    (sum, val, i) => sum + val * (embB[i] ?? 0),
     0,
   );
-  const magnitudeA = Math.sqrt(vecA.reduce((sum, val) => sum + val ** 2, 0));
-  const magnitudeB = Math.sqrt(vecB.reduce((sum, val) => sum + val ** 2, 0));
 
-  return dotProduct / (magnitudeA * magnitudeB);
+  // OpenAI and Gemini both normalize embeddings to unit length,
+  // This means we can skip dividing by magnitudes for efficiency.
+  // const magnitudeA = Math.sqrt(embA.reduce((sum, val) => sum + val ** 2, 0));
+  // const magnitudeB = Math.sqrt(embB.reduce((sum, val) => sum + val ** 2, 0));
+  // return dotProduct / (magnitudeA * magnitudeB);
+
+  return dotProduct;
 }
 
 /**
- * Calculates the cosine distance between a vector and a list of vectors.
+ * Calculates the cosine distance between an embedding (normalized vector) and a list of embeddings.
  * Cosine distance is defined as (1 - cosine similarity).
  */
-export function cosineDistanceAll(vec: number[], vecAr: number[][]): number[] {
-  return vecAr.map((v) => 1 - cosineSimilarity(vec, v));
+export function cosineDistanceAll(emb: number[], embAr: number[][]): number[] {
+  return embAr.map((v) => 1 - cosineSimilarity(emb, v));
 }
 
 /**
