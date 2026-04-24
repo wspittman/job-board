@@ -33,9 +33,7 @@ function removeNulls(v: unknown): DeepPartialNullToUndef<unknown> | undefined {
 
   if (Array.isArray(v)) {
     const cleanArray = v.map(removeNulls).filter(Boolean);
-    return cleanArray.length
-      ? (cleanArray as DeepPartialNullToUndef<unknown>)
-      : undefined;
+    return cleanArray.length ? cleanArray : undefined;
   }
 
   const entries = Object.entries(v)

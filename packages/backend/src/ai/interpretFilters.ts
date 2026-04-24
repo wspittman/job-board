@@ -46,7 +46,7 @@ export async function interpretFilters(query: string): Promise<Filters> {
     ...extractedFilters,
     isRemote,
     location: normalizedLocation(extractedFilters.location),
-  } as Filters;
+  };
 
   const result: Filters = {};
   setExtractedData(result, mappedContent);

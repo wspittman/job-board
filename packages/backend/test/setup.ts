@@ -3,6 +3,7 @@ import { mock } from "node:test";
 
 process.env.ADMIN_TOKEN ??= "test-admin-token-123456";
 process.env.NODE_ENV ??= "test";
+process.env.OPENAI_API_KEY ??= "test-openai-key-123456";
 
 const telemetryWorkaround = (
   await import("../src/utils/telemetryWorkaround.cjs")

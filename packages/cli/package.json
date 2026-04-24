@@ -1,34 +1,28 @@
 {
-  "name": "backend",
+  "name": "cli",
   "version": "1.0.0",
   "type": "module",
+  "private": true,
   "scripts": {
     "lint": "eslint",
     "format": "prettier . --write",
-    "test": "node --import tsx --import ./test/setup.ts --test --test-reporter=dot test/**/*.test.ts",
+    "test": "node --import tsx --test --import ./test/setup.ts --test-reporter=dot test/**/*.test.ts",
     "test-details": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
-    "dev": "tsx watch --env-file=./.env ./src/app.ts",
-    "build": "tsc",
-    "start": "node dist/app.js"
+    "cli": "tsx --env-file=.env src/index.ts"
   },
   "dependencies": {
-    "applicationinsights": "^2.9.5",
-    "cors": "^2.8.5",
     "dry-utils-async": "^0.3.2",
-    "dry-utils-cosmosdb": "^0.5.1",
+    "dry-utils-logger": "^0.1.1",
     "dry-utils-openai": "^0.4.2",
     "dry-utils-text": "^0.2.1",
-    "express": "^5.1.0",
-    "helmet": "^8.0.0"
+    "ml-kmeans": "^7.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.1",
     "@types/node": "^24.10.0",
     "eslint": "^10.0.0",
     "prettier": "^3.7.4",
-    "tsx": "^4.7.1",
+    "tsx": "^4.19.1",
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.56.0"
   }
