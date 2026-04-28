@@ -44,6 +44,7 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
 2. Configure environment variables:
    - Each workspace uses its own `.env` file. Consult the individual package READMEs for required keys.
    - For local Cosmos DB development, follow the instructions below to set up the emulator and export its certificate.
+3. Optional: Import recommended Agent Skills from [agent-skills](https://github.com/wspittman/agent-skills.git)
 
 ### Local CosmosDB Emulator
 

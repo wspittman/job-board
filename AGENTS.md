@@ -27,9 +27,15 @@ Run the following commands from the root of the repository:
 
 # Available Skills
 
-In addition to built-in skills, this repository includes custom skills.
+In addition to built-in skills, you should have access to skills from the user profile, including frequently-used skills like:
 
+- `planning-with-files`: Use for complex, multi-step tasks that require maintaining state across many tool calls. This skill uses markdown files on disk as persistent working memory to overcome context window limitations.
 - `write-unit-test`: Use when you must write or update unit tests. This skill helps to ensure that tests are written to match the surrounding workspace conventions.
+
+and more specialized skills like:
+
+- `humanizer`: Use when editing or reviewing text to make it sound more natural and human-written. Based on Wikipedia's comprehensive "Signs of AI writing" guide. Detects and fixes patterns including: inflated symbolism, promotional language, superficial -ing analyses, vague attributions, em dash overuse, rule of three, AI vocabulary words, negative parallelisms, and excessive conjunctive phrases.
+- `security-awareness`: Use for agents that access email, credential vaults, web browsers, or sensitive data. Teaches agents to recognize and avoid security threats during normal activity, including phishing detection, credential protection, domain verification, and social engineering defense.
 
 # Development Conventions
 
