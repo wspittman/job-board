@@ -25,6 +25,8 @@ export interface Filters {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+  // Admin
+  refresh?: boolean;
 }
 
 export interface RefreshJobsOptions {

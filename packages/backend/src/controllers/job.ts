@@ -251,6 +251,7 @@ async function readJobsByFilters({
   companyStage,
   payCadence,
   currency,
+  refresh,
 }: EnhancedFilters) {
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
@@ -303,6 +304,11 @@ async function readJobsByFilters({
 
   if (minSalary) {
     query.whereCondition("salaryRange.min", ">=", minSalary);
+  }
+
+  if (refresh) {
+    const cutoffSeconds = Math.floor((Date.now() - MS_PER_DAY) / 1000);
+    query.whereCondition("_ts", ">=", cutoffSeconds);
   }
 
   // Substring Matches

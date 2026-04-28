@@ -60,4 +60,6 @@ export interface FilterModelApi {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+  // Admin
+  refresh?: boolean;
 }
