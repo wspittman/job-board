@@ -25,15 +25,21 @@ const companyJobQueue = new AsyncQueue(
 );
 
 /**
- * Adds a single company to the database if it doesn't exist
+ * Adds a single company to the database.
  * @param key - Company identifier containing id and ATS type
+ * @throws {AppError} 409 if the company is already indexed
+ * @throws {AppError} 404 if the company is not found on the given ATS
  * @returns Promise resolving when company is added
  */
 export async function addCompany(key: CompanyKey) {
-  const added = await addCompanyInternal(key);
-  if (added) {
-    companyInfoQueue.add([key]);
-  }
+  const exists = await db.company.get(key);
+  if (exists) throw new AppError("Company already indexed", 409);
+
+  const { item: company } = await ats.getCompany(key);
+  if (!company) throw new AppError(`Company not found on ${key.ats}`, 404);
+
+  await db.company.upsert(company);
+  companyInfoQueue.add([key]);
 }
 
 /**
@@ -161,7 +167,6 @@ async function addCompanyInternal(key: CompanyKey) {
   if (!company) return false;
 
   await db.company.upsert(company);
-  // Don't add to companyInfoQueue here, we want the caller to do it so they can batch
   return true;
 }
 

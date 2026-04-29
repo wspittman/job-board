@@ -1,0 +1,117 @@
+.add-company-page {
+  padding: var(--space-6) 0;
+}
+
+.add-company-hero {
+  text-align: center;
+  margin-block-end: var(--space-4);
+}
+
+.add-company-intro {
+  max-width: 600px;
+  margin: 0 auto;
+  color: var(--text-muted);
+}
+
+.add-company-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.add-company-form-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.add-company-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.add-company-feedback {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: var(--font-size-5);
+
+  &.feedback-error {
+    background: var(--bg-error);
+    color: var(--text-error);
+  }
+
+  &.feedback-success {
+    background: hsl(142 60% 95%);
+    color: hsl(142 60% 25%);
+  }
+}
+
+.add-company-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  border-radius: var(--radius);
+  background: var(--primary-gradient-btn);
+  color: var(--text-contrast);
+  font-size: var(--font-size-5);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease-in-out;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.add-company-info {
+  & h2 {
+    font-size: var(--font-size-3);
+    margin-block-end: var(--space-1);
+  }
+
+  & ul {
+    color: var(--text-muted);
+    padding-inline-start: var(--space-3);
+    margin-block-end: var(--space-3);
+    line-height: 1.8;
+  }
+}
+
+.add-company-slug-guide {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+
+  & dt {
+    font-weight: 600;
+    color: var(--primary-main);
+  }
+
+  & dd {
+    margin: 0;
+    color: var(--text-muted);
+
+    & code {
+      font-size: var(--font-size-6);
+      background: var(--bg-active);
+      padding: 0 var(--space-1);
+      border-radius: calc(var(--radius) / 2);
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .add-company-content {
+    grid-template-columns: 1fr;
+  }
+}

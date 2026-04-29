@@ -1,0 +1,56 @@
+<main class="add-company-page">
+  <section class="add-company-hero">
+    <h1>Add Your Company</h1>
+    <p class="add-company-intro">
+      Get your US-based jobs in front of job seekers — for free, no account
+      needed.
+    </p>
+  </section>
+
+  <section class="add-company-content">
+    <div class="add-company-form-wrap card">
+      <form id="add-company-form" novalidate>
+        <div class="add-company-fields">
+          <jb-form-select id="ats-select"></jb-form-select>
+          <jb-form-input id="slug-input"></jb-form-input>
+        </div>
+        <div
+          id="add-company-feedback"
+          class="add-company-feedback"
+          hidden
+        ></div>
+        <button type="submit" class="add-company-submit btn-primary">
+          Add Company
+        </button>
+      </form>
+    </div>
+
+    <aside class="add-company-info">
+      <h2>Before you submit</h2>
+      <ul>
+        <li>
+          Your company must use
+          <strong>Greenhouse</strong> or <strong>Lever</strong> as its applicant
+          tracking system.
+        </li>
+        <li>Only <strong>US-based jobs</strong> are indexed.</li>
+        <li>Jobs appear within <strong>24 hours</strong> of adding.</li>
+        <li>It's completely <strong>free</strong> — no account needed.</li>
+      </ul>
+
+      <h2>How to find your slug</h2>
+      <dl class="add-company-slug-guide">
+        <dt>Greenhouse</dt>
+        <dd>
+          Look at your jobs page URL:
+          <code>boards.greenhouse.io/<strong>&lt;slug&gt;</strong></code>
+        </dd>
+        <dt>Lever</dt>
+        <dd>
+          Look at your jobs page URL:
+          <code>jobs.lever.co/<strong>&lt;slug&gt;</strong></code>
+        </dd>
+      </dl>
+    </aside>
+  </section>
+</main>

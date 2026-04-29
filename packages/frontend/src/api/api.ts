@@ -1,6 +1,11 @@
 import { QueryCache, QueryClient } from "@tanstack/query-core";
 import { getStorageIds } from "../utils/storage";
-import type { FilterModelApi, JobModelApi, MetadataModelApi } from "./apiTypes";
+import type {
+  CompanyKeyApi,
+  FilterModelApi,
+  JobModelApi,
+  MetadataModelApi,
+} from "./apiTypes";
 
 const qc = new QueryClient({
   defaultOptions: {
@@ -55,6 +60,15 @@ class APIConnector {
   }
 
   /**
+   * Adds a company to the job board index.
+   * @param key - The company identifier and ATS type.
+   * @throws {Error} If the company is already indexed (409), not found on the ATS (404), or the request fails.
+   */
+  public async addCompany(key: CompanyKeyApi): Promise<void> {
+    await this.#httpCall<{ status: string }>("company", "PUT", key);
+  }
+
+  /**
    * Makes an HTTP call to the API.
    * @param url - The URL endpoint to call.
    * @param method - The HTTP method to use (defaults to GET).
@@ -63,7 +77,7 @@ class APIConnector {
    */
   async #httpCall<T>(
     url: string,
-    method: "GET" | "POST" = "GET",
+    method: "GET" | "POST" | "PUT" = "GET",
     body?: unknown,
   ): Promise<T> {
     const trimmedUrl = url.replace(/^\/+/, "");
@@ -80,10 +94,12 @@ class APIConnector {
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    const { statusText, ok } = response;
+    const { status, statusText, ok } = response;
 
     if (!ok) {
-      throw new Error(`API Request Failed: ${statusText}`);
+      throw Object.assign(new Error(`API Request Failed: ${statusText}`), {
+        status,
+      });
     }
 
     return (await response.json()) as T;

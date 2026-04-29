@@ -63,3 +63,8 @@ export interface FilterModelApi {
   // Admin
   refresh?: boolean;
 }
+
+export interface CompanyKeyApi {
+  id: string;
+  ats: "greenhouse" | "lever";
+}
