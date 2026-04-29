@@ -8,7 +8,7 @@ aggregate meaningful breakdowns from job/company fields and surface them on the 
 
 ## Current Phase
 
-Phase 1
+Phase 5
 
 ---
 
@@ -130,8 +130,8 @@ Define `JobAggregateStats` in `models.ts` (fields: `presenceCounts`, `jobFamilyC
 
 Add the optional aggregation fields to `Metadata` (see above).
 
-- [ ] Add optional aggregation fields to `Metadata`
-- **Status:** pending
+- [x] Add optional aggregation fields to `Metadata`
+- **Status:** completed
 
 ### Phase 3 — Backend: Update `refreshInternal`
 
@@ -140,9 +140,9 @@ Add the optional aggregation fields to `Metadata` (see above).
 Call `db.job.getAggregateStats()` during the refresh and write the results into the
 `"job"` metadata document.
 
-- [ ] Call `getAggregateStats()` in `refreshInternal`
-- [ ] Write aggregated results into the `"job"` metadata document
-- **Status:** pending
+- [x] Call `getAggregateStats()` in `refreshInternal`
+- [x] Write aggregated results into the `"job"` metadata document
+- **Status:** completed
 
 ### Phase 4 — Backend: Expose in `ClientMetadata`
 
@@ -151,9 +151,9 @@ Call `db.job.getAggregateStats()` during the refresh and write the results into 
 Add the new stats to `ClientMetadata` and map them through in `getClientMetadata()`.
 Keep it as a single metadata endpoint (no new routes).
 
-- [ ] Add new stats to `ClientMetadata`
-- [ ] Map through in `getClientMetadata()`
-- **Status:** pending
+- [x] Add new stats to `ClientMetadata`
+- [x] Map through in `getClientMetadata()`
+- **Status:** completed
 
 ### Phase 5 — Frontend: API types and model
 

@@ -12,7 +12,6 @@ import type {
   CompanyQuickRef,
   IgnoreJob,
   Job,
-  JobAggregateStats,
   JobKey,
   Location,
   Metadata,
@@ -126,21 +125,22 @@ class JobContainer extends Container<Job> {
     );
   }
 
-  async getAggregateStats(): Promise<JobAggregateStats> {
+  async aggregateMetadata(): Promise<Metadata> {
     const now = Date.now();
+    const oneDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - MS_PER_DAY}`;
+    const sevenDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - 7 * MS_PER_DAY}`;
     const bucketPresence =
       "SELECT c.presence AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.presence) GROUP BY c.presence";
     const bucketJobFamily =
       "SELECT c.jobFamily AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.jobFamily) GROUP BY c.jobFamily";
-    const sevenDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - 7 * MS_PER_DAY}`;
-    const oneDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - MS_PER_DAY}`;
 
-    const [presenceRows, jobFamilyRows, recentCounts, newCounts] =
+    const [jobCount, newCounts, recentCounts, presenceRows, jobFamilyRows] =
       await Promise.all([
+        this.getCount(),
+        this.query<number>(oneDayCount),
+        this.query<number>(sevenDayCount),
         this.query<BucketCount>(bucketPresence),
         this.query<BucketCount>(bucketJobFamily),
-        this.query<number>(sevenDayCount),
-        this.query<number>(oneDayCount),
       ]);
 
     const presenceCounts = Object.fromEntries(
@@ -156,10 +156,12 @@ class JobContainer extends Container<Job> {
     );
 
     return {
+      id: "job",
+      jobCount,
+      newJobCount: newCounts[0] ?? 0,
+      recentJobCount: recentCounts[0] ?? 0,
       presenceCounts,
       jobFamilyCounts,
-      recentJobCount: recentCounts[0] ?? 0,
-      newJobCount: newCounts[0] ?? 0,
     };
   }
 }

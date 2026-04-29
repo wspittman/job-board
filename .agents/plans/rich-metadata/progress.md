@@ -18,21 +18,31 @@
 
 ### Phase 2: Backend — Extend `Metadata` model
 
-- **Status:** pending
+- **Status:** completed
 - **Actions taken:**
-- **Files created/modified:**
+  - Added optional `presenceCounts`, `jobFamilyCounts`, `recentJobCount`, `newJobCount` fields to `Metadata` interface
+- **Files modified:**
+  - `packages/backend/src/models/models.ts`
 
 ### Phase 3: Backend — Update `refreshInternal`
 
-- **Status:** pending
+- **Status:** completed
 - **Actions taken:**
-- **Files created/modified:**
+  - Added `db.job.getAggregateStats()` to the `Promise.all` in `refreshInternal`
+  - Spread `aggregateStats` into the `"job"` metadata upsert
+- **Files modified:**
+  - `packages/backend/src/controllers/metadata.ts`
 
 ### Phase 4: Backend — Expose in `ClientMetadata`
 
-- **Status:** pending
+- **Status:** completed
 - **Actions taken:**
-- **Files created/modified:**
+  - Added `Presence` to imports in `clientModels.ts`
+  - Added `presenceCounts`, `jobFamilyCounts`, `recentJobCount`, `newJobCount` to `ClientMetadata`
+  - Mapped new fields from `jobMetadata` in `getClientMetadata()`
+- **Files modified:**
+  - `packages/backend/src/models/clientModels.ts`
+  - `packages/backend/src/controllers/metadata.ts`
 
 ### Phase 5: Frontend — API types and model
 

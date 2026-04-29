@@ -81,21 +81,6 @@ export interface IgnoreJob {
 }
 
 /**
- * Pre-computed aggregate stats derived from all job documents.
- * Computed via Cosmos DB GROUP BY and range COUNT queries at metadata refresh time.
- */
-export interface JobAggregateStats {
-  /** Count of jobs by presence mode (remote/hybrid/onsite). */
-  presenceCounts: Partial<Record<Presence, number>>;
-  /** Count of jobs by job family (engineering, design, etc.). */
-  jobFamilyCounts: Partial<Record<JobFamily, number>>;
-  /** Number of jobs posted in the last 7 days. */
-  recentJobCount: number;
-  /** Number of jobs posted in the last 24 hours. */
-  newJobCount: number;
-}
-
-/**
  * Aggregated metadata for other containers. Cached in the backend service.
  * - id: The type of metadata
  * - pKey: id
@@ -111,6 +96,10 @@ export interface Metadata {
 
   // For job type
   jobCount?: number;
+  newJobCount?: number;
+  recentJobCount?: number;
+  presenceCounts?: Partial<Record<Presence, number>>;
+  jobFamilyCounts?: Partial<Record<JobFamily, number>>;
 }
 
 /**
