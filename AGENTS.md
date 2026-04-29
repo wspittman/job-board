@@ -2,6 +2,16 @@
 
 A job board that prioritizes the job seeker's experience.
 
+## Workflows
+
+- Create or continue a plan: use the `planning-with-files` skill. When continuing, only implement changes in the **next phase** of the plan before stopping for feedback.
+- Write unit tests: use the `write-unit-test` skill.
+
+### Verifying Changes
+
+- If you are working with or from a plan, review to ensure that the plan files are structured correctly and up to date.
+- Always run `npm run pre-checkin` before committing code.
+
 ## NPM Workspaces
 
 Common Tech Stack: TypeScript, Node, Eslint, Prettier, Tsx
@@ -27,13 +37,6 @@ Run from the repository root:
 - `write-unit-test`: Use when you must write or update unit tests.
 - `humanizer`: Use when editing or reviewing text to make it sound more natural and human-written.
 - `security-awareness`: Use for tasks that access email, credential vaults, web browsers, or sensitive data.
-
-## Workflows
-
-- When asked to create a plan, use the `planning-with-files` skill. Before committing, review to ensure that the plan files are structured correctly according to the skill.
-- When asked to continue or implement a plan, use the `planning-with-files` skill to remember how the plans are organized and how they need to be updated. Implement changes in the next phase of the plan, update the plan files, and stop.
-- When asked to write unit tests, use the `write-unit-test` skill to ensure that your tests are well-structured and follow best practices.
-- Always run `npm run pre-checkin` before committing code.
 
 ## Conventions
 
