@@ -20,6 +20,30 @@ Artifacts are written under `packages/cli/logs/`:
 - `eval/in/` — eval input scenarios (populate before running `evals`)
 - `eval/out/` — model outcomes and summary reports
 - `html/` — Markdown input and rendered HTML output
+
+## Blog article workflow
+
+To create a new blog article without manual copy-paste:
+
+1. Write a Markdown file with YAML frontmatter in `packages/frontend/src/blog/<slug>.md`:
+
+   ```markdown
+   ---
+   title: Your Article Title
+   description: A short description for the meta tag.
+   date: April 28, 2026
+   slug: your-article-slug
+   ---
+
+   Article body goes here.
+   ```
+
+2. Run `npm run cli -- html --blog <slug>` — the CLI reads the `.md` file, injects frontmatter into `template.htm`, and writes the finished `.html` file to the same folder.
+3. Add a link to the new post in `packages/frontend/src/blog.html`.
+4. Add an entry to `sitemap.xml`.
+
+The standard `html` command (without `--blog`) still works for one-off markdown conversions using `logs/html/in/` and `logs/html/out/`.
+
 - `playground/` — clustering experiment data
 
 ## Notes
