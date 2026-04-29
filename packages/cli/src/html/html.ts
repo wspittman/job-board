@@ -14,13 +14,52 @@ const __dirname = path.dirname(__filename);
 /** Absolute path to the frontend blog folder. */
 export const blogFolder = path.join(__dirname, "../../../frontend/src/blog");
 
+const blogCmd: Command = {
+  args: "<SLUG>",
+  usage:
+    "Convert a frontmatter markdown in packages/frontend/src/blog/<SLUG>.md to a full HTML page",
+  async run(args: string[]): Promise<void> {
+    let [slug = ""] = args;
+    slug = slug.trim();
+
+    if (!slug || slug.match(/[^a-zA-Z0-9_-]/)) {
+      throw new CommandError("Invalid argument: SLUG");
+    }
+
+    return runBlog(slug);
+  },
+};
+
+const fileCmd: Command = {
+  args: "<NAME>",
+  usage: "Convert a markdown file in logs/html/in to HTML in logs/html/out",
+  async run(args: string[]): Promise<void> {
+    let [file = ""] = args;
+    file = file.trim();
+
+    if (!file || file.match(/[^a-zA-Z0-9_-]/)) {
+      throw new CommandError("Invalid argument: FILE_NAME");
+    }
+
+    const text = await readText({ ...inPlace, file });
+
+    if (!text) {
+      throw new CommandError(`File not found: ${file}`);
+    }
+
+    const content = markdownToHtml(text);
+
+    await writeText(content, { ...outPlace, file });
+  },
+};
+
 export const html: Command = {
-  args: "[--blog] <NAME>",
-  usage: [
-    "Convert a markdown file in logs/html/in to HTML in logs/html/out",
-    "--blog <SLUG>  Convert a frontmatter markdown in packages/frontend/src/blog/<SLUG>.md to a full HTML page",
-  ],
-  run,
+  args: "<SUBCOMMAND> <ARGS>",
+  usage: "Convert markdown to HTML",
+  subCommands: {
+    blog: blogCmd,
+    file: fileCmd,
+  },
 };
 
 export interface BlogFrontmatter {
@@ -119,36 +158,4 @@ export async function runBlog(
     .replace("{{SECTION_HTML}}", `\n${sectionHtml}\n        `);
 
   await writeFile(outPath, output, "utf-8");
-}
-
-async function run(args: string[]): Promise<void> {
-  const blogFlagIndex = args.indexOf("--blog");
-
-  if (blogFlagIndex !== -1) {
-    const remainingArgs = args.filter((_, i) => i !== blogFlagIndex);
-    const slug = (remainingArgs[0] ?? "").trim();
-
-    if (!slug || slug.match(/[^a-zA-Z0-9_-]/)) {
-      throw new CommandError("Invalid argument: SLUG");
-    }
-
-    return runBlog(slug);
-  }
-
-  let [file = ""] = args;
-  file = file.trim();
-
-  if (!file || file.match(/[^a-zA-Z0-9_-]/)) {
-    throw new CommandError("Invalid argument: FILE_NAME");
-  }
-
-  const text = await readText({ ...inPlace, file });
-
-  if (!text) {
-    throw new CommandError(`File not found: ${file}`);
-  }
-
-  const content = markdownToHtml(text);
-
-  await writeText(content, { ...outPlace, file });
 }

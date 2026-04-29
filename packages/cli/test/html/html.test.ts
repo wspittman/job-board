@@ -10,7 +10,7 @@ after(afterReset);
 
 const touchedFiles = makeFileTracker();
 
-suite("html command", () => {
+suite("html file subcommand", () => {
   test("run: converts markdown to HTML and writes output file", async () => {
     const inPath = path.join(logBasePath, "html", "in", "test-post.md");
     const outPath = path.join(logBasePath, "html", "out", "test-post.html");
@@ -20,7 +20,7 @@ suite("html command", () => {
     await mkdir(path.dirname(outPath), { recursive: true });
     await writeFile(inPath, "# Hello World\n\nSome content.", "utf-8");
 
-    await html.run!(["test-post"]);
+    await html.subCommands!.file.run!(["test-post"]);
 
     const output = await readFile(outPath, "utf-8");
     assert.ok(output.includes("Hello World"));
@@ -31,7 +31,10 @@ suite("html command", () => {
 
   invalidFileNames.forEach((fileName) => {
     test(`run: throws CommandError for invalid file name "${fileName}"`, async () => {
-      await assert.rejects(() => html.run!([fileName]), CommandError);
+      await assert.rejects(
+        () => html.subCommands!.file.run!([fileName]),
+        CommandError,
+      );
     });
   });
 });
@@ -107,8 +110,11 @@ suite("runBlog", () => {
   const invalidSlugs = ["", "   ", "../evil", "--flag"];
 
   invalidSlugs.forEach((slug) => {
-    test(`run --blog throws CommandError for invalid slug "${slug}"`, async () => {
-      await assert.rejects(() => html.run!(["--blog", slug]), CommandError);
+    test(`blog subcommand throws CommandError for invalid slug "${slug}"`, async () => {
+      await assert.rejects(
+        () => html.subCommands!.blog.run!([slug]),
+        CommandError,
+      );
     });
   });
 
