@@ -102,6 +102,16 @@ Implementation:
 
 - Unit test for the blog conversion: given a `.md` with frontmatter, assert the output HTML contains expected title, description, slug, header, and section content
 
+### Phase 5: Auto-update `blog.html` and `sitemap.xml`
+
+**Status:** `complete`
+
+- When `html blog <SLUG>` runs, also insert a new `<article class="card">` at the top of `<section class="blog-list">` in `blog.html`
+- Also insert a `<url>` entry in `sitemap.xml`
+- Both operations are idempotent (skip if slug already present)
+- Export `updateBlogIndex` and `updateSitemap` with optional `filePath` override for testability
+- Add unit tests for both helpers and update the `runBlog` integration test
+
 ---
 
 ## Decisions

@@ -29,9 +29,12 @@
 - **Actions taken:** Replaced verbose placeholder comments in `template.htm` with clean `{{TITLE}}`, `{{DESCRIPTION}}`, `{{SLUG}}`, `{{HEADER_HTML}}`, `{{SECTION_HTML}}` sentinels. Added blog workflow section to `packages/cli/AGENTS.md`.
 - **Files created/modified:** `packages/frontend/src/blog/template.htm`, `packages/cli/AGENTS.md`
 
-### Phase 4: Tests
+### Phase 5: Auto-update `blog.html` and `sitemap.xml`
 
 - **Status:** complete
+- **Actions taken:** Added `updateBlogIndex` and `updateSitemap` exported helpers to `html.ts`. Both accept an optional `filePath` override for testability and are idempotent (skip if slug already present). `runBlog` now calls both after writing the HTML file. Added `before`/`afterEach` save/restore guards in the `runBlog` integration test, plus dedicated suites for both helpers (4 new tests). Full pre-checkin passes.
+- **Files created/modified:** `packages/cli/src/html/html.ts`, `packages/cli/test/html/html.test.ts`
+
 - **Actions taken:** Added `parseFrontmatter` suite (4 cases) and `runBlog` suite (6 cases) to `html.test.ts`. All 86 CLI tests pass. Full pre-checkin passes (lint + format + all tests).
 - **Files created/modified:** `packages/cli/test/html/html.test.ts`
 

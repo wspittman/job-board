@@ -20,6 +20,16 @@ const blogPlace: Place = {
   ...inPlace,
   folder: "../../../../frontend/src/blog",
 };
+const blogIndexPlace: Place = {
+  ...inPlace,
+  folder: "../../../../frontend/src",
+  file: "blog",
+};
+const sitemapPlace: Place = {
+  ...inPlace,
+  folder: "../../../../frontend/src/public",
+  file: "sitemap",
+};
 
 function readFMLine(line: string): BEntry | undefined {
   const idx = line.indexOf(":") || 0;
@@ -57,8 +67,12 @@ export function parseFrontmatter(text: string): Blog | undefined {
 /**
  * Converts a frontmatter markdown file in the blog folder to a full HTML page.
  * @param slug The slug of the blog post (filename without extension).
+ * @param overrides Optional Place overrides for testing (blog index and sitemap).
  */
-export async function runBlog(slug: string): Promise<void> {
+export async function runBlog(
+  slug: string,
+  overrides?: { blogIndex?: Place; sitemap?: Place },
+): Promise<void> {
   const template = await readText({ ...blogPlace, file: "template" }, "htm");
   if (!template) {
     throw new CommandError("Blog template not found");
@@ -85,6 +99,76 @@ export async function runBlog(slug: string): Promise<void> {
     .replace("{{SECTION_HTML}}", `\n${sectionHtml}\n        `);
 
   await writeText(output, { ...blogPlace, file: slug }, "html");
+  await updateBlogIndex(blog, overrides?.blogIndex);
+  await updateSitemap(blog.slug, overrides?.sitemap);
+}
+
+/**
+ * Inserts a new article card at the top of the blog list in blog.html.
+ * Skips insertion if the slug is already present (idempotent).
+ * @param blog The blog metadata to insert.
+ * @param place Optional Place override; defaults to the frontend blog.html.
+ */
+export async function updateBlogIndex(
+  blog: Pick<Blog, "title" | "description" | "date" | "slug">,
+  place: Place = blogIndexPlace,
+): Promise<void> {
+  const content = await readText(place, "html");
+  if (!content) {
+    throw new CommandError("blog.html not found");
+  }
+
+  if (content.includes(`/blog/${blog.slug}`)) return;
+
+  const card = [
+    `        <article class="card">`,
+    `          <header>`,
+    `            <h2><a href="/blog/${blog.slug}">${blog.title}</a></h2>`,
+    `            <time>${blog.date}</time>`,
+    `          </header>`,
+    `          <p>${blog.description}</p>`,
+    `        </article>`,
+  ].join("\n");
+
+  const marker = '<section class="blog-list">';
+  const markerIdx = content.indexOf(marker);
+  if (markerIdx === -1) {
+    throw new CommandError("Blog list marker not found in blog.html");
+  }
+
+  const insertAt = content.indexOf("\n", markerIdx) + 1;
+  const updated =
+    content.slice(0, insertAt) + card + "\n" + content.slice(insertAt);
+  await writeText(updated, place, "html");
+}
+
+/**
+ * Adds a URL entry for the blog post to sitemap.xml.
+ * Skips insertion if the slug is already present (idempotent).
+ * @param slug The blog post slug.
+ * @param place Optional Place override; defaults to the frontend sitemap.xml.
+ */
+export async function updateSitemap(
+  slug: string,
+  place: Place = sitemapPlace,
+): Promise<void> {
+  const content = await readText(place, "xml");
+  if (!content) {
+    throw new CommandError("sitemap.xml not found");
+  }
+
+  if (content.includes(`/blog/${slug}`)) return;
+
+  const entry = [
+    `  <url>`,
+    `    <loc>https://betterjobboard.net/blog/${slug}</loc>`,
+    `    <changefreq>monthly</changefreq>`,
+    `    <priority>0.2</priority>`,
+    `  </url>`,
+  ].join("\n");
+
+  const updated = content.replace("</urlset>", `${entry}\n</urlset>`);
+  await writeText(updated, place, "xml");
 }
 
 const blogCmd: Command = {
