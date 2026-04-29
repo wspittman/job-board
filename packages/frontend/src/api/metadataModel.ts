@@ -1,5 +1,12 @@
 import type { FormOption } from "../components/form-element";
 import { api } from "./api";
+import type { MetadataModelApi } from "./apiTypes";
+
+type DeepNumberToString<T> = T extends number
+  ? string
+  : T extends object
+    ? { [K in keyof T]: DeepNumberToString<T[K]> }
+    : T;
 
 /**
  * Manages metadata related to job listings, such as company names, job counts, and timestamps.
@@ -21,11 +28,34 @@ class MetadataModel {
    * Retrieves the formatted counts of jobs and companies.
    * @returns The formatted job and company counts.
    */
-  async getCountStrings(): Promise<{ jobCount: string; companyCount: string }> {
-    const { jobCount, companyCount } = await this.#fetch();
+  async getCountStrings(): Promise<
+    DeepNumberToString<Omit<MetadataModelApi, "companyNames" | "timestamp">>
+  > {
+    const {
+      companyCount,
+      jobCount,
+      newJobCount,
+      recentJobCount,
+      presenceCounts,
+      jobFamilyCounts,
+    } = await this.#fetch();
     return {
       jobCount: jobCount.toLocaleString(),
+      newJobCount: newJobCount.toLocaleString(),
+      recentJobCount: recentJobCount.toLocaleString(),
       companyCount: companyCount.toLocaleString(),
+      presenceCounts: Object.fromEntries(
+        Object.entries(presenceCounts).map(([key, value]) => [
+          key,
+          value?.toLocaleString(),
+        ]),
+      ),
+      jobFamilyCounts: Object.fromEntries(
+        Object.entries(jobFamilyCounts).map(([key, value]) => [
+          key,
+          value?.toLocaleString(),
+        ]),
+      ),
     };
   }
 

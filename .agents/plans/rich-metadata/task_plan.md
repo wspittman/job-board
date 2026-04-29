@@ -8,7 +8,7 @@ aggregate meaningful breakdowns from job/company fields and surface them on the 
 
 ## Current Phase
 
-Phase 5
+Phase 6
 
 ---
 
@@ -162,9 +162,9 @@ Keep it as a single metadata endpoint (no new routes).
 Mirror the new fields in `MetadataModelApi`. Add a helper in `MetadataModel` to
 return the pre-processed stats needed by the UI (e.g., remote percentage).
 
-- [ ] Mirror new fields in `MetadataModelApi`
-- [ ] Add helper methods in `MetadataModel`
-- **Status:** pending
+- [x] Mirror new fields in `MetadataModelApi`
+- [x] Add helper methods in `MetadataModel`
+- **Status:** completed
 
 ### Phase 6 — Frontend: Update stats component
 

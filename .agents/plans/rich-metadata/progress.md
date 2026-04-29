@@ -46,9 +46,15 @@
 
 ### Phase 5: Frontend — API types and model
 
-- **Status:** pending
+- **Status:** completed
 - **Actions taken:**
-- **Files created/modified:**
+  - Added `Presence` type (`"onsite" | "remote" | "hybrid" | ""`) to `apiEnums.ts`
+  - Added `Presence` import and new fields (`presenceCounts`, `jobFamilyCounts`, `recentJobCount`, `newJobCount`) to `MetadataModelApi` in `apiTypes.ts`
+  - Added `getRichStats()` helper to `MetadataModel` in `metadataModel.ts`; computes remote/hybrid percentage and surfaces `recentJobCount` for the stats cards
+- **Files modified:**
+  - `packages/frontend/src/api/apiEnums.ts`
+  - `packages/frontend/src/api/apiTypes.ts`
+  - `packages/frontend/src/api/metadataModel.ts`
 
 ### Phase 6: Frontend — Update stats component
 
