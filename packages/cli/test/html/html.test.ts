@@ -45,11 +45,11 @@ suite("parseFrontmatter", () => {
     const result = parseFrontmatter(md);
 
     assert.ok(result);
-    assert.equal(result.frontmatter.title, "My Title");
-    assert.equal(result.frontmatter.description, "My description.");
-    assert.equal(result.frontmatter.date, "April 28, 2026");
-    assert.equal(result.frontmatter.slug, "my-title");
-    assert.ok(result.body.includes("Body content."));
+    assert.equal(result.title, "My Title");
+    assert.equal(result.description, "My description.");
+    assert.equal(result.date, "April 28, 2026");
+    assert.equal(result.slug, "my-title");
+    assert.ok(result.content.includes("Body content."));
   });
 
   const invalidInputs = [
@@ -75,28 +75,24 @@ suite("parseFrontmatter", () => {
 });
 
 suite("runBlog", () => {
-  const tempDir = path.join(logBasePath, "html", "blog-test");
+  const blogPath = path.join(
+    logBasePath,
+    "../../../packages/frontend/src/blog",
+  );
 
   test("converts frontmatter markdown to a full HTML page", async () => {
     const slug = "test-blog-post";
-    const mdPath = path.join(tempDir, `${slug}.md`);
-    const templatePath = path.join(tempDir, "template.htm");
-    const outPath = path.join(tempDir, `${slug}.html`);
-    touchedFiles.push(mdPath, templatePath, outPath);
+    const mdPath = path.join(blogPath, `${slug}.md`);
+    const outPath = path.join(blogPath, `${slug}.html`);
+    touchedFiles.push(mdPath, outPath);
 
-    await mkdir(tempDir, { recursive: true });
     await writeFile(
       mdPath,
       "---\ntitle: Test Title\ndescription: A test post.\ndate: April 28, 2026\nslug: test-blog-post\n---\n\n## Hello\n\nSome content.",
       "utf-8",
     );
-    await writeFile(
-      templatePath,
-      `<html><head><title>{{TITLE}} | Site</title><meta name="description" content="{{DESCRIPTION}}" /><link rel="canonical" href="https://example.com/blog/{{SLUG}}" /></head><body><header class="blog-header">{{HEADER_HTML}}</header><section>{{SECTION_HTML}}</section></body></html>`,
-      "utf-8",
-    );
 
-    await runBlog(slug, tempDir);
+    await runBlog(slug);
 
     const output = await readFile(outPath, "utf-8");
     assert.ok(output.includes("Test Title"));
@@ -118,10 +114,7 @@ suite("runBlog", () => {
     });
   });
 
-  test("run --blog throws CommandError when md file does not exist", async () => {
-    await assert.rejects(
-      () => runBlog("nonexistent-slug", tempDir),
-      CommandError,
-    );
+  test("throws CommandError when md file does not exist", async () => {
+    await assert.rejects(() => runBlog("nonexistent-slug"), CommandError);
   });
 });

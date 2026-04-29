@@ -1,6 +1,15 @@
 # Progress Log
 
-## Session: April 28, 2026
+## Session: April 29, 2026
+
+### Refactor: `--blog` flag → proper subcommands
+
+- **Status:** complete
+- **Actions taken:**
+  - Converted `--blog` flag to `blog` subcommand; generic conversion is now `file` subcommand
+  - Subsequent user refactoring: `parseFrontmatter` now returns flat `Blog` (with `content`) instead of `{ frontmatter, body }`; `runBlog` drops the `folder` parameter in favour of `blogPlace` via fileUtils; `validateFileName` extracted to shared utils; `readFMLine` helper added; header HTML now generated via `markdownToHtml`
+  - Updated `html.test.ts` to match new flat `Blog` shape and `runBlog` signature; `runBlog` integration test now writes test files to the real frontend blog folder (which holds the real `template.htm`)
+- **Files created/modified:** `packages/cli/src/html/html.ts`, `packages/cli/test/html/html.test.ts`
 
 ### Phase 1: Establish frontmatter convention
 

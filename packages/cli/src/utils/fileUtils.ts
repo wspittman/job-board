@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 type Strings = string | string[] | undefined;
-type Ext = "json" | "md" | "html";
+type Ext = "json" | "md" | "html" | "htm";
 
 export interface Place {
   group: "html" | "cache" | "eval" | "playground";
