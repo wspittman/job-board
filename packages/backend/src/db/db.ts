@@ -5,17 +5,19 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
+import { JobFamily, Presence } from "../models/enums.ts";
 import type {
   Company,
   CompanyKey,
   CompanyQuickRef,
   IgnoreJob,
   Job,
+  JobAggregateStats,
   JobKey,
   Location,
   Metadata,
 } from "../models/models.ts";
-import { JOB_EXPIRY_SEC } from "../utils/constants.ts";
+import { JOB_EXPIRY_SEC, MS_PER_DAY } from "../utils/constants.ts";
 import {
   createSubscribeAggregator,
   subscribeError,
@@ -28,6 +30,11 @@ subscribeCosmosDBLogging({
   error: subscribeError,
   aggregate: createSubscribeAggregator("db", 10),
 });
+
+interface BucketCount {
+  name: string;
+  count: number;
+}
 
 class CompanyContainer extends Container<Company> {
   constructor(container: Container<Company>) {
@@ -117,6 +124,43 @@ class JobContainer extends Container<Job> {
     return await batch("DeleteJob", jobIds, (id) =>
       this.remove({ id, companyId }),
     );
+  }
+
+  async getAggregateStats(): Promise<JobAggregateStats> {
+    const now = Date.now();
+    const bucketPresence =
+      "SELECT c.presence AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.presence) GROUP BY c.presence";
+    const bucketJobFamily =
+      "SELECT c.jobFamily AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.jobFamily) GROUP BY c.jobFamily";
+    const sevenDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - 7 * MS_PER_DAY}`;
+    const oneDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - MS_PER_DAY}`;
+
+    const [presenceRows, jobFamilyRows, recentCounts, newCounts] =
+      await Promise.all([
+        this.query<BucketCount>(bucketPresence),
+        this.query<BucketCount>(bucketJobFamily),
+        this.query<number>(sevenDayCount),
+        this.query<number>(oneDayCount),
+      ]);
+
+    const presenceCounts = Object.fromEntries(
+      presenceRows
+        .filter(({ name }) => !!name && Presence.safeParse(name).success)
+        .map(({ name, count }) => [name, count]),
+    );
+
+    const jobFamilyCounts = Object.fromEntries(
+      jobFamilyRows
+        .filter(({ name }) => !!name && JobFamily.safeParse(name).success)
+        .map(({ name, count }) => [name, count]),
+    );
+
+    return {
+      presenceCounts,
+      jobFamilyCounts,
+      recentJobCount: recentCounts[0] ?? 0,
+      newJobCount: newCounts[0] ?? 0,
+    };
   }
 }
 

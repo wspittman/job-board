@@ -119,10 +119,10 @@ computed at call time.
 Define `JobAggregateStats` in `models.ts` (fields: `presenceCounts`, `jobFamilyCounts`,
 `recentJobCount`, `newJobCount`).
 
-- [ ] Rewrite `getAggregateStats()` in `JobContainer` using GROUP BY + COUNT queries
-- [ ] Update `JobAggregateStats` type (remove `seniorityCounts`, `companyStageCounts`)
-- [ ] Update unit tests to match new shape
-- **Status:** pending (needs re-implementation — prior in-memory approach was too expensive)
+- [x] Rewrite `getAggregateStats()` in `JobContainer` using GROUP BY + COUNT queries
+- [x] Update `JobAggregateStats` type (remove `seniorityCounts`, `companyStageCounts`)
+- [x] Delete obsolete `aggregateJobStats` unit tests (tested helper no longer exists)
+- **Status:** completed
 
 ### Phase 2 — Backend: Extend `Metadata` model
 

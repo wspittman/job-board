@@ -4,15 +4,16 @@
 
 ### Phase 1: Backend — DB aggregation queries
 
-- **Status:** needs_revision — in-memory aggregation approach was significantly more expensive than Cosmos-native GROUP BY queries; new approach uses separate GROUP BY queries for `presence`/`jobFamily` and range COUNT queries for `postTS` thresholds; `seniorityLevel` and `companyStage` dropped due to data quality issues
+- **Status:** completed
 - **Actions taken:**
-  - ~~Added `JobAggregateStats` interface to `models.ts`~~ (needs to be revised: remove `seniorityCounts`, `companyStageCounts`)
-  - ~~Added `aggregateJobStats()` exported helper to `db.ts`~~ (needs to be replaced with GROUP BY / range COUNT query approach)
-  - ~~Added `getAggregateStats()` method to `JobContainer`~~ (needs to be rewritten)
-  - ~~Wrote unit tests in `test/db/aggregateJobStats.test.ts`~~ (needs to be updated to match new shape)
-- **Files created/modified:**
+  - Updated `JobAggregateStats` in `models.ts`: removed `seniorityCounts` and `companyStageCounts`; removed unused `CompanyStage`/`SeniorityLevel` imports
+  - Replaced `getAggregateStats()` in `db.ts`: now uses 4 parallel Cosmos DB queries — GROUP BY for `presence` and `jobFamily`, range COUNT for 7-day and 24-hour postTS thresholds
+  - Removed `aggregateJobStats` in-memory helper entirely (it was the old approach)
+  - Deleted `test/db/aggregateJobStats.test.ts` (the tested function no longer exists; new query-based logic has no isolated pure function to unit test)
+- **Files modified:**
   - `packages/backend/src/models/models.ts`
   - `packages/backend/src/db/db.ts`
+- **Files deleted:**
   - `packages/backend/test/db/aggregateJobStats.test.ts`
 
 ### Phase 2: Backend — Extend `Metadata` model
