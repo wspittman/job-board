@@ -12,7 +12,6 @@ export interface MetadataModelApi {
   companyCount: number;
   companyNames: [string, string][];
   jobCount: number;
-  newJobCount: number;
   recentJobCount: number;
   presenceCounts: Partial<Record<Presence, number>>;
   jobFamilyCounts: Partial<Record<JobFamily, number>>;

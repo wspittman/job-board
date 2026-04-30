@@ -1,12 +1,6 @@
 import type { FormOption } from "../components/form-element";
 import { api } from "./api";
-import type { MetadataModelApi } from "./apiTypes";
-
-type DeepNumberToString<T> = T extends number
-  ? string
-  : T extends object
-    ? { [K in keyof T]: DeepNumberToString<T[K]> }
-    : T;
+import { toJobFamilyLabel } from "./apiEnums";
 
 /**
  * Manages metadata related to job listings, such as company names, job counts, and timestamps.
@@ -25,37 +19,41 @@ class MetadataModel {
   }
 
   /**
-   * Retrieves the formatted counts of jobs and companies.
-   * @returns The formatted job and company counts.
+   * Retrieves the formatted strings for metadata counts.
+   * @returns An object containing formatted strings.
    */
-  async getCountStrings(): Promise<
-    DeepNumberToString<Omit<MetadataModelApi, "companyNames" | "timestamp">>
-  > {
+  async getCountStrings(): Promise<{
+    companyCount: string;
+    jobCount: string;
+    recentJobCount: string;
+    remotePct: string;
+    topJobFamilies: { pct: string; label: string }[];
+  }> {
     const {
       companyCount,
       jobCount,
-      newJobCount,
       recentJobCount,
       presenceCounts,
       jobFamilyCounts,
     } = await this.#fetch();
+
+    const toPct = (count: number) =>
+      jobCount > 0 ? `${Math.round((count / jobCount) * 100)}%` : "0%";
+    const remotePct = toPct(presenceCounts.remote ?? 0);
+    const topJobFamilies = Object.entries(jobFamilyCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([key, count]) => ({
+        pct: toPct(count ?? 0),
+        label: toJobFamilyLabel(key),
+      }));
+
     return {
-      jobCount: jobCount.toLocaleString(),
-      newJobCount: newJobCount.toLocaleString(),
-      recentJobCount: recentJobCount.toLocaleString(),
       companyCount: companyCount.toLocaleString(),
-      presenceCounts: Object.fromEntries(
-        Object.entries(presenceCounts).map(([key, value]) => [
-          key,
-          value?.toLocaleString(),
-        ]),
-      ),
-      jobFamilyCounts: Object.fromEntries(
-        Object.entries(jobFamilyCounts).map(([key, value]) => [
-          key,
-          value?.toLocaleString(),
-        ]),
-      ),
+      jobCount: jobCount.toLocaleString(),
+      recentJobCount: recentJobCount.toLocaleString(),
+      remotePct,
+      topJobFamilies,
     };
   }
 

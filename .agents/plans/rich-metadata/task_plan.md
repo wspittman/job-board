@@ -8,7 +8,7 @@ aggregate meaningful breakdowns from job/company fields and surface them on the 
 
 ## Current Phase
 
-Phase 6
+Phase 6 — Complete
 
 ---
 
@@ -173,9 +173,9 @@ return the pre-processed stats needed by the UI (e.g., remote percentage).
 Expand from 2 stat cards to 4. Add Remote/Hybrid card and "Posted This Week" card.
 Keep the design consistent with the existing card pattern.
 
-- [ ] Expand stats section from 2 cards to 4
-- [ ] Render Remote/Hybrid and "Posted This Week" stat cards
-- **Status:** pending
+- [x] Expand stats section from 2 cards to 4
+- [x] Render Remote/Hybrid and "Posted This Week" stat cards
+- **Status:** completed
 
 ---
 

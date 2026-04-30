@@ -58,9 +58,15 @@
 
 ### Phase 6: Frontend — Update stats component
 
-- **Status:** pending
+- **Status:** completed
 - **Actions taken:**
+  - Added `remoteHybridPct` to `getCountStrings()` in `metadataModel.ts` (computed from raw `presenceCounts` before stringifying; no separate `getRichStats()` needed)
+  - Added "Remote or Hybrid" and "Posted This Week" stat cards to `stats.html`
+  - Updated `stats.ts` to destructure all 4 values from `getCountStrings()` and set all 4 stat texts
 - **Files created/modified:**
+  - `packages/frontend/src/api/metadataModel.ts`
+  - `packages/frontend/src/home/stats.html`
+  - `packages/frontend/src/home/stats.ts`
 
 ## Test Results
 
