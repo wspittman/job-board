@@ -86,12 +86,37 @@ npm run cli -- evals <LLM_ACTION> [RUN_NAME]
 
 ### `html` — Convert Markdown to HTML
 
-Reads a Markdown file from `logs/html/in/<FILE_NAME>` and writes the rendered HTML to
-`logs/html/out/<FILE_NAME>`.
+| Subcommand | Arguments | Description                                                                                                                      |
+| ---------- | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `file`     | `<NAME>`  | Converts a Markdown file in `logs/html/in/` and writes HTML to `logs/html/out/`.                                                 |
+| `blog`     | `<SLUG>`  | Converts a frontmatter Markdown file in the frontend blog folder to a full HTML page, and updates `blog.html` and `sitemap.xml`. |
+
+**`html file` example:**
 
 ```bash
-npm run cli -- html <FILE_NAME>
+npm run cli -- html file my-post
 ```
+
+**`html blog` workflow:**
+
+1. Write a Markdown file with YAML frontmatter at `packages/frontend/src/blog/<slug>.md`:
+
+   ```markdown
+   ---
+   title: Your Article Title
+   description: A short description for the meta tag.
+   date: April 29, 2026
+   slug: your-article-slug
+   ---
+
+   Article body goes here.
+   ```
+
+2. Run the command — it converts the Markdown, injects it into the blog template, and writes the finished `.html` file alongside the source. It also inserts a card into `blog.html` and adds a `sitemap.xml` entry (both operations are idempotent).
+
+   ```bash
+   npm run cli -- html blog your-article-slug
+   ```
 
 ### `playground` — Run clustering experiments
 
