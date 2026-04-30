@@ -1,5 +1,6 @@
 import { z } from "dry-utils-openai";
 import type { DeepPartialNullToUndef } from "../types/types.ts";
+import type { JobFamily, Presence } from "./enums.ts";
 import type {
   ExtractionCompany,
   ExtractionJob,
@@ -95,6 +96,9 @@ export interface Metadata {
 
   // For job type
   jobCount?: number;
+  recentJobCount?: number;
+  presenceCounts?: Partial<Record<Presence, number>>;
+  jobFamilyCounts?: Partial<Record<JobFamily, number>>;
 }
 
 /**

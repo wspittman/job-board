@@ -1,7 +1,7 @@
 .container {
   display: grid;
   gap: var(--space-2);
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: 1fr;
 
   & svg {
     height: 70%;
@@ -9,15 +9,22 @@
   }
 }
 
+@media (min-width: 600px) {
+  .container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .stat-card {
   display: grid;
   grid-template-columns: auto 1fr;
+  padding: var(--space-2) var(--space-3);
   gap: var(--space-3);
   align-items: center;
 }
 
 .stat-icon {
-  height: 100%;
+  width: calc(var(--space-6) * 2);
   aspect-ratio: 1;
   border-radius: var(--radius);
   background: var(--primary-gradient-bg);
@@ -26,11 +33,31 @@
   color: var(--primary-main);
 }
 
+.stat-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
 .stat-value {
   font-size: var(--font-size-2);
   color: var(--primary-main);
 }
 
 .stat-label {
+  font-size: var(--font-size-3);
+}
+
+.stat-value-2 {
+  font-size: var(--font-size-3);
+  color: var(--primary-main);
+}
+
+.stat-label-2 {
   font-size: var(--font-size-4);
 }

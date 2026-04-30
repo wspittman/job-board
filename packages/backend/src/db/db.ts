@@ -5,6 +5,7 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
+import { JobFamily, Presence } from "../models/enums.ts";
 import type {
   Company,
   CompanyKey,
@@ -15,7 +16,7 @@ import type {
   Location,
   Metadata,
 } from "../models/models.ts";
-import { JOB_EXPIRY_SEC } from "../utils/constants.ts";
+import { JOB_EXPIRY_SEC, MS_PER_DAY } from "../utils/constants.ts";
 import {
   createSubscribeAggregator,
   subscribeError,
@@ -28,6 +29,11 @@ subscribeCosmosDBLogging({
   error: subscribeError,
   aggregate: createSubscribeAggregator("db", 10),
 });
+
+interface BucketCount {
+  name: string;
+  count: number;
+}
 
 class CompanyContainer extends Container<Company> {
   constructor(container: Container<Company>) {
@@ -117,6 +123,43 @@ class JobContainer extends Container<Job> {
     return await batch("DeleteJob", jobIds, (id) =>
       this.remove({ id, companyId }),
     );
+  }
+
+  async aggregateMetadata(): Promise<Metadata> {
+    const now = Date.now();
+    const sevenDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - 7 * MS_PER_DAY}`;
+    const bucketPresence =
+      "SELECT c.presence AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.presence) GROUP BY c.presence";
+    const bucketJobFamily =
+      "SELECT c.jobFamily AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.jobFamily) GROUP BY c.jobFamily";
+
+    const [jobCount, recentCounts, presenceRows, jobFamilyRows] =
+      await Promise.all([
+        this.getCount(),
+        this.query<number>(sevenDayCount),
+        this.query<BucketCount>(bucketPresence),
+        this.query<BucketCount>(bucketJobFamily),
+      ]);
+
+    const presenceCounts = Object.fromEntries(
+      presenceRows
+        .filter(({ name }) => !!name && Presence.safeParse(name).success)
+        .map(({ name, count }) => [name, count]),
+    );
+
+    const jobFamilyCounts = Object.fromEntries(
+      jobFamilyRows
+        .filter(({ name }) => !!name && JobFamily.safeParse(name).success)
+        .map(({ name, count }) => [name, count]),
+    );
+
+    return {
+      id: "job",
+      jobCount,
+      recentJobCount: recentCounts[0] ?? 0,
+      presenceCounts,
+      jobFamilyCounts,
+    };
   }
 }
 
