@@ -85,7 +85,6 @@ async function getClientMetadata(): Promise<ClientMetadata> {
   } = companyMetadata ?? {};
   const {
     jobCount = 0,
-    newJobCount = 0,
     recentJobCount = 0,
     presenceCounts = {},
     jobFamilyCounts = {},
@@ -97,15 +96,14 @@ async function getClientMetadata(): Promise<ClientMetadata> {
   );
 
   const metadata: ClientMetadata = {
+    // _ts is in seconds, but the client expects milliseconds
+    timestamp: Math.max(companyTS, jobTS) * 1000,
     companyCount,
     companyNames,
     jobCount,
-    // _ts is in seconds, but the client expects milliseconds
-    timestamp: Math.max(companyTS, jobTS) * 1000,
+    recentJobCount,
     presenceCounts,
     jobFamilyCounts,
-    recentJobCount,
-    newJobCount,
   };
 
   return metadata;

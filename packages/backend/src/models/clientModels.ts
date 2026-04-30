@@ -79,14 +79,13 @@ export interface ClientJob {
 }
 
 export interface ClientMetadata {
+  timestamp: number;
   companyCount: number;
   companyNames: [string, string][];
   jobCount: number;
-  timestamp: number;
+  recentJobCount: number;
   presenceCounts: Partial<Record<Presence, number>>;
   jobFamilyCounts: Partial<Record<JobFamily, number>>;
-  recentJobCount: number;
-  newJobCount: number;
 }
 
 // #endregion

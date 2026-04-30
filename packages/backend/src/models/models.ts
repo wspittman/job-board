@@ -96,7 +96,6 @@ export interface Metadata {
 
   // For job type
   jobCount?: number;
-  newJobCount?: number;
   recentJobCount?: number;
   presenceCounts?: Partial<Record<Presence, number>>;
   jobFamilyCounts?: Partial<Record<JobFamily, number>>;
