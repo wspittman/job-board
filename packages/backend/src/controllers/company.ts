@@ -4,10 +4,10 @@ import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../models/clientModels.ts";
 import type { CompanyKey, CompanyKeys, FullJobKey } from "../models/models.ts";
+import { refreshJobsForCompany } from "../sync/jobs.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 import { logProperty } from "../utils/telemetry.ts";
-import { refreshJobsForCompany } from "./job.ts";
 import { refreshMetadata } from "./metadata.ts";
 
 const companyInfoQueue = new AsyncQueue(
