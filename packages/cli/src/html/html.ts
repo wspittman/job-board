@@ -32,7 +32,8 @@ const sitemapPlace: Place = {
 };
 
 function readFMLine(line: string): BEntry | undefined {
-  const idx = line.indexOf(":") || 0;
+  const idx = line.indexOf(":");
+  if (idx === -1) return undefined;
   const key = line.slice(0, idx).trim() as keyof Blog;
   const value = line.slice(idx + 1).trim();
   if (fmKeySet.has(key) && value) {
