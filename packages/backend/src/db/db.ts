@@ -1,6 +1,7 @@
 import { batch } from "dry-utils-async";
 import {
   Container,
+  Query,
   connectDB,
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
@@ -29,11 +30,6 @@ subscribeCosmosDBLogging({
   error: subscribeError,
   aggregate: createSubscribeAggregator("db", 10),
 });
-
-interface BucketCount {
-  name: string;
-  count: number;
-}
 
 class CompanyContainer extends Container<Company> {
   constructor(container: Container<Company>) {
@@ -126,32 +122,32 @@ class JobContainer extends Container<Job> {
   }
 
   async aggregateMetadata(): Promise<Metadata> {
-    const now = Date.now();
-    const sevenDayCount = `SELECT VALUE COUNT(1) FROM c WHERE c.postTS >= ${now - 7 * MS_PER_DAY}`;
-    const bucketPresence =
-      "SELECT c.presence AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.presence) GROUP BY c.presence";
-    const bucketJobFamily =
-      "SELECT c.jobFamily AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.jobFamily) GROUP BY c.jobFamily";
+    const weekMs = Date.now() - 7 * MS_PER_DAY;
+    const recent = new Query("COUNT", ["postTS", ">=", weekMs]);
 
     const [jobCount, recentCounts, presenceRows, jobFamilyRows] =
       await Promise.all([
         this.getCount(),
-        this.query<number>(sevenDayCount),
-        this.query<BucketCount>(bucketPresence),
-        this.query<BucketCount>(bucketJobFamily),
+        this.query<number>(recent),
+        this.getCountBy("presence"),
+        this.getCountBy("jobFamily"),
       ]);
 
-    const presenceCounts = Object.fromEntries(
-      presenceRows
-        .filter(({ name }) => !!name && Presence.safeParse(name).success)
-        .map(({ name, count }) => [name, count]),
-    );
+    const presenceCounts: Partial<Record<Presence, number>> = {};
+    presenceRows.forEach(({ name, count }) => {
+      const parsed = Presence.safeParse(name);
+      if (parsed.success) {
+        presenceCounts[parsed.data] = count;
+      }
+    });
 
-    const jobFamilyCounts = Object.fromEntries(
-      jobFamilyRows
-        .filter(({ name }) => !!name && JobFamily.safeParse(name).success)
-        .map(({ name, count }) => [name, count]),
-    );
+    const jobFamilyCounts: Partial<Record<JobFamily, number>> = {};
+    jobFamilyRows.forEach(({ name, count }) => {
+      const parsed = JobFamily.safeParse(name);
+      if (parsed.success) {
+        jobFamilyCounts[parsed.data] = count;
+      }
+    });
 
     return {
       id: "job",

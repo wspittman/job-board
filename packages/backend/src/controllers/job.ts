@@ -25,10 +25,7 @@ export async function getJobs(filterInput: Filters) {
     const { jobId, companyId } = filterInput;
     if (!companyId) return [];
 
-    const job = await db.job.get({
-      id: jobId,
-      companyId,
-    });
+    const job = await db.job.get({ id: jobId, companyId });
 
     const result = job ? [job] : [];
     logProperty(
@@ -99,9 +96,11 @@ async function readJobsByFilters({
   currency,
   refresh,
 }: EnhancedFilters) {
+  // The limit of 24 items is intentional to prevent excessive data retrieval.
+  const query = new Query().top(24);
+
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
   // Look at the QueryBuilder class comment for ordering guidelines
-  const query = new Query();
 
   // Exact Matches
 
@@ -202,8 +201,7 @@ async function readJobsByFilters({
     }
   }
 
-  // The limit of 24 items is intentional to prevent excessive data retrieval.
-  return db.job.query<Job>(query.build(24));
+  return db.job.query<Job>(query.build());
 }
 
 // #endregion
