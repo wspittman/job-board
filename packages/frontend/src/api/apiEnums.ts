@@ -36,6 +36,8 @@ const getCurrencyFormatter = (currency: Currency) => {
 
 // #endregion
 
+export type Presence = "onsite" | "remote" | "hybrid";
+
 const workTimeBasis = {
   full_time: "Full-time",
   part_time: "Part-time",

@@ -2,6 +2,7 @@ import type {
   CompanyStage,
   JobFamily,
   PayCadence,
+  Presence,
   WorkTimeBasis,
 } from "./enums.ts";
 import type { CompanyKey } from "./models.ts";
@@ -25,6 +26,8 @@ export interface Filters {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+  // Admin
+  refresh?: boolean;
 }
 
 export interface RefreshJobsOptions {
@@ -76,10 +79,13 @@ export interface ClientJob {
 }
 
 export interface ClientMetadata {
+  timestamp: number;
   companyCount: number;
   companyNames: [string, string][];
   jobCount: number;
-  timestamp: number;
+  recentJobCount: number;
+  presenceCounts: Partial<Record<Presence, number>>;
+  jobFamilyCounts: Partial<Record<JobFamily, number>>;
 }
 
 // #endregion

@@ -70,6 +70,7 @@ const FiltersSchema = z.object({
   daysSince: coerceInt(z.int().positive().max(JOB_EXPIRY_DAYS)),
   maxExperience: coerceInt(z.int().nonnegative().max(100)),
   minSalary: coerceInt(z.int().positive().max(10_000_000)),
+  refresh: coerceString(z.stringbool()),
 });
 
 const beaconSchema = z.object({

@@ -4,8 +4,6 @@ REST service that integrates with Azure Cosmos DB, Application Insights telemetr
 
 Package-specific Tech Stack: Express, Application Insights, CosmosDB via dry-utils-cosmosdb, OpenAI via dry-utils-openai, node:test for tests
 
-Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stated otherwise.
-
 ## Container-Friendly Cosmos Mocking
 
 Important: Azure CosmosDB Emulator or an Azure CosmosDB account is required to run the backend API locally. Agents may not have this available depending on their environment.
@@ -37,5 +35,4 @@ Example JSON:
 ## Development workflows
 
 - Development server: `npm run start:backend`
-- Production build: `npm run build --workspace=backend` followed by `npm run start --workspace=backend`; artifacts are emitted to `dist/`.
-- Environment variables are loaded from `.env`. See `src/config.ts` for values such as `DATABASE_URL`, `LLM_MODEL`, `LLM_REASONING_EFFORT`, `OPENAI_API_KEY`, `ADMIN_TOKEN`, and `APPLICATIONINSIGHTS_CONNECTION_STRING`.
+- Environment variables are loaded from `.env`. See `src/config.ts`.

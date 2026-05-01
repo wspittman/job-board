@@ -48,6 +48,7 @@
     "noUncheckedIndexedAccess": true,
 
     // Interoperability
+    "types": ["node"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,

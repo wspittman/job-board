@@ -3,14 +3,18 @@ import type {
   Currency,
   JobFamily,
   PayCadence,
+  Presence,
   WorkTimeBasis,
 } from "./apiEnums";
 
 export interface MetadataModelApi {
+  timestamp: number;
   companyCount: number;
   companyNames: [string, string][];
   jobCount: number;
-  timestamp: number;
+  recentJobCount: number;
+  presenceCounts: Partial<Record<Presence, number>>;
+  jobFamilyCounts: Partial<Record<JobFamily, number>>;
 }
 
 export interface JobModelApi {
@@ -60,4 +64,6 @@ export interface FilterModelApi {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+  // Admin
+  refresh?: boolean;
 }

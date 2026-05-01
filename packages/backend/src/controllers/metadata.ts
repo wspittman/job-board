@@ -29,10 +29,10 @@ export const refreshMetadata = debounceAsync(
 );
 
 async function refreshInternal() {
-  const [quickRefs, companyIds, jobCount] = await Promise.all([
+  const [quickRefs, companyIds, jobMetadata] = await Promise.all([
     db.company.getQuickRefs(),
     db.job.getCompanyIds(),
-    db.job.getCount(),
+    db.job.aggregateMetadata(),
   ]);
 
   // Only include quick refs for companies that have jobs
@@ -48,7 +48,7 @@ async function refreshInternal() {
   }
 
   await Promise.all([
-    db.metadata.upsertItem({ id: "job", jobCount }),
+    db.metadata.upsertItem(jobMetadata),
     db.metadata.upsertItem({
       id: "company",
       companyCount: validRefs.length,
@@ -56,7 +56,10 @@ async function refreshInternal() {
     }),
   ]);
 
-  logProperty("Metadata", { jobCount, companyCount: validRefs.length });
+  logProperty("Metadata", {
+    jobCount: jobMetadata.jobCount,
+    companyCount: validRefs.length,
+  });
 
   cacheCompanyMeta.clear();
   cacheQuickRefMap.clear();
@@ -75,19 +78,32 @@ async function getClientMetadata(): Promise<ClientMetadata> {
     cacheCompanyMeta(),
     cacheJobMeta(),
   ]);
+  const {
+    companyCount = 0,
+    companyQuickRef = [],
+    _ts: companyTS = 0,
+  } = companyMetadata ?? {};
+  const {
+    jobCount = 0,
+    recentJobCount = 0,
+    presenceCounts = {},
+    jobFamilyCounts = {},
+    _ts: jobTS = 0,
+  } = jobMetadata ?? {};
 
-  const companyQuickRef = companyMetadata?.companyQuickRef ?? [];
   const companyNames = companyQuickRef.map(
     ([id, name]) => [id, name] as [string, string],
   );
 
   const metadata: ClientMetadata = {
-    companyCount: companyMetadata?.companyCount ?? 0,
-    companyNames,
-    jobCount: jobMetadata?.jobCount ?? 0,
     // _ts is in seconds, but the client expects milliseconds
-    timestamp:
-      Math.max(companyMetadata?._ts ?? 0, jobMetadata?._ts ?? 0) * 1000,
+    timestamp: Math.max(companyTS, jobTS) * 1000,
+    companyCount,
+    companyNames,
+    jobCount,
+    recentJobCount,
+    presenceCounts,
+    jobFamilyCounts,
   };
 
   return metadata;

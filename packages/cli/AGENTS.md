@@ -1,8 +1,6 @@
-# CLI workspace instructions
+# CLI
 
 General-purpose CLI for development and operational tasks.
-
-Refer to root-level `AGENTS.md`. Run all commands from the repo root unless stated otherwise.
 
 ## Prerequisites and configuration
 
