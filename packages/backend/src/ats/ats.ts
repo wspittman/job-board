@@ -6,6 +6,7 @@ import type {
   JobKey,
 } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
+import { Ashby } from "./ashby.ts";
 import { ATSBase } from "./atsBase.ts";
 import { Greenhouse } from "./greenhouse.ts";
 import { Lever } from "./lever.ts";
@@ -14,6 +15,7 @@ class ATSConnector {
   private readonly atsEndpoints: Record<ATS, ATSBase> = {
     greenhouse: new Greenhouse(),
     lever: new Lever(),
+    ashby: new Ashby(),
   };
 
   /**
