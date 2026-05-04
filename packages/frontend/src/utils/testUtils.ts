@@ -1,4 +1,5 @@
-import type { MetadataModelApi } from "../api/apiTypes";
+import type { JobModelApi, MetadataModelApi } from "../api/apiTypes";
+import { JobModel } from "../api/jobModel";
 import { ComponentBase } from "../components/componentBase";
 import type { FormElement } from "../components/form-element";
 import { spies } from "./testSetup";
@@ -83,17 +84,42 @@ export function createComponent<T extends Class>(
  * @param overrides Partial metadata fields to override the default values.
  */
 export function mockMetadata(overrides: Partial<MetadataModelApi> = {}) {
+  if (overrides.timestamp && overrides.timestamp < 0) {
+    spies.fetchMetadata.mockRejectedValueOnce(new Error("Test Error"));
+    return;
+  }
+
   spies.fetchMetadata.mockResolvedValueOnce({
     timestamp: 1777934360621,
     companyCount: 3,
-    companyNames: ["test", "example", "abc"].map((name) => [
+    companyNames: ["test", "example", "acme"].map((name) => [
       name,
       name[0]!.toUpperCase() + name.slice(1),
     ]),
-    jobCount: 100,
-    recentJobCount: 10,
-    presenceCounts: { remote: 40, onsite: 35, hybrid: 25 },
-    jobFamilyCounts: { engineering: 60, data: 25, design: 15, marketing: 10 },
+    jobCount: 1000,
+    recentJobCount: 100,
+    presenceCounts: { remote: 400, onsite: 350, hybrid: 250 },
+    jobFamilyCounts: {
+      engineering: 500,
+      data: 250,
+      design: 150,
+      marketing: 100,
+    },
+    ...overrides,
+  });
+}
+
+export function createJobModel(overrides: Partial<JobModelApi> = {}) {
+  return new JobModel({
+    id: "job-1",
+    companyId: "acme",
+    title: "Software Engineer",
+    company: "Acme",
+    description: "A great job",
+    postTS: Date.now() - 1000 * 60 * 60 * 24 * 10, // 10 days ago
+    applyUrl: "/jobs/job-1/apply?ats=gh",
+    isRemote: false,
+    location: "Seattle, WA",
     ...overrides,
   });
 }

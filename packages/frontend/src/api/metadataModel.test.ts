@@ -7,8 +7,8 @@ suite("metadataModel", () => {
     mockMetadata();
     const result = await metadataModel.getCountStrings();
 
-    expect(result.jobCount).toBe("100");
-    expect(result.recentJobCount).toBe("10");
+    expect(result.jobCount).toBe("1,000");
+    expect(result.recentJobCount).toBe("100");
     expect(result.companyCount).toBe("3");
   });
 
@@ -36,14 +36,14 @@ suite("metadataModel", () => {
     const { topJobFamilies } = await metadataModel.getCountStrings();
 
     expect(topJobFamilies).toEqual([
-      { pct: "60%", label: "Engineering" },
+      { pct: "50%", label: "Engineering" },
       { pct: "25%", label: "Data" },
       { pct: "15%", label: "Design" },
     ]);
   });
 
   test("getCountStrings: topJobFamilies returns fewer than 3 when fewer families exist", async () => {
-    mockMetadata({ jobFamilyCounts: { engineering: 80, data: 20 } });
+    mockMetadata({ jobFamilyCounts: { engineering: 500, data: 250 } });
     const { topJobFamilies } = await metadataModel.getCountStrings();
     expect(topJobFamilies).toHaveLength(2);
   });
@@ -54,7 +54,7 @@ test("getCompanyFormOptions: returns company names as sorted form options", asyn
   const options = await metadataModel.getCompanyFormOptions();
 
   expect(options).toEqual([
-    { value: "abc", label: "Abc" },
+    { value: "acme", label: "Acme" },
     { value: "example", label: "Example" },
     { value: "test", label: "Test" },
   ]);
