@@ -13,7 +13,7 @@ Expand the frontend test suite from its current 7-file coverage of base form com
 
 ## Current Phase
 
-Phase 3 — Utility Module (**pending**)
+Phase 4 — Page-Level Rendering Components (**pending**)
 
 ## What to Skip (permanently)
 
@@ -111,7 +111,7 @@ Mock `api.interpretQuery` with `vi.spyOn`. Use `vi.fn` for `location.assign` in 
 
 ## Phase 3 — Utility Module
 
-**Status:** pending
+**Status:** complete
 
 ### 3a. `src/utils/storage.test.ts`
 
