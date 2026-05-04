@@ -1,7 +1,9 @@
+import type { MetadataModelApi } from "../api/apiTypes";
 import { ComponentBase } from "../components/componentBase";
 import type { FormElement } from "../components/form-element";
+import { spies } from "./testSetup";
 
-export { spies } from "./testSetup";
+export { spies };
 
 // #region Types for accessing protected component members
 
@@ -22,6 +24,8 @@ export type XrayFormElement<T extends FormElement = FormElement> =
   };
 
 // #endregion
+
+// #region Components
 
 // Special class mixin rules requires any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,3 +73,29 @@ export function createComponent<T extends Class>(
 
   return document.createElement(tag) as InstanceType<T>;
 }
+
+// #endregion
+
+// #region API
+
+/**
+ * Mocks the API response for metadata with default values, allowing overrides for specific fields.
+ * @param overrides Partial metadata fields to override the default values.
+ */
+export function mockMetadata(overrides: Partial<MetadataModelApi> = {}) {
+  spies.fetchMetadata.mockResolvedValueOnce({
+    timestamp: 1777934360621,
+    companyCount: 3,
+    companyNames: ["test", "example", "abc"].map((name) => [
+      name,
+      name[0]!.toUpperCase() + name.slice(1),
+    ]),
+    jobCount: 100,
+    recentJobCount: 10,
+    presenceCounts: { remote: 40, onsite: 35, hybrid: 25 },
+    jobFamilyCounts: { engineering: 60, data: 25, design: 15, marketing: 10 },
+    ...overrides,
+  });
+}
+
+// #endregion
