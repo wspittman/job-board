@@ -13,7 +13,7 @@ Expand the frontend test suite from its current 7-file coverage of base form com
 
 ## Current Phase
 
-Phase 1 — Data Model Logic (**pending**)
+Phase 2 — Remaining Reusable Components (**pending**)
 
 ## What to Skip (permanently)
 
@@ -31,7 +31,7 @@ Phase 1 — Data Model Logic (**pending**)
 
 ## Phase 1 — Data Model Logic
 
-**Status:** pending
+**Status:** complete
 
 **Rationale:** Pure TypeScript logic with zero DOM dependencies. Highest density of test value per line of code. No mocking needed for `filterModel`; light mocking for `jobModel`.
 
