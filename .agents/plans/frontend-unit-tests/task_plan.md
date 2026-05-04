@@ -13,7 +13,7 @@ Expand the frontend test suite from its current 7-file coverage of base form com
 
 ## Current Phase
 
-Phase 2 — Remaining Reusable Components (**pending**)
+Phase 3 — Utility Module (**pending**)
 
 ## What to Skip (permanently)
 
@@ -75,7 +75,7 @@ Label conversion functions (`toWorkTimeBasisLabel`, `toJobFamilyLabel`, etc.) ar
 
 ## Phase 2 — Remaining Reusable Components
 
-**Status:** pending
+**Status:** complete
 
 **Rationale:** Same test infrastructure and conventions as the existing 7 component tests. Low ramp-up cost.
 
