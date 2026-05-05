@@ -1,9 +1,9 @@
-import type { JobResult } from "./ashby/jobResult.d.ts";
+import type { JobResult } from "./ashby/jobResult.ts";
 import { config } from "../config.ts";
 import { ATSBase } from "./atsBase.ts";
 import type { CompanyKey, Company, Job, JobKey } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
-import type { CompanyResult } from "./ashby/companyResult.js";
+import type { CompanyResult } from "./ashby/companyResult.ts";
 import { normTitle } from "./normalization.ts";
 import { standardizeUntrustedHtml } from "dry-utils-text";
 import { AppError } from "../utils/AppError.ts";
