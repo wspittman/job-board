@@ -80,15 +80,17 @@ export function createComponent<T extends Class>(
 // #region API
 
 /**
+ * Mocks the API response for metadata to simulate an error condition.
+ */
+export function mockMetadataErr() {
+  spies.fetchMetadata.mockRejectedValueOnce(new Error("Test Error"));
+}
+
+/**
  * Mocks the API response for metadata with default values, allowing overrides for specific fields.
  * @param overrides Partial metadata fields to override the default values.
  */
 export function mockMetadata(overrides: Partial<MetadataModelApi> = {}) {
-  if (overrides.timestamp && overrides.timestamp < 0) {
-    spies.fetchMetadata.mockRejectedValueOnce(new Error("Test Error"));
-    return;
-  }
-
   spies.fetchMetadata.mockResolvedValueOnce({
     timestamp: 1777934360621,
     companyCount: 3,

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, suite, test, vi } from "vitest";
-import { mockMetadata } from "../utils/testUtils";
+import { mockMetadata, mockMetadataErr } from "../utils/testUtils";
 
 suite("faq", () => {
   beforeEach(() => {
@@ -24,7 +24,7 @@ suite("faq", () => {
   });
 
   test("swallows error silently if getTimestampString rejects", async () => {
-    mockMetadata({ timestamp: -1 });
+    mockMetadataErr();
     await import("./faq");
 
     const els = document.querySelectorAll<HTMLElement>(".faq-note");

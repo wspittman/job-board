@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, expect, suite, test } from "vitest";
-import { mockMetadata, type XrayComponent } from "../utils/testUtils";
+import {
+  mockMetadata,
+  mockMetadataErr,
+  type XrayComponent,
+} from "../utils/testUtils";
 // Import to trigger custom element registration
 import "./stats";
 
@@ -51,7 +55,7 @@ suite("Stats", () => {
   });
 
   test("error swallowing: element remains hidden if getCountStrings rejects", async () => {
-    mockMetadata({ timestamp: -1 });
+    mockMetadataErr();
     await expect(element.onLoad()).resolves.toBeUndefined();
     expect(element.style.display).not.toBe("block");
   });
