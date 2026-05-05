@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, expect, suite, test } from "vitest";
 import { FilterModel } from "../api/filterModel";
-import { mockJobs, spies, type XrayComponent } from "../utils/testUtils";
+import { mockApi } from "../utils/testSetup";
+import { mockJobs, type XrayComponent } from "../utils/testUtils";
 import { FILTERS_UPDATED } from "./filters/filters";
 import { JOB_CARD_SELECTED } from "./results/job-card";
 
@@ -30,7 +31,7 @@ suite("jobs", () => {
 
     await Promise.resolve();
 
-    expect(spies.fetchJobs).toHaveBeenCalledTimes(1);
+    expect(mockApi.fetchJobs).toHaveBeenCalledTimes(1);
   });
 
   test("JOB_CARD_SELECTED updates the details pane with the selected job title", async () => {

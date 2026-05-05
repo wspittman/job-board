@@ -1,13 +1,12 @@
 import { afterEach, expect, suite, test, vi } from "vitest";
-import { api } from "../api/api";
 import { FilterModel } from "../api/filterModel";
-import type { XrayComponent } from "../utils/testUtils";
+import {
+  mockInterpretQuery,
+  mockInterpretQueryErr,
+  type XrayComponent,
+} from "../utils/testUtils";
 import { FORM_ELEMENT_UPDATE } from "./form-element";
 import { NL_SEARCH_RESULT, NLSearch } from "./nl-search";
-
-vi.mock("../api/api", () => ({
-  api: { interpretQuery: vi.fn() },
-}));
 
 type Xray = XrayComponent<NLSearch>;
 
@@ -42,8 +41,7 @@ suite("NLSearch", () => {
 
   test("shows loading state while API call is in progress", async () => {
     const element = await createLoaded();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(api.interpretQuery).mockReturnValue(new Promise(() => {}));
+    mockInterpretQuery({});
     setQuery(element, "remote jobs");
     const updateBtn = element.getEl<HTMLButtonElement>("update")!;
     updateBtn.click();
@@ -53,8 +51,7 @@ suite("NLSearch", () => {
 
   test("emits NL_SEARCH_RESULT with a FilterModel detail on successful search", async () => {
     const element = await createLoaded();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(api.interpretQuery).mockResolvedValue({ isRemote: true });
+    mockInterpretQuery({ isRemote: true });
     const handler = vi.fn();
     element.addEventListener(NL_SEARCH_RESULT, handler);
 
@@ -72,8 +69,7 @@ suite("NLSearch", () => {
 
   test("shows error message when API call fails", async () => {
     const element = await createLoaded();
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(api.interpretQuery).mockRejectedValue(new Error("API error"));
+    mockInterpretQueryErr();
     setQuery(element, "remote jobs");
     element.getEl<HTMLButtonElement>("update")!.click();
     await Promise.resolve();
@@ -90,8 +86,7 @@ suite("NLSearch", () => {
   test("redirect: navigates to /jobs with filter query after successful search", async () => {
     const assign = vi.fn();
     vi.stubGlobal("location", { assign, origin: window.location.origin });
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    vi.mocked(api.interpretQuery).mockResolvedValue({ isRemote: true });
+    mockInterpretQuery({ isRemote: true });
 
     const element = await createLoaded({ redirect: "" });
     setQuery(element, "remote jobs");

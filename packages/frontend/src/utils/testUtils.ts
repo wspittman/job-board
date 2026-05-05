@@ -1,10 +1,14 @@
-import type { JobModelApi, MetadataModelApi } from "../api/apiTypes";
+import type {
+  FilterModelApi,
+  JobModelApi,
+  MetadataModelApi,
+} from "../api/apiTypes";
 import { JobModel } from "../api/jobModel";
 import { ComponentBase } from "../components/componentBase";
 import type { FormElement } from "../components/form-element";
-import { spies } from "./testSetup";
+import { mockApi } from "./testSetup";
 
-export { spies };
+export { spies } from "./testSetup";
 
 // #region Types for accessing protected component members
 
@@ -83,7 +87,7 @@ export function createComponent<T extends Class>(
  * Mocks the API response for metadata to simulate an error condition.
  */
 export function mockMetadataErr() {
-  spies.fetchMetadata.mockRejectedValueOnce(new Error("Test Error"));
+  mockApi.fetchMetadata.mockRejectedValueOnce(new Error("Test Error"));
 }
 
 /**
@@ -91,7 +95,7 @@ export function mockMetadataErr() {
  * @param overrides Partial metadata fields to override the default values.
  */
 export function mockMetadata(overrides: Partial<MetadataModelApi> = {}) {
-  spies.fetchMetadata.mockResolvedValueOnce({
+  mockApi.fetchMetadata.mockResolvedValueOnce({
     timestamp: 1777934360621,
     companyCount: 3,
     companyNames: ["test", "example", "acme"].map((name) => [
@@ -140,7 +144,22 @@ export function createJobModel(overrides: Partial<JobModelApi> = {}) {
  * @param overrides Partial job fields to override the default values.
  */
 export function mockJobs(overrides: Partial<JobModelApi> = {}) {
-  spies.fetchJobs.mockResolvedValueOnce([createJobApi(overrides)]);
+  mockApi.fetchJobs.mockResolvedValueOnce([createJobApi(overrides)]);
+}
+
+/**
+ * Mocks the API response for interpreting a natural language query to simulate an error condition.
+ */
+export function mockInterpretQueryErr() {
+  mockApi.interpretQuery.mockRejectedValueOnce(new Error("Test Error"));
+}
+
+/**
+ * Mocks the API response for interpreting a natural language query with a specified FilterModelApi result.
+ * @param result The FilterModelApi object to return as the result of interpreting the query.
+ */
+export function mockInterpretQuery(result: FilterModelApi) {
+  mockApi.interpretQuery.mockResolvedValueOnce(result);
 }
 
 // #endregion
