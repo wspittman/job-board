@@ -20,10 +20,16 @@ suite("Stats", () => {
   test("renders count strings after onLoad", async () => {
     mockMetadata();
     await element.onLoad();
-    expect(element.getEl("job-count")?.textContent).toBe("1,000");
-    expect(element.getEl("company-count")?.textContent).toBe("3");
+    expect(element.getEl("job-count")?.textContent).toBe(
+      (1000).toLocaleString(),
+    );
+    expect(element.getEl("company-count")?.textContent).toBe(
+      (3).toLocaleString(),
+    );
     expect(element.getEl("remote-pct")?.textContent).toBe("40%");
-    expect(element.getEl("job-recent-count")?.textContent).toBe("100");
+    expect(element.getEl("job-recent-count")?.textContent).toBe(
+      (100).toLocaleString(),
+    );
   });
 
   test("becomes visible after successful load", async () => {

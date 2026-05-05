@@ -78,7 +78,7 @@ suite("FilterModel", () => {
     ["location", "Seattle", "Location: Seattle"],
     ["daysSince", "7", "Posted: Within 7 days"],
     ["maxExperience", "5", "Experience: 5 years"],
-    ["minSalary", "100000", "Pay Rate: 100,000"],
+    ["minSalary", "100000", `Pay Rate: ${(100000).toLocaleString()}`],
     ["companyId", "acme-corp", "Company: Acme Inc."],
   ] as [string, string, string][])(
     "toFriendlyStrings: key=%s value=%s → label contains '%s'",
