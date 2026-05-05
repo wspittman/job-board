@@ -4,6 +4,7 @@ export const spies = {
   sendBeacon: vi.fn(),
   setFormValue: vi.fn(),
   fetchMetadata: vi.fn(),
+  fetchJobs: vi.fn(),
 };
 
 Object.defineProperty(global.navigator, "sendBeacon", {
@@ -18,6 +19,8 @@ Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
   value: vi.fn(),
 });
 
-vi.mock("../api/api", () => ({ api: { fetchMetadata: spies.fetchMetadata } }));
+vi.mock("../api/api", () => ({
+  api: { fetchMetadata: spies.fetchMetadata, fetchJobs: spies.fetchJobs },
+}));
 
 beforeEach(vi.clearAllMocks);

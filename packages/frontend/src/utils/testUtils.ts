@@ -109,8 +109,8 @@ export function mockMetadata(overrides: Partial<MetadataModelApi> = {}) {
   });
 }
 
-export function createJobModel(overrides: Partial<JobModelApi> = {}) {
-  return new JobModel({
+function createJobApi(overrides: Partial<JobModelApi> = {}): JobModelApi {
+  return {
     id: "job-1",
     companyId: "acme",
     title: "Software Engineer",
@@ -121,7 +121,24 @@ export function createJobModel(overrides: Partial<JobModelApi> = {}) {
     isRemote: false,
     location: "Seattle, WA",
     ...overrides,
-  });
+  };
+}
+
+/**
+ * Creates a JobModel instance with default values, allowing overrides for specific fields.
+ * @param overrides Partial job fields to override the default values.
+ * @returns A JobModel instance with the specified overrides.
+ */
+export function createJobModel(overrides: Partial<JobModelApi> = {}) {
+  return new JobModel(createJobApi(overrides));
+}
+
+/**
+ * Mocks the API response for jobs with default values, allowing overrides for specific fields.
+ * @param overrides Partial job fields to override the default values.
+ */
+export function mockJobs(overrides: Partial<JobModelApi> = {}) {
+  spies.fetchJobs.mockResolvedValueOnce([createJobApi(overrides)]);
 }
 
 // #endregion

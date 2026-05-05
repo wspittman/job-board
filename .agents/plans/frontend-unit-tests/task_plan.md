@@ -13,7 +13,7 @@ Expand the frontend test suite from its current 7-file coverage of base form com
 
 ## Current Phase
 
-Phase 5 — Complex Page Orchestrators (Targeted Only) (**pending**)
+Phase 5 — Complex Page Orchestrators (Targeted Only) (**complete**)
 
 ## What to Skip (permanently)
 
@@ -176,7 +176,7 @@ Verify the timestamp display and error path (if the component has non-trivial lo
 
 ## Phase 5 — Complex Page Orchestrators (Targeted Only)
 
-**Status:** pending
+**Status:** complete
 
 **Rationale:** `jobs.ts`, `filters.ts`, `results.ts`, and `details.ts` coordinate many sub-components and events. Full coverage is impractical without significant test infrastructure investment. Limit to critical behaviors that are isolated enough to test cleanly.
 
