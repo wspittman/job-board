@@ -52,4 +52,25 @@ _Phase 2 (Remaining Reusable Components) is **pending** and awaiting review._
   - `FilterModel` stores all data in a private `#filters` field; use public methods (e.g. `toLocationSearchString()`) for assertions rather than `toMatchObject`
   - `window.location.assign` is non-configurable in jsdom — use `vi.stubGlobal("location", { assign: vi.fn(), ... })` and pair with `afterEach(vi.unstubAllGlobals)`
 
-_Phase 3 (Utility Module) is **pending** and awaiting review._
+_Phase 4 (Page-Level Rendering Components) is **pending** and awaiting review._
+
+---
+
+## Session: 2026-05-04 (continued)
+
+### Phase 4 — Page-Level Rendering Components
+
+- **Status:** complete
+- **Test files created:**
+  - `src/jobs/results/message-card.test.ts` — covers `countToMessage` table (via `create`), explicit message content, `error-card` class, and default count behavior
+  - `src/jobs/results/job-card.test.ts` — covers `create` text population, `isSelected` true/false states, idempotency guard, and click event emission
+  - `src/home/stats.test.ts` — covers count rendering, visibility after load, disconnected guard, and error swallowing
+  - `src/faq/faq.test.ts` — covers timestamp text/display on success and silent error swallowing; uses `vi.resetModules()` + dynamic import pattern for top-level module code
+- **Test count:** 177 (up from 157)
+- **Pre-checkin:** green
+- **Non-obvious conventions learned:**
+  - `vi.clearAllMocks()` (from testSetup) does NOT reset `mockResolvedValue` implementations — leaks can corrupt subsequent `beforeEach` side effects when `connectedCallback` fires on element append; use `vi.resetAllMocks()` in `beforeEach` for components whose `connectedCallback` calls async methods
+  - When `connectedCallback` triggers `onLoad` in `beforeEach`, element must be in the DOM for the `isConnected` guard to pass; test the disconnected guard by creating a fresh unconnected element rather than trying to time a removal before promise resolution
+  - Top-level `await` module code (like `faq.ts`) requires `vi.resetModules()` in `beforeEach` + dynamic `import()` inside each test to re-execute the module per test
+
+_Phase 5 (Complex Page Orchestrators) is **pending** and awaiting review._

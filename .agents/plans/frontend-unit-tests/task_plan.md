@@ -13,7 +13,7 @@ Expand the frontend test suite from its current 7-file coverage of base form com
 
 ## Current Phase
 
-Phase 4 — Page-Level Rendering Components (**pending**)
+Phase 5 — Complex Page Orchestrators (Targeted Only) (**pending**)
 
 ## What to Skip (permanently)
 
@@ -130,7 +130,7 @@ Note: The module-level `beacon()` call executes on import. Stub `navigator.sendB
 
 ## Phase 4 — Page-Level Rendering Components
 
-**Status:** pending
+**Status:** complete
 
 **Rationale:** These components have clear inputs/outputs and testable behavior, but require mocking API/model dependencies. Each file is self-contained enough to test in isolation.
 
