@@ -9,9 +9,8 @@ import { standardizeUntrustedHtml } from "dry-utils-text";
 import { AppError } from "../utils/AppError.ts";
 import { logError } from "../utils/telemetry.ts";
 
-const NAME = "ashby"
+const NAME = "ashby";
 export class Ashby extends ATSBase {
-
   constructor() {
     super(NAME, config.ASHBY_URL);
   }
@@ -19,9 +18,8 @@ export class Ashby extends ATSBase {
   async getCompany({ id }: CompanyKey): Promise<Context<Company>> {
     const companyResult = await this.fetchCompany(id);
     const company = this.formatCompany(id);
-
-    if (companyResult.jobs.length) {
-      const exampleJob = companyResult.jobs[0]
+    if (companyResult.jobs.length > 0 && companyResult.jobs[0]) {
+      const exampleJob = this.formatJob(id, companyResult.jobs[0]);
 
       const context = {
         description: "Example job from the company",
@@ -38,8 +36,8 @@ export class Ashby extends ATSBase {
   }
 
   async getJobs({ id }: CompanyKey): Promise<Context<Job>[]> {
-    const { jobs } = await this.fetchCompany(id);
-    return jobs.map((job) => this.formatJobBasic(id, job));
+    const { jobs } = await this.fetchCompany(id, true);
+    return jobs.map((job) => this.formatJob(id, job));
   }
 
   async getJob(jobKey: JobKey): Promise<Context<Job>> {
@@ -48,7 +46,7 @@ export class Ashby extends ATSBase {
     // We log an error so we can track if this accidentally happens in production
     logError("Ashby.getJob: This should never be called when deployed");
 
-    const { jobs } = await this.fetchCompany(jobKey.companyId);
+    const { jobs } = await this.fetchCompany(jobKey.companyId, true);
     const job = jobs.find((job) => job.id === jobKey.id);
     if (!job) {
       throw new AppError("Job not found", 404);
@@ -71,7 +69,17 @@ export class Ashby extends ATSBase {
   private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
     const result = this.formatJobBasic(companyId, jobResult);
 
-    const { id, descriptionHtml, department, secondaryLocations, location } = jobResult;
+    const {
+      address,
+      id,
+      descriptionHtml,
+      department,
+      employmentType,
+      secondaryLocations,
+      team,
+      location,
+      workplaceType,
+    } = jobResult;
 
     result.item.description = standardizeUntrustedHtml(descriptionHtml);
 
@@ -79,10 +87,13 @@ export class Ashby extends ATSBase {
     const context = {
       description: `Additional information about the job ${id}`,
       content: {
-        descriptionHtml,
+        address,
         department,
+        employmentType,
         secondaryLocations,
+        team,
         location: location,
+        workplaceType,
       },
     };
     result.context = [context];
@@ -90,25 +101,28 @@ export class Ashby extends ATSBase {
     return result;
   }
 
-
-  private async fetchCompany(id: string): Promise<CompanyResult> {
-    return this.httpCall<CompanyResult>("Company", id, "");
+  private async fetchCompany(
+    id: string,
+    includeComp: boolean = false,
+  ): Promise<CompanyResult> {
+    const route = includeComp ? "" : "?includeCompensation=true";
+    return this.httpCall<CompanyResult>("Company", id, route);
   }
 
   private formatJobBasic(
     companyId: string,
-    { id, title, publishedAt, jobUrl }: JobResult,
+    { id, title, publishedAt, applyUrl }: JobResult,
   ): Context<Job> {
     const job: Job = {
       // Keys
-      id: String(id),
+      id: id,
       companyId: companyId,
 
       // Basic
       title: normTitle(title),
       description: "",
       postTS: new Date(publishedAt).getTime(),
-      applyUrl: jobUrl,
+      applyUrl: applyUrl,
     };
 
     // NOTE: Don't set context here because refreshJobInfo depends on it being undefined to know when to fetch full job data
