@@ -19,9 +19,6 @@ export type {
   ExtractionSalaryRange as SalaryRange,
 };
 
-export const atsTypes = ["greenhouse", "lever"] as const;
-export type ATS = (typeof atsTypes)[number];
-
 export type LLMAction = keyof typeof llm;
 export const llmActionTypes = Object.getOwnPropertyNames(
   Object.getPrototypeOf(llm),

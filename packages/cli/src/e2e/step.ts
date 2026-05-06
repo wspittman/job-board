@@ -1,5 +1,5 @@
 import { config } from "../config.ts";
-import type { ATS } from "../portal/pTypes.ts";
+import type { ATS } from "../portal/atsConsts.ts";
 import type { HttpMethod } from "../types.ts";
 
 const { GREENHOUSE_IDS: ghIds, LEVER_IDS: lvIds } = config;
