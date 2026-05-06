@@ -1,12 +1,10 @@
 import { logger } from "dry-utils-logger";
 import assert from "node:assert/strict";
-import { config } from "../config.ts";
 import { CommandError, type Command } from "../types.ts";
 import { apiCall } from "../utils/http.ts";
 import { flows } from "./flows.ts";
 import type { Step } from "./step.ts";
 
-const { GREENHOUSE_IDS, LEVER_IDS } = config;
 const FLOW_NAMES = Object.keys(flows);
 
 export const e2e: Command = {
@@ -15,7 +13,6 @@ export const e2e: Command = {
     "Run the e2e tests against a running local server",
     `FLOW: ${FLOW_NAMES.join("|")}`,
   ],
-  prerequisite,
   run: async ([flow]: string[]): Promise<void> => {
     if (!flow || !FLOW_NAMES.includes(flow)) {
       throw new CommandError("Invalid argument: FLOW");
@@ -24,11 +21,6 @@ export const e2e: Command = {
     await runFlow(flow);
   },
 };
-
-function prerequisite(): void {
-  assert.ok(GREENHOUSE_IDS.length > 2, "ENV: GREENHOUSE_IDS <= 2");
-  assert.ok(LEVER_IDS.length > 2, "ENV: LEVER_IDS <= 2");
-}
 
 /**
  * Execute the named flow against the configured backend API.
