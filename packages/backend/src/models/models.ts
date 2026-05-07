@@ -8,7 +8,7 @@ import type {
 } from "./extractionModels.ts";
 
 export const IdSchema = z.string().trim().nonempty().max(100);
-export const AtsSchema = z.enum(["greenhouse", "lever"] as const);
+export const AtsSchema = z.enum(["ashby", "greenhouse", "lever"] as const);
 export type ATS = z.infer<typeof AtsSchema>;
 export type CompanyQuickRef = [id: string, name: string, website?: string];
 
