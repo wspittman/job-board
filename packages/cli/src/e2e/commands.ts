@@ -41,7 +41,11 @@ async function runFlow(name: string): Promise<void> {
     }
   } catch (err) {
     if (err instanceof assert.AssertionError) {
-      logger.error("Assertion Error", err.message);
+      logger.error("Assertion Error", {
+        message: err.message.split("\n")[0],
+        expected: err.expected,
+        actual: err.actual,
+      });
       return;
     }
     throw err;
