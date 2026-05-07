@@ -71,6 +71,7 @@ export class Ashby extends ATSBase {
 
     const {
       address,
+      compensation,
       id,
       descriptionHtml,
       department,
@@ -88,6 +89,7 @@ export class Ashby extends ATSBase {
       description: `Additional information about the job ${id}`,
       content: {
         address,
+        compensation,
         department,
         employmentType,
         secondaryLocations,
@@ -105,7 +107,7 @@ export class Ashby extends ATSBase {
     id: string,
     includeComp: boolean = false,
   ): Promise<CompanyResult> {
-    const route = includeComp ? "" : "?includeCompensation=true";
+    const route = includeComp ? "?includeCompensation=true" : "";
     return this.httpCall<CompanyResult>("Company", id, route);
   }
 
