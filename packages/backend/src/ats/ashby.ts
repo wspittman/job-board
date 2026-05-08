@@ -1,13 +1,13 @@
-import type { JobResult } from "./ashby/jobResult.ts";
-import { config } from "../config.ts";
-import { ATSBase } from "./atsBase.ts";
-import type { CompanyKey, Company, Job, JobKey } from "../models/models.ts";
-import type { Context } from "../types/types.ts";
-import type { CompanyResult } from "./ashby/companyResult.ts";
-import { normTitle } from "./normalization.ts";
 import { standardizeUntrustedHtml } from "dry-utils-text";
+import { config } from "../config.ts";
+import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
+import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { logError } from "../utils/telemetry.ts";
+import type { CompanyResult } from "./ashby/companyResult.ts";
+import type { JobResult } from "./ashby/jobResult.ts";
+import { ATSBase } from "./atsBase.ts";
+import { normTitle } from "./normalization.ts";
 
 const NAME = "ashby";
 export class Ashby extends ATSBase {
@@ -23,7 +23,10 @@ export class Ashby extends ATSBase {
 
       const context = {
         description: "Example job from the company",
-        content: { ...exampleJob },
+        content: {
+          ...exampleJob.item,
+          ...(exampleJob.context?.[0]?.content ?? {}),
+        },
       };
 
       return {
