@@ -70,6 +70,12 @@ export class Ashby extends ATSBase {
   }
 
   private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
+    if (jobResult.isListed === false) {
+      logError(
+        `Ashby.formatJob: ${companyId}\\${jobResult.id} marked as unlisted.`,
+      );
+    }
+
     const result = this.formatJobBasic(companyId, jobResult);
 
     const {
