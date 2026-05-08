@@ -1,12 +1,4 @@
-import type { CorrelationContext } from "applicationinsights/out/AutoCollection/CorrelationContextManager.js";
-import type {
-  EnvelopeTelemetry,
-  EventData,
-  ExceptionData,
-  ExceptionDetails,
-  RequestData,
-} from "applicationinsights/out/Declarations/Contracts/index.js";
-import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
+import type { TelemetryClient } from "applicationinsights";
 import { subscribeAsyncLogging } from "dry-utils-async";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
@@ -23,24 +15,36 @@ import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
 // #region Types and Startup
 
-interface TypedRequestData extends RequestData {
+// Phase 1 compile bridge – these interfaces are replaced by OTel span attributes in Phase 3
+interface TypedRequestData {
+  name?: string;
+  responseCode?: string;
+  duration?: number;
   properties: Bag | unknown[] | undefined;
 }
-interface TypedEventData extends EventData {
+interface TypedEventData {
+  name?: string;
   properties: Bag | unknown[] | undefined;
 }
-interface TypedExceptionData extends ExceptionData {
+interface ExceptionDetails {
+  message: string;
+  stack?: string;
+  parsedStack: { assembly: string }[];
+}
+interface TypedExceptionData {
+  exceptions: ExceptionDetails[];
   properties: Bag | unknown[] | undefined;
 }
 
-let _client: NodeClient;
+let _client: TelemetryClient;
 
 export function startTelemetry(): void {
   telemetryWorkaround
     .setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
     .start();
   _client = telemetryWorkaround.getClient();
-  _client.addTelemetryProcessor(telemetryProcessor);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _client.addTelemetryProcessor(telemetryProcessor as any);
   _client.config.disableAppInsights = config.NODE_ENV === "dev";
 
   subscribeAsyncLogging({
@@ -67,7 +71,7 @@ interface AgSub {
   blob: Bag;
 }
 
-interface CustomContext extends CorrelationContext {
+interface CustomContext {
   requestContext?: Bag;
 }
 
@@ -251,7 +255,11 @@ export function createSubscribeAggregator(
  * @param envelope - Telemetry envelope to process
  * @returns true to allow the event to be sent
  */
-export function telemetryProcessor({ data }: EnvelopeTelemetry): boolean {
+export function telemetryProcessor({
+  data,
+}: {
+  data: { baseType: string; baseData: unknown };
+}): boolean {
   try {
     if (!data.baseData) return true;
 
@@ -263,13 +271,13 @@ export function telemetryProcessor({ data }: EnvelopeTelemetry): boolean {
         break;
       }
       case "EventData": {
-        const eventData = data.baseData as EventData;
+        const eventData = data.baseData as TypedEventData;
         appendContext(eventData);
         devLogEvent(eventData);
         break;
       }
       case "ExceptionData": {
-        devLogException(data.baseData as ExceptionData);
+        devLogException(data.baseData as TypedExceptionData);
         break;
       }
       case "RemoteDependencyData":

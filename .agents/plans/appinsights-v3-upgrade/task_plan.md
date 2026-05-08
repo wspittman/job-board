@@ -7,20 +7,21 @@ context enrichment, dev-mode suppression, or auto-instrumentation.
 
 ## Current Phase
 
-Phase 1
+Phase 2
 
 ## Phases
 
 ### Phase 1: Package bump + compile errors
 
-- [ ] Bump `applicationinsights` to `^3` in `packages/backend/package.json`
-- [ ] Run `npm install`
-- [ ] Replace deep internal imports in `src/utils/telemetry.ts` (see findings.md §Breaking Changes 1):
-  - `CorrelationContext` → `ICorrelationContext` (public v3 export)
-  - `NodeClient` → `TelemetryClient` (public v3 export)
-  - `EnvelopeTelemetry`, `EventData`, `ExceptionData`, `ExceptionDetails`, `RequestData` — removed in v3; temporarily type the `telemetryProcessor` parameter and local casts as `unknown` / `any` as a compile bridge (they are replaced entirely in Phase 3)
-- [ ] Run `npm run build` to confirm clean compile
-- **Status:** pending
+- [x] Bump `applicationinsights` to `^3` in `packages/backend/package.json`
+- [x] Run `npm install`
+- [x] Replace deep internal imports in `src/utils/telemetry.ts` (see findings.md §Breaking Changes 1):
+  - `CorrelationContext` → removed; `CustomContext` redefined as a standalone interface (no base type needed)
+  - `NodeClient` → `TelemetryClient` (public v3 export from `applicationinsights`)
+  - `EnvelopeTelemetry`, `EventData`, `ExceptionData`, `ExceptionDetails`, `RequestData` → replaced with local minimal stub interfaces as compile bridges
+  - `addTelemetryProcessor` call cast to `any` (v3 expects `TelemetryItem` signature; call is removed in Phase 3)
+- [x] Run `npm run build` to confirm clean compile
+- **Status:** complete
 - **Acceptance:** `tsc` exits clean. Runtime not yet correct.
 
 ### Phase 2: Fix `disableAppInsights` no-op
@@ -84,11 +85,13 @@ Phase 1
 
 ## Decisions Made
 
-| Decision                                           | Rationale                                                                           |
-| -------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Use `samplingPercentage = 0` for dev suppression   | `disableAppInsights` is unsupported in v3; sampling to 0 is the documented approach |
-| Replace TelemetryProcessor with OTel SpanProcessor | `addTelemetryProcessor` silently no-ops in v3 — invisible regression                |
-| Switch to AsyncLocalStorage-only context           | Mutable `requestContext` on the correlation context shim object is not stable in v3 |
+| Decision                                                  | Rationale                                                                                                                                                                                     |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ICorrelationContext` not re-exported from v3             | `ICorrelationContext` is defined in `applicationinsights/out/src/shim/types.d.ts` but not re-exported from the package's main entry. `CustomContext` was redefined as a standalone interface. |
+| `addTelemetryProcessor` bridged with `as any` for Phase 1 | v3 `addTelemetryProcessor` expects `(envelope: TelemetryItem, ...) => boolean`; cast allows clean compile while the call site is removed entirely in Phase 3.                                 |
+| Use `samplingPercentage = 0` for dev suppression          | `disableAppInsights` is unsupported in v3; sampling to 0 is the documented approach                                                                                                           |
+| Replace TelemetryProcessor with OTel SpanProcessor        | `addTelemetryProcessor` silently no-ops in v3 — invisible regression                                                                                                                          |
+| Switch to AsyncLocalStorage-only context                  | Mutable `requestContext` on the correlation context shim object is not stable in v3                                                                                                           |
 
 ## Errors Encountered
 

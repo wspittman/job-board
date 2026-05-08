@@ -1,43 +1,43 @@
 # Progress Log
 
-## Session: 2026-04-28
+## Session: 2026-05-08
 
 ### Phase Status
 
-| Phase | Title                                       | Status  |
-| ----- | ------------------------------------------- | ------- |
-| 1     | Package bump + compile errors               | pending |
-| 2     | Fix `disableAppInsights` no-op              | pending |
-| 3     | Replace with OTel SpanProcessor             | pending |
-| 4     | ESM instrumentation hook                    | pending |
-| 5     | Validate / remove `telemetryWorkaround.cjs` | pending |
-| 6     | Integration smoke test                      | pending |
+| Phase | Title                                       | Status   |
+| ----- | ------------------------------------------- | -------- |
+| 1     | Package bump + compile errors               | complete |
+| 2     | Fix `disableAppInsights` no-op              | pending  |
+| 3     | Replace with OTel SpanProcessor             | pending  |
+| 4     | ESM instrumentation hook                    | pending  |
+| 5     | Validate / remove `telemetryWorkaround.cjs` | pending  |
+| 6     | Integration smoke test                      | pending  |
 
 ### Summary
 
-Research and planning complete. No code changes yet.
+Phase 1 complete. Package bumped to v3.14.0, deep internal imports replaced, `tsc` builds clean.
 
 ### Actions Taken
 
-- Audited all `applicationinsights` usages in `packages/backend/src/` and `packages/backend/test/`
-- Fetched and reviewed the v3 README, CHANGELOG, shim source (`applicationinsights.ts`, `correlationContextManager.ts`)
-- Identified 6 breaking changes affecting this codebase
-- Created plan files at `.agents/plans/appinsights-v3-upgrade/`
-- Removed preliminary notes from `packages/backend/docs/appinsights-v3-upgrade-plan.md`
+- Bumped `applicationinsights` to `^3` in `packages/backend/package.json` (resolved to 3.14.0)
+- Replaced three deep-path v2 imports in `src/utils/telemetry.ts`:
+  - `CorrelationContext` from internal path — `CustomContext` redefined as standalone interface (no base type; `ICorrelationContext` is not re-exported from the v3 public entry)
+  - `NodeClient` → `TelemetryClient` (from `applicationinsights`)
+  - `EnvelopeTelemetry`, `EventData`, `ExceptionData`, `ExceptionDetails`, `RequestData` → local minimal stub interfaces as Phase 1 compile bridges
+- Cast `telemetryProcessor` reference passed to `addTelemetryProcessor` as `any` (v3 expects `TelemetryItem` signature; call removed in Phase 3)
+- Fixed missed `ExceptionData` cast → `TypedExceptionData`
+- `npm run build --workspace=backend` exits clean
 
-### Files Reviewed
+### Files Changed
 
-- `packages/backend/src/utils/telemetry.ts` — main telemetry module (all breaking changes originate here)
-- `packages/backend/src/utils/telemetryWorkaround.cjs` — CJS shim for ESM defaultClient issue
-- `packages/backend/src/app.ts` — entry point; telemetry started before other imports
-- `packages/backend/test/setup.ts` — mocks for telemetry bootstrap
-- `packages/backend/src/middleware/logIdentifiers.ts` — uses `logError` from telemetry
+- `packages/backend/package.json` — bumped `applicationinsights` to `^3`
+- `packages/backend/src/utils/telemetry.ts` — replaced all deep imports; local stub interfaces; `as any` bridge
 
 ### Current State
 
-- All phases: **pending**
-- No code has been changed
-- Next step: begin Phase 1 (package bump)
+- Phase 1: **complete**
+- Phase 2–6: **pending**
+- Next step: begin Phase 2 (fix `disableAppInsights` no-op + update test mock)
 
 ## Test Results
 

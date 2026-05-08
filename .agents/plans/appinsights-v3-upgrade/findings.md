@@ -45,12 +45,12 @@ import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
 
 Replacements:
 
-| v2 type                                                         | v3 replacement                                                                          |
-| --------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `CorrelationContext`                                            | `ICorrelationContext` (public export from `applicationinsights`)                        |
-| `EnvelopeTelemetry`                                             | No equivalent — the telemetry processor that consumes it is replaced by a SpanProcessor |
-| `EventData`, `RequestData`, `ExceptionData`, `ExceptionDetails` | No equivalent — replaced by OTel span attributes/events                                 |
-| `NodeClient`                                                    | `TelemetryClient` (public export from `applicationinsights`)                            |
+| v2 type                                                         | v3 replacement                                                                                                                                                                                                                     |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CorrelationContext`                                            | `ICorrelationContext` exists in `applicationinsights/out/src/shim/types.d.ts` but is **not re-exported** from the package's public entry; `CustomContext` was redefined as a standalone interface with only `requestContext?: Bag` |
+| `EnvelopeTelemetry`                                             | No equivalent — the telemetry processor that consumes it is replaced by a SpanProcessor                                                                                                                                            |
+| `EventData`, `RequestData`, `ExceptionData`, `ExceptionDetails` | No equivalent — replaced by local minimal stub interfaces as Phase 1 compile bridge; removed in Phase 3                                                                                                                            |
+| `NodeClient`                                                    | `TelemetryClient` (public export from `applicationinsights`)                                                                                                                                                                       |
 
 ### 2. `addTelemetryProcessor` — removed entirely
 

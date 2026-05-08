@@ -12,7 +12,7 @@
     "start": "node dist/app.js"
   },
   "dependencies": {
-    "applicationinsights": "^2.9.5",
+    "applicationinsights": "^3.14.0",
     "cors": "^2.8.5",
     "dry-utils-async": "^0.3.2",
     "dry-utils-cosmosdb": "^0.6.0",
