@@ -7,7 +7,7 @@ context enrichment, dev-mode suppression, or auto-instrumentation.
 
 ## Current Phase
 
-Phase 5
+Phase 6
 
 ## Phases
 
@@ -68,11 +68,10 @@ Phase 5
 
 ### Phase 5: Validate / remove `telemetryWorkaround.cjs`
 
-- [ ] Temporarily import `applicationinsights` directly in `telemetry.ts` (bypass the CJS shim)
-- [ ] Start dev server and verify `defaultClient` is defined after `setup()`
-- [ ] If ESM issue resolved: delete `telemetryWorkaround.cjs`, update `telemetry.ts` and `test/setup.ts`
-- [ ] If ESM issue persists: keep the file but strip the now-unused `getCorrelationContext` export
-- **Status:** pending
+- [x] Tested ESM `defaultClient` access: `undefined` before and after `setup()` + `start()` when imported via native ESM — issue persists in v3
+- [x] Kept `telemetryWorkaround.cjs`; stripped now-unused `getCorrelationContext` export
+- [x] Run `npm run test --workspace=backend` — 255 tests pass
+- **Status:** complete
 - **Acceptance:** `telemetryWorkaround.cjs` is either deleted or reduced to only what is needed.
 
 ### Phase 6: Integration smoke test
@@ -86,7 +85,7 @@ Phase 5
 
 ## Key Questions
 
-1. Does the ESM `defaultClient` issue (GitHub #1354) still apply in v3? (Determine in Phase 5)
+1. Does the ESM `defaultClient` issue (GitHub #1354) still apply in v3? **Resolved in Phase 5: Yes, `defaultClient` is `undefined` before and after `start()` when imported via ESM. `telemetryWorkaround.cjs` is retained.**
 2. Is `spanProcessors` exposed on `AzureMonitorOpenTelemetryOptions` in the installed v3 version, or does it need a different field name? **Resolved in Phase 3: `spanProcessors?: SpanProcessor[]` is present in v3.14.0.**
 3. Does `samplingPercentage = 0` fully suppress export in v3, or is a different mechanism needed?
 4. Does `tsx watch` honour `--import` flags passed alongside it, or must `dev` be switched to `node --import tsx ...` for the OTel hook to load first? **Resolved: `tsx` honours `--import` flags (confirmed v4.21.0 / Node v24.14.1).**
