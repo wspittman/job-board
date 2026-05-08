@@ -7,7 +7,7 @@ context enrichment, dev-mode suppression, or auto-instrumentation.
 
 ## Current Phase
 
-Phase 2
+Phase 3
 
 ## Phases
 
@@ -26,10 +26,10 @@ Phase 2
 
 ### Phase 2: Fix `disableAppInsights` no-op
 
-- [ ] Replace `_client.config.disableAppInsights = config.NODE_ENV === "dev"` with `samplingPercentage = 0`
-- [ ] Update mock in `test/setup.ts` to drop `addTelemetryProcessor` and `disableAppInsights`
-- [ ] Run `npm run test --workspace=backend` to confirm tests pass
-- **Status:** pending
+- [x] Replace `_client.config.disableAppInsights = config.NODE_ENV === "dev"` with `if (config.NODE_ENV === "dev") { _client.config.samplingPercentage = 0; }`
+- [x] Update mock in `test/setup.ts`: replace `config: { disableAppInsights: true }` with `config: { samplingPercentage: 0 }` (kept `addTelemetryProcessor` mock — still called until Phase 3)
+- [x] Run `npm run test --workspace=backend` to confirm tests pass
+- **Status:** complete
 - **Acceptance:** Dev mode no longer sends telemetry; test suite passes.
 
 ### Phase 3: Replace `addTelemetryProcessor` with OTel SpanProcessor

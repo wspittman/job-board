@@ -7,7 +7,7 @@
 | Phase | Title                                       | Status   |
 | ----- | ------------------------------------------- | -------- |
 | 1     | Package bump + compile errors               | complete |
-| 2     | Fix `disableAppInsights` no-op              | pending  |
+| 2     | Fix `disableAppInsights` no-op              | complete |
 | 3     | Replace with OTel SpanProcessor             | pending  |
 | 4     | ESM instrumentation hook                    | pending  |
 | 5     | Validate / remove `telemetryWorkaround.cjs` | pending  |

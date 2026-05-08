@@ -10,7 +10,7 @@ const telemetryWorkaround = (
 ).default;
 const telemetryClient = {
   addTelemetryProcessor: () => {},
-  config: { disableAppInsights: true },
+  config: { samplingPercentage: 0 },
 };
 
 mock.method(telemetryWorkaround, "setup", () => ({

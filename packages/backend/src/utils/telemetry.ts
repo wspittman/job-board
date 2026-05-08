@@ -45,7 +45,9 @@ export function startTelemetry(): void {
   _client = telemetryWorkaround.getClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _client.addTelemetryProcessor(telemetryProcessor as any);
-  _client.config.disableAppInsights = config.NODE_ENV === "dev";
+  if (config.NODE_ENV === "dev") {
+    _client.config.samplingPercentage = 0;
+  }
 
   subscribeAsyncLogging({
     log: ({ tag, val }) => logProperty(tag, val),
