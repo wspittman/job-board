@@ -57,7 +57,7 @@ const validations: Step[] = [
   formErrStep(
     "refresh/jobs",
     "Unknown ATS Error",
-    'ats field is invalid: Invalid option: expected one of "greenhouse"|"lever"',
+    'ats field is invalid: Invalid option: expected one of "ashby"|"greenhouse"|"lever"',
     {
       method: "POST",
       asAdmin: true,
