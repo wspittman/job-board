@@ -1,4 +1,8 @@
-import { logError, startTelemetry } from "./utils/telemetry.ts";
+import {
+  asyncLocalStorage,
+  logError,
+  startTelemetry,
+} from "./utils/telemetry.ts";
 
 // We need this as early as possible, for reasons
 startTelemetry();
@@ -18,6 +22,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({ maxAge: 86400 }));
 app.use(express.json());
+app.use((_, __, next) => asyncLocalStorage.run({}, next));
 app.use(logIdentifiers);
 
 app.use("/api", router);

@@ -9,11 +9,11 @@ const telemetryWorkaround = (
   await import("../src/utils/telemetryWorkaround.cjs")
 ).default;
 const telemetryClient = {
-  addTelemetryProcessor: () => {},
   config: { samplingPercentage: 0 },
 };
 
 mock.method(telemetryWorkaround, "setup", () => ({
+  setAzureMonitorOptions() {},
   start() {
     // no-op telemetry bootstrap
   },

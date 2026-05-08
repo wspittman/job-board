@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test } from "node:test";
 import { logIdentifiers } from "../../src/middleware/logIdentifiers.ts";
 import { Bag } from "../../src/types/types.ts";
-import telemetryWorkaround from "../../src/utils/telemetryWorkaround.cjs";
+import { asyncLocalStorage } from "../../src/utils/telemetry.ts";
 
 const headers = {
   "jb-visitor-id": "d4e08dd6-9d72-4c39-a9c2-7c4895a2c072",
@@ -37,17 +37,9 @@ const caseDefaults: CaseInput = {
 suite("logIdentifiers", () => {
   const res = {} as Response;
   const next = mock.fn();
-  let correlationContext: Bag = {};
-
-  mock.method(
-    telemetryWorkaround,
-    "getCorrelationContext",
-    () => correlationContext,
-  );
 
   beforeEach(() => {
     next.mock.resetCalls();
-    correlationContext = {};
   });
 
   const cases: Partial<CaseInput>[] = [
@@ -70,29 +62,33 @@ suite("logIdentifiers", () => {
     const testInput = { ...caseDefaults, ...caseInput };
 
     test(`passes identifiers for ${testInput.method} ${testInput.path}`, () => {
-      const req = testInput as unknown as Request;
+      asyncLocalStorage.run({}, () => {
+        const req = testInput as unknown as Request;
 
-      logIdentifiers(req, res, next);
+        logIdentifiers(req, res, next);
 
-      assert.equal(next.mock.callCount(), 1);
-      const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
-      assert.deepStrictEqual(actual, testInput.expected);
+        assert.equal(next.mock.callCount(), 1);
+        const actual = (asyncLocalStorage.getStore()?.["prop"] as Bag) ?? {};
+        assert.deepStrictEqual(actual, testInput.expected);
+      });
     });
   });
 
   test("logs error but continues when beacon validation fails", () => {
-    const req = {
-      ...caseDefaults,
-      headers: {
-        "jb-visitor-id": "invalid",
-        "jb-session-id": "invalid",
-      },
-    } as unknown as Request;
+    asyncLocalStorage.run({}, () => {
+      const req = {
+        ...caseDefaults,
+        headers: {
+          "jb-visitor-id": "invalid",
+          "jb-session-id": "invalid",
+        },
+      } as unknown as Request;
 
-    assert.doesNotThrow(() => logIdentifiers(req, res, next));
+      assert.doesNotThrow(() => logIdentifiers(req, res, next));
 
-    assert.equal(next.mock.callCount(), 1);
-    const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
-    assert.deepStrictEqual(actual, {});
+      assert.equal(next.mock.callCount(), 1);
+      const actual = (asyncLocalStorage.getStore()?.["prop"] as Bag) ?? {};
+      assert.deepStrictEqual(actual, {});
+    });
   });
 });

@@ -7,7 +7,7 @@ context enrichment, dev-mode suppression, or auto-instrumentation.
 
 ## Current Phase
 
-Phase 3
+Phase 4
 
 ## Phases
 
@@ -34,19 +34,20 @@ Phase 3
 
 ### Phase 3: Replace `addTelemetryProcessor` with OTel SpanProcessor
 
-- [ ] Export `asyncLocalStorage` from `telemetry.ts`
-- [ ] Add Express middleware in `app.ts` that wraps each request in `asyncLocalStorage.run({}, next)` (before `logIdentifiers`)
-- [ ] Remove fallback to `getCorrelationContext().requestContext` in `getContext()`
-- [ ] Remove `CustomContext` interface and `ICorrelationContext` import from `telemetry.ts` (no longer needed after `getContext()` simplification)
-- [ ] Write `TelemetryContextProcessor` implementing OTel `SpanProcessor`
-- [ ] In the SpanProcessor's `onEnd`, call `appendContext` to merge `asyncLocalStorage` properties onto span attributes
-- [ ] Migrate dev-mode console logging from `telemetryProcessor` into the SpanProcessor's `onEnd` (adapt `devLogRequest`/`devLogEvent` to read from span attributes; adapt `devLogException` to read from span events — or simplify to `console.log(span)` if full fidelity is not needed at first)
-- [ ] Register the SpanProcessor via `Configuration.setAzureMonitorOptions({ spanProcessors: [...] })`
-- [ ] Verify `spanProcessors` field exists on `AzureMonitorOpenTelemetryOptions` type after install
-- [ ] Update `logIdentifiers.test.ts` and `inputValidators.test.ts`: replace `getCorrelationContext` mocks with `asyncLocalStorage.run({}, ...)` wrappers; assert against the store object rather than `correlationContext.requestContext.prop` (see findings.md §Test Impact)
-- [ ] Remove `getCorrelationContext` mock from `test/setup.ts` (if present) and from individual test files
-- [ ] Run `npm run test --workspace=backend` to confirm tests pass
-- **Status:** pending
+- [x] Export `asyncLocalStorage` from `telemetry.ts`
+- [x] Add Express middleware in `app.ts` that wraps each request in `asyncLocalStorage.run({}, next)` (before `logIdentifiers`)
+- [x] Remove fallback to `getCorrelationContext().requestContext` in `getContext()`
+- [x] Remove `CustomContext` interface from `telemetry.ts`
+- [x] Write `TelemetryContextProcessor` implementing OTel `SpanProcessor`
+- [x] In `onEnd`, merge `asyncLocalStorage` store keys onto span attributes (objects JSON-serialized, primitives/arrays passed through)
+- [x] Migrate dev-mode console logging into `devLogSpan()` — reads span name, HTTP status code, duration, and `store["prop"]` for request context; reads exception events for errors
+- [x] Register via `Configuration.setAzureMonitorOptions({ spanProcessors: [...] })` called on the return value of `telemetryWorkaround.setup()`
+- [x] `spanProcessors` confirmed present on `AzureMonitorOpenTelemetryOptions` in v3.14.0 (Key Question 2 resolved: ✅)
+- [x] Remove Phase 1 compile-bridge stub interfaces and `telemetryProcessor` / `appendContext` functions
+- [x] Update `logIdentifiers.test.ts` and `inputValidators.test.ts`: replaced `getCorrelationContext` mocks with `asyncLocalStorage.run({}, ...)` wrappers; assert against `asyncLocalStorage.getStore()["prop"]`
+- [x] Removed `addTelemetryProcessor` from test mock client; added `setAzureMonitorOptions` to `setup` mock return
+- [x] Run `npm run test --workspace=backend` — 255 tests pass
+- **Status:** complete
 - **Acceptance:** Properties from `logProperty()` / `logCounter()` appear on request spans in Application Insights; test suite passes.
 
 ### Phase 4: ESM instrumentation hook
@@ -79,7 +80,7 @@ Phase 3
 ## Key Questions
 
 1. Does the ESM `defaultClient` issue (GitHub #1354) still apply in v3? (Determine in Phase 5)
-2. Is `spanProcessors` exposed on `AzureMonitorOpenTelemetryOptions` in the installed v3 version, or does it need a different field name? (Determine in Phase 3)
+2. Is `spanProcessors` exposed on `AzureMonitorOpenTelemetryOptions` in the installed v3 version, or does it need a different field name? **Resolved in Phase 3: `spanProcessors?: SpanProcessor[]` is present in v3.14.0.**
 3. Does `samplingPercentage = 0` fully suppress export in v3, or is a different mechanism needed?
 4. Does `tsx watch` honour `--import` flags passed alongside it, or must `dev` be switched to `node --import tsx ...` for the OTel hook to load first? (Determine in Phase 4)
 

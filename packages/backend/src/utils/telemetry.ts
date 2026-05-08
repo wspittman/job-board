@@ -1,3 +1,8 @@
+import type { AttributeValue } from "@opentelemetry/api";
+import type {
+  ReadableSpan,
+  SpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import type { TelemetryClient } from "applicationinsights";
 import { subscribeAsyncLogging } from "dry-utils-async";
 import { AsyncLocalStorage } from "node:async_hooks";
@@ -15,36 +20,17 @@ import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
 // #region Types and Startup
 
-// Phase 1 compile bridge – these interfaces are replaced by OTel span attributes in Phase 3
-interface TypedRequestData {
-  name?: string;
-  responseCode?: string;
-  duration?: number;
-  properties: Bag | unknown[] | undefined;
-}
-interface TypedEventData {
-  name?: string;
-  properties: Bag | unknown[] | undefined;
-}
-interface ExceptionDetails {
-  message: string;
-  stack?: string;
-  parsedStack: { assembly: string }[];
-}
-interface TypedExceptionData {
-  exceptions: ExceptionDetails[];
-  properties: Bag | unknown[] | undefined;
-}
-
 let _client: TelemetryClient;
 
 export function startTelemetry(): void {
-  telemetryWorkaround
-    .setup(config.APPLICATIONINSIGHTS_CONNECTION_STRING)
-    .start();
+  const appInsights = telemetryWorkaround.setup(
+    config.APPLICATIONINSIGHTS_CONNECTION_STRING,
+  );
+  appInsights.setAzureMonitorOptions({
+    spanProcessors: [new TelemetryContextProcessor()],
+  });
+  appInsights.start();
   _client = telemetryWorkaround.getClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _client.addTelemetryProcessor(telemetryProcessor as any);
   if (config.NODE_ENV === "dev") {
     _client.config.samplingPercentage = 0;
   }
@@ -73,11 +59,7 @@ interface AgSub {
   blob: Bag;
 }
 
-interface CustomContext {
-  requestContext?: Bag;
-}
-
-const asyncLocalStorage = new AsyncLocalStorage<Bag>();
+export const asyncLocalStorage = new AsyncLocalStorage<Bag>();
 
 // #endregion
 
@@ -111,19 +93,7 @@ export function withAsyncContext(
  * Get the current logging context, initializing it if necessary
  */
 function getContext(): Bag {
-  // If an async context is already set, use it
-  const asyncContext = asyncLocalStorage.getStore();
-  if (asyncContext) return asyncContext;
-
-  // Otherwise, use the request-level context
-  const context = telemetryWorkaround.getCorrelationContext() as CustomContext;
-  if (context) {
-    context.requestContext ??= {};
-    return context.requestContext;
-  }
-
-  // If no context (eg. on startup), return an empty object
-  return {};
+  return asyncLocalStorage.getStore() ?? {};
 }
 
 /**
@@ -250,112 +220,66 @@ export function createSubscribeAggregator(
 
 // #endregion
 
-// #region (Send) Telemetry Processor
+// #region OTel SpanProcessor
 
 /**
- * Application Insights telemetry processor that enriches telemetry with context
- * @param envelope - Telemetry envelope to process
- * @returns true to allow the event to be sent
+ * OTel SpanProcessor that enriches spans with request-scoped telemetry context
+ * and handles dev-mode console logging.
  */
-export function telemetryProcessor({
-  data,
-}: {
-  data: { baseType: string; baseData: unknown };
-}): boolean {
-  try {
-    if (!data.baseData) return true;
-
-    switch (data.baseType) {
-      case "RequestData": {
-        const requestData = data.baseData as TypedRequestData;
-        appendContext(requestData);
-        devLogRequest(requestData);
-        break;
-      }
-      case "EventData": {
-        const eventData = data.baseData as TypedEventData;
-        appendContext(eventData);
-        devLogEvent(eventData);
-        break;
-      }
-      case "ExceptionData": {
-        devLogException(data.baseData as TypedExceptionData);
-        break;
-      }
-      case "RemoteDependencyData":
-      case "MetricData":
-        // Uncomment for local debug logging
-        // devLog(data.baseData);
-        break;
-      default:
-        // Uncomment for local debug logging
-        // devLog(data.baseData);
-        break;
-    }
-  } catch (error) {
-    // Can't logError here because it could cause an infinite loop
-    console.error(error);
+class TelemetryContextProcessor implements SpanProcessor {
+  forceFlush(): Promise<void> {
+    return Promise.resolve();
   }
-  return true;
-}
 
-function appendContext(baseData: TypedRequestData | TypedEventData) {
-  const requestData = baseData;
-  requestData.properties = {
-    ...requestData.properties,
-    ...getContext(),
-  };
+  onStart(): void {}
+
+  onEnd(span: ReadableSpan): void {
+    const store = asyncLocalStorage.getStore();
+    if (store) {
+      for (const [key, value] of Object.entries(store)) {
+        span.attributes[key] =
+          typeof value === "object" && value !== null && !Array.isArray(value)
+            ? JSON.stringify(value)
+            : (value as AttributeValue);
+      }
+    }
+    devLogSpan(span, store);
+  }
+
+  shutdown(): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 // #endregion
 
 // #region Development Logging
 
-function devLogRequest(requestData: TypedRequestData) {
-  if (config.NODE_ENV === "dev") {
-    const { name, responseCode, duration, properties } = requestData;
-    devLog({
-      name,
-      responseCode,
-      duration,
-      ...properties,
-    });
-  }
-}
+function devLogSpan(span: ReadableSpan, store: Bag | undefined): void {
+  if (config.NODE_ENV !== "dev") return;
 
-function devLogEvent(eventData: TypedEventData) {
-  if (config.NODE_ENV === "dev") {
-    const { name, properties } = eventData;
-    devLog({ name, ...properties });
-  }
-}
+  const durationMs = span.duration[0] * 1000 + span.duration[1] / 1_000_000;
+  const props = store?.["prop"] as Bag | undefined;
 
-function devLogException({ exceptions, properties }: TypedExceptionData) {
-  if (config.NODE_ENV === "dev") {
-    const [first, ...rest] = exceptions;
-    const simplify = (ex: ExceptionDetails) => ({
-      exception: ex.message,
-      stack: ex.stack ?? ex.parsedStack.map((frame) => frame.assembly),
-    });
-
-    if (first) {
-      if (
-        !Array.isArray(properties) &&
-        typeof properties?.["cause"] === "string"
-      ) {
-        try {
-          properties["cause"] = JSON.parse(properties["cause"]);
-        } catch {
-          /* ignore */
-        }
-      }
-
+  const exceptionEvents = span.events.filter((e) => e.name === "exception");
+  if (exceptionEvents.length > 0) {
+    for (const evt of exceptionEvents) {
       devLog({
-        ...simplify(first),
-        properties,
-        innerExceptions: rest.map(simplify),
+        name: span.name,
+        exception: evt.attributes?.["exception.message"],
+        stack: evt.attributes?.["exception.stacktrace"],
+        ...(props ?? {}),
       });
     }
+  } else {
+    devLog({
+      name: span.name,
+      statusCode:
+        span.attributes["http.response.status_code"] ??
+        span.attributes["http.status_code"],
+      durationMs: Math.round(durationMs),
+      ...(props ?? {}),
+    });
   }
 }
 

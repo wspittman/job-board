@@ -8,7 +8,7 @@
 | ----- | ------------------------------------------- | -------- |
 | 1     | Package bump + compile errors               | complete |
 | 2     | Fix `disableAppInsights` no-op              | complete |
-| 3     | Replace with OTel SpanProcessor             | pending  |
+| 3     | Replace with OTel SpanProcessor             | complete |
 | 4     | ESM instrumentation hook                    | pending  |
 | 5     | Validate / remove `telemetryWorkaround.cjs` | pending  |
 | 6     | Integration smoke test                      | pending  |
