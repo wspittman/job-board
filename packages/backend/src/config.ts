@@ -74,7 +74,8 @@ const Defaults: Partial<Record<KEY, string>> = {
   LLM_MODEL: "gpt-5-nano",
 
   // App Insights configs
-  APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=dummy_key",
+  APPLICATIONINSIGHTS_CONNECTION_STRING:
+    "InstrumentationKey=00000000-0000-0000-0000-000000000000",
 };
 
 const getEnv = (key: KEY): string | undefined => {

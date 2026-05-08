@@ -87,7 +87,7 @@ Phase 6
 
 1. Does the ESM `defaultClient` issue (GitHub #1354) still apply in v3? **Resolved in Phase 5: Yes, `defaultClient` is `undefined` before and after `start()` when imported via ESM. `telemetryWorkaround.cjs` is retained.**
 2. Is `spanProcessors` exposed on `AzureMonitorOpenTelemetryOptions` in the installed v3 version, or does it need a different field name? **Resolved in Phase 3: `spanProcessors?: SpanProcessor[]` is present in v3.14.0.**
-3. Does `samplingPercentage = 0` fully suppress export in v3, or is a different mechanism needed?
+3. Does `samplingPercentage = 0` fully suppress export in v3, or is a different mechanism needed? **Resolved: setting `_client.config.samplingPercentage = 0` after `start()` is inert — `parseConfig()` already ran at 100% during `start()`. Must be set via `setAzureMonitorOptions({ samplingRatio: 0 })` before calling `start()` to take effect. See findings §7.**
 4. Does `tsx watch` honour `--import` flags passed alongside it, or must `dev` be switched to `node --import tsx ...` for the OTel hook to load first? **Resolved: `tsx` honours `--import` flags (confirmed v4.21.0 / Node v24.14.1).**
 
 ## Decisions Made
@@ -103,6 +103,10 @@ Phase 6
 
 ## Errors Encountered
 
-| Error | Attempt | Resolution |
-| ----- | ------- | ---------- |
-|       |         |            |
+| Error                                            | Attempt                                               | Resolution                                                                                                           |
+| ------------------------------------------------ | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `--experimental-loader` exits code 1 on Node v24 | Used as OTel hook loader                              | Replaced with `module.register()` bootstrap via `--import ./register-otel.mjs`                                       |
+| SERVER spans never fire under Node v24 ESM       | Auto-instrumentation via `hook.mjs`                   | Added manual `requestSpanMiddleware()` in `telemetry.ts`; see findings §8                                            |
+| `trackException` crashes (`_logApi` undefined)   | Default `InstrumentationKey=dummy_key` connection str | Changed default to `InstrumentationKey=00000000-0000-0000-0000-000000000000`; see findings §9                        |
+| ESLint error on `register-otel.mjs`              | New bootstrap file not in tsconfig                    | Added `"**/*.mjs"` to `ignores` in `eslint.base.config.js`                                                           |
+| `samplingPercentage = 0` has no effect in dev    | Set after `start()` call                              | Currently left as-is; must move to `setAzureMonitorOptions({ samplingRatio: 0 })` before `start()` — see findings §7 |

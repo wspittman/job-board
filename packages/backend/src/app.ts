@@ -1,6 +1,7 @@
 import {
   asyncLocalStorage,
   logError,
+  requestSpanMiddleware,
   startTelemetry,
 } from "./utils/telemetry.ts";
 
@@ -22,6 +23,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({ maxAge: 86400 }));
 app.use(express.json());
+app.use(requestSpanMiddleware);
 app.use((_, __, next) => asyncLocalStorage.run({}, next));
 app.use(logIdentifiers);
 

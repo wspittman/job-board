@@ -7,6 +7,7 @@
 - Exceptions logged via `logError()` must be linked to the surrounding request operation
 - `trackEvent()` / `trackException()` call signatures must be unchanged
 - Auto-instrumentation for Express requests and outbound HTTP must work
+- Dev console logs must show exactly one entry per inbound request
 - Tests must continue to pass without a real Application Insights resource
 
 ## Core Difference: v2 vs v3
@@ -95,9 +96,58 @@ After Phase 3 removes the `getCorrelationContext()` fallback from `getContext()`
 
 Fix (Phase 3): Import `asyncLocalStorage` from `telemetry.ts` in both test files. Wrap each test call in `asyncLocalStorage.run({}, () => { ... })` and assert against the store object directly.
 
-### 6. `telemetryWorkaround.cjs` — may still be needed
+### 6. `telemetryWorkaround.cjs` — still needed in v3
 
-The CJS workaround exists to sidestep GitHub issue #1354: in v2's ESM build, the `defaultClient` getter fires before `setup()` because ESM eagerly evaluates exported properties. The v3 shim uses the same `export let defaultClient` pattern, so the issue likely persists. Must be verified empirically in Phase 5.
+The CJS workaround exists to sidestep GitHub issue #1354: in v2's ESM build, the `defaultClient` getter fires before `setup()` because ESM eagerly evaluates exported properties. The v3 shim uses the same `export let defaultClient` pattern — **confirmed in Phase 5: `defaultClient` remains `undefined` before and after `setup()` + `start()` when imported via native ESM**. `telemetryWorkaround.cjs` is retained, stripped to only `getClient` and `setup` (removed now-unused `getCorrelationContext`).
+
+### 7. `samplingPercentage = 0` is inert when set after `start()`
+
+The `disableAppInsights` fix in Phase 2 sets `_client.config.samplingPercentage = 0` after calling `start()`. This is currently inert: `start()` calls `parseConfig()` internally, which reads the sampling percentage at that moment (defaulting to 100%). Mutations to `_client.config.samplingPercentage` after that point have no effect on the sampler that was already initialized.
+
+If dev suppression is required, it must be configured before `start()` — either via `setAzureMonitorOptions({ samplingRatio: 0 })` before calling `start()`, or by not calling `start()` at all in dev. Left as-is for now since the integration smoke test (Phase 6) will validate actual production telemetry behavior.
+
+### 8. SERVER spans do not fire under Node v24 + ESM
+
+**Investigation (2026-05-08):** Three separate probes were run with `--import ./register-otel.mjs`, all showing the same result: CLIENT spans for outbound `http.get()` fire correctly, but SERVER spans for inbound requests never appear in the processor.
+
+**Root cause:** `module.register()` loads `hook.mjs` in an async worker thread. `import-in-the-middle` (IIMT) wraps the ESM-facing namespace's `http.Server.prototype.emit`. However, Node v24's internal HTTP engine constructs server instances using the **original unproxied prototype** — not the ESM-namespace proxy — when dispatching `request` events internally. The patch is on the wrong prototype object.
+
+Verification: `http.createServer.toString()` returns a non-native string (wrapped), and `http.Server.prototype.emit.toString()` is also wrapped — so IIMT _is_ applied. But SERVER spans still do not fire. CLIENT spans work because outgoing `http.get()` calls go through the wrapped ESM export directly.
+
+**`--experimental-loader` is not viable:** Running with `--experimental-loader=@opentelemetry/instrumentation/hook.mjs` exits with code 1 on Node v24. Not usable.
+
+**Fix:** `requestSpanMiddleware()` exported from `telemetry.ts` creates manual `SpanKind.SERVER` spans via `trace.getTracer('express').startSpan(...)`. These flow through `TelemetryContextProcessor.onEnd` → `devLogSpan`, keeping all telemetry logic in one place, and ensure production HTTP telemetry reaches App Insights. Registered in `app.ts` before the `asyncLocalStorage.run` middleware so span context is active during `asyncLocalStorage.run({}, next)`.
+
+**Correction (2026-05-08 follow-up):** Subsequent observation showed that IIMT _does_ produce SERVER spans for Express-hosted requests (unlike bare `http.createServer`). Express registers its request listener via `server.on('request', ...)` which goes through a code path that IIMT's prototype patch does intercept. The earlier probes used `http.createServer(handler)` directly and saw no SERVER spans because that handler registration bypasses the patched emit. The result is that both our manual `requestSpanMiddleware` spans and the auto-instrumentation SERVER spans fire for every request — one with `instrumentationScope.name === "express"` (manual), one from `@opentelemetry/instrumentation-http` (auto). See §11 for how this is resolved.
+
+The middleware includes a comment noting it should be removed once OTel resolves the ESM/Node v24 SERVER span issue cleanly.
+
+### 9. Invalid connection string crashes `trackException`
+
+The dummy connection string default in `config.ts` was `"InstrumentationKey=dummy_key"`. This causes `useAzureMonitor()` (called inside `TelemetryClient.initialize()`) to throw on the invalid GUID format. `initialize()` catches the error silently, leaving the internal `_logApi` field `undefined`. A subsequent `_client.trackException()` call then throws `Cannot read properties of undefined`.
+
+Fix: Changed the default to `"InstrumentationKey=00000000-0000-0000-0000-000000000000"` — a syntactically valid connection string that is accepted by the SDK without throwing.
+
+### 10. ESLint fails on `register-otel.mjs`
+
+`register-otel.mjs` cannot be added to `tsconfig.json` (it's plain JS, not TypeScript), and the shared ESLint config only ignored `**/*.js` and `**/*.cjs`. This caused a lint error on the new bootstrap file.
+
+Fix: Added `"**/*.mjs"` to the `ignores` array in `eslint.base.config.js`.
+
+### 11. Duplicate SERVER spans per request
+
+With IIMT active via `register-otel.mjs`, every inbound Express request produces two SERVER spans:
+
+1. The auto-instrumentation span from `@opentelemetry/instrumentation-http` (`instrumentationScope.name` = `@opentelemetry/instrumentation-http`)
+2. The manual span from `requestSpanMiddleware` (`instrumentationScope.name` = `"express"`, tracer name passed to `trace.getTracer()`)
+
+This caused two dev log entries per request and would export two HTTP request records to App Insights per call.
+
+**Fix — dev logs:** Added guard in `devLogSpan`: `if (span.instrumentationScope.name !== "express") return;` — logs only the manual span, which carries the `asyncLocalStorage` context properties.
+
+**Fix — App Insights export:** Added `instrumentationOptions: { http: { enabled: false } }` to `setAzureMonitorOptions`. This disables `@opentelemetry/instrumentation-http` entirely, preventing both the duplicate SERVER spans and the outbound CLIENT spans (to the App Insights ingestion endpoint, Cosmos DB, etc.) from being exported. Outbound HTTP dependency tracking must now be done explicitly via `logProperty` or `_client.trackDependency` where needed.
+
+**Type reference:** `instrumentationOptions?: InstrumentationOptions` is defined on `AzureMonitorOpenTelemetryOptions` in `@azure/monitor-opentelemetry`. The `http` field accepts `InstrumentationConfig` from `@opentelemetry/instrumentation`, which includes `enabled?: boolean`.
 
 ### 7. ESM instrumentation hook — missing
 
@@ -111,11 +161,14 @@ Without it, Express request spans and HTTP dependency spans are not captured. Mu
 
 ## Technical Decisions
 
-| Decision                                           | Rationale                                                                           |
-| -------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Use `samplingPercentage = 0` for dev suppression   | `disableAppInsights` is unsupported in v3; sampling to 0 is the documented approach |
-| Replace TelemetryProcessor with OTel SpanProcessor | `addTelemetryProcessor` silently no-ops in v3 — invisible regression                |
-| Switch to AsyncLocalStorage-only context           | Mutable `requestContext` on the correlation context shim object is not stable in v3 |
+| Decision                                               | Rationale                                                                                                                                                                                                             |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Use `samplingPercentage = 0` for dev suppression       | `disableAppInsights` is unsupported in v3; sampling to 0 is the documented approach — though the set-after-`start()` approach is currently inert (see §7)                                                             |
+| Replace TelemetryProcessor with OTel SpanProcessor     | `addTelemetryProcessor` silently no-ops in v3 — invisible regression                                                                                                                                                  |
+| Switch to AsyncLocalStorage-only context               | Mutable `requestContext` on the correlation context shim object is not stable in v3                                                                                                                                   |
+| Manual `requestSpanMiddleware` for SERVER spans        | OTel HTTP auto-instrumentation does not fire SERVER spans under Node v24 ESM for bare `http.createServer`; does fire for Express but produces duplicates — manual span is the authoritative one (carries ALS context) |
+| Changed default connection string to valid GUID format | `dummy_key` caused `useAzureMonitor()` to throw silently, leaving `_logApi` undefined and crashing `trackException`; valid GUID is accepted without side-effects                                                      |
+| Disable HTTP auto-instrumentation                      | Prevents duplicate SERVER spans and noisy CLIENT spans in App Insights; see §11. Outbound dependency tracking must be added explicitly where needed.                                                                  |
 
 ## Resources
 
@@ -130,26 +183,30 @@ Without it, Express request spans and HTTP dependency spans are not captured. Mu
 - `trackEvent()`, `trackException()`, `trackMetric()`, `trackDependency()`, `trackRequest()` — same call signatures, routed through shim
 - `getCorrelationContext()` — still works, returns `ICorrelationContext` derived from active OTel span
 - `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable — still respected
-- Dummy connection string in `config.ts` (`InstrumentationKey=dummy_key`) — still works for tests
+- Dummy connection string in `config.ts` — changed to `InstrumentationKey=00000000-0000-0000-0000-000000000000` (valid GUID format required by v3's `useAzureMonitor()`; `dummy_key` caused a silent initialization failure; see §9)
 
 ## Risk Assessment
 
-| Area                                    | Risk                                                  | Mitigation                              |
-| --------------------------------------- | ----------------------------------------------------- | --------------------------------------- |
-| `addTelemetryProcessor` silently no-ops | **High** — context enrichment breaks without error    | Phase 3 is required before shipping     |
-| Mutable correlation context             | **High** — accumulated properties silently dropped    | Phase 3a (AsyncLocalStorage middleware) |
-| `disableAppInsights` no-op in dev       | **Medium** — telemetry sent unexpectedly in dev       | Phase 2, quick fix                      |
-| ESM hook missing                        | **Medium** — no auto-instrumentation for HTTP/Express | Phase 4 required                        |
-| Deep import paths                       | **Low** — compile errors surface immediately          | Phase 1 fixes all                       |
-| `telemetryWorkaround.cjs` unknown       | **Low** — may still be needed                         | Phase 5 verifies empirically            |
+| Area                                    | Risk                                               | Mitigation / Status                                                |
+| --------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| `addTelemetryProcessor` silently no-ops | **High** — context enrichment breaks without error | ✅ Resolved in Phase 3 (OTel SpanProcessor)                        |
+| Mutable correlation context             | **High** — accumulated properties silently dropped | ✅ Resolved in Phase 3 (AsyncLocalStorage middleware)              |
+| `disableAppInsights` no-op in dev       | **Medium** — telemetry sent unexpectedly in dev    | ⚠️ Phase 2 sets `samplingPercentage = 0` but it is inert (§7)      |
+| ESM hook missing / SERVER spans absent  | **Medium** — no request telemetry in dev or prod   | ✅ Resolved via `requestSpanMiddleware` workaround (Phase 4 + §8)  |
+| Deep import paths                       | **Low** — compile errors surface immediately       | ✅ Resolved in Phase 1                                             |
+| `telemetryWorkaround.cjs` unknown       | **Low** — may still be needed                      | ✅ Resolved in Phase 5 — retained, stripped to `getClient`/`setup` |
 
 ## Technical Decisions
 
-| Decision                                                     | Rationale                                                                                                                              |
-| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Upgrade in phases, not all at once                           | Phases 1–2 are safe to merge independently; Phase 3 is the bulk of work and warrants its own PR                                        |
-| Prefer `asyncLocalStorage` exclusively for request context   | Removes dependency on the v3 shim's unstable `requestContext` mutation pattern                                                         |
-| Use `Configuration.setAzureMonitorOptions` for SpanProcessor | Documented v3.6.0+ API; keeps usage within the `applicationinsights` shim rather than directly touching `@azure/monitor-opentelemetry` |
+| Decision                                                             | Rationale                                                                                                                                                                                                                                     |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Upgrade in phases, not all at once                                   | Phases 1–2 are safe to merge independently; Phase 3 is the bulk of work and warrants its own PR                                                                                                                                               |
+| Prefer `asyncLocalStorage` exclusively for request context           | Removes dependency on the v3 shim's unstable `requestContext` mutation pattern                                                                                                                                                                |
+| Use `Configuration.setAzureMonitorOptions` for SpanProcessor         | Documented v3.6.0+ API; keeps usage within the `applicationinsights` shim rather than directly touching `@azure/monitor-opentelemetry`                                                                                                        |
+| Use `module.register()` bootstrap instead of `--experimental-loader` | `hook.mjs` only exports hook functions — no side effects on `--import`. `--experimental-loader` fails with exit code 1 on Node v24. `module.register()` is the supported path on Node v24 and isolates future migration to synchronous hooks. |
+| Manual `requestSpanMiddleware` for SERVER spans                      | Bare `http.createServer` SERVER spans don't fire under Node v24 ESM/IIMT; Express requests do fire but produce duplicates. Manual span is authoritative (carries ALS context). HTTP auto-instrumentation disabled. See §8, §11.               |
+| Changed default connection string to valid GUID format               | `InstrumentationKey=dummy_key` caused `useAzureMonitor()` to throw silently inside `TelemetryClient.initialize()`, leaving `_logApi` undefined and crashing subsequent `trackException` calls (see §9).                                       |
+| Disable HTTP auto-instrumentation (`instrumentationOptions`)         | Prevents duplicate SERVER spans and noisy CLIENT spans (App Insights ingestion, Cosmos DB) from polluting the portal. See §11.                                                                                                                |
 
 ## Resources
 

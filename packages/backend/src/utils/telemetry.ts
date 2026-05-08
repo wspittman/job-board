@@ -1,10 +1,16 @@
-import type { AttributeValue } from "@opentelemetry/api";
+import {
+  SpanKind,
+  context,
+  trace,
+  type AttributeValue,
+} from "@opentelemetry/api";
 import type {
   ReadableSpan,
   SpanProcessor,
 } from "@opentelemetry/sdk-trace-base";
 import type { TelemetryClient } from "applicationinsights";
 import { subscribeAsyncLogging } from "dry-utils-async";
+import type { NextFunction, Request, Response } from "express";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
 import { AppError } from "./AppError.ts";
@@ -28,6 +34,11 @@ export function startTelemetry(): void {
   );
   appInsights.setAzureMonitorOptions({
     spanProcessors: [new TelemetryContextProcessor()],
+    // HTTP auto-instrumentation is disabled because requestSpanMiddleware creates
+    // SERVER spans manually (Node v24 ESM incompatibility with IIMT). CLIENT spans
+    // from outbound http calls are also suppressed to avoid noise; add individual
+    // dependency tracking via logProperty/trackDependency as needed.
+    instrumentationOptions: { http: { enabled: false } },
   });
   appInsights.start();
   _client = telemetryWorkaround.getClient();
@@ -220,6 +231,46 @@ export function createSubscribeAggregator(
 
 // #endregion
 
+// #region Request Span Middleware
+
+/*
+ * OTel's HTTP auto-instrumentation does not produce SERVER spans in Node v24 ESM
+ * because import-in-the-middle's async worker-thread hook patches the ESM-facing
+ * namespace's Server prototype, while Node's internal HTTP implementation uses the
+ * original unproxied prototype for emitting `request` events.
+ *
+ * This middleware creates SERVER spans manually so that:
+ * - TelemetryContextProcessor.onEnd enriches them with request-scoped properties
+ * - devLogSpan logs them locally in dev mode
+ * - They are exported to Application Insights in production
+ *
+ * Remove this middleware if OTel resolves ESM/Node v24 SERVER span auto-instrumentation.
+ */
+export function requestSpanMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  const tracer = trace.getTracer("express");
+  const span = tracer.startSpan(`${req.method} ${req.path}`, {
+    kind: SpanKind.SERVER,
+    attributes: {
+      "http.method": req.method,
+      "http.target": req.path,
+      "http.url": req.url,
+    },
+  });
+
+  res.on("finish", () => {
+    span.setAttribute("http.response.status_code", res.statusCode);
+    span.end();
+  });
+
+  context.with(trace.setSpan(context.active(), span), next);
+}
+
+// #endregion
+
 // #region OTel SpanProcessor
 
 /**
@@ -257,6 +308,7 @@ class TelemetryContextProcessor implements SpanProcessor {
 
 function devLogSpan(span: ReadableSpan, store: Bag | undefined): void {
   if (config.NODE_ENV !== "dev") return;
+  if (span.kind !== SpanKind.SERVER) return;
 
   const durationMs = span.duration[0] * 1000 + span.duration[1] / 1_000_000;
   const props = store?.["prop"] as Bag | undefined;
