@@ -7,7 +7,7 @@ context enrichment, dev-mode suppression, or auto-instrumentation.
 
 ## Current Phase
 
-Phase 4
+Phase 5
 
 ## Phases
 
@@ -58,12 +58,12 @@ Phase 4
 - `--experimental-loader` works but is deprecated by Node.js (may be removed). The documented successor is `module.register()` called from a `--import`-preloaded file.
 - `module.register()` itself was deprecated in Node v25.9 in favour of `module.registerHooks()` (synchronous hooks), but v24 (current: v24.14.1) treats it as stable. The bootstrap file approach isolates the change so it's easy to update when OTel adds synchronous hook support.
 
-- [ ] Confirm `@opentelemetry/instrumentation` is available as a transitive dep; add as explicit devDependency if not
-- [ ] Create `packages/backend/register-otel.mjs` that calls `register('@opentelemetry/instrumentation/hook.mjs', import.meta.url)` from `node:module`
-- [ ] Update `start` script: `node --import ./register-otel.mjs dist/app.js`
-- [ ] Update `dev` script: `tsx watch --import ./register-otel.mjs --env-file=./.env ./src/app.ts` (confirmed: `tsx` honours `--import`)
-- [ ] Do **not** add the hook to the `test` script — telemetry is fully mocked in tests
-- **Status:** pending
+- [x] Confirm `@opentelemetry/instrumentation` is available as a transitive dep; add as explicit devDependency if not
+- [x] Create `packages/backend/register-otel.mjs` that calls `register('@opentelemetry/instrumentation/hook.mjs', import.meta.url)` from `node:module`
+- [x] Update `start` script: `node --import ./register-otel.mjs dist/app.js`
+- [x] Update `dev` script: `tsx watch --import ./register-otel.mjs --env-file=./.env ./src/app.ts` (confirmed: `tsx` honours `--import`)
+- [x] Do **not** add the hook to the `test` script — telemetry is fully mocked in tests
+- **Status:** complete
 - **Acceptance:** Express request spans appear automatically without a manual `trackRequest` call; no deprecation warnings on startup.
 
 ### Phase 5: Validate / remove `telemetryWorkaround.cjs`

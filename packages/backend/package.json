@@ -7,9 +7,9 @@
     "format": "prettier . --write",
     "test": "node --import tsx --import ./test/setup.ts --test --test-reporter=dot test/**/*.test.ts",
     "test-details": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
-    "dev": "tsx watch --env-file=./.env ./src/app.ts",
+    "dev": "tsx watch --import ./register-otel.mjs --env-file=./.env ./src/app.ts",
     "build": "tsc",
-    "start": "node dist/app.js"
+    "start": "node --import ./register-otel.mjs dist/app.js"
   },
   "dependencies": {
     "applicationinsights": "^3.14.0",
