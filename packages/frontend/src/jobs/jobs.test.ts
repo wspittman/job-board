@@ -26,6 +26,7 @@ suite("jobs", () => {
   });
 
   test("FILTERS_UPDATED event triggers api.fetchJobs with the filter query", async () => {
+    mockJobs();
     const filters = FilterModel.fromLocationSearchString("title=engineer");
     window.dispatchEvent(new CustomEvent(FILTERS_UPDATED, { detail: filters }));
 
