@@ -8,7 +8,7 @@ export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   {
-    ignores: ["**/*.js", "**/*.cjs"],
+    ignores: ["**/*.js", "**/*.cjs", "**/*.mjs"],
   },
   {
     languageOptions: {
