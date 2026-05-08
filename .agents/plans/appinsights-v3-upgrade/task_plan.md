@@ -52,12 +52,19 @@ Phase 4
 
 ### Phase 4: ESM instrumentation hook
 
-- [ ] Confirm `@opentelemetry/instrumentation` is available (transitive dep of v3); add as explicit devDependency if not
-- [ ] Add `--import @opentelemetry/instrumentation/hook.mjs` to the `start` script (`node --import ... dist/app.js`)
-- [ ] Add `--import @opentelemetry/instrumentation/hook.mjs` to the `dev` script (`tsx watch --import ... --env-file=./.env ./src/app.ts`) — confirm `tsx` respects the flag or use `node --import tsx --import ... --env-file=./.env ./src/app.ts` if not
-- [ ] Do **not** add the hook to the `test` script — telemetry is fully mocked in tests and the real OTel hook is not needed
+**Approach:** Use `module.register()` via a `--import` bootstrap file rather than `--experimental-loader`.
+
+- `hook.mjs` re-exports `initialize`, `load`, `resolve` etc. from `import-in-the-middle` — it has no side effects when imported directly, so `--import hook.mjs` does nothing. It must be passed to `module.register()`.
+- `--experimental-loader` works but is deprecated by Node.js (may be removed). The documented successor is `module.register()` called from a `--import`-preloaded file.
+- `module.register()` itself was deprecated in Node v25.9 in favour of `module.registerHooks()` (synchronous hooks), but v24 (current: v24.14.1) treats it as stable. The bootstrap file approach isolates the change so it's easy to update when OTel adds synchronous hook support.
+
+- [ ] Confirm `@opentelemetry/instrumentation` is available as a transitive dep; add as explicit devDependency if not
+- [ ] Create `packages/backend/register-otel.mjs` that calls `register('@opentelemetry/instrumentation/hook.mjs', import.meta.url)` from `node:module`
+- [ ] Update `start` script: `node --import ./register-otel.mjs dist/app.js`
+- [ ] Update `dev` script: `tsx watch --import ./register-otel.mjs --env-file=./.env ./src/app.ts` (confirmed: `tsx` honours `--import`)
+- [ ] Do **not** add the hook to the `test` script — telemetry is fully mocked in tests
 - **Status:** pending
-- **Acceptance:** Express request spans appear automatically without a manual `trackRequest` call.
+- **Acceptance:** Express request spans appear automatically without a manual `trackRequest` call; no deprecation warnings on startup.
 
 ### Phase 5: Validate / remove `telemetryWorkaround.cjs`
 
@@ -82,17 +89,18 @@ Phase 4
 1. Does the ESM `defaultClient` issue (GitHub #1354) still apply in v3? (Determine in Phase 5)
 2. Is `spanProcessors` exposed on `AzureMonitorOpenTelemetryOptions` in the installed v3 version, or does it need a different field name? **Resolved in Phase 3: `spanProcessors?: SpanProcessor[]` is present in v3.14.0.**
 3. Does `samplingPercentage = 0` fully suppress export in v3, or is a different mechanism needed?
-4. Does `tsx watch` honour `--import` flags passed alongside it, or must `dev` be switched to `node --import tsx ...` for the OTel hook to load first? (Determine in Phase 4)
+4. Does `tsx watch` honour `--import` flags passed alongside it, or must `dev` be switched to `node --import tsx ...` for the OTel hook to load first? **Resolved: `tsx` honours `--import` flags (confirmed v4.21.0 / Node v24.14.1).**
 
 ## Decisions Made
 
-| Decision                                                  | Rationale                                                                                                                                                                                     |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ICorrelationContext` not re-exported from v3             | `ICorrelationContext` is defined in `applicationinsights/out/src/shim/types.d.ts` but not re-exported from the package's main entry. `CustomContext` was redefined as a standalone interface. |
-| `addTelemetryProcessor` bridged with `as any` for Phase 1 | v3 `addTelemetryProcessor` expects `(envelope: TelemetryItem, ...) => boolean`; cast allows clean compile while the call site is removed entirely in Phase 3.                                 |
-| Use `samplingPercentage = 0` for dev suppression          | `disableAppInsights` is unsupported in v3; sampling to 0 is the documented approach                                                                                                           |
-| Replace TelemetryProcessor with OTel SpanProcessor        | `addTelemetryProcessor` silently no-ops in v3 — invisible regression                                                                                                                          |
-| Switch to AsyncLocalStorage-only context                  | Mutable `requestContext` on the correlation context shim object is not stable in v3                                                                                                           |
+| Decision                                                             | Rationale                                                                                                                                                                                                                          |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ICorrelationContext` not re-exported from v3                        | `ICorrelationContext` is defined in `applicationinsights/out/src/shim/types.d.ts` but not re-exported from the package's main entry. `CustomContext` was redefined as a standalone interface.                                      |
+| `addTelemetryProcessor` bridged with `as any` for Phase 1            | v3 `addTelemetryProcessor` expects `(envelope: TelemetryItem, ...) => boolean`; cast allows clean compile while the call site is removed entirely in Phase 3.                                                                      |
+| Use `samplingPercentage = 0` for dev suppression                     | `disableAppInsights` is unsupported in v3; sampling to 0 is the documented approach                                                                                                                                                |
+| Replace TelemetryProcessor with OTel SpanProcessor                   | `addTelemetryProcessor` silently no-ops in v3 — invisible regression                                                                                                                                                               |
+| Switch to AsyncLocalStorage-only context                             | Mutable `requestContext` on the correlation context shim object is not stable in v3                                                                                                                                                |
+| Use `module.register()` bootstrap instead of `--experimental-loader` | `hook.mjs` only exports hook functions — no side effects on `--import`. `--experimental-loader` works but is deprecated. `module.register()` is the supported path on Node v24 and isolates future migration to synchronous hooks. |
 
 ## Errors Encountered
 
