@@ -56,13 +56,13 @@ const syncCompanyJobs = (env?: ENV): Command => ({
 });
 
 const refreshCompanyJobs = (env?: ENV): Command => ({
-  args: "<ATS> <COMPANY_ID>",
-  usage: "Refresh a company's jobs from the ATS",
+  args: "<ATS> <COMPANY_ID[, ...]>",
+  usage: "Refresh jobs for one or more companies from the ATS",
   run: async (args: string[]): Promise<void> => {
-    const { ats, companyId } = validateCompanyArgs(args);
+    const { ats, companyIds } = validateCompanyArgs(args);
 
-    logger.info(`Refreshing jobs for ${ats}/${companyId}`);
-    const body = { ats, companyId };
+    logger.info(`Refreshing jobs for ${ats}`, companyIds);
+    const body = { ats, companyIds };
     const result = await apiCall("POST", "refresh/jobs/", { body, env });
     logger.info("Done", result);
   },

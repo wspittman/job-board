@@ -73,22 +73,25 @@ export async function refreshCompanies() {
 
 /**
  * Refreshes jobs for specified companies and updates metadata
- * @param param0 - Options for refreshing jobs including ATS type, company ID, and age threshold
+ * @param param0 - Options for refreshing jobs including ATS type, company IDs, and age threshold
  * @returns Promise resolving when jobs are refreshed and metadata is updated
  */
 export async function refreshJobs({
   ats,
-  companyId,
+  companyIds,
   replaceJobsOlderThan,
 }: RefreshJobsOptions) {
   let keys: (CompanyKey & { replaceJobsOlderThan?: number })[];
 
-  if (companyId && ats) {
-    const company = await db.company.get({ id: companyId, ats });
-    if (!company) {
-      throw new AppError("Company not found");
+  if (companyIds && ats) {
+    const companies = await Promise.all(
+      companyIds.map((id) => db.company.get({ id, ats })),
+    );
+    const missing = companyIds.filter((_, i) => !companies[i]);
+    if (missing.length) {
+      throw new AppError(`Companies not found: ${missing.join(", ")}`);
     }
-    keys = [{ id: companyId, ats }];
+    keys = companyIds.map((id) => ({ id, ats }));
   } else if (ats) {
     const ids = await db.company.getIds(ats);
     keys = ids.map((id) => ({ id, ats }));

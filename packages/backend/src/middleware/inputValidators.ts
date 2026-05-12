@@ -46,7 +46,7 @@ const TimestampSchema = z
 
 const RefreshJobsOptionsSchema = z.strictObject({
   ats: AtsSchema.optional(),
-  companyId: IdSchema.optional(),
+  companyIds: z.array(IdSchema).nonempty().optional(),
   replaceJobsOlderThan: TimestampSchema.optional(),
 });
 
@@ -165,8 +165,8 @@ export function useRefreshJobsOptions(input: unknown): RefreshJobsOptions {
 
   const options = zParse(RefreshJobsOptionsSchema, input);
 
-  if (options.companyId && !options.ats) {
-    throw new AppError("ats field is required when using companyId");
+  if (options.companyIds && !options.ats) {
+    throw new AppError("ats field is required when using companyIds");
   }
 
   logProperty("Input_RefreshJobsOptions", options);
