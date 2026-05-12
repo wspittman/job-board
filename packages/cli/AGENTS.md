@@ -15,12 +15,12 @@ General-purpose CLI for development and operational tasks.
 
 Artifacts are written under `packages/cli/logs/`:
 
-- `app.log` — application log
-- `cache/` — cached LLM responses and embeddings
-- `eval/in/` — eval input scenarios (populate before running `evals`)
-- `eval/out/` — model outcomes and summary reports
-- `html/` — Markdown input and rendered HTML output
-- `playground/` — clustering experiment data
+- `app.log` - application log
+- `cache/` - cached LLM responses and embeddings
+- `eval/in/` - eval input scenarios (populate before running `evals`)
+- `eval/out/` - model outcomes and summary reports
+- `html/` - Markdown input and rendered HTML output
+- `playground/` - clustering experiment data
 
 ## Notes
 
