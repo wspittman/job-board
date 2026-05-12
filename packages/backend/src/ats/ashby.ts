@@ -59,13 +59,15 @@ export class Ashby extends ATSBase {
   }
 
   private formatCompany(id: string): Company {
+    id = id.trim();
     return {
       // Keys
       id,
       ats: NAME,
 
       // Basic
-      name: id.trim(),
+      // No name field, just use token until we have a better solution
+      name: id[0]?.toUpperCase() + id.slice(1),
     };
   }
 
