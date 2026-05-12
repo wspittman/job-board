@@ -7,12 +7,11 @@ interface Blog {
   title: string;
   description: string;
   date: string;
-  slug: string;
   content: string;
 }
 
 type BEntry = [keyof Blog, string];
-const fmKeySet = new Set<keyof Blog>(["title", "description", "date", "slug"]);
+const fmKeySet = new Set<keyof Blog>(["title", "description", "date"]);
 
 const inPlace: Place = { group: "html", stage: "in" };
 const outPlace: Place = { group: "html", stage: "out" };
@@ -95,23 +94,25 @@ export async function runBlog(
   const output = template
     .replace("{{TITLE}}", blog.title)
     .replace("{{DESCRIPTION}}", blog.description)
-    .replace("{{SLUG}}", blog.slug)
+    .replace("{{SLUG}}", slug)
     .replace("{{HEADER_HTML}}", headerHtml)
-    .replace("{{SECTION_HTML}}", `\n${sectionHtml}\n        `);
+    .replace("{{SECTION_HTML}}", sectionHtml);
 
   await writeText(output, { ...blogPlace, file: slug }, "html");
-  await updateBlogIndex(blog, overrides?.blogIndex);
-  await updateSitemap(blog.slug, overrides?.sitemap);
+  await updateBlogIndex(slug, blog, overrides?.blogIndex);
+  await updateSitemap(slug, overrides?.sitemap);
 }
 
 /**
  * Inserts a new article card at the top of the blog list in blog.html.
  * Skips insertion if the slug is already present (idempotent).
+ * @param slug The blog post slug.
  * @param blog The blog metadata to insert.
  * @param place Optional Place override; defaults to the frontend blog.html.
  */
 export async function updateBlogIndex(
-  blog: Pick<Blog, "title" | "description" | "date" | "slug">,
+  slug: string,
+  blog: Blog,
   place: Place = blogIndexPlace,
 ): Promise<void> {
   const content = await readText(place, "html");
@@ -119,16 +120,16 @@ export async function updateBlogIndex(
     throw new CommandError("blog.html not found");
   }
 
-  if (content.includes(`/blog/${blog.slug}`)) return;
+  if (content.includes(`/blog/${slug}`)) return;
 
   const card = [
-    `        <article class="card">`,
-    `          <header>`,
-    `            <h2><a href="/blog/${blog.slug}">${blog.title}</a></h2>`,
-    `            <time>${blog.date}</time>`,
-    `          </header>`,
-    `          <p>${blog.description}</p>`,
-    `        </article>`,
+    '<article class="card">',
+    "<header>",
+    `<h2><a href="/blog/${slug}">${blog.title}</a></h2>`,
+    `<time>${blog.date}</time>`,
+    "</header>",
+    `<p>${blog.description}</p>`,
+    "</article>",
   ].join("\n");
 
   const marker = '<section class="blog-list">';
@@ -161,14 +162,14 @@ export async function updateSitemap(
   if (content.includes(`/blog/${slug}`)) return;
 
   const entry = [
-    `  <url>`,
-    `    <loc>https://betterjobboard.net/blog/${slug}</loc>`,
-    `    <changefreq>monthly</changefreq>`,
-    `    <priority>0.2</priority>`,
-    `  </url>`,
+    "<url>",
+    `<loc>https://betterjobboard.net/blog/${slug}</loc>`,
+    "<changefreq>monthly</changefreq>",
+    "<priority>0.2</priority>",
+    "</url>",
   ].join("\n");
 
-  const updated = content.replace("</urlset>", `${entry}\n</urlset>`);
+  const updated = content.replace("</urlset>", `${entry}</urlset>`);
   await writeText(updated, place, "xml");
 }
 

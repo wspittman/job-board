@@ -47,15 +47,14 @@ suite("html file subcommand", () => {
 });
 
 suite("parseFrontmatter", () => {
-  test("parses all four fields and separates body", () => {
-    const md = `---\ntitle: My Title\ndescription: My description.\ndate: April 28, 2026\nslug: my-title\n---\n\n## Intro\n\nBody content.`;
+  test("parses all three fields and separates body", () => {
+    const md = `---\ntitle: My Title\ndescription: My description.\ndate: April 28, 2026\n---\n\n## Intro\n\nBody content.`;
     const result = parseFrontmatter(md);
 
     assert.ok(result);
     assert.equal(result.title, "My Title");
     assert.equal(result.description, "My description.");
     assert.equal(result.date, "April 28, 2026");
-    assert.equal(result.slug, "my-title");
     assert.ok(result.content.includes("Body content."));
   });
 
@@ -65,12 +64,12 @@ suite("parseFrontmatter", () => {
       text: "# Just markdown\n\nNo frontmatter here.",
     },
     {
-      label: "missing slug",
-      text: "---\ntitle: T\ndescription: D\ndate: Jan 1, 2026\n---\n\nBody.",
+      label: "missing date",
+      text: "---\ntitle: T\ndescription: D\n---\n\nBody.",
     },
     {
       label: "missing title",
-      text: "---\ndescription: D\ndate: Jan 1, 2026\nslug: s\n---\n\nBody.",
+      text: "---\ndescription: D\ndate: Jan 1, 2026\n---\n\nBody.",
     },
   ];
 
@@ -111,7 +110,7 @@ suite("runBlog", () => {
 
     await writeFile(
       mdPath,
-      "---\ntitle: Test Title\ndescription: A test post.\ndate: April 28, 2026\nslug: test-blog-post\n---\n\n## Hello\n\nSome content.",
+      "---\ntitle: Test Title\ndescription: A test post.\ndate: April 28, 2026\n---\n\n## Hello\n\nSome content.",
       "utf-8",
     );
 
@@ -189,11 +188,12 @@ suite("updateBlogIndex", () => {
     await writeFile(tmpPath, minimalHtml, "utf-8");
 
     await updateBlogIndex(
+      "new-post",
       {
         title: "New Post",
         description: "A new post.",
         date: "April 29, 2026",
-        slug: "new-post",
+        content: "",
       },
       tmpPlace,
     );
@@ -216,11 +216,12 @@ suite("updateBlogIndex", () => {
     await writeFile(tmpPath, withSlug, "utf-8");
 
     await updateBlogIndex(
+      "already-here",
       {
         title: "Already Here",
         description: "Desc.",
         date: "April 29, 2026",
-        slug: "already-here",
+        content: "",
       },
       tmpPlace,
     );
