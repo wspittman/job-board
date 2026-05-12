@@ -128,7 +128,7 @@ export async function updateBlogIndex(
     throw new CommandError("blog.html not found");
   }
 
-  if (content.includes(`/blog/${slug}`)) return;
+  if (content.includes(`href="/blog/${slug}"`)) return;
 
   const card = [
     '<article class="card">',
@@ -167,7 +167,7 @@ export async function updateSitemap(
     throw new CommandError("sitemap.xml not found");
   }
 
-  if (content.includes(`/blog/${slug}`)) return;
+  if (content.includes(`/blog/${slug}</loc>`)) return;
 
   const entry = [
     "  <url>",
