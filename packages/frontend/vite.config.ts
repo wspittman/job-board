@@ -1,4 +1,4 @@
-import { readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -7,11 +7,14 @@ import { htmlPartials } from "./plugins/htmlPartials.ts";
 import { inlineLucideIcons } from "./plugins/inlineLucideIcons.ts";
 
 const __dirname = join(dirname(fileURLToPath(import.meta.url)), "src");
+const getDir = (folder?: string) => resolve(__dirname, folder ?? "");
+const getFiles = (dir: string, ext: string) =>
+  readdirSync(dir).filter((f) => f.endsWith(ext));
 
 function getHtmlEntries(folder?: string) {
   const input: Record<string, string> = {};
-  const dir = resolve(__dirname, folder ?? "");
-  const files = readdirSync(dir).filter((f) => f.endsWith(".html"));
+  const dir = getDir(folder);
+  const files = getFiles(dir, ".html");
 
   for (const file of files) {
     const fullPath = join(dir, file);
@@ -26,9 +29,23 @@ export default defineConfig({
   plugins: [
     htmlPartials(),
     inlineLucideIcons(),
+    {
+      name: "copy-blog-md",
+      generateBundle() {
+        const blogDir = getDir("blog");
+        const files = getFiles(blogDir, ".md");
+        for (const file of files) {
+          this.emitFile({
+            type: "asset",
+            fileName: `blog/${file}`,
+            source: readFileSync(join(blogDir, file), "utf-8"),
+          });
+        }
+      },
+    },
     // Emit Brotli and gzip side-by-side
     compression({
-      include: [/\.(js|mjs|css|html|svg|json|txt|xml)$/],
+      include: [/\.(js|mjs|css|html|svg|json|txt|xml|md)$/],
       algorithms: [
         "brotliCompress", // produces .br
         "gzip", // produces .gz
