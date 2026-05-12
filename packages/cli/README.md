@@ -106,13 +106,12 @@ npm run cli -- html file my-post
    title: Your Article Title
    description: A short description for the meta tag.
    date: April 29, 2026
-   slug: your-article-slug
    ---
 
    Article body goes here.
    ```
 
-2. Run the command — it converts the Markdown, injects it into the blog template, and writes the finished `.html` file alongside the source. It also inserts a card into `blog.html` and adds a `sitemap.xml` entry (both operations are idempotent).
+2. Run the command - it converts the Markdown, injects it into the blog template, and writes the finished `.html` file alongside the source. It also inserts a card into `blog.html` and adds a `sitemap.xml` entry (both operations are idempotent).
 
    ```bash
    npm run cli -- html blog your-article-slug

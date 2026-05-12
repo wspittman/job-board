@@ -30,13 +30,21 @@ const sitemapPlace: Place = {
   file: "sitemap",
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function readFMLine(line: string): BEntry | undefined {
   const idx = line.indexOf(":");
   if (idx === -1) return undefined;
   const key = line.slice(0, idx).trim() as keyof Blog;
   const value = line.slice(idx + 1).trim();
   if (fmKeySet.has(key) && value) {
-    return [key, value];
+    return [key, escapeHtml(value)];
   }
   return undefined;
 }
@@ -162,14 +170,14 @@ export async function updateSitemap(
   if (content.includes(`/blog/${slug}`)) return;
 
   const entry = [
-    "<url>",
-    `<loc>https://betterjobboard.net/blog/${slug}</loc>`,
-    "<changefreq>monthly</changefreq>",
-    "<priority>0.2</priority>",
-    "</url>",
+    "  <url>",
+    `    <loc>https://betterjobboard.net/blog/${slug}</loc>`,
+    "    <changefreq>monthly</changefreq>",
+    "    <priority>0.2</priority>",
+    "  </url>",
   ].join("\n");
 
-  const updated = content.replace("</urlset>", `${entry}</urlset>`);
+  const updated = content.replace("</urlset>", `${entry}\n</urlset>`);
   await writeText(updated, place, "xml");
 }
 

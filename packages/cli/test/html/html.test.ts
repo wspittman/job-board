@@ -78,6 +78,19 @@ suite("parseFrontmatter", () => {
       assert.equal(parseFrontmatter(text), undefined);
     });
   });
+
+  test("escapes HTML special characters in frontmatter values", () => {
+    const md = `---\ntitle: "Quotes" & <Tags>\ndescription: A "desc" with <b>bold</b> & more.\ndate: May 11, 2026\n---\n\nBody.`;
+    const result = parseFrontmatter(md);
+
+    assert.ok(result);
+    assert.equal(result.title, "&quot;Quotes&quot; &amp; &lt;Tags&gt;");
+    assert.equal(
+      result.description,
+      "A &quot;desc&quot; with &lt;b&gt;bold&lt;/b&gt; &amp; more.",
+    );
+    assert.equal(result.date, "May 11, 2026");
+  });
 });
 
 suite("runBlog", () => {
