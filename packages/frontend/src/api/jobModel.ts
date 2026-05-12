@@ -124,8 +124,7 @@ export class JobModel {
   #tsToDaysString(ts: number): string {
     const days = Math.floor((Date.now() - ts) / MS_PER_DAY);
     if (days === 0) return "Just Posted";
-    if (days < 7) return "New";
-    if (days < 30) return "Recent";
+    if (days < 7) return "Past Week";
     return `${days} days ago`;
   }
 
