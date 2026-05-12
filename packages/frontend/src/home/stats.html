@@ -3,18 +3,56 @@
     <div class="stat-icon" aria-hidden="true">
       <svg data-icon="briefcase"></svg>
     </div>
-    <div>
-      <p id="job-count" class="stat-value"></p>
-      <p class="stat-label">Available Jobs</p>
+    <div class="stat-rows">
+      <div class="stat-row">
+        <span id="job-count" class="stat-value"></span>
+        <span class="stat-label">Jobs</span>
+      </div>
+      <div id="job-recent-row" class="stat-row">
+        <span id="job-recent-count" class="stat-value-2"></span>
+        <span class="stat-label-2">Posted Last Week</span>
+      </div>
     </div>
   </article>
   <article class="stat-card card">
     <div class="stat-icon" aria-hidden="true">
       <svg data-icon="building-2"></svg>
     </div>
-    <div>
-      <p id="company-count" class="stat-value"></p>
-      <p class="stat-label">Companies Hiring</p>
+    <div class="stat-rows">
+      <div class="stat-row">
+        <span id="company-count" class="stat-value"></span>
+        <span class="stat-label">Companies</span>
+      </div>
+    </div>
+  </article>
+  <article id="remote-card" class="stat-card card">
+    <div class="stat-icon" aria-hidden="true">
+      <svg data-icon="globe"></svg>
+    </div>
+    <div class="stat-rows">
+      <div class="stat-row">
+        <span id="remote-pct" class="stat-value"></span>
+        <span class="stat-label">Remote</span>
+      </div>
+    </div>
+  </article>
+  <article id="job-families-card" class="stat-card card">
+    <div class="stat-icon" aria-hidden="true">
+      <svg data-icon="layers"></svg>
+    </div>
+    <div class="stat-rows">
+      <div class="stat-row">
+        <span id="job-family-1-pct" class="stat-value-2"></span>
+        <span id="job-family-1-label" class="stat-label-2"></span>
+      </div>
+      <div class="stat-row">
+        <span id="job-family-2-pct" class="stat-value-2"></span>
+        <span id="job-family-2-label" class="stat-label-2"></span>
+      </div>
+      <div class="stat-row">
+        <span id="job-family-3-pct" class="stat-value-2"></span>
+        <span id="job-family-3-label" class="stat-label-2"></span>
+      </div>
     </div>
   </article>
 </section>

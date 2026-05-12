@@ -1,5 +1,6 @@
 import { z } from "dry-utils-openai";
 import type { DeepPartialNullToUndef } from "../types/types.ts";
+import type { JobFamily, Presence } from "./enums.ts";
 import type {
   ExtractionCompany,
   ExtractionJob,
@@ -7,7 +8,7 @@ import type {
 } from "./extractionModels.ts";
 
 export const IdSchema = z.string().trim().nonempty().max(100);
-export const AtsSchema = z.enum(["greenhouse", "lever"] as const);
+export const AtsSchema = z.enum(["ashby", "greenhouse", "lever"] as const);
 export type ATS = z.infer<typeof AtsSchema>;
 export type CompanyQuickRef = [id: string, name: string, website?: string];
 
@@ -95,6 +96,9 @@ export interface Metadata {
 
   // For job type
   jobCount?: number;
+  recentJobCount?: number;
+  presenceCounts?: Partial<Record<Presence, number>>;
+  jobFamilyCounts?: Partial<Record<JobFamily, number>>;
 }
 
 /**

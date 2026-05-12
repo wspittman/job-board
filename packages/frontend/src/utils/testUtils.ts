@@ -1,5 +1,12 @@
+import type {
+  FilterModelApi,
+  JobModelApi,
+  MetadataModelApi,
+} from "../api/apiTypes";
+import { JobModel } from "../api/jobModel";
 import { ComponentBase } from "../components/componentBase";
 import type { FormElement } from "../components/form-element";
+import { mockApi } from "./testSetup";
 
 export { spies } from "./testSetup";
 
@@ -22,6 +29,8 @@ export type XrayFormElement<T extends FormElement = FormElement> =
   };
 
 // #endregion
+
+// #region Components
 
 // Special class mixin rules requires any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,3 +78,88 @@ export function createComponent<T extends Class>(
 
   return document.createElement(tag) as InstanceType<T>;
 }
+
+// #endregion
+
+// #region API
+
+/**
+ * Mocks the API response for metadata to simulate an error condition.
+ */
+export function mockMetadataErr() {
+  mockApi.fetchMetadata.mockRejectedValueOnce(new Error("Test Error"));
+}
+
+/**
+ * Mocks the API response for metadata with default values, allowing overrides for specific fields.
+ * @param overrides Partial metadata fields to override the default values.
+ */
+export function mockMetadata(overrides: Partial<MetadataModelApi> = {}) {
+  mockApi.fetchMetadata.mockResolvedValueOnce({
+    timestamp: 1777934360621,
+    companyCount: 3,
+    companyNames: ["test", "example", "acme"].map((name) => [
+      name,
+      name[0]!.toUpperCase() + name.slice(1),
+    ]),
+    jobCount: 1000,
+    recentJobCount: 100,
+    presenceCounts: { remote: 400, onsite: 350, hybrid: 250 },
+    jobFamilyCounts: {
+      engineering: 500,
+      data: 250,
+      design: 150,
+      marketing: 100,
+    },
+    ...overrides,
+  });
+}
+
+function createJobApi(overrides: Partial<JobModelApi> = {}): JobModelApi {
+  return {
+    id: "job-1",
+    companyId: "acme",
+    title: "Software Engineer",
+    company: "Acme",
+    description: "A great job",
+    postTS: Date.now() - 1000 * 60 * 60 * 24 * 10, // 10 days ago
+    applyUrl: "/jobs/job-1/apply?ats=gh",
+    isRemote: false,
+    location: "Seattle, WA",
+    ...overrides,
+  };
+}
+
+/**
+ * Creates a JobModel instance with default values, allowing overrides for specific fields.
+ * @param overrides Partial job fields to override the default values.
+ * @returns A JobModel instance with the specified overrides.
+ */
+export function createJobModel(overrides: Partial<JobModelApi> = {}) {
+  return new JobModel(createJobApi(overrides));
+}
+
+/**
+ * Mocks the API response for jobs with default values, allowing overrides for specific fields.
+ * @param overrides Partial job fields to override the default values.
+ */
+export function mockJobs(overrides: Partial<JobModelApi> = {}) {
+  mockApi.fetchJobs.mockResolvedValueOnce([createJobApi(overrides)]);
+}
+
+/**
+ * Mocks the API response for interpreting a natural language query to simulate an error condition.
+ */
+export function mockInterpretQueryErr() {
+  mockApi.interpretQuery.mockRejectedValueOnce(new Error("Test Error"));
+}
+
+/**
+ * Mocks the API response for interpreting a natural language query with a specified FilterModelApi result.
+ * @param result The FilterModelApi object to return as the result of interpreting the query.
+ */
+export function mockInterpretQuery(result: FilterModelApi) {
+  mockApi.interpretQuery.mockResolvedValueOnce(result);
+}
+
+// #endregion

@@ -33,6 +33,7 @@ interface Config {
   DATABASE_MOCK_DATA_PATH?: string;
 
   // ATS
+  ASHBY_URL: string;
   GREENHOUSE_URL: string;
   LEVER_URL: string;
 
@@ -65,6 +66,7 @@ const Defaults: Partial<Record<KEY, string>> = {
   DATABASE_LOCAL_CERT_PATH: path.resolve(process.cwd(), "cosmosdbcert.cer"),
 
   // ATS
+  ASHBY_URL: "https://api.ashbyhq.com/posting-api/job-board",
   GREENHOUSE_URL: "https://boards-api.greenhouse.io/v1/boards",
   LEVER_URL: "https://api.lever.co/v0/postings",
 
@@ -161,6 +163,7 @@ export const config: Config = {
   DATABASE_MOCK_DATA_PATH: getEnv("DATABASE_MOCK_DATA_PATH"),
 
   // ATS configs
+  ASHBY_URL: getReqEnv("ASHBY_URL"),
   GREENHOUSE_URL: getReqEnv("GREENHOUSE_URL"),
   LEVER_URL: getReqEnv("LEVER_URL"),
 

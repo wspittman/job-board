@@ -35,6 +35,7 @@ Run from the repository root:
 
 - `planning-with-files`: Use for complex, multi-step tasks that require maintaining state across many tool calls.
 - `write-unit-test`: Use when you must write or update unit tests.
+- `dry-utils-cosmosdb-mockdb`: Use for testing interactions with Cosmos DB when no real database is available or desired.
 - `humanizer`: Use when editing or reviewing text to make it sound more natural and human-written.
 - `security-awareness`: Use for tasks that access email, credential vaults, web browsers, or sensitive data.
 

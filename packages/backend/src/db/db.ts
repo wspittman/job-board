@@ -1,10 +1,12 @@
 import { batch } from "dry-utils-async";
 import {
   Container,
+  Query,
   connectDB,
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
+import { JobFamily, Presence } from "../models/enums.ts";
 import type {
   Company,
   CompanyKey,
@@ -15,7 +17,7 @@ import type {
   Location,
   Metadata,
 } from "../models/models.ts";
-import { JOB_EXPIRY_SEC } from "../utils/constants.ts";
+import { JOB_EXPIRY_SEC, MS_PER_DAY } from "../utils/constants.ts";
 import {
   createSubscribeAggregator,
   subscribeError,
@@ -117,6 +119,43 @@ class JobContainer extends Container<Job> {
     return await batch("DeleteJob", jobIds, (id) =>
       this.remove({ id, companyId }),
     );
+  }
+
+  async aggregateMetadata(): Promise<Metadata> {
+    const weekMs = Date.now() - 7 * MS_PER_DAY;
+    const recent = new Query("COUNT", ["postTS", ">=", weekMs]);
+
+    const [jobCount, recentCounts, presenceRows, jobFamilyRows] =
+      await Promise.all([
+        this.getCount(),
+        this.query<number>(recent),
+        this.getCountBy("presence"),
+        this.getCountBy("jobFamily"),
+      ]);
+
+    const presenceCounts: Partial<Record<Presence, number>> = {};
+    presenceRows.forEach(({ name, count }) => {
+      const parsed = Presence.safeParse(name);
+      if (parsed.success) {
+        presenceCounts[parsed.data] = count;
+      }
+    });
+
+    const jobFamilyCounts: Partial<Record<JobFamily, number>> = {};
+    jobFamilyRows.forEach(({ name, count }) => {
+      const parsed = JobFamily.safeParse(name);
+      if (parsed.success) {
+        jobFamilyCounts[parsed.data] = count;
+      }
+    });
+
+    return {
+      id: "job",
+      jobCount,
+      recentJobCount: recentCounts[0] ?? 0,
+      presenceCounts,
+      jobFamilyCounts,
+    };
   }
 }
 
