@@ -10,14 +10,15 @@ process.env.GREENHOUSE_IDS = "gh-1, gh-2";
 process.env.LEVER_IDS = "lv-1";
 
 const {
-  addCompaniesStep,
-  addCompanyStep,
-  delCompanyStep,
-  formAsyncStep,
-  formErrStep,
+  req,
+  res,
   formStep,
-  formSucStep,
-  resetSteps,
+  ats,
+  companyId,
+  companyIds,
+  oneAddEachAts,
+  allAddAts,
+  allDelAts,
 } = await import("../../src/e2e/step.ts");
 
 suite("e2e step", () => {
@@ -41,180 +42,257 @@ suite("e2e step", () => {
     }
   });
 
-  test("formStep: applies defaults and allows overrides", () => {
-    assert.deepEqual(formStep("jobs", "list jobs"), {
-      name: "list jobs",
-      path: "jobs",
+  test("req: builds request with method, path, asAdmin, and opts", () => {
+    assert.deepEqual(req("GET", "jobs", {}, false), {
       method: "GET",
-      asAdmin: false,
-      expectStatus: 200,
-    });
-
-    assert.deepEqual(
-      formStep("jobs", "create job", {
-        method: "POST",
-        asAdmin: true,
-        expectStatus: 201,
-      }),
-      {
-        name: "create job",
-        path: "jobs",
-        method: "POST",
-        asAdmin: true,
-        expectStatus: 201,
-      },
-    );
-  });
-
-  test("formSucStep: defaults to success body and supports overrides", () => {
-    assert.deepEqual(formSucStep("jobs", "sync jobs"), {
-      name: "sync jobs",
       path: "jobs",
-      method: "GET",
       asAdmin: false,
-      expectStatus: 200,
-      expectBody: { status: "success" },
     });
 
     assert.deepEqual(
-      formSucStep("jobs", "sync jobs", {
-        expectBody: { status: "custom" },
-      }),
+      req("POST", "company", { body: { ats: "lever", id: "lv-1" } }, true),
       {
-        name: "sync jobs",
-        path: "jobs",
-        method: "GET",
-        asAdmin: false,
-        expectStatus: 200,
-        expectBody: { status: "custom" },
-      },
-    );
-  });
-
-  test("formAsyncStep: applies async defaults and keeps explicit overrides", () => {
-    assert.deepEqual(formAsyncStep("jobs/sync", "sync now"), {
-      name: "sync now",
-      path: "jobs/sync",
-      method: "POST",
-      asAdmin: true,
-      expectStatus: 202,
-      expectBody: "Accepted",
-      asyncWait: "Verify Async Action",
-    });
-
-    assert.deepEqual(
-      formAsyncStep("jobs/sync", "sync now", {
-        expectStatus: 204,
-        asyncWait: "Custom async check",
-      }),
-      {
-        name: "sync now",
-        path: "jobs/sync",
         method: "POST",
-        asAdmin: true,
-        expectStatus: 204,
-        expectBody: "Accepted",
-        asyncWait: "Custom async check",
-      },
-    );
-  });
-
-  test("formErrStep: defaults to 400 error payload and honors custom status", () => {
-    assert.deepEqual(formErrStep("jobs", "invalid job", "Bad request"), {
-      name: "invalid job",
-      path: "jobs",
-      method: "GET",
-      asAdmin: false,
-      expectStatus: 400,
-      expectBody: {
-        status: "error",
-        statusCode: 400,
-        message: "Bad request",
-      },
-    });
-
-    assert.deepEqual(
-      formErrStep("jobs", "missing", "Not Found", {
-        expectStatus: 404,
-      }),
-      {
-        name: "missing",
-        path: "jobs",
-        method: "GET",
-        asAdmin: false,
-        expectStatus: 404,
-        expectBody: {
-          status: "error",
-          statusCode: 404,
-          message: "Not Found",
-        },
-      },
-    );
-  });
-
-  test("company step helpers: build admin company requests", () => {
-    assert.deepEqual(addCompanyStep("greenhouse", "gh-1"), {
-      name: "greenhouse / gh-1",
-      path: "company",
-      method: "PUT",
-      asAdmin: true,
-      expectStatus: 200,
-      expectBody: { status: "success" },
-      body: { ats: "greenhouse", id: "gh-1" },
-    });
-
-    assert.deepEqual(delCompanyStep("lever", "lv-2"), {
-      name: "lever / lv-2",
-      path: "company",
-      method: "DELETE",
-      asAdmin: true,
-      expectStatus: 200,
-      expectBody: { status: "success" },
-      body: { ats: "lever", id: "lv-2" },
-    });
-
-    assert.deepEqual(addCompaniesStep("greenhouse", ["gh-1", "gh-2"]), {
-      name: "greenhouse / [gh-1, gh-2]",
-      path: "companies",
-      method: "PUT",
-      asAdmin: true,
-      expectStatus: 200,
-      expectBody: { status: "success" },
-      body: { ats: "greenhouse", ids: ["gh-1", "gh-2"] },
-      asyncWait: undefined,
-    });
-  });
-
-  test("resetSteps: deletes configured ids and sets async wait on final step", () => {
-    assert.deepEqual(resetSteps, [
-      {
-        name: "greenhouse / gh-1",
         path: "company",
-        method: "DELETE",
         asAdmin: true,
-        expectStatus: 200,
-        expectBody: { status: "success" },
+        body: { ats: "lever", id: "lv-1" },
+      },
+    );
+  });
+
+  test("req shorthands: get is not admin, post/put/del default to admin", () => {
+    assert.deepEqual(req.get("jobs"), {
+      method: "GET",
+      path: "jobs",
+      asAdmin: false,
+    });
+
+    assert.deepEqual(req.post("jobs"), {
+      method: "POST",
+      path: "jobs",
+      asAdmin: true,
+    });
+
+    assert.deepEqual(req.put("company", { body: { ats: "ashby", id: "x" } }), {
+      method: "PUT",
+      path: "company",
+      asAdmin: true,
+      body: { ats: "ashby", id: "x" },
+    });
+
+    assert.deepEqual(
+      req.del("company", { body: { ats: "lever", id: "lv-1" } }),
+      {
+        method: "DELETE",
+        path: "company",
+        asAdmin: true,
+        body: { ats: "lever", id: "lv-1" },
+      },
+    );
+  });
+
+  test("req shorthands: opts can override the default asAdmin", () => {
+    assert.deepEqual(
+      req.put("company", {
+        asAdmin: false,
+        body: { ats: "greenhouse", id: "gh-1" },
+      }),
+      {
+        method: "PUT",
+        path: "company",
+        asAdmin: false,
         body: { ats: "greenhouse", id: "gh-1" },
       },
+    );
+  });
+
+  test("res: builds response with status and optional value", () => {
+    assert.deepEqual(res(200), { status: 200, value: undefined });
+    assert.deepEqual(res(201, "created"), { status: 201, value: "created" });
+  });
+
+  test("res.ok: returns 200 with optional value", () => {
+    assert.deepEqual(res.ok(), { status: 200, value: undefined });
+    assert.deepEqual(res.ok({ count: 3 }), {
+      status: 200,
+      value: { count: 3 },
+    });
+  });
+
+  test("res.err: defaults to 400 and builds error payload", () => {
+    assert.deepEqual(res.err("Bad request"), {
+      status: 400,
+      value: { status: "error", statusCode: 400, message: "Bad request" },
+    });
+
+    assert.deepEqual(res.err("Not Found", 404), {
+      status: 404,
+      value: { status: "error", statusCode: 404, message: "Not Found" },
+    });
+  });
+
+  test("res.accepted: is a 202 Accepted response", () => {
+    assert.deepEqual(res.accepted, { status: 202, value: "Accepted" });
+  });
+
+  test("formStep: builds a step with name, req, res, and optional confirm", () => {
+    assert.deepEqual(formStep("list jobs", req.get("jobs"), res.ok()), {
+      name: "list jobs",
+      req: { method: "GET", path: "jobs", asAdmin: false },
+      res: { status: 200, value: undefined },
+      confirm: undefined,
+    });
+
+    assert.deepEqual(
+      formStep("sync jobs", req.post("jobs/sync"), res.accepted, "Verify sync"),
       {
-        name: "greenhouse / gh-2",
+        name: "sync jobs",
+        req: { method: "POST", path: "jobs/sync", asAdmin: true },
+        res: { status: 202, value: "Accepted" },
+        confirm: "Verify sync",
+      },
+    );
+  });
+
+  test("constants: ats, companyId, companyIds reflect configured greenhouse ids", () => {
+    assert.equal(ats, "greenhouse");
+    assert.equal(companyId, "gh-1");
+    assert.deepEqual(companyIds, ["gh-1", "gh-2"]);
+  });
+
+  test("oneAddEachAts: one add step per ATS type using first id", () => {
+    assert.equal(oneAddEachAts.length, 3);
+
+    assert.deepEqual(oneAddEachAts[0], {
+      name: "Add ashby company",
+      req: {
+        method: "PUT",
         path: "company",
-        method: "DELETE",
+        asAdmin: false,
+        body: { ats: "ashby", id: "stream" },
+      },
+      res: { status: 200, value: undefined },
+      confirm: undefined,
+    });
+
+    assert.deepEqual(oneAddEachAts[1], {
+      name: "Add greenhouse company",
+      req: {
+        method: "PUT",
+        path: "company",
+        asAdmin: false,
+        body: { ats: "greenhouse", id: "gh-1" },
+      },
+      res: { status: 200, value: undefined },
+      confirm: undefined,
+    });
+
+    assert.deepEqual(oneAddEachAts[2], {
+      name: "Add lever company",
+      req: {
+        method: "PUT",
+        path: "company",
+        asAdmin: false,
+        body: { ats: "lever", id: "lv-1" },
+      },
+      res: { status: 200, value: undefined },
+      confirm: undefined,
+    });
+  });
+
+  test("allAddAts: add-all steps per ATS type with confirm messages", () => {
+    assert.equal(allAddAts.length, 3);
+
+    assert.deepEqual(allAddAts[0], {
+      name: "Add all ashby companies",
+      req: {
+        method: "PUT",
+        path: "companies",
         asAdmin: true,
-        expectStatus: 200,
-        expectBody: { status: "success" },
+        body: { ats: "ashby", ids: ["stream"] },
+      },
+      res: { status: 200, value: undefined },
+      confirm: "Verify ashby companies added",
+    });
+
+    assert.deepEqual(allAddAts[1], {
+      name: "Add all greenhouse companies",
+      req: {
+        method: "PUT",
+        path: "companies",
+        asAdmin: true,
+        body: { ats: "greenhouse", ids: ["gh-1", "gh-2"] },
+      },
+      res: { status: 200, value: undefined },
+      confirm: "Verify greenhouse companies added",
+    });
+
+    assert.deepEqual(allAddAts[2], {
+      name: "Add all lever companies",
+      req: {
+        method: "PUT",
+        path: "companies",
+        asAdmin: true,
+        body: { ats: "lever", ids: ["lv-1"] },
+      },
+      res: { status: 200, value: undefined },
+      confirm: "Verify lever companies added",
+    });
+  });
+
+  test("allDelAts: delete step for every configured company id", () => {
+    // ashby: ["stream"], greenhouse: ["gh-1", "gh-2"], lever: ["lv-1"]
+    assert.equal(allDelAts.length, 4);
+
+    assert.deepEqual(allDelAts[0], {
+      name: "Delete ashby company stream",
+      req: {
+        method: "DELETE",
+        path: "company",
+        asAdmin: true,
+        body: { ats: "ashby", id: "stream" },
+      },
+      res: { status: 200, value: undefined },
+      confirm: undefined,
+    });
+
+    assert.deepEqual(allDelAts[1], {
+      name: "Delete greenhouse company gh-1",
+      req: {
+        method: "DELETE",
+        path: "company",
+        asAdmin: true,
+        body: { ats: "greenhouse", id: "gh-1" },
+      },
+      res: { status: 200, value: undefined },
+      confirm: undefined,
+    });
+
+    assert.deepEqual(allDelAts[2], {
+      name: "Delete greenhouse company gh-2",
+      req: {
+        method: "DELETE",
+        path: "company",
+        asAdmin: true,
         body: { ats: "greenhouse", id: "gh-2" },
       },
-      {
-        name: "lever / lv-1",
-        path: "company",
+      res: { status: 200, value: undefined },
+      confirm: undefined,
+    });
+  });
+
+  test("allDelAts: last step has confirm set", () => {
+    const last = allDelAts.at(-1);
+    assert.deepEqual(last, {
+      name: "Delete lever company lv-1",
+      req: {
         method: "DELETE",
+        path: "company",
         asAdmin: true,
-        expectStatus: 200,
-        expectBody: { status: "success" },
         body: { ats: "lever", id: "lv-1" },
-        asyncWait: "Verify companies deleted and metadata reset",
       },
-    ]);
+      res: { status: 200, value: undefined },
+      confirm: "Verify companies deleted",
+    });
   });
 });

@@ -57,8 +57,9 @@ async function runFlow(name: string): Promise<void> {
 async function runStep(
   n: number,
   total: number,
-  { name, method, path, expectStatus, expectBody, asyncWait, ...opts }: Step,
+  { name, req, res, confirm }: Step,
 ): Promise<void> {
+  const { method, path, ...opts } = req;
   logger.info(`[${n}/${total}] ${method} ${path}: ${name}`);
 
   const { status, value } = await apiCall(method, path, {
@@ -69,17 +70,17 @@ async function runStep(
 
   logger.info(`[${status}]`, value);
 
-  assert.equal(status, expectStatus, `FAIL: Step ${n} Wrong Status`);
-  if (expectBody != undefined) {
+  assert.equal(status, res.status, `FAIL: Step ${n} Wrong Status`);
+  if (res.value != undefined) {
     assert.partialDeepStrictEqual(
       value,
-      expectBody,
+      res.value,
       `FAIL: Step ${n} Wrong Body`,
     );
   }
 
-  if (asyncWait) {
-    logger.info(`${asyncWait}, then press Enter to continue...`);
+  if (confirm) {
+    logger.info(`${confirm}, then press Enter to continue...`);
     await new Promise<void>((resolve) => {
       // When you attach a data listener to process.stdin, it switches the stream into "flowing" mode.
       // To allow the script to exit, you need to explicitly pause() the stdin stream after receiving the data.

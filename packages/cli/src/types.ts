@@ -1,6 +1,6 @@
 export type Bag = Record<string, unknown>;
 export type NumBag = Record<string, number>;
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type ENV = "prod" | "local";
 
 export interface Command {
