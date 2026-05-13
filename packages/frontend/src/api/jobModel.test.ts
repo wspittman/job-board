@@ -72,7 +72,7 @@ suite("JobModel", () => {
   });
 
   test("getDisplayFacets (useShort=true): recent post label present", () => {
-    expect(createJobModel().getDisplayFacets(true)).toContain("Recent");
+    expect(createJobModel().getDisplayFacets(true)).toContain("Past Week");
   });
 
   test("getDisplayFacets (useShort=true): stage label has no 'Company' suffix", () => {

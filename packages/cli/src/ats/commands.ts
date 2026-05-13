@@ -1,6 +1,6 @@
 import { logger } from "dry-utils-logger";
 import timers from "node:timers/promises";
-import { fetchCompany, fetchJob, fetchJobCount } from "../portal/pFuncs.ts";
+import { fetchCompany, fetchJob, fetchJobCounts } from "../portal/pFuncs.ts";
 import type { Command } from "../types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
 import { validateCompanyArgs, validateJobArgs } from "../utils/utils.ts";
@@ -42,8 +42,9 @@ const counts: Command = {
 
     logger.info(`Get job counts for ${ats} companies`, companyIds);
     await runMany(companyIds, async (companyId) => {
-      const count = await fetchJobCount(ats, companyId);
-      logger.info(`  ${companyId}: ${count}`);
+      const { total, fresh } = await fetchJobCounts(ats, companyId);
+      const pct = total ? ((fresh / total) * 100).toFixed(1) : "0";
+      logger.info(`  ${companyId}: ${pct}% fresh, ${fresh} / ${total}`);
     });
   },
 };

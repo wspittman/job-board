@@ -39,3 +39,13 @@ function validateIds(name: string, ids: (string | undefined)[]): string[] {
 
   return validIds;
 }
+
+export function validateFileName(name: string, fileName?: string): string {
+  fileName = fileName?.trim() || "";
+
+  if (!fileName || fileName.match(/[^a-zA-Z0-9_-]/)) {
+    throw new CommandError(`Invalid argument: ${name}`);
+  }
+
+  return fileName;
+}

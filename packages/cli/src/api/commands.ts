@@ -55,6 +55,19 @@ const syncCompanyJobs = (env?: ENV): Command => ({
   },
 });
 
+const refreshCompanyJobs = (env?: ENV): Command => ({
+  args: "<ATS> <COMPANY_ID[, ...]>",
+  usage: "Refresh jobs for one or more companies from the ATS",
+  run: async (args: string[]): Promise<void> => {
+    const { ats, companyIds } = validateCompanyArgs(args);
+
+    logger.info(`Refreshing jobs for ${ats}`, companyIds);
+    const body = { ats, companyIds };
+    const result = await apiCall("POST", "refresh/jobs/", { body, env });
+    logger.info("Done", result);
+  },
+});
+
 export const apiCommands: Command = {
   args: "<SUBCOMMAND> <ARGS>",
   usage: [
@@ -71,5 +84,7 @@ export const apiCommands: Command = {
     deleteCompanyProd: deleteCompany("prod"),
     syncCompanyJobs: syncCompanyJobs(),
     syncCompanyJobsProd: syncCompanyJobs("prod"),
+    refreshCompanyJobs: refreshCompanyJobs(),
+    refreshCompanyJobsProd: refreshCompanyJobs("prod"),
   },
 };

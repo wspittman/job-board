@@ -1,5 +1,6 @@
 import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
+import { JOB_EXPIRY_MS } from "../../../backend/src/utils/constants.ts";
 import { CommandError, type Bag } from "../types.ts";
 import type { ATS } from "./atsConsts.ts";
 import { llmActionTypes, type Context, type LLMAction } from "./pTypes.ts";
@@ -60,17 +61,21 @@ export async function fetchJob(ats: ATS, companyId: string, jobId?: string) {
 }
 
 /**
- * Fetches the job count for a company from the ATS.
- * @param ats - ATS provider key
- * @param companyId - ATS company slug/id
- * @returns The number of jobs for the company
+ * Fetches the job counts for a company from the ATS.
+ * @param ats ATS provider key
+ * @param companyId ATS company slug/id
+ * @returns The total and fresh job counts for the company
  */
-export async function fetchJobCount(
+export async function fetchJobCounts(
   ats: ATS,
   companyId: string,
-): Promise<number> {
+): Promise<{ total: number; fresh: number }> {
   const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
-  return jobs.length;
+  const expiryWindow = Date.now() - JOB_EXPIRY_MS;
+  const freshJobs = jobs.filter(
+    ({ item: { postTS } }) => postTS >= expiryWindow,
+  );
+  return { total: jobs.length, fresh: freshJobs.length };
 }
 
 export async function infer(

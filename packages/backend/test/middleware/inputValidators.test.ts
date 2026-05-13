@@ -219,9 +219,10 @@ suite("useRefreshJobsOptions", () => {
     {},
     { ats },
     { replaceJobsOlderThan: NOW },
-    { ats, companyId },
+    { ats, companyIds: [companyId] },
+    { ats, companyIds: [companyId, "company2"] },
     { ats, replaceJobsOlderThan: NOW },
-    { ats, companyId, replaceJobsOlderThan: NOW },
+    { ats, companyIds: [companyId], replaceJobsOlderThan: NOW },
   ];
 
   validCases.forEach((input) => {
@@ -232,10 +233,11 @@ suite("useRefreshJobsOptions", () => {
   });
 
   const invalidCases = [
-    { companyId },
+    { companyIds: [companyId] },
     { ats: ATS_INVALID },
-    { ats, companyId: ID_INVALID_TYPE },
-    { ats, companyId: ID_INVALID_LENGTH },
+    { ats, companyIds: [] },
+    { ats, companyIds: [ID_INVALID_TYPE] },
+    { ats, companyIds: [ID_INVALID_LENGTH] },
     { replaceJobsOlderThan: "not-a-number" },
     { replaceJobsOlderThan: MIN_DATE - 1 },
     { replaceJobsOlderThan: NOW + 10000 },
