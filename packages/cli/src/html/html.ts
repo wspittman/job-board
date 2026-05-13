@@ -102,7 +102,7 @@ export async function runBlog(
   const output = template
     .replace("{{TITLE}}", blog.title)
     .replace("{{DESCRIPTION}}", blog.description)
-    .replace("{{SLUG}}", slug)
+    .replaceAll("{{SLUG}}", slug)
     .replace("{{HEADER_HTML}}", headerHtml)
     .replace("{{SECTION_HTML}}", sectionHtml);
 
