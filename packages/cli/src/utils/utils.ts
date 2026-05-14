@@ -1,4 +1,4 @@
-import { atsTypes, type ATS } from "../portal/pTypes.ts";
+import { atsTypes, type ATS } from "../portal/atsConsts.ts";
 import { CommandError } from "../types.ts";
 
 export function validateCompanyArgs([ats, ...companyIds]: string[]) {

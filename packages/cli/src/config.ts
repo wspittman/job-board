@@ -1,3 +1,5 @@
+import { atsTypes, type ATS } from "./portal/atsConsts.ts";
+
 interface Config {
   // API configs
   API_URL: string;
@@ -7,8 +9,7 @@ interface Config {
   PROD_ADMIN_TOKEN?: string;
 
   // E2E test configs
-  GREENHOUSE_IDS: string[];
-  LEVER_IDS: string[];
+  E2E_COMPANIES: Partial<Record<ATS, string[]>>;
 }
 type KEY = keyof Config;
 
@@ -36,6 +37,26 @@ const toArr = (s: string = "") =>
     .filter(Boolean);
 
 /**
+ * Parses a `|`-delimited list of `ats:id1,id2` entries into a record.
+ * Example: `greenhouse:id1,id2|lever:id3,id4`
+ */
+const toCompanies = (s: string = ""): Partial<Record<ATS, string[]>> => {
+  if (!s) return {};
+  return Object.fromEntries(
+    s.split("|").map((entry) => {
+      const [ats = "", ids = ""] = entry.split(":");
+      const trimmed = ats.trim();
+      if (!atsTypes.includes(trimmed as ATS)) {
+        throw new Error(
+          `E2E_COMPANIES: unknown ATS "${trimmed}". Expected one of: ${atsTypes.join(", ")}`,
+        );
+      }
+      return [trimmed as ATS, toArr(ids)];
+    }),
+  );
+};
+
+/**
  * CLI configuration derived from environment variables.
  */
 export const config: Config = {
@@ -45,6 +66,5 @@ export const config: Config = {
   PROD_API_URL: normUrl(getReqEnv("PROD_API_URL")),
   PROD_ADMIN_TOKEN: getEnv("PROD_ADMIN_TOKEN"),
 
-  GREENHOUSE_IDS: toArr(getEnv("GREENHOUSE_IDS")),
-  LEVER_IDS: toArr(getEnv("LEVER_IDS")),
+  E2E_COMPANIES: toCompanies(getEnv("E2E_COMPANIES")),
 };

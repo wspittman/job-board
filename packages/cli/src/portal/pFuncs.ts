@@ -2,12 +2,8 @@ import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
 import { JOB_EXPIRY_MS } from "../../../backend/src/utils/constants.ts";
 import { CommandError, type Bag } from "../types.ts";
-import {
-  llmActionTypes,
-  type ATS,
-  type Context,
-  type LLMAction,
-} from "./pTypes.ts";
+import type { ATS } from "./atsConsts.ts";
+import { llmActionTypes, type Context, type LLMAction } from "./pTypes.ts";
 
 export { getLLMOptions } from "../../../backend/src/config.ts";
 

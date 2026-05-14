@@ -1,223 +1,168 @@
-import { config } from "../config.ts";
+import { atsTypes } from "../portal/atsConsts.ts";
 import {
   type Step,
-  addCompaniesStep,
-  addCompanyStep,
-  delCompanyStep,
-  formAsyncStep,
-  formErrStep,
+  allAddAts,
+  allDelAts,
+  ats,
+  companyId,
+  companyIds,
   formStep,
-  formSucStep,
-  resetSteps,
+  oneAddEachAts,
+  req,
+  res,
 } from "./step.ts";
 
-const { GREENHOUSE_IDS: ghIds, LEVER_IDS: lvIds } = config;
-
-const UNKNOWN = "unknown_id";
+const unknown = "unknown_id";
+const UNDEFINED_ID =
+  "id field is invalid: Invalid input: expected string, received undefined";
 
 const pings: Step[] = [
-  formSucStep("", "Ping"),
-  formStep("unknown", "404", { expectStatus: 404, expectBody: "Not Found" }),
-  formStep("jobs", "Empty Query", { expectBody: [] }),
-  formStep("metadata", "Status check", { expectBody: {} }),
+  formStep("Ping", req.get(""), res.ok({ status: "success" })),
+  formStep("404", req.get("unknown"), res(404, "Not Found")),
+  formStep("Empty query", req.get("jobs"), res.ok([])),
+  formStep("Status check", req.get("metadata"), res.ok({})),
 ];
 
 const validations: Step[] = [
   // Refresh Jobs
-  formErrStep("refresh/jobs", "Auth Missing", "Unauthorized", {
-    method: "POST",
-    expectStatus: 401,
-  }),
-  formErrStep(
-    "refresh/jobs",
+  formStep(
+    "Auth Missing",
+    req.post("refresh/jobs", { asAdmin: false }),
+    res.err("Unauthorized", 401),
+  ),
+  formStep(
     "Unknown Arg Error",
-    'Unrecognized key: "unknownArg"',
-    {
-      method: "POST",
-      asAdmin: true,
-      body: {
-        ats: "greenhouse",
-        companyId: ghIds[0],
-        unknownArg: UNKNOWN,
-      },
-    },
+    req.post("refresh/jobs", { body: { ats, companyIds, unknown } }),
+    res.err('Unrecognized key: "unknown"'),
   ),
-  formErrStep(
-    "refresh/jobs",
+  formStep(
     "Company without ATS Error",
-    "ats field is required when using companyId",
-    {
-      method: "POST",
-      asAdmin: true,
-      body: {
-        companyId: ghIds[0],
-      },
-    },
+    req.post("refresh/jobs", { body: { companyIds } }),
+    res.err("ats field is required when using companyIds"),
   ),
-  formErrStep(
-    "refresh/jobs",
+  formStep(
     "Unknown ATS Error",
-    'ats field is invalid: Invalid option: expected one of "ashby"|"greenhouse"|"lever"',
-    {
-      method: "POST",
-      asAdmin: true,
-      body: {
-        ats: UNKNOWN,
-        companyId: ghIds[0],
-      },
-    },
+    req.post("refresh/jobs", { body: { ats: unknown, companyIds } }),
+    res.err(
+      `ats field is invalid: Invalid option: expected one of ${atsTypes.map((type) => `"${type}"`).join("|")}`,
+    ),
   ),
 
   // Company
-  formErrStep(
-    "company",
+  formStep(
     "Empty Body Error",
-    "id field is invalid: Invalid input: expected string, received undefined",
-    {
-      method: "PUT",
-      body: {},
-    },
+    req.put("company", { asAdmin: false, body: {} }),
+    res.err(UNDEFINED_ID),
   ),
-  formErrStep(
-    "companies",
+  formStep(
     "Empty Body Error",
-    "ids field is invalid: Invalid input: expected array, received undefined",
-    {
-      method: "PUT",
-      asAdmin: true,
-      body: {},
-    },
+    req.put("companies", { body: {} }),
+    res.err(
+      "ids field is invalid: Invalid input: expected array, received undefined",
+    ),
   ),
-  formErrStep(
-    "companies",
+  formStep(
     "Empty IDs Error",
-    "ids field is invalid: Too small: expected array to have >=1 items",
-    {
-      method: "PUT",
-      asAdmin: true,
-      body: { ats: "greenhouse", ids: [] },
-    },
+    req.put("companies", { body: { ats: "greenhouse", ids: [] } }),
+    res.err(
+      "ids field is invalid: Too small: expected array to have >=1 items",
+    ),
   ),
-  formErrStep(
-    "company",
+  formStep(
     "Empty Body Error",
-    "id field is invalid: Invalid input: expected string, received undefined",
-    {
-      method: "DELETE",
-      asAdmin: true,
-      body: {},
-    },
+    req.del("company", { body: {} }),
+    res.err(UNDEFINED_ID),
   ),
 
   // Job
-  formErrStep(
-    "job/apply",
-    "Missing Query Error",
-    "id field is invalid: Invalid input: expected string, received undefined",
-    {},
+  formStep("Missing Query Error", req.get("job/apply"), res.err(UNDEFINED_ID)),
+  formStep(
+    "Not Found Error",
+    req.get("job/apply", {
+      query: {
+        id: unknown,
+        companyId: unknown,
+      },
+    }),
+    res.err("Job not found", 404),
   ),
-  formErrStep("job/apply", "Not Found Error", "Job not found", {
-    query: {
-      id: UNKNOWN,
-      companyId: UNKNOWN,
-    },
-    expectStatus: 404,
-  }),
-  formErrStep(
-    "company/job",
+  formStep(
     "Empty Body Error",
-    "companyId field is invalid: Invalid input: expected string, received undefined",
-    {
-      method: "DELETE",
-      asAdmin: true,
-      body: {},
-    },
+    req.del("company/job", { body: {} }),
+    res.err(
+      "companyId field is invalid: Invalid input: expected string, received undefined",
+    ),
   ),
 ];
 
 const unknowns: Step[] = [
-  formAsyncStep("refresh/jobs", "Unknown Company", {
-    body: {
-      ats: "greenhouse",
-      companyId: UNKNOWN,
-    },
-  }),
-  formErrStep(
-    "company",
+  formStep(
     "Unknown Company",
-    `greenhouse / ${UNKNOWN}: Not Found`,
-    {
-      method: "PUT",
+    req.post("refresh/jobs", { body: { ats, companyIds: [unknown] } }),
+    res.accepted,
+    "Verify internal Not Found exception",
+  ),
+  formStep(
+    "Unknown Company",
+    req.put("company", { asAdmin: false, body: { ats, id: unknown } }),
+    res.err(`greenhouse / ${unknown}: Not Found`, 404),
+  ),
+  formStep(
+    "Unknown Companies",
+    req.put("companies", {
       body: {
         ats: "greenhouse",
-        id: UNKNOWN,
+        ids: [unknown, unknown + "2", unknown + "3"],
       },
-      expectStatus: 404,
-    },
-  ),
-  addCompaniesStep(
-    "greenhouse",
-    [UNKNOWN, UNKNOWN + "2", UNKNOWN + "3"],
+    }),
+    res.ok(),
     "Verify internal Not Found exceptions",
   ),
-  delCompanyStep("greenhouse", UNKNOWN),
-  formSucStep("company/job", "Unknown Company", {
-    method: "DELETE",
-    asAdmin: true,
-    body: {
-      ats: "greenhouse",
-      jobId: UNKNOWN,
-      companyId: UNKNOWN,
-    },
-  }),
-  formSucStep("company/job", "Unknown Job", {
-    method: "DELETE",
-    asAdmin: true,
-    body: {
-      ats: "greenhouse",
-      jobId: UNKNOWN,
-      companyId: ghIds[0],
-    },
-  }),
+  formStep(
+    "Unknown Company",
+    req.del("company", { body: { ats, id: unknown } }),
+    res.ok(),
+  ),
+  formStep(
+    "Unknown Company",
+    req.del("company/job", {
+      body: { ats, companyId: unknown, jobId: unknown },
+    }),
+    res.ok(),
+  ),
+  formStep(
+    "Unknown Job",
+    req.del("company/job", { body: { ats, companyId, jobId: unknown } }),
+    res.ok(),
+  ),
 ];
 
 const companies: Step[] = [
-  ...resetSteps,
-  // Metadata baseline would go here
-  // Add one company from each ATS
-  addCompanyStep("greenhouse", ghIds[0]!),
-  addCompanyStep("lever", lvIds[0]!),
+  ...allDelAts,
+  ...oneAddEachAts,
   // Re-add the same companies to test idempotency
-  addCompanyStep("greenhouse", ghIds[0]!),
-  addCompanyStep("lever", lvIds[0]!),
-  // Add multiple companies from each ATS
-  addCompaniesStep("greenhouse", ghIds),
-  addCompaniesStep("lever", lvIds, "Verify RefreshCompanyInfo actions"),
-  // Metadata check would go here
-  formAsyncStep("refresh/companies", "Refresh All Companies"),
-  // Metadata check would go here
+  ...oneAddEachAts,
+  ...allAddAts,
+
+  formStep(
+    "Refresh All Companies",
+    req.post("refresh/companies"),
+    res.accepted,
+    "Verify Company Refreshes",
+  ),
 ];
 
 const manual = [
-  //addCompanyStep("greenhouse", "noxgroup"),
-  formSucStep("refresh/jobs", "Refresh Company", {
-    method: "POST",
-    asAdmin: true,
-    body: {
-      ats: "greenhouse",
-      companyId: "propublica",
-      //replaceJobsOlderThan: Date.now() - 1000 * 60 * 60 * 24 * 90, // 90 days
-    },
-  }),
-  /*formSucStep("company/job", "Ignore Job", {
-    method: "DELETE",
-    asAdmin: true,
-    body: {
-      ats: "greenhouse",
-      companyId: "propublica",
-      jobId: "4053828006",
-    },
-  }),*/
+  formStep(
+    "Refresh Jobs for Company",
+    req.post("refresh/jobs", {
+      body: {
+        ats: "greenhouse",
+        companyIds: ["propublica"],
+      },
+    }),
+    res.accepted,
+  ),
 ];
 
 /*
