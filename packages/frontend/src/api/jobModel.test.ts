@@ -44,7 +44,6 @@ suite("JobModel", () => {
     const job = createJobModel({
       minSalary: 120000,
       payCadence: "salary",
-      currency: "USD",
     });
     const facets = job.getDisplayFacets(false);
     expect(

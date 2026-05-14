@@ -25,14 +25,14 @@ suite("Stats", () => {
     mockMetadata();
     await element.onLoad();
     expect(element.getEl("job-count")?.textContent).toBe(
-      (1000).toLocaleString(),
+      (1000).toLocaleString(undefined, { notation: "compact" }),
     );
     expect(element.getEl("company-count")?.textContent).toBe(
-      (3).toLocaleString(),
+      (3).toLocaleString(undefined, { notation: "compact" }),
     );
     expect(element.getEl("remote-pct")?.textContent).toBe("40%");
     expect(element.getEl("job-recent-count")?.textContent).toBe(
-      (100).toLocaleString(),
+      (100).toLocaleString(undefined, { notation: "compact" }),
     );
   });
 

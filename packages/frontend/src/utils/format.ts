@@ -1,0 +1,91 @@
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+/**
+ * A utility class for formatting numbers, percentages, dates, and currency values.
+ */
+class Format {
+  #number = new Intl.NumberFormat(undefined, { notation: "compact" });
+  #percent = new Intl.NumberFormat(undefined, { style: "percent" });
+  #dateTime = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "full",
+    timeStyle: "short",
+  });
+  #date = new Intl.DateTimeFormat(undefined, { dateStyle: "short" });
+  #relativeTime = new Intl.RelativeTimeFormat(undefined, {
+    numeric: "auto",
+  });
+  #currency = new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+    notation: "compact",
+  });
+
+  /**
+   * Formats a number using compact notation.
+   * @param value The number to format. Defaults to 0 if not provided.
+   * @returns The formatted number string.
+   */
+  number(value: number = 0): string {
+    return this.#number.format(value);
+  }
+
+  /**
+   * Formats a value as a percentage of a total.
+   * If the total is zero or negative, it returns "0%".
+   * If the value is negative, it is treated as zero.
+   * @param value The value to format. Defaults to 0 if not provided.
+   * @param total The total value. Defaults to 0 if not provided.
+   * @returns The formatted percentage string.
+   */
+  percent(value: number = 0, total: number = 0): string {
+    value = Math.max(value, 0);
+    total = Math.max(total, 0);
+    const pct = total > 0 ? value / total : 0;
+    return this.#percent.format(pct);
+  }
+
+  /**
+   * Formats a timestamp into a full date and time string.
+   * @param value The timestamp to format, in milliseconds since the Unix epoch.
+   * @returns The formatted date and time string.
+   */
+  dateTime(value: number): string {
+    return this.#dateTime.format(value);
+  }
+
+  /**
+   * Formats a timestamp into a short date string.
+   * @param value The timestamp to format, in milliseconds since the Unix epoch.
+   * @returns The formatted date string.
+   */
+  date(value: number): string {
+    return this.#date.format(value);
+  }
+
+  /**
+   * Formats a timestamp into a relative time string indicating how long ago it was from the current time.
+   * - If the timestamp is from the same day, it returns "Just Posted".
+   * - If the timestamp is within the past week, it returns "Past Week".
+   * - For older timestamps, it returns a relative time string (e.g., "2 weeks ago").
+   * @param value The timestamp to format, in milliseconds since the Unix epoch.
+   * @returns The formatted relative time string.
+   */
+  daysAgo(value: number): string {
+    const days = Math.floor((Date.now() - value) / MS_PER_DAY);
+    if (days === 0) return "Just Posted";
+    if (days < 7) return "Past Week";
+    return this.#relativeTime.format(-days, "day");
+  }
+
+  /**
+   * Formats a number as a currency value.
+   * @param value The number to format.
+   * @returns The formatted currency string.
+   */
+  currency(value: number): string {
+    return this.#currency.format(value);
+  }
+}
+
+export const fmt = new Format();

@@ -1,6 +1,5 @@
 import type {
   CompanyStage,
-  Currency,
   JobFamily,
   PayCadence,
   Presence,
@@ -30,7 +29,6 @@ export interface JobModelApi {
   companyStage?: CompanyStage;
 
   // The Compensation
-  currency?: Currency;
   payCadence?: PayCadence;
   minSalary?: number;
 

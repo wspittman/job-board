@@ -7,9 +7,15 @@ suite("metadataModel", () => {
     mockMetadata();
     const result = await metadataModel.getCountStrings();
 
-    expect(result.jobCount).toBe((1000).toLocaleString());
-    expect(result.recentJobCount).toBe((100).toLocaleString());
-    expect(result.companyCount).toBe((3).toLocaleString());
+    expect(result.jobCount).toBe(
+      (1000).toLocaleString(undefined, { notation: "compact" }),
+    );
+    expect(result.recentJobCount).toBe(
+      (100).toLocaleString(undefined, { notation: "compact" }),
+    );
+    expect(result.companyCount).toBe(
+      (3).toLocaleString(undefined, { notation: "compact" }),
+    );
   });
 
   test("getCountStrings: computes remotePct", async () => {

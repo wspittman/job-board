@@ -1,4 +1,5 @@
 import type { FormOption } from "../components/form-element";
+import { fmt } from "../utils/format";
 import { api } from "./api";
 import { toJobFamilyLabel } from "./apiEnums";
 
@@ -15,7 +16,7 @@ class MetadataModel {
    */
   async getTimestampString(): Promise<string> {
     const { timestamp } = await this.#fetch();
-    return new Date(timestamp).toLocaleString();
+    return fmt.dateTime(timestamp);
   }
 
   /**
@@ -37,21 +38,19 @@ class MetadataModel {
       jobFamilyCounts,
     } = await this.#fetch();
 
-    const toPct = (count: number) =>
-      jobCount > 0 ? `${Math.round((count / jobCount) * 100)}%` : "0%";
-    const remotePct = toPct(presenceCounts.remote ?? 0);
+    const remotePct = fmt.percent(presenceCounts.remote, jobCount);
     const topJobFamilies = Object.entries(jobFamilyCounts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
       .map(([key, count]) => ({
-        pct: toPct(count ?? 0),
+        pct: fmt.percent(count, jobCount),
         label: toJobFamilyLabel(key),
       }));
 
     return {
-      companyCount: companyCount.toLocaleString(),
-      jobCount: jobCount.toLocaleString(),
-      recentJobCount: recentJobCount.toLocaleString(),
+      companyCount: fmt.number(companyCount),
+      jobCount: fmt.number(jobCount),
+      recentJobCount: fmt.number(recentJobCount),
       remotePct,
       topJobFamilies,
     };

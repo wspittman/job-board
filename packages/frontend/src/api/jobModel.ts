@@ -1,8 +1,8 @@
+import { fmt } from "../utils/format";
 import { getStorageIds } from "../utils/storage";
 import { api } from "./api";
 import {
   toCompanyStageLabel,
-  toCurrencyFormat,
   toJobFamilyLabel,
   toPayCadenceLabel,
   toWorkTimeBasisLabel,
@@ -10,8 +10,6 @@ import {
 import type { JobModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 import { metadataModel } from "./metadataModel";
-
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 export class JobModel {
   static async search(filters: FilterModel): Promise<JobModel[]> {
@@ -116,16 +114,7 @@ export class JobModel {
   #getPostFacet(useShort: boolean): string {
     const { postTS } = this.#job;
 
-    return useShort
-      ? this.#tsToDaysString(postTS)
-      : new Date(postTS).toLocaleDateString();
-  }
-
-  #tsToDaysString(ts: number): string {
-    const days = Math.floor((Date.now() - ts) / MS_PER_DAY);
-    if (days === 0) return "Just Posted";
-    if (days < 7) return "Past Week";
-    return `${days} days ago`;
+    return useShort ? fmt.daysAgo(postTS) : fmt.date(postTS);
   }
 
   #getStageFacet(useShort: boolean): string | undefined {
@@ -136,13 +125,12 @@ export class JobModel {
   }
 
   #getCompString(useShort: boolean): string | undefined {
-    const { minSalary, payCadence, currency } = this.#job;
+    const { minSalary, payCadence } = this.#job;
     const cadence = toPayCadenceLabel(payCadence) || undefined;
 
     if (minSalary != null) {
-      const noCurrencyPrefix = cadence ? "" : "Pay: ";
-      const amount = toCurrencyFormat(minSalary, currency, noCurrencyPrefix);
-      return cadence ? `${amount} / ${cadence}` : `${amount}`;
+      const amount = fmt.currency(minSalary);
+      return cadence ? `${amount} / ${cadence}` : `Pay: ${amount}`;
     }
 
     if (useShort && (!payCadence || payCadence === "salary")) return undefined;

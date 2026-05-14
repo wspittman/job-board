@@ -14,7 +14,12 @@ suite("faq", () => {
 
   test("sets last-refreshed text and shows .faq-note elements on success", async () => {
     mockMetadata();
-    const expectedString = `Last refreshed: ${new Date(1777934360621).toLocaleString()}`;
+    const expectedString = `Last refreshed: ${new Date(
+      1777934360621,
+    ).toLocaleString(undefined, {
+      dateStyle: "full",
+      timeStyle: "short",
+    })}`;
     await import("./faq");
 
     const els = document.querySelectorAll<HTMLElement>(".faq-note");

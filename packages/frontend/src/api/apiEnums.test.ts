@@ -2,7 +2,6 @@ import { expect, suite, test } from "vitest";
 import {
   toCompanyStage,
   toCompanyStageLabel,
-  toCurrencyFormat,
   toJobFamily,
   toJobFamilyLabel,
   toPayCadence,
@@ -94,17 +93,4 @@ suite("apiEnums", () => {
   ] as [unknown, string][])("toPayCadence(%s) → %s", ([value, expected]) => {
     expect(toPayCadence(value)).toBe(expected);
   });
-
-  test.for([
-    [150000, "USD", undefined, `$150K`],
-    [80000, undefined, "Pay: ", `Pay: ${(80000).toLocaleString()}`],
-    [5000, undefined, undefined, (5000).toLocaleString()],
-    [1000, "FAKE" as never, undefined, (1000).toLocaleString()],
-  ] as [...Parameters<typeof toCurrencyFormat>, string][])(
-    "toCurrencyFormat(%s, %s, %s) → %s",
-    ([value, currency, prefix, expected]) => {
-      const result = toCurrencyFormat(value, currency, prefix);
-      expect(result).toBe(expected);
-    },
-  );
 });
