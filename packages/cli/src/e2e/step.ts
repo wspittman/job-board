@@ -2,16 +2,19 @@ import { config } from "../config.ts";
 import { atsTypes, type ATS } from "../portal/atsConsts.ts";
 import type { HttpMethod } from "../types.ts";
 
-const { GREENHOUSE_IDS: ghIds, LEVER_IDS: lvIds } = config;
-
-const atsMap: Record<ATS, string[]> = {
-  greenhouse: ghIds,
-  lever: lvIds,
-  ashby: [],
+const { E2E_COMPANIES } = config;
+const getIds = (ats: ATS): string[] => {
+  const ids = E2E_COMPANIES[ats] ?? [];
+  if (!ids.length) {
+    throw new Error(`Config E2E_COMPANIES: no IDs found for ATS "${ats}"`);
+  }
+  return ids;
 };
+const firstId = (ats: ATS): string => getIds(ats)[0]!;
+
 export const ats = "greenhouse" as const;
-export const companyId = atsMap[ats][0];
-export const companyIds = atsMap[ats];
+export const companyIds = getIds(ats);
+export const companyId = firstId(ats);
 
 // #region Request
 
@@ -85,7 +88,7 @@ export const formStep = (
 export const oneAddEachAts = atsTypes.map((ats) =>
   formStep(
     `Add ${ats} company`,
-    req.put("company", { asAdmin: false, body: { ats, id: atsMap[ats][0] } }),
+    req.put("company", { asAdmin: false, body: { ats, id: firstId(ats) } }),
     res.ok(),
   ),
 );
@@ -94,21 +97,22 @@ export const allAddAts = atsTypes.map((ats) =>
   formStep(
     `Add all ${ats} companies`,
     req.put("companies", {
-      body: { ats, ids: atsMap[ats] },
+      body: { ats, ids: getIds(ats) },
     }),
     res.ok(),
     `Verify ${ats} companies added`,
   ),
 );
 
-export const allDelAts = atsTypes.flatMap((ats) =>
-  atsMap[ats].map((id) =>
-    formStep(
-      `Delete ${ats} company ${id}`,
-      req.del("company", { body: { ats, id } }),
-      res.ok(),
-    ),
-  ),
+export const allDelAts = atsTypes.flatMap(
+  (ats) =>
+    getIds(ats).map((id) =>
+      formStep(
+        `Delete ${ats} company ${id}`,
+        req.del("company", { body: { ats, id } }),
+        res.ok(),
+      ),
+    ) ?? [],
 );
 const lastDelStep = allDelAts.at(-1);
 if (lastDelStep) {

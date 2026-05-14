@@ -65,7 +65,7 @@ npm run cli -- ats exactJob lever my-company-slug abc-123
 ### `e2e` — Run end-to-end tests
 
 Runs a predefined flow of API calls against the local backend and asserts expected responses.
-Requires a running local server and `GREENHOUSE_IDS`/`LEVER_IDS` to be populated.
+Requires a running local server and `E2E_COMPANIES` to be populated.
 
 ```bash
 npm run cli -- e2e <FLOW>

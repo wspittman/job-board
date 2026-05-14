@@ -2,12 +2,10 @@ import assert from "node:assert/strict";
 import { after, suite, test } from "node:test";
 
 const originalAdminToken = process.env.ADMIN_TOKEN;
-const originalGreenhouseIds = process.env.GREENHOUSE_IDS;
-const originalLeverIds = process.env.LEVER_IDS;
+const originalE2eCompanies = process.env.E2E_COMPANIES;
 
 process.env.ADMIN_TOKEN = "test-admin-token-1";
-process.env.GREENHOUSE_IDS = "gh-1, gh-2";
-process.env.LEVER_IDS = "lv-1";
+process.env.E2E_COMPANIES = "ashby:ash-1|greenhouse:gh-1,gh-2|lever:lv-1";
 
 const {
   req,
@@ -29,16 +27,10 @@ suite("e2e step", () => {
       process.env.ADMIN_TOKEN = originalAdminToken;
     }
 
-    if (originalGreenhouseIds === undefined) {
-      delete process.env.GREENHOUSE_IDS;
+    if (originalE2eCompanies === undefined) {
+      delete process.env.E2E_COMPANIES;
     } else {
-      process.env.GREENHOUSE_IDS = originalGreenhouseIds;
-    }
-
-    if (originalLeverIds === undefined) {
-      delete process.env.LEVER_IDS;
-    } else {
-      process.env.LEVER_IDS = originalLeverIds;
+      process.env.E2E_COMPANIES = originalE2eCompanies;
     }
   });
 
@@ -169,7 +161,7 @@ suite("e2e step", () => {
         method: "PUT",
         path: "company",
         asAdmin: false,
-        body: { ats: "ashby", id: "stream" },
+        body: { ats: "ashby", id: "ash-1" },
       },
       res: { status: 200, value: undefined },
       confirm: undefined,
@@ -209,7 +201,7 @@ suite("e2e step", () => {
         method: "PUT",
         path: "companies",
         asAdmin: true,
-        body: { ats: "ashby", ids: ["stream"] },
+        body: { ats: "ashby", ids: ["ash-1"] },
       },
       res: { status: 200, value: undefined },
       confirm: "Verify ashby companies added",
@@ -241,16 +233,16 @@ suite("e2e step", () => {
   });
 
   test("allDelAts: delete step for every configured company id", () => {
-    // ashby: ["stream"], greenhouse: ["gh-1", "gh-2"], lever: ["lv-1"]
+    // ashby: ["ash-1"], greenhouse: ["gh-1", "gh-2"], lever: ["lv-1"]
     assert.equal(allDelAts.length, 4);
 
     assert.deepEqual(allDelAts[0], {
-      name: "Delete ashby company stream",
+      name: "Delete ashby company ash-1",
       req: {
         method: "DELETE",
         path: "company",
         asAdmin: true,
-        body: { ats: "ashby", id: "stream" },
+        body: { ats: "ashby", id: "ash-1" },
       },
       res: { status: 200, value: undefined },
       confirm: undefined,
