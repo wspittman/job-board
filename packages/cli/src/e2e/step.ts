@@ -47,7 +47,7 @@ req.del = (path: string, opts: ReqOpts = {}): Req =>
 
 // #endregion
 
-// #region Results
+// #region Response
 
 interface Res {
   status: number;
@@ -65,7 +65,7 @@ res.accepted = res(202, "Accepted");
 
 // #endregion
 
-/// #region Step
+// #region Step
 
 /**
  * Defines a single step in an end-to-end flow.
@@ -104,15 +104,14 @@ export const allAddAts = atsTypes.map((ats) =>
   ),
 );
 
-export const allDelAts = atsTypes.flatMap(
-  (ats) =>
-    getIds(ats).map((id) =>
-      formStep(
-        `Delete ${ats} company ${id}`,
-        req.del("company", { body: { ats, id } }),
-        res.ok(),
-      ),
-    ) ?? [],
+export const allDelAts = atsTypes.flatMap((ats) =>
+  getIds(ats).map((id) =>
+    formStep(
+      `Delete ${ats} company ${id}`,
+      req.del("company", { body: { ats, id } }),
+      res.ok(),
+    ),
+  ),
 );
 const lastDelStep = allDelAts.at(-1);
 if (lastDelStep) {
