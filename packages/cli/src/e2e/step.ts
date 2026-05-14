@@ -3,14 +3,11 @@ import { atsTypes, type ATS } from "../portal/atsConsts.ts";
 import type { HttpMethod } from "../types.ts";
 
 const { E2E_COMPANIES } = config;
-const getIds = (ats: ATS): string[] => {
-  const ids = E2E_COMPANIES[ats] ?? [];
-  if (!ids.length) {
-    throw new Error(`Config E2E_COMPANIES: no IDs found for ATS "${ats}"`);
-  }
-  return ids;
-};
-const firstId = (ats: ATS): string => getIds(ats)[0]!;
+const configErrMsg = (ats: ATS) =>
+  `Config E2E_COMPANIES: no IDs found for ATS "${ats}"`;
+const getIds = (ats: ATS): string[] =>
+  E2E_COMPANIES[ats] ?? [configErrMsg(ats)];
+const firstId = (ats: ATS): string => getIds(ats)[0] ?? configErrMsg(ats);
 
 export const ats = "greenhouse" as const;
 export const companyIds = getIds(ats);
