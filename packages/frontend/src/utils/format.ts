@@ -18,8 +18,9 @@ class Format {
   #currency = new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 1,
     notation: "compact",
+    roundingMode: "trunc",
   });
   #collator = new Intl.Collator(undefined, { sensitivity: "base" });
 
