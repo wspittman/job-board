@@ -21,6 +21,7 @@ class Format {
     maximumFractionDigits: 0,
     notation: "compact",
   });
+  #collator = new Intl.Collator(undefined, { sensitivity: "base" });
 
   /**
    * Formats a number using compact notation.
@@ -82,6 +83,19 @@ class Format {
    */
   currency(value: number): string {
     return this.#currency.format(value);
+  }
+
+  /**
+   * Sorts an array of [value, label] entries into an array of { value, label } objects sorted by label.
+   * @param entries The array of [value, label] entries to sort and format.
+   * @returns An array of { value, label } objects sorted by label.
+   */
+  sortedOptions(
+    entries: [string, string][],
+  ): { value: string; label: string }[] {
+    return entries
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => this.#collator.compare(a.label, b.label));
   }
 }
 

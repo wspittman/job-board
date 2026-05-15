@@ -1,3 +1,5 @@
+import { fmt } from "../utils/format";
+
 // #region Helper Functions
 
 type Enum<T extends string> = Record<T, string>;
@@ -14,9 +16,7 @@ function asLabel<T extends string>(obj: Enum<T>, value: unknown): string {
 }
 
 function toOptions<T extends string>(obj: Enum<T>) {
-  return Object.entries<string>(obj)
-    .map(([value, label]) => ({ value, label }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  return fmt.sortedOptions(Object.entries(obj));
 }
 
 // #endregion

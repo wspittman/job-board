@@ -84,4 +84,24 @@ suite("fmt", () => {
   test("currency: formats zero as a string", () => {
     expect(fmt.currency(0)).toBeTypeOf("string");
   });
+
+  test.for([
+    [[], []],
+    [["Label"], ["Label"]],
+    [
+      ["Zebra", "Apple", "Mango"],
+      ["Apple", "Mango", "Zebra"],
+    ],
+    [
+      ["banana", "Apple"],
+      ["Apple", "banana"],
+    ],
+  ] as [string[], string[]][])(
+    "sortedOptions: %o → %o",
+    ([input, expected]) => {
+      const entries = input.map((x) => [`id-${x}`, x] as [string, string]);
+      const options = expected.map((x) => ({ value: `id-${x}`, label: x }));
+      expect(fmt.sortedOptions(entries)).toEqual(options);
+    },
+  );
 });
