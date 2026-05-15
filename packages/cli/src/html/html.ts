@@ -96,15 +96,15 @@ export async function runBlog(
     throw new CommandError("Invalid or missing frontmatter in markdown file");
   }
 
-  const headerHtml = markdownToHtml(`# ${blog.title}\n\n${blog.date}`);
+  const headerHtml = `<h1>${blog.title}</h1>\n<p>${blog.date}</p>`;
   const sectionHtml = markdownToHtml(blog.content);
 
   const output = template
-    .replace("{{TITLE}}", blog.title)
-    .replace("{{DESCRIPTION}}", blog.description)
-    .replaceAll("{{SLUG}}", slug)
-    .replace("{{HEADER_HTML}}", headerHtml)
-    .replace("{{SECTION_HTML}}", sectionHtml);
+    .replace("{{TITLE}}", () => blog.title)
+    .replace("{{DESCRIPTION}}", () => blog.description)
+    .replaceAll("{{SLUG}}", () => slug)
+    .replace("{{HEADER_HTML}}", () => headerHtml)
+    .replace("{{SECTION_HTML}}", () => sectionHtml);
 
   await writeText(output, { ...blogPlace, file: slug }, "html");
   await updateBlogIndex(slug, blog, overrides?.blogIndex);
