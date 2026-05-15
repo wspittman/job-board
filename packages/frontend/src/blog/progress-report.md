@@ -1,10 +1,17 @@
 ---
 title: Progress Report
 description: A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
-date: May 7, 2026
+date: May 14, 2026
 ---
 
 A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
+
+## May 14, 2026
+
+- Added 80+ companies to the board now that we have Ashby support.
+- Removed the special "Recent" chip for jobs that were posted between 7 and 30 days ago. Now that we use a 90-day expiry time, 30 days isn't "recent".
+  - Also rename the "New" chip to "Past Week" to make it clearer what it means.
+- Minor number/date/currency formatting changes as we improve how we work with locales.
 
 ## May 7, 2026
 
