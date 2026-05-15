@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, expect, suite, test, vi } from "vitest";
 import { fmt } from "./format";
 
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const NOW = new Date("2026-05-14T12:00:00Z").getTime();
 
 suite("fmt", () => {
@@ -42,27 +41,23 @@ suite("fmt", () => {
     },
   );
 
-  test("daysAgo: returns 'Just Posted' for the same millisecond", () => {
-    expect(fmt.daysAgo(NOW)).toBe("Just Posted");
-  });
-
   test("daysAgo: returns 'Just Posted' when less than one full day has passed", () => {
-    expect(fmt.daysAgo(NOW - MS_PER_DAY + 1)).toBe("Just Posted");
+    expect(fmt.daysAgo(0)).toBe("Just Posted");
   });
 
   test.for([1, 3, 6])("daysAgo: %d days ago → 'Past Week'", (days) => {
-    expect(fmt.daysAgo(NOW - days * MS_PER_DAY)).toBe("Past Week");
+    expect(fmt.daysAgo(days)).toBe("Past Week");
   });
 
   test("daysAgo: 7+ days ago returns a relative string beyond 'Past Week'", () => {
-    const result = fmt.daysAgo(NOW - 7 * MS_PER_DAY);
+    const result = fmt.daysAgo(7);
     expect(result).toBeTypeOf("string");
     expect(result).not.toBe("Just Posted");
     expect(result).not.toBe("Past Week");
   });
 
   test("daysAgo: 30 days ago returns a relative string", () => {
-    const result = fmt.daysAgo(NOW - 30 * MS_PER_DAY);
+    const result = fmt.daysAgo(30);
     expect(result).toBeTypeOf("string");
     expect(result).not.toBe("Just Posted");
     expect(result).not.toBe("Past Week");

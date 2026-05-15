@@ -1,5 +1,3 @@
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
-
 /**
  * A utility class for formatting numbers, percentages, dates, and currency values.
  */
@@ -64,15 +62,11 @@ class Format {
   }
 
   /**
-   * Formats a timestamp into a relative time string indicating how long ago it was from the current time.
-   * - If the timestamp is from the same day, it returns "Just Posted".
-   * - If the timestamp is within the past week, it returns "Past Week".
-   * - For older timestamps, it returns a relative time string (e.g., "2 weeks ago").
-   * @param value The timestamp to format, in milliseconds since the Unix epoch.
+   * Formats a timestamp into a relative time string (e.g., "Just Posted", "Past Week", "3 days ago").
+   * @param days The number of days ago the timestamp is from the current time.
    * @returns The formatted relative time string.
    */
-  daysAgo(value: number): string {
-    const days = Math.floor((Date.now() - value) / MS_PER_DAY);
+  daysAgo(days: number): string {
     if (days === 0) return "Just Posted";
     if (days < 7) return "Past Week";
     return this.#relativeTime.format(-days, "day");

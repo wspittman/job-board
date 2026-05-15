@@ -11,6 +11,8 @@ import type { JobModelApi } from "./apiTypes";
 import type { FilterModel } from "./filterModel";
 import { metadataModel } from "./metadataModel";
 
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
 export class JobModel {
   static async search(filters: FilterModel): Promise<JobModel[]> {
     if (filters.isEmpty()) return [];
@@ -60,10 +62,12 @@ export class JobModel {
   }
 
   getDisplayFacets(useShort = false): string[] {
-    const { workTimeBasis, jobFamily, minSalary } = this.#job;
+    const { workTimeBasis, jobFamily, minSalary, postTS } = this.#job;
 
     const loc = this.#getLocationFacet(useShort);
-    const post = this.#getPostFacet(useShort);
+
+    const days = Math.floor((Date.now() - postTS) / MS_PER_DAY);
+    const post = useShort ? fmt.daysAgo(days) : fmt.date(postTS);
 
     const p1: string[] = [];
     const p2: string[] = [];
@@ -79,7 +83,7 @@ export class JobModel {
       (condition ? pIf : pElse)?.push(value);
     };
 
-    pushIf(useShort && !post.endsWith("days ago"), p1, p3, post);
+    pushIf(useShort && days < 7, p1, p3, post);
     pushIf(loc === "Remote", p1, p2, loc);
     pushIf(minSalary != null, p1, p3, this.#getCompString(useShort));
     pushIf(true, p2, undefined, this.#getExperienceFacet(useShort));
@@ -109,12 +113,6 @@ export class JobModel {
     return useShort
       ? `${experience} yrs exp`
       : `${experience} years experience required`;
-  }
-
-  #getPostFacet(useShort: boolean): string {
-    const { postTS } = this.#job;
-
-    return useShort ? fmt.daysAgo(postTS) : fmt.date(postTS);
   }
 
   #getStageFacet(useShort: boolean): string | undefined {
