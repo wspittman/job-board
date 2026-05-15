@@ -1,3 +1,4 @@
+import { fmt } from "../utils/format";
 import {
   toCompanyStage,
   toCompanyStageLabel,
@@ -125,7 +126,7 @@ export class FilterModel {
         case "maxExperience":
           return [key, `Experience: ${Number(value).toLocaleString()} years`];
         case "minSalary":
-          return [key, `Pay Rate: ${Number(value).toLocaleString()}`];
+          return [key, `Pay Rate: ${fmt.currency(Number(value))}`];
         default:
           return [key, `${key}: ${value}`];
       }

@@ -5,6 +5,7 @@ import {
   type XrayComponent,
 } from "../utils/testUtils";
 // Import to trigger custom element registration
+import { fmt } from "../utils/format";
 import "./stats";
 
 type Xray = XrayComponent;
@@ -24,15 +25,11 @@ suite("Stats", () => {
   test("renders count strings after onLoad", async () => {
     mockMetadata();
     await element.onLoad();
-    expect(element.getEl("job-count")?.textContent).toBe(
-      (1000).toLocaleString(undefined, { notation: "compact" }),
-    );
-    expect(element.getEl("company-count")?.textContent).toBe(
-      (3).toLocaleString(undefined, { notation: "compact" }),
-    );
+    expect(element.getEl("job-count")?.textContent).toBe(fmt.number(1000));
+    expect(element.getEl("company-count")?.textContent).toBe(fmt.number(3));
     expect(element.getEl("remote-pct")?.textContent).toBe("40%");
     expect(element.getEl("job-recent-count")?.textContent).toBe(
-      (100).toLocaleString(undefined, { notation: "compact" }),
+      fmt.number(100),
     );
   });
 

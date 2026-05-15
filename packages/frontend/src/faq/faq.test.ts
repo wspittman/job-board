@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, expect, suite, test, vi } from "vitest";
+import { fmt } from "../utils/format";
 import { mockMetadata, mockMetadataErr } from "../utils/testUtils";
 
 suite("faq", () => {
@@ -14,12 +15,7 @@ suite("faq", () => {
 
   test("sets last-refreshed text and shows .faq-note elements on success", async () => {
     mockMetadata();
-    const expectedString = `Last refreshed: ${new Date(
-      1777934360621,
-    ).toLocaleString(undefined, {
-      dateStyle: "full",
-      timeStyle: "short",
-    })}`;
+    const expectedString = `Last refreshed: ${fmt.dateTime(1777934360621)}`;
     await import("./faq");
 
     const els = document.querySelectorAll<HTMLElement>(".faq-note");
