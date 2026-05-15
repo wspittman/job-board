@@ -122,7 +122,7 @@ function createJobApi(overrides: Partial<JobModelApi> = {}): JobModelApi {
     title: "Software Engineer",
     company: "Acme",
     description: "A great job",
-    postTS: Date.now() - 1000 * 60 * 60 * 24 * 10, // 10 days ago
+    postTS: Date.now() - 1000 * 60 * 60 * 24 * 5, // 5 days ago
     applyUrl: "/jobs/job-1/apply?ats=gh",
     isRemote: false,
     location: "Seattle, WA",

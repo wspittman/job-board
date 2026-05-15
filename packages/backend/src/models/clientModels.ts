@@ -33,7 +33,7 @@ export interface Filters {
 export interface RefreshJobsOptions {
   // To narrow the refresh
   ats?: CompanyKey["ats"];
-  companyId?: CompanyKey["id"];
+  companyIds?: CompanyKey["id"][];
   // To do a full replace of existing jobs, matching the refresh, whose refresh timestamp is older than this
   replaceJobsOlderThan?: number;
 }

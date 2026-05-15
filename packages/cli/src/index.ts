@@ -39,8 +39,6 @@ export async function runCommand(
   args: string[],
 ): Promise<void> {
   try {
-    cmd.prerequisite?.();
-
     if (cmd.subCommands) {
       const [subCommand, ...subArgs] = args;
       const subCmd = cmd.subCommands[subCommand!];

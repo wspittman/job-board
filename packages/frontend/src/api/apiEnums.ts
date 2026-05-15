@@ -19,21 +19,6 @@ function toOptions<T extends string>(obj: Enum<T>) {
     .sort((a, b) => a.label.localeCompare(b.label));
 }
 
-const currencyFormatters: Map<Currency, Intl.NumberFormat> = new Map();
-const getCurrencyFormatter = (currency: Currency) => {
-  let formatter = currencyFormatters.get(currency);
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 0,
-      notation: "compact",
-    });
-    currencyFormatters.set(currency, formatter);
-  }
-  return formatter;
-};
-
 // #endregion
 
 export type Presence = "onsite" | "remote" | "hybrid";
@@ -105,42 +90,3 @@ export const toPayCadence = (value: unknown): PayCadence | undefined =>
   asEnum(payCadence, value);
 export const toPayCadenceLabel = (value: unknown): string =>
   asLabel(payCadence, value);
-
-/**
- * The set of "known" codes present in the data (12/15/25).
- * @deprecated We're moving away from supporting multiple currencies, so this enum and related functions will be removed in a future release.
- */
-export type Currency =
-  | "USD"
-  | "CAD"
-  | "EUR"
-  | "GBP"
-  | "AUD"
-  | "ARS"
-  | "AED"
-  | "BRL"
-  | "CRC"
-  | "INR"
-  | "JPY"
-  | "KRW"
-  | "MXN"
-  | "PHP"
-  | "PLN"
-  | "SEK"
-  | "SGD"
-  | "TWD";
-export function toCurrencyFormat(
-  n: number,
-  currency?: Currency,
-  prefix: string = "",
-): string {
-  try {
-    if (currency) {
-      const formatter = getCurrencyFormatter(currency);
-      return formatter.format(n);
-    }
-  } catch {
-    /* ignore */
-  }
-  return prefix + n.toLocaleString();
-}

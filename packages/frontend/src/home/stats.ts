@@ -31,15 +31,6 @@ class Stats extends ComponentBase {
         this.setText(`job-family-${i + 1}-label`, label);
       });
 
-      // TRANSITION: We may not have new metadata available.
-      // When this happens, only show existing overall counts.
-      // Remove after transition is complete, 5/4/26
-      if (!topJobFamilies.length) {
-        this.getEl("job-recent-row")?.style.setProperty("display", "none");
-        this.getEl("remote-card")?.style.setProperty("display", "none");
-        this.getEl("job-families-card")?.style.setProperty("display", "none");
-      }
-
       this.style.display = "block";
     } catch {
       // ignore

@@ -1,8 +1,8 @@
+import { fmt } from "../utils/format";
 import { getStorageIds } from "../utils/storage";
 import { api } from "./api";
 import {
   toCompanyStageLabel,
-  toCurrencyFormat,
   toJobFamilyLabel,
   toPayCadenceLabel,
   toWorkTimeBasisLabel,
@@ -62,10 +62,12 @@ export class JobModel {
   }
 
   getDisplayFacets(useShort = false): string[] {
-    const { workTimeBasis, jobFamily, minSalary } = this.#job;
+    const { workTimeBasis, jobFamily, minSalary, postTS } = this.#job;
 
     const loc = this.#getLocationFacet(useShort);
-    const post = this.#getPostFacet(useShort);
+
+    const days = Math.floor((Date.now() - postTS) / MS_PER_DAY);
+    const post = useShort ? fmt.daysAgo(days) : fmt.date(postTS);
 
     const p1: string[] = [];
     const p2: string[] = [];
@@ -81,7 +83,7 @@ export class JobModel {
       (condition ? pIf : pElse)?.push(value);
     };
 
-    pushIf(useShort && !post.endsWith("days ago"), p1, p3, post);
+    pushIf(useShort && days < 7, p1, p3, post);
     pushIf(loc === "Remote", p1, p2, loc);
     pushIf(minSalary != null, p1, p3, this.#getCompString(useShort));
     pushIf(true, p2, undefined, this.#getExperienceFacet(useShort));
@@ -113,22 +115,6 @@ export class JobModel {
       : `${experience} years experience required`;
   }
 
-  #getPostFacet(useShort: boolean): string {
-    const { postTS } = this.#job;
-
-    return useShort
-      ? this.#tsToDaysString(postTS)
-      : new Date(postTS).toLocaleDateString();
-  }
-
-  #tsToDaysString(ts: number): string {
-    const days = Math.floor((Date.now() - ts) / MS_PER_DAY);
-    if (days === 0) return "Just Posted";
-    if (days < 7) return "New";
-    if (days < 30) return "Recent";
-    return `${days} days ago`;
-  }
-
   #getStageFacet(useShort: boolean): string | undefined {
     const { companyStage } = this.#job;
 
@@ -137,13 +123,12 @@ export class JobModel {
   }
 
   #getCompString(useShort: boolean): string | undefined {
-    const { minSalary, payCadence, currency } = this.#job;
+    const { minSalary, payCadence } = this.#job;
     const cadence = toPayCadenceLabel(payCadence) || undefined;
 
     if (minSalary != null) {
-      const noCurrencyPrefix = cadence ? "" : "Pay: ";
-      const amount = toCurrencyFormat(minSalary, currency, noCurrencyPrefix);
-      return cadence ? `${amount} / ${cadence}` : `${amount}`;
+      const amount = fmt.currency(minSalary);
+      return cadence ? `${amount} / ${cadence}` : `Pay: ${amount}`;
     }
 
     if (useShort && (!payCadence || payCadence === "salary")) return undefined;

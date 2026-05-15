@@ -1,12 +1,10 @@
 import { logger } from "dry-utils-logger";
 import assert from "node:assert/strict";
-import { config } from "../config.ts";
 import { CommandError, type Command } from "../types.ts";
 import { apiCall } from "../utils/http.ts";
 import { flows } from "./flows.ts";
 import type { Step } from "./step.ts";
 
-const { GREENHOUSE_IDS, LEVER_IDS } = config;
 const FLOW_NAMES = Object.keys(flows);
 
 export const e2e: Command = {
@@ -15,7 +13,6 @@ export const e2e: Command = {
     "Run the e2e tests against a running local server",
     `FLOW: ${FLOW_NAMES.join("|")}`,
   ],
-  prerequisite,
   run: async ([flow]: string[]): Promise<void> => {
     if (!flow || !FLOW_NAMES.includes(flow)) {
       throw new CommandError("Invalid argument: FLOW");
@@ -24,11 +21,6 @@ export const e2e: Command = {
     await runFlow(flow);
   },
 };
-
-function prerequisite(): void {
-  assert.ok(GREENHOUSE_IDS.length > 2, "ENV: GREENHOUSE_IDS <= 2");
-  assert.ok(LEVER_IDS.length > 2, "ENV: LEVER_IDS <= 2");
-}
 
 /**
  * Execute the named flow against the configured backend API.
@@ -49,7 +41,11 @@ async function runFlow(name: string): Promise<void> {
     }
   } catch (err) {
     if (err instanceof assert.AssertionError) {
-      logger.error("Assertion Error", err.message);
+      logger.error("Assertion Error", {
+        message: err.message.split("\n")[0],
+        expected: err.expected,
+        actual: err.actual,
+      });
       return;
     }
     throw err;
@@ -61,8 +57,9 @@ async function runFlow(name: string): Promise<void> {
 async function runStep(
   n: number,
   total: number,
-  { name, method, path, expectStatus, expectBody, asyncWait, ...opts }: Step,
+  { name, req, res, confirm }: Step,
 ): Promise<void> {
+  const { method, path, ...opts } = req;
   logger.info(`[${n}/${total}] ${method} ${path}: ${name}`);
 
   const { status, value } = await apiCall(method, path, {
@@ -73,17 +70,17 @@ async function runStep(
 
   logger.info(`[${status}]`, value);
 
-  assert.equal(status, expectStatus, `FAIL: Step ${n} Wrong Status`);
-  if (expectBody != undefined) {
+  assert.equal(status, res.status, `FAIL: Step ${n} Wrong Status`);
+  if (res.value != undefined) {
     assert.partialDeepStrictEqual(
       value,
-      expectBody,
+      res.value,
       `FAIL: Step ${n} Wrong Body`,
     );
   }
 
-  if (asyncWait) {
-    logger.info(`${asyncWait}, then press Enter to continue...`);
+  if (confirm) {
+    logger.info(`${confirm}, then press Enter to continue...`);
     await new Promise<void>((resolve) => {
       // When you attach a data listener to process.stdin, it switches the stream into "flowing" mode.
       // To allow the script to exit, you need to explicitly pause() the stdin stream after receiving the data.
