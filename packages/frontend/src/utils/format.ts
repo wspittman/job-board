@@ -2,7 +2,10 @@
  * A utility class for formatting numbers, percentages, dates, and currency values.
  */
 class Format {
-  #number = new Intl.NumberFormat(undefined, { notation: "compact" });
+  #number = new Intl.NumberFormat(undefined, {
+    notation: "compact",
+    roundingMode: "trunc",
+  });
   #percent = new Intl.NumberFormat(undefined, { style: "percent" });
   #dateTime = new Intl.DateTimeFormat(undefined, {
     dateStyle: "full",
