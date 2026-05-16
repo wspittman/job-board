@@ -8,7 +8,7 @@ interactivity — without running any ad-hoc database queries.
 
 ## Current Phase
 
-Phase 1 — complete
+Phase 2 — complete
 
 ## Phases
 
@@ -55,7 +55,7 @@ Files to modify:
 - `packages/backend/src/db/db.ts` — extend `aggregateMetadata()` to compute new fields
 - `packages/backend/src/controllers/metadata.ts` — ensure new fields flow through to response
 
-- **Status:** pending
+- **Status:** complete
 
 ---
 

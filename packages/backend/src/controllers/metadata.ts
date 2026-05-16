@@ -88,6 +88,10 @@ async function getClientMetadata(): Promise<ClientMetadata> {
     recentJobCount = 0,
     presenceCounts = {},
     jobFamilyCounts = {},
+    workTimeCounts = {},
+    stageCounts = {},
+    topLocations = [],
+    salaryStats = [],
     _ts: jobTS = 0,
   } = jobMetadata ?? {};
 
@@ -104,6 +108,10 @@ async function getClientMetadata(): Promise<ClientMetadata> {
     recentJobCount,
     presenceCounts,
     jobFamilyCounts,
+    workTimeCounts,
+    stageCounts,
+    topLocations,
+    salaryStats,
   };
 
   return metadata;

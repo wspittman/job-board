@@ -5,7 +5,7 @@ import type {
   Presence,
   WorkTimeBasis,
 } from "./enums.ts";
-import type { CompanyKey } from "./models.ts";
+import type { CompanyKey, SalaryStat } from "./models.ts";
 
 // #region Input Models
 
@@ -86,6 +86,10 @@ export interface ClientMetadata {
   recentJobCount: number;
   presenceCounts: Partial<Record<Presence, number>>;
   jobFamilyCounts: Partial<Record<JobFamily, number>>;
+  workTimeCounts: Partial<Record<WorkTimeBasis, number>>;
+  stageCounts: Partial<Record<CompanyStage, number>>;
+  topLocations: { regionCode: string; count: number }[];
+  salaryStats: SalaryStat[];
 }
 
 // #endregion

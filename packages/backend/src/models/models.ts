@@ -1,6 +1,11 @@
 import { z } from "dry-utils-openai";
 import type { DeepPartialNullToUndef } from "../types/types.ts";
-import type { JobFamily, Presence } from "./enums.ts";
+import type {
+  CompanyStage,
+  JobFamily,
+  Presence,
+  WorkTimeBasis,
+} from "./enums.ts";
 import type {
   ExtractionCompany,
   ExtractionJob,
@@ -80,6 +85,16 @@ export interface IgnoreJob {
   reason: string;
 }
 
+/** Annual salary percentile stats for a job family bucket (or all jobs when jobFamily is undefined). */
+export interface SalaryStat {
+  /** Undefined means the overall bucket across all job families. */
+  jobFamily?: JobFamily;
+  count: number;
+  p25: number;
+  median: number;
+  p75: number;
+}
+
 /**
  * Aggregated metadata for other containers. Cached in the backend service.
  * - id: The type of metadata
@@ -99,6 +114,10 @@ export interface Metadata {
   recentJobCount?: number;
   presenceCounts?: Partial<Record<Presence, number>>;
   jobFamilyCounts?: Partial<Record<JobFamily, number>>;
+  workTimeCounts?: Partial<Record<WorkTimeBasis, number>>;
+  stageCounts?: Partial<Record<CompanyStage, number>>;
+  topLocations?: { regionCode: string; count: number }[];
+  salaryStats?: SalaryStat[];
 }
 
 /**

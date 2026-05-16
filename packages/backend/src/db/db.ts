@@ -6,7 +6,12 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
-import { JobFamily, Presence } from "../models/enums.ts";
+import {
+  CompanyStage,
+  JobFamily,
+  Presence,
+  WorkTimeBasis,
+} from "../models/enums.ts";
 import type {
   Company,
   CompanyKey,
@@ -16,6 +21,7 @@ import type {
   JobKey,
   Location,
   Metadata,
+  SalaryStat,
 } from "../models/models.ts";
 import { JOB_EXPIRY_SEC, MS_PER_DAY } from "../utils/constants.ts";
 import {
@@ -125,29 +131,58 @@ class JobContainer extends Container<Job> {
     const weekMs = Date.now() - 7 * MS_PER_DAY;
     const recent = new Query("COUNT", ["postTS", ">=", weekMs]);
 
-    const [jobCount, recentCounts, presenceRows, jobFamilyRows] =
-      await Promise.all([
-        this.getCount(),
-        this.query<number>(recent),
-        this.getCountBy("presence"),
-        this.getCountBy("jobFamily"),
-      ]);
+    type SalaryRow = {
+      jobFamily?: string;
+      salaryRange?: { cadence?: string; min?: number; max?: number };
+    };
 
-    const presenceCounts: Partial<Record<Presence, number>> = {};
-    presenceRows.forEach(({ name, count }) => {
-      const parsed = Presence.safeParse(name);
-      if (parsed.success) {
-        presenceCounts[parsed.data] = count;
-      }
-    });
+    // GROUP BY in the DB; mock requires a custom mockDBProjects handler (see DB.connect)
+    const locationQuery = {
+      query:
+        "SELECT c.primaryLocation.regionCode AS regionCode, COUNT(1) AS count" +
+        " FROM c" +
+        " WHERE (IS_DEFINED(c.primaryLocation.regionCode)) AND (c.primaryLocation.countryCode = @countryCode)" +
+        " GROUP BY c.primaryLocation.regionCode",
+      parameters: [{ name: "@countryCode", value: "US" }],
+    };
 
-    const jobFamilyCounts: Partial<Record<JobFamily, number>> = {};
-    jobFamilyRows.forEach(({ name, count }) => {
-      const parsed = JobFamily.safeParse(name);
-      if (parsed.success) {
-        jobFamilyCounts[parsed.data] = count;
-      }
-    });
+    // WHERE pushdown; mock built-in handles nested-path parameterized conditions
+    const salaryQuery = {
+      query:
+        "SELECT c.jobFamily, c.salaryRange FROM c WHERE (c.salaryRange.cadence = @cadence)",
+      parameters: [{ name: "@cadence", value: "salary" }],
+    };
+
+    const [
+      jobCount,
+      recentCounts,
+      presenceRows,
+      jobFamilyRows,
+      workTimeRows,
+      stageRows,
+      locationRows,
+      salaryRaw,
+    ] = await Promise.all([
+      this.getCount(),
+      this.query<number>(recent),
+      this.getCountBy("presence"),
+      this.getCountBy("jobFamily"),
+      this.getCountBy("workTimeBasis"),
+      this.getCountBy("companyStage"),
+      this.query<{ regionCode: string; count: number }>(locationQuery),
+      this.query<SalaryRow>(salaryQuery),
+    ]);
+
+    const presenceCounts = toCountRecord(presenceRows, Presence);
+    const jobFamilyCounts = toCountRecord(jobFamilyRows, JobFamily);
+    const workTimeCounts = toCountRecord(workTimeRows, WorkTimeBasis);
+    const stageCounts = toCountRecord(stageRows, CompanyStage);
+
+    const topLocations = locationRows
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    const salaryStats = computeSalaryStats(salaryRaw);
 
     return {
       id: "job",
@@ -155,6 +190,10 @@ class JobContainer extends Container<Job> {
       recentJobCount: recentCounts[0] ?? 0,
       presenceCounts,
       jobFamilyCounts,
+      workTimeCounts,
+      stageCounts,
+      topLocations,
+      salaryStats,
     };
   }
 }
@@ -236,6 +275,30 @@ class DB {
         mockDataJson: config.DATABASE_MOCK_DATA_JSON,
         mockDataPath: config.DATABASE_MOCK_DATA_PATH,
       }),
+      mockDBProjects: {
+        job: [
+          {
+            // Handles the location GROUP BY query in aggregateMetadata()
+            matcher:
+              /^c\.primaryLocation\.regionCode\s+AS\s+regionCode\s*,\s*COUNT\(1\)\s+AS\s+count$/i,
+            fn: ({ items }) => {
+              const counts = new Map<string, number>();
+              for (const item of items) {
+                const rc = (
+                  item["primaryLocation"] as { regionCode?: string } | undefined
+                )?.regionCode;
+                if (rc) counts.set(rc, (counts.get(rc) ?? 0) + 1);
+              }
+              return Array.from(counts.entries()).map(
+                ([regionCode, count]) => ({
+                  regionCode,
+                  count,
+                }),
+              );
+            },
+          },
+        ],
+      },
       containers: [
         {
           name: "company",
@@ -286,3 +349,102 @@ class DB {
 
 // Export the singleton instance
 export const db = new DB();
+
+// #region Aggregation helpers (exported for unit testing)
+
+function toCountRecord<T extends string>(
+  rows: { name: unknown; count: number }[],
+  schema: {
+    safeParse: (
+      val: unknown,
+    ) => { success: true; data: T } | { success: false };
+  },
+): Partial<Record<T, number>> {
+  const result: Partial<Record<T, number>> = {};
+  rows.forEach(({ name, count }) => {
+    const parsed = schema.safeParse(name);
+    if (parsed.success) {
+      result[parsed.data] = count;
+    }
+  });
+  return result;
+}
+
+/**
+ * Computes annual salary percentile stats from raw job rows.
+ * Emits one overall bucket (jobFamily undefined) plus one bucket per job family.
+ * Buckets with fewer than 10 data points are omitted.
+ * @param rows - Raw job rows containing jobFamily and salaryRange fields.
+ * @returns Salary stats buckets sorted by bucket type (overall first, then by family).
+ */
+export function computeSalaryStats(
+  rows: {
+    jobFamily?: string;
+    salaryRange?: { cadence?: string; min?: number; max?: number };
+  }[],
+): SalaryStat[] {
+  const MIN_SAMPLES = 10;
+  const groups = new Map<string | undefined, number[]>();
+
+  for (const { jobFamily, salaryRange: sr } of rows) {
+    if (sr?.cadence !== "salary") continue;
+    const salMin = sr.min ?? 0;
+    const salMax = sr.max ?? 0;
+    if (salMin <= 0 && salMax <= 0) continue;
+
+    const midpoint =
+      salMin > 0 && salMax > 0
+        ? (salMin + salMax) / 2
+        : salMin > 0
+          ? salMin
+          : salMax;
+
+    const overall = groups.get(undefined) ?? [];
+    overall.push(midpoint);
+    groups.set(undefined, overall);
+
+    if (jobFamily) {
+      const family = groups.get(jobFamily) ?? [];
+      family.push(midpoint);
+      groups.set(jobFamily, family);
+    }
+  }
+
+  const stats: SalaryStat[] = [];
+  for (const [key, midpoints] of groups) {
+    if (midpoints.length < MIN_SAMPLES) continue;
+    const sorted = [...midpoints].sort((a, b) => a - b);
+
+    let jobFamily: JobFamily | undefined;
+    if (key !== undefined) {
+      const parsed = JobFamily.safeParse(key);
+      if (!parsed.success) continue;
+      jobFamily = parsed.data;
+    }
+
+    stats.push({
+      jobFamily,
+      count: sorted.length,
+      p25: calcPercentile(sorted, 25),
+      median: calcPercentile(sorted, 50),
+      p75: calcPercentile(sorted, 75),
+    });
+  }
+  return stats;
+}
+
+/**
+ * Interpolated percentile of a pre-sorted array.
+ * @param sorted - Numbers sorted ascending.
+ * @param p - Percentile in the range [0, 100].
+ * @returns The interpolated value at the given percentile, rounded to the nearest integer.
+ */
+export function calcPercentile(sorted: number[], p: number): number {
+  if (sorted.length === 1) return sorted[0]!;
+  const idx = (p / 100) * (sorted.length - 1);
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  return Math.round(sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (idx - lo));
+}
+
+// #endregion
