@@ -7,7 +7,11 @@ type Enum<T extends string> = Record<T, string>;
 function asEnum<T extends string>(obj: Enum<T>, value: unknown): T | undefined {
   if (typeof value !== "string") return undefined;
   const val = value.trim() as T;
-  return obj[val] ? val : undefined;
+  if (obj[val]) return val;
+  const lower = val.toLowerCase() as T;
+  if (obj[lower]) return lower;
+  const upper = val.toUpperCase() as T;
+  return obj[upper] ? upper : undefined;
 }
 
 function asLabel<T extends string>(obj: Enum<T>, value: unknown): string {

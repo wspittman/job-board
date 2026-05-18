@@ -27,6 +27,10 @@ import { logProperty } from "../utils/telemetry.ts";
 // Z Helpers
 type Z<T> = z.ZodType<T>;
 const soft = <T>(zt: Z<T>) => zt.optional().catch(undefined);
+const strPreProcess = <T>(zt: Z<T>, fn: (val: string) => string) =>
+  z.preprocess((val) => (typeof val === "string" ? fn(val) : val), zt);
+const lower = <T>(zt: Z<T>) => strPreProcess(zt, (s) => s.toLowerCase());
+const upper = <T>(zt: Z<T>) => strPreProcess(zt, (s) => s.toUpperCase());
 const coerceString = <T>(zt: Z<T>) => soft(z.preprocess(String, zt));
 const coerceInt = <T>(zt: Z<T>) =>
   soft(
@@ -55,10 +59,10 @@ const FiltersSchema = z.object({
   companyId: coerceString(IdSchema),
   jobId: coerceString(IdSchema),
   isRemote: coerceString(z.stringbool()),
-  workTimeBasis: soft(WorkTimeBasis),
-  jobFamily: soft(JobFamily),
-  companyStage: soft(CompanyStage),
-  payCadence: soft(PayCadence),
+  workTimeBasis: soft(lower(WorkTimeBasis)),
+  jobFamily: soft(lower(JobFamily)),
+  companyStage: soft(lower(CompanyStage)),
+  payCadence: soft(lower(PayCadence)),
   currency: soft(
     z
       .string()
@@ -68,7 +72,7 @@ const FiltersSchema = z.object({
   ),
   title: soft(SearchSchema),
   city: soft(SearchSchema),
-  state: soft(UsState),
+  state: soft(upper(UsState)),
   daysSince: coerceInt(z.int().positive().max(JOB_EXPIRY_DAYS)),
   maxExperience: coerceInt(z.int().nonnegative().max(100)),
   minSalary: coerceInt(z.int().positive().max(10_000_000)),
