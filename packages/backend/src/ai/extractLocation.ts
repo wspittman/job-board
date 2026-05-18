@@ -31,12 +31,8 @@ export async function extractLocation(
     getLLMOptions("extractLocation"),
   );
 
-  if (!content) return undefined;
+  if (!content?.city) return undefined;
 
-  const normalizedCity = content.city;
-  if (normalizedCity) {
-    setCachedLocation(city, normalizedCity);
-  }
-
-  return normalizedCity;
+  setCachedLocation(city, content.city);
+  return content.city;
 }
