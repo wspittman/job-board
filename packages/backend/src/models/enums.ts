@@ -307,15 +307,18 @@ export const UsState = z
     "MP",
     "PR",
     "VI",
+    "",
   ] as const)
   .describe(
     [
       "US state or territory code.",
       "Use the ISO 3166-2 subdivision code (uppercase) excluding country prefix.",
+      "If no state/territory is specified, return ''.",
       "Examples:",
       "'Seattle, WA' → 'WA';",
       "'NYC' → 'NY';",
-      "'talahasee, florda' → 'FL'.",
+      "'talahasee, florda' → 'FL';",
+      "'Remote work' → '';",
     ].join(" "),
   );
 export type UsState = z.infer<typeof UsState>;
