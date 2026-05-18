@@ -43,10 +43,10 @@ Phase 5
 
 ### Phase 5: Tests and pre-checkin
 
-- [ ] Update unit tests affected by `Filters` model change
-- [ ] Update/add tests for backward-compat location parsing heuristic
-- [ ] Run `npm run pre-checkin`
-- **Status:** not_started
+- [x] Update unit tests affected by `Filters` model change — all backend and frontend tests already updated in prior phases
+- [x] Add backward-compat test cases: bare city (`?location=Austin`), city takes precedence (`?city=Chicago&location=...`), state takes precedence (`?state=WA&location=...`)
+- [x] Run `npm run pre-checkin` — all lint, format, and tests pass
+- **Status:** complete
 
 ## Key Questions
 

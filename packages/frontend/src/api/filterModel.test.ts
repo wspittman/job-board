@@ -17,6 +17,12 @@ suite("FilterModel", () => {
       "?title=engineer&location=Seattle%2C+WA",
       { title: "engineer", city: "Seattle, WA" },
     ],
+    // Backward compat: bare city name
+    ["?location=Austin", { city: "Austin" }],
+    // Backward compat: city already present — location param is ignored
+    ["?city=Chicago&location=Seattle%2C+IL", { city: "Chicago" }],
+    // Backward compat: state already present — location param is ignored
+    ["?state=WA&location=Seattle", { state: "WA" }],
   ];
 
   test.for(fromLocationSearchStringCases)(
