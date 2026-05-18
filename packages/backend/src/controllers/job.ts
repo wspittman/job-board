@@ -150,6 +150,7 @@ async function readJobsByFilters({
 
   if (city || state) {
     const remoteMatch = "c.presence = 'remote'";
+    // Marked as US or worldwide remote
     const countryMatch = `c.locationSearchKey = '|||US|' OR c.locationSearchKey = '||||'`;
     const stateMatch = `c.locationSearchKey = CONCAT('||', @state, '|US|')`;
 

@@ -184,7 +184,7 @@ const InterpretQuerySchema = z.object({
  * @returns Validated query string
  */
 export function useInterpretQuery(input: unknown): string {
-  const { query } = stripObj(zParse(InterpretQuerySchema, input));
+  const { query } = zParse(InterpretQuerySchema, input);
   logProperty("Input_InterpretQuery", query);
   return query;
 }
