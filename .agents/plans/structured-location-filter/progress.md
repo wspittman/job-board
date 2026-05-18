@@ -33,7 +33,23 @@ Plan created. No implementation started. Ready to begin Phase 1.
 
 ---
 
-## Session 3 — 2026-05-18
+## Session 4 — 2026-05-18
+
+### Phase 3 — Completed ✓
+
+**Files changed:**
+
+- `packages/backend/src/controllers/job.ts`:
+  - Removed `EnhancedFilters` type and `Location` import
+  - `getJobs`: LLM city normalization only when `city` is provided; passes `city`/`state` directly to `readJobsByFilters` via spread
+  - `readJobsByFilters`: signature changed from `EnhancedFilters` to `Filters`; new location query logic:
+    - city + state → exact match on `locationSearchKey` + state-level and country-level remote broadening
+    - state only → `ENDSWITH` match + country-level remote broadening
+    - city only → `STARTSWITH` match + country-level remote broadening
+
+**Skipped:** `inputValidators.ts` backward compat for `?location=` — confirmed belongs in frontend (Phase 4); backend never receives old-style `?location=` params directly.
+
+**Test result:** All 241 tests pass (exit code 0)
 
 ### Phase 2 — Completed ✓
 

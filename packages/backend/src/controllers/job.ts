@@ -2,14 +2,10 @@ import { Query } from "dry-utils-cosmosdb";
 import { llm } from "../ai/llm.ts";
 import { db } from "../db/db.ts";
 import type { Filters } from "../models/clientModels.ts";
-import type { Job, JobKey, Location } from "../models/models.ts";
+import type { Job, JobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { MS_PER_DAY } from "../utils/constants.ts";
 import { logProperty } from "../utils/telemetry.ts";
-
-type EnhancedFilters = Filters & {
-  location?: Location;
-};
 
 /**
  * Retrieves jobs matching the specified filters
@@ -35,21 +31,16 @@ export async function getJobs(filterInput: Filters) {
     return result;
   }
 
-  // US-only transition:
-  // If no location provided, assume US-based
-  // TODO (Phase 3): replace EnhancedFilters with direct city + state query params
-  const normalizedCity = await llm.extractLocation(filterInput.city ?? "");
-  const queryLocation: Location = {
-    city: normalizedCity,
-    countryCode: "US",
-  };
+  // Normalize city via LLM (handles typos, abbreviations, capitalization).
+  // State is already validated and needs no normalization.
+  const normalizedCity = filterInput.city
+    ? await llm.extractLocation(filterInput.city)
+    : undefined;
 
-  const filters: EnhancedFilters = {
+  const result = await readJobsByFilters({
     ...filterInput,
-    location: queryLocation,
-  };
-
-  const result = await readJobsByFilters(filters);
+    city: normalizedCity,
+  });
   logProperty("GetJobs_Count", result.length);
   return result;
 }
@@ -78,7 +69,8 @@ export async function getApplyRedirectUrl(key: JobKey): Promise<string> {
 async function readJobsByFilters({
   companyId,
   title,
-  location,
+  city,
+  state,
   daysSince,
   maxExperience,
   minSalary,
@@ -89,7 +81,7 @@ async function readJobsByFilters({
   payCadence,
   currency,
   refresh,
-}: EnhancedFilters) {
+}: Filters) {
   // The limit of 24 items is intentional to prevent excessive data retrieval.
   const query = new Query().top(24);
 
@@ -156,43 +148,35 @@ async function readJobsByFilters({
     query.whereCondition("title", "CONTAINS", title);
   }
 
-  if (location) {
+  if (city || state) {
     const remoteMatch = "c.presence = 'remote'";
-    // Comment out for now since it doesn't take RemoteEligibility into account
-    //const noLocationMatch = "c.locationSearchKey = '||||'";
-    const countryMatch = `c.locationSearchKey = '|||US|'`;
-    const regionMatch = `c.locationSearchKey = CONCAT('||', @regionCode, '|US|')`;
+    const countryMatch = `c.locationSearchKey = '|||US|' OR c.locationSearchKey = '||||'`;
+    const stateMatch = `c.locationSearchKey = CONCAT('||', @state, '|US|')`;
 
-    let locClause = "";
-    let remoteMatches: string[] = [];
+    let locClause: string;
+    let remoteMatches = [countryMatch];
 
-    if (location.city) {
-      locClause = `c.locationSearchKey = CONCAT('|', @city, '|', @regionCode, '|US|')`;
-      remoteMatches = [regionMatch, countryMatch];
-      //remoteMatches = [regionMatch, countryMatch, noLocationMatch];
-    } else if (location.regionCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @regionCode, '|US|'))`;
-      remoteMatches = [countryMatch];
-      //remoteMatches = [countryMatch, noLocationMatch];
-    } else if (location.countryCode) {
-      locClause = `ENDSWITH(c.locationSearchKey, '|US|')`;
-      remoteMatches = [];
-      //remoteMatches = [noLocationMatch];
+    if (city && state) {
+      locClause = `c.locationSearchKey = CONCAT('|', @city, '|', @state, '|US|')`;
+      remoteMatches = [stateMatch, countryMatch];
+    } else if (state) {
+      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @state, '|US|'))`;
+    } else {
+      // city only — match city in any state
+      locClause = `STARTSWITH(c.locationSearchKey, CONCAT('|', @city, '|'))`;
     }
 
-    if (isRemote !== false && remoteMatches.length) {
+    if (isRemote !== false) {
       locClause += ` OR (${remoteMatch} AND (${remoteMatches.join(" OR ")}))`;
     }
 
-    if (locClause) {
-      query.where([
-        locClause,
-        {
-          "@city": location.city ?? "",
-          "@regionCode": location.regionCode ?? "",
-        },
-      ]);
-    }
+    query.where([
+      locClause,
+      {
+        "@city": city ?? "",
+        "@state": state ?? "",
+      },
+    ]);
   }
 
   return db.job.query<Job>(query.build());

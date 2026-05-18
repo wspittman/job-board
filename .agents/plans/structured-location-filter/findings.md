@@ -53,19 +53,19 @@ Used in:
 
 ## File Map
 
-| File                                                 | Change                                                                                                                   |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `packages/backend/src/models/enums.ts`               | Added `UsState` Zod enum with LLM `.describe()` — single source of truth for valid state codes                           |
-| `packages/backend/src/models/clientModels.ts`        | `location?: string` → `city?: string` + `state?: string`                                                                 |
-| `packages/backend/src/models/extractionModels.ts`    | `ExtractionFilters.location: ExtractionLocation` → `city: zString(...)` + `state: UsState`; imports `UsState` from enums |
-| `packages/backend/src/middleware/inputValidators.ts` | `FiltersSchema`: `location` → `city` (SearchSchema) + `state` (`soft(UsState)`); imports `UsState` from enums            |
-| `packages/backend/src/ai/interpretFilters.ts`        | Removed `normalizedLocation` call; `city`/`state` spread through naturally                                               |
-| `packages/backend/src/controllers/job.ts`            | Minimal compile fix: uses `filterInput.city` for interim LLM call (Phase 3 replaces fully)                               |
-| `packages/backend/src/utils/location.ts`             | No change (still used for job display in `toClient.ts`)                                                                  |
-| `packages/frontend/src/api/filterModel.ts`           | Split `location` → `city` + `state`; backward compat for `?location=`                                                    |
-| `packages/frontend/src/jobs/filters/filters.ts`      | Replace location text input with city input + state dropdown                                                             |
-| Filter chips / display (frontend)                    | Update chip labels                                                                                                       |
-| Tests                                                | Update affected tests                                                                                                    |
+| File                                                 | Change                                                                                                                              |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/backend/src/models/enums.ts`               | Added `UsState` Zod enum with LLM `.describe()` — single source of truth for valid state codes                                      |
+| `packages/backend/src/models/clientModels.ts`        | `location?: string` → `city?: string` + `state?: string`                                                                            |
+| `packages/backend/src/models/extractionModels.ts`    | `ExtractionFilters.location: ExtractionLocation` → `city: zString(...)` + `state: UsState`; imports `UsState` from enums            |
+| `packages/backend/src/middleware/inputValidators.ts` | `FiltersSchema`: `location` → `city` (SearchSchema) + `state` (`soft(UsState)`); imports `UsState` from enums                       |
+| `packages/backend/src/ai/interpretFilters.ts`        | Removed `normalizedLocation` call; `city`/`state` spread through naturally                                                          |
+| `packages/backend/src/controllers/job.ts`            | `EnhancedFilters`/`queryLocation` removed; `city`/`state` used directly; new 3-case query logic (city+state, state-only, city-only) |
+| `packages/backend/src/utils/location.ts`             | No change (still used for job display in `toClient.ts`)                                                                             |
+| `packages/frontend/src/api/filterModel.ts`           | Split `location` → `city` + `state`; backward compat for `?location=`                                                               |
+| `packages/frontend/src/jobs/filters/filters.ts`      | Replace location text input with city input + state dropdown                                                                        |
+| Filter chips / display (frontend)                    | Update chip labels                                                                                                                  |
+| Tests                                                | Update affected tests                                                                                                               |
 
 ## US States + Territories
 

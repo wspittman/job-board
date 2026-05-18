@@ -6,7 +6,7 @@ Replace the freeform `location` string filter with separate `city` (text input) 
 
 ## Current Phase
 
-Phase 3
+Phase 4
 
 ## Phases
 
@@ -27,10 +27,10 @@ Phase 3
 
 ### Phase 3: Backend — Job controller and routes
 
-- [ ] `job.ts`: update `EnhancedFilters` and query logic — use `state` directly, only call LLM for `city` normalization
-- [ ] Update Cosmos DB query construction to use `city` + `state` from filters directly (no re-serialization to a string)
-- [ ] `inputValidators.ts`: handle legacy `?location=` param — parse city/state with a lightweight heuristic and populate `city` + `state` fields (see findings.md for heuristic)
-- **Status:** not_started
+- [x] `job.ts`: remove `EnhancedFilters`/`queryLocation` indirection; LLM normalizes city only; `state` used directly
+- [x] Update Cosmos DB query construction: city+state (exact), state-only (ENDSWITH), city-only (STARTSWITH); remote broadening per case
+- [x] ~~`inputValidators.ts`: handle legacy `?location=` param~~ — superseded: `findings.md` confirms backward compat belongs in the frontend (Phase 4); backend never receives old `?location=` params
+- **Status:** complete
 
 ### Phase 4: Frontend — UI and FilterModel
 
