@@ -83,26 +83,17 @@ Old `?location=` values come from:
 1. User typing directly: e.g., `"Seattle"`, `"Washington"`, `"Seattle, WA"`
 2. NL search result: e.g., `"Seattle, WA, United States (US)"`, `"Washington (US)"`
 
-**Heuristic (applied in frontend `FilterModel` during URL param parsing):**
+**Simplified approach (applied in frontend `FilterModel` during URL param parsing):**
 
-```
-Parse "?location=<value>":
-1. Split on ", "
-2. Last token: if 2 chars and matches US state code → state = token; rest = city
-   If last token = "United States (US)" or "US" → discard, try again with remaining tokens
-3. If single token that matches a state code (2 chars) → state = token, city = undefined
-4. Otherwise → city = full value, state = undefined
-```
+If `?location=<value>` is present and no `?city=` or `?state=` exist, set `city = location` and leave state blank. The LLM normalizes the raw value on the backend, which handles the common patterns well enough.
 
 Examples:
 
-- `"Seattle, WA"` → city=Seattle, state=WA ✓
-- `"Seattle, WA, United States (US)"` → discard "United States (US)", then city=Seattle, state=WA ✓
-- `"Seattle"` → city=Seattle, state=undefined ✓
-- `"WA"` → city=undefined, state=WA ✓
-- `"Washington"` → city=Washington, state=undefined (not a state code; best effort) ✓
+- `"Seattle, WA"` → city="Seattle, WA", state=undefined (LLM normalizes city)
+- `"Seattle"` → city="Seattle", state=undefined ✓
+- `"WA"` → city="WA", state=undefined (too short for `normSearchString`, effectively ignored)
 
-The backend does not need to handle backward compat because old bookmarks are client-side URLs — the frontend parses them and re-emits `?city=&state=` to the API.
+The backend does not need to handle backward compat because old bookmarks are client-side URLs — the frontend parses them and re-emits `?city=` to the API.
 
 ## NL Search Integration
 

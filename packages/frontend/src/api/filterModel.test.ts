@@ -15,7 +15,7 @@ suite("FilterModel", () => {
     ["?companyId=acme&jobId=job-1", { companyId: "acme", jobId: "job-1" }],
     [
       "?title=engineer&location=Seattle%2C+WA",
-      { title: "engineer", location: "Seattle, WA" },
+      { title: "engineer", city: "Seattle, WA" },
     ],
   ];
 
@@ -32,11 +32,11 @@ suite("FilterModel", () => {
   test("fromFormData: reads fields", () => {
     const fd = new FormData();
     fd.set("title", "designer");
-    fd.set("location", "New York");
+    fd.set("city", "New York");
     const model = FilterModel.fromFormData(fd);
     const entries = Object.fromEntries(model.toEntries());
     expect(entries["title"]).toBe("designer");
-    expect(entries["location"]).toBe("New York");
+    expect(entries["city"]).toBe("New York");
   });
 
   test("fromFormData: missing field resolves to undefined (not included in entries)", () => {
@@ -76,7 +76,8 @@ suite("FilterModel", () => {
     ["isRemote", "true", "Remote"],
     ["isRemote", "false", "In-Person / Hybrid"],
     ["title", "developer", "Title: developer"],
-    ["location", "Seattle", "Location: Seattle"],
+    ["city", "Seattle", "City: Seattle"],
+    ["state", "WA", "State: Washington"],
     ["daysSince", "7", "Posted: Within 7 days"],
     ["maxExperience", "5", "Experience: 5 years"],
     ["minSalary", "100000", `Pay Rate: ${fmt.currency(100000)}`],

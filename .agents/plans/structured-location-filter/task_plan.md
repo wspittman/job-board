@@ -6,7 +6,7 @@ Replace the freeform `location` string filter with separate `city` (text input) 
 
 ## Current Phase
 
-Phase 4
+Phase 5
 
 ## Phases
 
@@ -34,11 +34,12 @@ Phase 4
 
 ### Phase 4: Frontend — UI and FilterModel
 
-- [ ] `filterModel.ts`: split `location` into `city` + `state`; serialize to `?city=X&state=Y`; add backward-compat parsing of old `?location=` param (heuristic: same as backend)
-- [ ] `filters.ts`: replace location text input with city text input + state/territory dropdown
-- [ ] Update filter chip labels/display
-- [ ] Verify NL search path: `interpretFilters` response now returns `city` + `state` — frontend must populate both fields in `FilterModel`
-- **Status:** not_started
+- [x] `apiTypes.ts`: replace `location?: string` in `FilterModelApi` with `city?: string` + `state?: string`
+- [x] `apiEnums.ts`: add `usState` object (50 states + DC + 5 territories); export `UsState`, `stateOptions`, `toUsState`, `toUsStateLabel`
+- [x] `filterModel.ts`: replace `location` with `city`/`state` in `#fromGeneric` and `toFriendlyStrings`; add backward-compat `?location=` handling in `#fromLocationSearchString` — sets `city = location` and leaves state blank (LLM normalizes on backend)
+- [x] `filters.ts`: replace `location` text input with `city` text input + `state` `jb-form-select` dropdown using `stateOptions`
+- [x] `filterModel.test.ts`: update 3 tests that referenced `location` to use `city`/`state`; added state chip label test (`state=WA → 'State: Washington'`)
+- **Status:** complete
 
 ### Phase 5: Tests and pre-checkin
 

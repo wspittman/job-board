@@ -3,6 +3,7 @@ import type {
   JobFamily,
   PayCadence,
   Presence,
+  UsState,
   WorkTimeBasis,
 } from "./apiEnums";
 
@@ -55,9 +56,10 @@ export interface FilterModelApi {
   jobFamily?: JobFamily;
   companyStage?: CompanyStage;
   payCadence?: PayCadence;
+  state?: UsState;
   // Substring Match
   title?: string;
-  location?: string;
+  city?: string;
   // Range Match
   daysSince?: number;
   maxExperience?: number;

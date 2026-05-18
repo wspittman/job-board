@@ -33,7 +33,22 @@ Plan created. No implementation started. Ready to begin Phase 1.
 
 ---
 
-## Session 4 — 2026-05-18
+## Session 5 — 2026-05-18
+
+### Phase 4 — Completed ✓
+
+**Files changed:**
+
+- `packages/frontend/src/api/apiTypes.ts`: `FilterModelApi.location?: string` → `city?: string` + `state?: string`
+- `packages/frontend/src/api/apiEnums.ts`: Added `usState` object (50 states + DC + 5 territories) with `stateOptions`, `toUsState`, `toUsStateLabel` exports
+- `packages/frontend/src/api/filterModel.ts`:
+  - `#fromGeneric`: reads `city`/`state` instead of `location`; `state` validated via `toUsState`
+  - `toFriendlyStrings()`: `city` → `City: <value>`; `state` → `State: <full name>`
+  - `#fromLocationSearchString`: backward-compat handling of `?location=`: sets `city = location`, leaves state blank (user simplified from the original heuristic after reviewing production telemetry)
+- `packages/frontend/src/jobs/filters/filters.ts`: replaced single `location` text input with `city` text input + `state` `jb-form-select` using `stateOptions`
+- `packages/frontend/src/api/filterModel.test.ts`: updated 3 tests (fromLocationSearchString backward compat, fromFormData, toFriendlyStrings)
+
+**Test result:** All 206 frontend tests pass (exit code 0)
 
 ### Phase 3 — Completed ✓
 
