@@ -8,6 +8,7 @@ import {
   PayCadence,
   Presence,
   SeniorityLevel,
+  UsState,
   WorkTimeBasis,
 } from "./enums.ts";
 
@@ -298,7 +299,18 @@ export const ExtractionFilters = z
       "A partial match search on job title text.",
       "Example: 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
     ),
-    location: ExtractionLocation,
+    city: zString(
+      "The properly capitalized English city name.",
+      "Fix spelling errors, abbreviations, and informal names.",
+      "Return '' if the input is not a recognizable city name.",
+      "Examples:",
+      "'Seattle, WA' → 'Seattle';",
+      "'NYC' → 'New York City';",
+      "'sf' → 'San Francisco';",
+      "'WA' → '' (state code, not a city);",
+      "'talahasee, florda' → 'Tallahassee'.",
+    ),
+    state: UsState,
     daysSince: zPosNum(
       "Filters to jobs posted within the specified number of days.",
       "Example: 'posted today' → 1, 'this week' → 7.",
