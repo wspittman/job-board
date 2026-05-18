@@ -6,7 +6,7 @@ Replace the freeform `location` string filter with separate `city` (text input) 
 
 ## Current Phase
 
-Phase 2
+Phase 3
 
 ## Phases
 
@@ -20,10 +20,10 @@ Phase 2
 
 ### Phase 2: Backend — AI layer
 
-- [ ] `interpretFilters.ts`: stop flattening structured location back to a string; return `{ city?, state? }` directly
-- [ ] `extractLocation.ts`: scope the LLM prompt to city-only normalization (since state is now a structured input); update return type to `string | undefined` (the normalized city name)
-- [ ] `location.ts`: assess whether `normalizedLocation` is still needed (still used in `toClient.ts` for job display — keep it, just no longer used in filters)
-- **Status:** not_started
+- [x] `interpretFilters.ts`: stop flattening structured location back to a string; return `{ city?, state? }` directly
+- [x] `extractLocation.ts`: scope the LLM prompt to city-only normalization (since state is now a structured input); update return type to `string | undefined` (the normalized city name)
+- [x] `location.ts`: assess whether `normalizedLocation` is still needed (still used in `toClient.ts` for job display — keep it, just no longer used in filters)
+- **Status:** complete
 
 ### Phase 3: Backend — Job controller and routes
 

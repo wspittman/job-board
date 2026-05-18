@@ -30,3 +30,19 @@ Plan created. No implementation started. Ready to begin Phase 1.
 - `packages/backend/test/middleware/inputValidators.test.ts` — Updated test cases: `location` → `city`/`state`
 
 **Test result:** All 241 tests pass (exit code 0)
+
+---
+
+## Session 3 — 2026-05-18
+
+### Phase 2 — Completed ✓
+
+**Files changed:**
+
+- `packages/backend/src/ai/extractLocation.ts` — Rewritten: city-only normalization; returns `string | undefined`; uses a new `CityExtraction` inline Zod schema; drops `ExtractionLocation` dependency
+- `packages/backend/src/db/cache.ts` — Updated to store/return `string` (city name) instead of `Location`; backward-compatible with old DB records (reads `item.city` which all existing records have)
+- `packages/backend/src/controllers/job.ts` — Adapted to new `extractLocation` return type; constructs `queryLocation: Location` from the city string + hardcoded `countryCode: "US"`; removed now-impossible non-US country check
+
+**Note:** `interpretFilters.ts` was already complete from Phase 1 (normalizedLocation call removed). `location.ts` confirmed unchanged — still used only for job display in `toClient.ts`.
+
+**Test result:** All 241 tests pass (exit code 0)

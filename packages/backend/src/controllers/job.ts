@@ -37,19 +37,12 @@ export async function getJobs(filterInput: Filters) {
 
   // US-only transition:
   // If no location provided, assume US-based
-  // TODO (Phase 3): use city + state directly from filters instead of re-parsing via LLM
-  const queryLocation: Location = await llm.extractLocation(
-    filterInput.city ?? "",
-  );
-  queryLocation.countryCode ||= "US";
-
-  const country = queryLocation.countryCode;
-  if (country && country.toUpperCase() !== "US") {
-    // US-only transition:
-    // If a user searches for a non-US location, return no results (even though they may exist in the DB for now).
-    logProperty("GetJobs_NonUSCountry", country);
-    return [];
-  }
+  // TODO (Phase 3): replace EnhancedFilters with direct city + state query params
+  const normalizedCity = await llm.extractLocation(filterInput.city ?? "");
+  const queryLocation: Location = {
+    city: normalizedCity,
+    countryCode: "US",
+  };
 
   const filters: EnhancedFilters = {
     ...filterInput,
