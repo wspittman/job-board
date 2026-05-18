@@ -42,28 +42,39 @@ Cosmos DB queries:
 - State only: `ENDSWITH(c.locationSearchKey, CONCAT('|', @state, '|US|'))`
 - Remote + state: `c.isRemote = true AND ENDSWITH(...)` (existing behavior, not changing)
 
+## US States + Territories
+
+`UsState` is a Zod enum defined in `enums.ts` alongside the other domain enums. It includes 50 states + DC + 5 inhabited territories and carries a `.describe()` prompt for LLM guidance. This is the single source of truth — no separate constant array in `constants.ts`.
+
+Used in:
+
+- `ExtractionFilters.state: UsState` (LLM extraction schema)
+- `FiltersSchema.state: soft(UsState)` (input validation)
+
 ## File Map
 
-| File                                                 | Change                                                                                                                              |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/backend/src/models/clientModels.ts`        | `location?: string` → `city?: string` + `state?: string`                                                                            |
-| `packages/backend/src/models/extractionModels.ts`    | `ExtractionFilters.location: ExtractionLocation` → `city?: string` + `state?: string`; simplify `ExtractionLocation` for filter use |
-| `packages/backend/src/middleware/inputValidators.ts` | `FiltersSchema`: add `city` + `state` fields; keep `location` as legacy field                                                       |
-| `packages/backend/src/ai/interpretFilters.ts`        | Stop calling `normalizedLocation()`; return `{ city?, state? }` directly                                                            |
-| `packages/backend/src/ai/extractLocation.ts`         | Narrow scope to city-only normalization; return `string \| undefined`                                                               |
-| `packages/backend/src/controllers/job.ts`            | Use `city` + `state` directly; LLM call only for city; update Cosmos DB query construction                                          |
-| `packages/backend/src/utils/location.ts`             | No change (still used for job display in `toClient.ts`)                                                                             |
-| `packages/frontend/src/api/filterModel.ts`           | Split `location` → `city` + `state`; backward compat for `?location=`                                                               |
-| `packages/frontend/src/jobs/filters/filters.ts`      | Replace location text input with city input + state dropdown                                                                        |
-| Filter chips / display (frontend)                    | Update chip labels                                                                                                                  |
-| Tests                                                | Update affected tests                                                                                                               |
+| File                                                 | Change                                                                                                                   |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `packages/backend/src/models/enums.ts`               | Added `UsState` Zod enum with LLM `.describe()` — single source of truth for valid state codes                           |
+| `packages/backend/src/models/clientModels.ts`        | `location?: string` → `city?: string` + `state?: string`                                                                 |
+| `packages/backend/src/models/extractionModels.ts`    | `ExtractionFilters.location: ExtractionLocation` → `city: zString(...)` + `state: UsState`; imports `UsState` from enums |
+| `packages/backend/src/middleware/inputValidators.ts` | `FiltersSchema`: `location` → `city` (SearchSchema) + `state` (`soft(UsState)`); imports `UsState` from enums            |
+| `packages/backend/src/ai/interpretFilters.ts`        | Removed `normalizedLocation` call; `city`/`state` spread through naturally                                               |
+| `packages/backend/src/controllers/job.ts`            | Minimal compile fix: uses `filterInput.city` for interim LLM call (Phase 3 replaces fully)                               |
+| `packages/backend/src/utils/location.ts`             | No change (still used for job display in `toClient.ts`)                                                                  |
+| `packages/frontend/src/api/filterModel.ts`           | Split `location` → `city` + `state`; backward compat for `?location=`                                                    |
+| `packages/frontend/src/jobs/filters/filters.ts`      | Replace location text input with city input + state dropdown                                                             |
+| Filter chips / display (frontend)                    | Update chip labels                                                                                                       |
+| Tests                                                | Update affected tests                                                                                                    |
 
-## US States + Territories List
+## US States + Territories
 
-50 states + DC + 5 inhabited territories:
-`AL, AK, AZ, AR, CA, CO, CT, DE, FL, GA, HI, ID, IL, IN, IA, KS, KY, LA, ME, MD, MA, MI, MN, MS, MO, MT, NE, NV, NH, NJ, NM, NY, NC, ND, OH, OK, OR, PA, RI, SC, SD, TN, TX, UT, VT, VA, WA, WV, WI, WY, DC, AS, GU, MP, PR, VI`
+`UsState` is a Zod enum defined in `enums.ts` alongside the other domain enums. It includes 50 states + DC + 5 inhabited territories, and carries a `.describe()` prompt for LLM guidance. This is the single source of truth — no separate constant array in `constants.ts`.
 
-This list lives as a constant (e.g., `US_STATES`) shared between frontend and backend validation. Likely in `packages/backend/src/utils/constants.ts` (already exists) and re-exported or duplicated in frontend.
+It is used directly in:
+
+- `ExtractionFilters.state: UsState` (LLM extraction schema)
+- `FiltersSchema.state: soft(UsState)` (input validation)
 
 ## Backward Compatibility Heuristic
 

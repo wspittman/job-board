@@ -4,6 +4,7 @@ import {
   CompanyStage,
   JobFamily,
   PayCadence,
+  UsState,
   WorkTimeBasis,
 } from "../models/enums.ts";
 import {
@@ -66,7 +67,8 @@ const FiltersSchema = z.object({
       .toUpperCase(),
   ),
   title: soft(SearchSchema),
-  location: soft(SearchSchema),
+  city: soft(SearchSchema),
+  state: soft(UsState),
   daysSince: coerceInt(z.int().positive().max(JOB_EXPIRY_DAYS)),
   maxExperience: coerceInt(z.int().nonnegative().max(100)),
   minSalary: coerceInt(z.int().positive().max(10_000_000)),

@@ -7,7 +7,7 @@ import { AppError } from "../utils/AppError.ts";
 import { MS_PER_DAY } from "../utils/constants.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
-type EnhancedFilters = Omit<Filters, "location"> & {
+type EnhancedFilters = Filters & {
   location?: Location;
 };
 
@@ -37,8 +37,9 @@ export async function getJobs(filterInput: Filters) {
 
   // US-only transition:
   // If no location provided, assume US-based
+  // TODO (Phase 3): use city + state directly from filters instead of re-parsing via LLM
   const queryLocation: Location = await llm.extractLocation(
-    filterInput.location ?? "",
+    filterInput.city ?? "",
   );
   queryLocation.countryCode ||= "US";
 

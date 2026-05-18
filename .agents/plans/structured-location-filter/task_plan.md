@@ -6,17 +6,17 @@ Replace the freeform `location` string filter with separate `city` (text input) 
 
 ## Current Phase
 
-Phase 1
+Phase 2
 
 ## Phases
 
 ### Phase 1: Backend — Split `Filters` model and validation
 
-- [ ] `clientModels.ts`: replace `Filters.location?: string` with `Filters.city?: string` + `Filters.state?: string`
-- [ ] `inputValidators.ts`: update `FiltersSchema` to validate `city` + `state` query params; keep `location` as a deprecated passthrough for backward compat
-- [ ] `extractionModels.ts`: simplify `ExtractionFilters.location: ExtractionLocation` → `city?: string` + `state?: string` (drop `countryCode` since US-only; rename `regionCode` → `state` to match new naming)
-- [ ] Fix any TypeScript compilation errors introduced
-- **Status:** not_started
+- [x] `clientModels.ts`: replace `Filters.location?: string` with `Filters.city?: string` + `Filters.state?: string`
+- [x] `inputValidators.ts`: update `FiltersSchema` to validate `city` + `state` query params; keep `location` as a deprecated passthrough for backward compat
+- [x] `extractionModels.ts`: simplify `ExtractionFilters.location: ExtractionLocation` → `city?: string` + `state?: string` (drop `countryCode` since US-only; rename `regionCode` → `state` to match new naming)
+- [x] Fix any TypeScript compilation errors introduced
+- **Status:** complete
 
 ### Phase 2: Backend — AI layer
 
@@ -56,14 +56,14 @@ Phase 1
 
 ## Decisions Made
 
-| Decision                                                                           | Rationale                                                                                    |
-| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Rename `regionCode` → `state` in filter models                                     | Clearer naming for US-only context; `regionCode` was a generic ISO concept                   |
-| Keep `countryCode` only on job storage models, drop from filter inputs             | US-only board; defaulting to US is already in place in the job controller                    |
-| Backward compat via string heuristic (not LLM)                                     | LLM is overkill for simple "City, ST" parsing; heuristic covers the common bookmark patterns |
-| City still uses LLM normalization                                                  | Typos, capitalization, metro areas still benefit from normalization                          |
-| `extractLocation` return type becomes `string \| undefined` (normalized city name) | State is no longer its responsibility; simplifies the function                               |
-| Validate `state` against a known US states + territories list                      | Prevents garbage input and gives clear errors                                                |
+| Decision                                                                           | Rationale                                                                                                                                      |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rename `regionCode` → `state` in filter models                                     | Clearer naming for US-only context; `regionCode` was a generic ISO concept                                                                     |
+| Keep `countryCode` only on job storage models, drop from filter inputs             | US-only board; defaulting to US is already in place in the job controller                                                                      |
+| Backward compat via string heuristic (not LLM)                                     | LLM is overkill for simple "City, ST" parsing; heuristic covers the common bookmark patterns                                                   |
+| City still uses LLM normalization                                                  | Typos, capitalization, metro areas still benefit from normalization                                                                            |
+| `extractLocation` return type becomes `string \| undefined` (normalized city name) | State is no longer its responsibility; simplifies the function                                                                                 |
+| Validate `state` against a known US states + territories list                      | Prevents garbage input; `UsState` Zod enum in `enums.ts` is the single source of truth, reused by both `FiltersSchema` and `ExtractionFilters` |
 
 ## Errors Encountered
 
