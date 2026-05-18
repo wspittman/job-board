@@ -8,6 +8,7 @@ import type {
 } from "applicationinsights/out/Declarations/Contracts/index.js";
 import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
 import { subscribeAsyncLogging } from "dry-utils-async";
+import { logger } from "dry-utils-logger";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
 import { AppError } from "./AppError.ts";
@@ -237,7 +238,7 @@ export function createSubscribeAggregator(
 
     if (config.ENABLE_VERBOSE_BLOB_LOGGING) {
       // TBD: Sent to a blob storage DB
-      console.dir(blob, { depth: null });
+      logger.debug("Aggregator Blob", blob);
     }
   };
 }
@@ -284,7 +285,7 @@ export function telemetryProcessor({ data }: EnvelopeTelemetry): boolean {
     }
   } catch (error) {
     // Can't logError here because it could cause an infinite loop
-    console.error(error);
+    logger.error("telemetryProcessor", error);
   }
   return true;
 }
@@ -351,13 +352,7 @@ function devLogException({ exceptions, properties }: TypedExceptionData) {
 
 function devLog(data: object) {
   if (config.NODE_ENV === "dev") {
-    console.dir(
-      {
-        timestamp: new Date().toISOString(),
-        ...data,
-      },
-      { depth: null },
-    );
+    logger.info(new Date().toISOString(), data);
   }
 }
 

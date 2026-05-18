@@ -4,6 +4,7 @@ import { logError, startTelemetry } from "./utils/telemetry.ts";
 startTelemetry();
 
 import cors from "cors";
+import { logger } from "dry-utils-logger";
 import type { NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
@@ -50,7 +51,7 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 function serverStartErrorHandler(error: unknown) {
-  console.error("Failed to start server:", error);
+  logger.error("Failed to start server", error);
   logError(error);
   process.exit(1);
 }
@@ -67,7 +68,7 @@ async function startServer() {
         serverStartErrorHandler(error);
         return;
       }
-      console.log(`Server running on port ${config.PORT}`);
+      logger.info(`Server running on port ${config.PORT}`);
     });
   } catch (error) {
     serverStartErrorHandler(error);
