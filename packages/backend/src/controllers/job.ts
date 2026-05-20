@@ -180,7 +180,7 @@ async function readJobsByFilters({
     ]);
   }
 
-  return db.job.query<Job>(query.build());
+  return db.job.query<Job>(query.orderBy("_ts", "DESC").build());
 }
 
 // #endregion
