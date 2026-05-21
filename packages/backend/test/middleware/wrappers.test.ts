@@ -318,11 +318,10 @@ suite("beaconRoute", () => {
     handler(req, res, next);
 
     assert.equal(validatorFn.mock.callCount(), 0);
-    assert.equal(writeHeadFn.mock.callCount(), 0);
-    assert.equal(endFn.mock.callCount(), 0);
-    assert.equal(next.mock.callCount(), 1);
-    const err = next.mock.calls[0]?.arguments.at(0);
-    assert.ok(err instanceof Error);
+    assert.equal(writeHeadFn.mock.callCount(), 1);
+    assert.equal(writeHeadFn.mock.calls[0]?.arguments.at(0), 204);
+    assert.equal(endFn.mock.callCount(), 1);
+    assert.equal(next.mock.callCount(), 0);
   });
 
   test("Validator throws", () => {
@@ -335,11 +334,8 @@ suite("beaconRoute", () => {
     handler(req, res, next);
 
     assert.equal(validatorFn.mock.callCount(), 1);
-    assert.equal(writeHeadFn.mock.callCount(), 0);
-    assert.equal(endFn.mock.callCount(), 0);
-    assert.equal(next.mock.callCount(), 1);
-    const err = next.mock.calls[0]?.arguments.at(0);
-    assert.ok(err instanceof Error);
-    assert.equal(err.message, "Beacon validator failed");
+    assert.equal(writeHeadFn.mock.callCount(), 1);
+    assert.equal(endFn.mock.callCount(), 1);
+    assert.equal(next.mock.callCount(), 0);
   });
 });

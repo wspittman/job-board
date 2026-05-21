@@ -20,7 +20,8 @@ const pings: Step[] = [
   formStep("Ping", req.get(""), res.ok({ status: "success" })),
   formStep("404", req.get("unknown"), res(404, "Not Found")),
   formStep("Empty query", req.get("jobs"), res.ok([])),
-  formStep("Status check", req.get("metadata"), res.ok({})),
+  formStep("Metadata", req.get("metadata"), res.ok({})),
+  formStep("Beacon", req.post("beacon"), res(204)),
 ];
 
 const validations: Step[] = [

@@ -85,7 +85,14 @@ export function redirectRoute<IN>(
 export function beaconRoute(inputValidator: (input: unknown) => void) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      inputValidator(JSON.parse(req.body as string));
+      const bodyStr = (req.body as string) ?? "{}";
+      try {
+        inputValidator(JSON.parse(bodyStr));
+      } catch {
+        logError(
+          new Error("Failed to process beacon body", { cause: bodyStr }),
+        );
+      }
       res.writeHead(204);
       res.end();
     } catch (error) {
