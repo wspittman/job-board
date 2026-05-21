@@ -25,13 +25,65 @@
       <article>
         <header class="blog-header">
           <h1>Progress Report</h1>
-          <p>May 14, 2026</p>
+          <p>May 21, 2026</p>
         </header>
         <section>
           <p>
             A running record of the improvements we're making as we do our best
             to put the "better" in Better Job Board.
           </p>
+          <h2>May 21, 2026</h2>
+          <p>
+            The "location" filter has been replaced with separate City and
+            State/Territory filters.
+          </p>
+          <ul>
+            <li>
+              Now that the board is US-only we can simplify how we handle
+              locations.
+            </li>
+            <li>
+              City is a fuzzy match (eg. "NYC", "New York", and "new yrk city"
+              will all match to "New York City"), while State/Territory is an
+              exact match.
+            </li>
+            <li>
+              Bookmarked "location" filters will be updated to use the new
+              "city" filter instead of "location".
+            </li>
+          </ul>
+          <p>Job results improvements</p>
+          <ul>
+            <li>
+              Added 60+ companies to the board.
+              <ul>
+                <li>
+                  Now that we are through our backlog, this will slow down to
+                  our normal pace.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Results are now the most-recently posted jobs that match the
+              filters, instead whatever default behavior our database was giving
+              us.
+            </li>
+            <li>
+              Fixed a bug where worldwide remote jobs were being excluded from
+              results.
+            </li>
+          </ul>
+          <p>Display improvements</p>
+          <ul>
+            <li>
+              Location chip no longer appends "United States (US)" since all
+              jobs are US-based now.
+            </li>
+            <li>
+              Number and currency formatting truncates towards zero instead of
+              rounding, to avoid inflating values.
+            </li>
+          </ul>
           <h2>May 14, 2026</h2>
           <ul>
             <li>

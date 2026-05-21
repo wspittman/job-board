@@ -1,10 +1,30 @@
 ---
 title: Progress Report
 description: A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
-date: May 14, 2026
+date: May 21, 2026
 ---
 
 A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
+
+## May 21, 2026
+
+The "location" filter has been replaced with separate City and State/Territory filters.
+
+- Now that the board is US-only we can simplify how we handle locations.
+- City is a fuzzy match (eg. "NYC", "New York", and "new yrk city" will all match to "New York City"), while State/Territory is an exact match.
+- Bookmarked "location" filters will be updated to use the new "city" filter instead of "location".
+
+Job results improvements
+
+- Added 60+ companies to the board.
+  - Now that we are through our backlog, this will slow down to our normal pace.
+- Results are now the most-recently posted jobs that match the filters, instead whatever default behavior our database was giving us.
+- Fixed a bug where worldwide remote jobs were being excluded from results.
+
+Display improvements
+
+- Location chip no longer appends "United States (US)" since all jobs are US-based now.
+- Number and currency formatting truncates towards zero instead of rounding, to avoid inflating values.
 
 ## May 14, 2026
 
