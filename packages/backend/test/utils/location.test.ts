@@ -4,8 +4,6 @@ import { suite, test } from "node:test";
 import type { Location } from "../../src/models/models.ts";
 import { normalizedLocation } from "../../src/utils/location.ts";
 
-const displayNames = new Intl.DisplayNames(["en"], { type: "region" });
-
 type LocationCase = {
   name: string;
   input: Location;
@@ -31,14 +29,14 @@ suite("normalizedLocation", () => {
         expected: "Seattle, WA",
       },
       {
-        name: "returns country display name with code",
+        name: "omits country when country code is the only field",
         input: { countryCode: "US" },
-        expected: `${displayNames.of("US")} (US)`,
+        expected: "",
       },
       {
-        name: "returns full location when all parts are provided",
+        name: "omits country code when all parts are provided",
         input: { city: "Seattle", regionCode: "WA", countryCode: "US" },
-        expected: `Seattle, WA, ${displayNames.of("US")} (US)`,
+        expected: "Seattle, WA",
       },
     ];
 

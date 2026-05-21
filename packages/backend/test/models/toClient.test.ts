@@ -64,7 +64,7 @@ suite("toClientJob", () => {
       postTS: 1_723_456_789,
       applyUrl: "/job/apply?id=job%20id&companyId=acme%2F1",
       isRemote: true,
-      location: "Seattle, WA, United States (US)",
+      location: "Seattle, WA",
       facets: {
         summary: "Owns the core platform.",
         experience: 3,
