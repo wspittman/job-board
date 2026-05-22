@@ -1,153 +1,196 @@
 # Findings & Decisions
 
+## Plan Refresh Summary - 2026-05-22
+
+The original `stats-page` plan was written against older backend assumptions. Current code has
+already implemented part of Phase 2, and `dry-utils-cosmosdb@0.6.1` changes how the remaining
+backend tests should be planned.
+
+Key updates:
+
+- Backend metadata aggregation now uses `Container.getCount()`, `Container.getCountBy()`, and
+  `Container.query()` rather than a manual all-jobs scan.
+- `getCountBy()` supports dot-path properties such as `primaryLocation.regionCode`.
+- The dry-utils mock query processor supports nested `WHERE` paths, top-level selected-property
+  projections, and the `getCountBy()` query pattern, which makes aggregate-path tests possible
+  without a real Cosmos DB emulator.
+- The implemented backend response uses `topLocationCounts`, not `topLocations`.
+- The implemented backend response puts `stageCounts` on job metadata and treats it as
+  job-weighted company stage distribution.
+- The frontend metadata API type is now behind the backend response and needs to be updated in
+  Phase 3.
+- The frontend already has enum labels in `apiEnums.ts`; a new `enumLabels.ts` utility would
+  duplicate the current pattern.
+
 ## Existing Metadata Shape
 
-`ClientMetadata` currently has:
+Backend `ClientMetadata` currently has:
 
 - `timestamp: number`
 - `companyCount: number`
-- `companyNames: [string, string][]` — id/name tuples, all companies
+- `companyNames: [string, string][]`
 - `jobCount: number`
 - `recentJobCount: number`
-- `presenceCounts: Partial<Record<Presence, number>>` — onsite/remote/hybrid/""
-- `jobFamilyCounts: Partial<Record<JobFamily, number>>` — 14 family buckets + ""
+- `presenceCounts: Partial<Record<Presence, number>>`
+- `jobFamilyCounts: Partial<Record<JobFamily, number>>`
+- `workTimeCounts: Partial<Record<WorkTimeBasis, number>>`
+- `stageCounts: Partial<Record<CompanyStage, number>>`
+- `topLocationCounts: Partial<Record<UsState, number>>`
+- `salaryStats: SalaryStat[]`
+
+Frontend `MetadataModelApi` currently only includes the older subset:
+
+- `timestamp`
+- `companyCount`
+- `companyNames`
+- `jobCount`
+- `recentJobCount`
+- `presenceCounts`
+- `jobFamilyCounts`
+
+Decision: Phase 3 starts by updating `packages/frontend/src/api/apiTypes.ts`.
 
 ## Backend Aggregation
 
-`aggregateMetadata()` in `db.ts` runs a full scan of the jobs container and computes counts.
-It is called at end of each sync run (`onComplete: refreshMetadata`).
+`aggregateMetadata()` in `packages/backend/src/db/db.ts` currently computes:
 
-The existing pattern: iterate all jobs, tally counts into plain objects, upsert two metadata
-documents (`id: "job"`, `id: "company"`).
+- total job count with `this.getCount()`
+- recent job count with `this.getCount(["postTS", ">=", weekMs])`
+- presence counts with `this.getCountBy("presence")`
+- job family counts with `this.getCountBy("jobFamily")`
+- work time counts with `this.getCountBy("workTimeBasis")`
+- stage counts with `this.getCountBy("companyStage")`
+- location counts with `this.getCountBy("primaryLocation.regionCode")`
+- salary rows with a parameterized salary-cadence query
 
-Extending this function is straightforward — same iteration loop, just accumulate more counters.
+The helper `toCountRecord()` validates bucket names against the matching Zod enum before emitting
+them.
 
-## Salary Data Availability
+## dry-utils-cosmosdb Current Capabilities
 
-`Job.salaryRange` has `{ currency, cadence, min, max }`. To compute percentiles:
+Installed version: `dry-utils-cosmosdb@0.6.1`.
 
-- Collect all `(min+max)/2` midpoints
-- Sort and compute p25, median, p75
-- Only emit buckets with ≥10 data points
-- Focus on `"salary"` cadence only (annual), ignore hourly/stipend
-- **No currency segmentation** — site is US-only, currency is always USD
-- Produce one overall bucket + one bucket per job family (trusted dimension)
+Relevant APIs:
+
+- `Container.getCount(condition?, partitionKey?)`
+- `Container.getCountBy(prop)`
+- `Container.query(query, options?)`
+- `connectDB({ mockDBData, mockDBFilters, mockDBProjects })`
+- `loadMockDBData({ mockDataJson, mockDataPath })`
+
+Important mock behavior:
+
+- Built-in mocks support the `getCountBy()` query shape:
+  `SELECT c.{prop} AS name, COUNT(1) AS count FROM c WHERE IS_DEFINED(c.{prop}) GROUP BY c.{prop}`.
+- Nested field lookup works for dot paths.
+- Built-in filters support `IS_DEFINED`, comparison operators, `IN`, and `CONTAINS`.
+- Custom `mockDBFilters` and `mockDBProjects` remain available if a future query shape is not
+  supported.
+
+Decision: Backend aggregate tests should prefer real dry-utils mock data and built-in query
+support before adding custom query matchers.
+
+## Salary Data
+
+`Job.salaryRange` has `{ currency, cadence, min, max }`.
+
+Current salary behavior:
+
+- Query selects rows where `salaryRange.cadence = "salary"`.
+- `computeSalaryStats()` also ignores rows where cadence is not `"salary"`.
+- It uses midpoint when both min and max exist.
+- It uses the single positive endpoint when only min or max exists.
+- It emits one overall bucket plus one bucket per valid job family.
+- Buckets with fewer than 10 salary rows are omitted.
+- Invalid job family buckets are dropped, while the overall bucket can still be emitted.
+
+Decision: Keep salary stats as annual USD-only values. Non-USD jobs are skipped before upsert in
+`sync/jobs.ts`.
 
 ## Location Data
 
-`Job.primaryLocation = { city, regionCode, countryCode }` is reliable structured data. It
-compresses to a plain string in `ClientJob.location` for legacy display reasons only — that
-doesn't affect its reliability as a source for aggregation.
+`Job.primaryLocation` remains structured source data. `ClientJob.location` is only a display string.
 
-Since the site is US-only, clamp aggregation to records where `countryCode === "US"` (or is
-absent). Aggregate by `regionCode` (US state code) for the top-locations breakdown; city-level
-granularity is too noisy. Emit top 10 states by job count. The `getTopLocations()` helper maps
-state codes to full names via a lookup table in `enumLabels.ts`.
+Current implementation groups `primaryLocation.regionCode` and validates keys with `UsState`.
+Non-US jobs are skipped before `db.job.upsert()` in `sync/jobs.ts`, so location aggregation does
+not need a separate country-code filter unless that ingestion rule changes.
+
+Decision: Frontend helpers should consume `topLocationCounts` and sort entries by count. Do not
+expect a `topLocations` array.
+
+## Company Stage Data
+
+`companyStage` is denormalized onto `Job` during refresh. Current aggregation groups jobs by
+`Job.companyStage`, which answers: "How many listed jobs are at companies in each stage?"
+
+That is different from: "How many companies are in each stage?"
+
+Decision: The stats page should label this carefully as job-weighted company stage distribution.
+A company-weighted version would require a backend change to aggregate companies instead.
 
 ## Frontend Page Pattern
 
-- `src/stats.html` — Vite auto-discovers it as a page entry
-- Import `./stats/stats.ts` as the module entry
-- The `<stats-page>` element (or section elements) fetches via `metadataModel`
-- Shadow DOM components registered in `stats.ts`
+The current MPA pattern is:
 
-## Component Architecture for Stats
+- root-level page file, for example `src/index.html`
+- include `./partials/head.html`
+- include `./partials/header.html`
+- include page markup or a page component
+- load a page entry script
 
-The stats page can use a single top-level `<stats-page>` custom element that:
+`vite.config.ts` auto-discovers root-level `src/*.html` entries and blog HTML entries.
 
-1. Calls `metadataModel` to fetch data
-2. Populates child components via property setting or re-renders inner HTML
+Decision: Create `packages/frontend/src/stats.html` as the root page and put component files under
+`packages/frontend/src/stats/`.
 
-Alternatively (simpler, more like existing pattern):
+## Frontend Enum Labels
 
-- Each chart section is its own component: `<stats-job-families>`, `<stats-presence>`, etc.
-- Each component independently calls `metadataModel` (TanStack cache ensures single fetch)
-- Easier to develop/test independently
+`packages/frontend/src/api/apiEnums.ts` already defines label and option helpers for:
 
-Decision: **One component per section** (matches existing pattern, avoids prop-drilling).
+- work time basis
+- job family
+- company stage
+- pay cadence
+- US states
 
-## SVG Chart Approach
+Current gaps for the stats page:
 
-### Horizontal Bar Chart
+- no presence label helper
+- `workTimeBasis` only includes `full_time` and `part_time`, while the backend enum also includes
+  `variable` and `per_diem`
+- empty backend enum buckets may arrive and need an intentional display rule
 
-```html
-<div class="bar-row" style="--pct: 42">
-  <span class="label">Engineering</span>
-  <div class="bar"><div class="fill"></div></div>
-  <span class="value">42%</span>
-</div>
-```
+Decision: Extend `apiEnums.ts`; do not add `enumLabels.ts`.
 
-`.fill { width: calc(var(--pct) * 1%); }` — pure CSS, no JS layout.
+## Component Architecture
 
-### Donut Chart (SVG)
+The existing home stats component fetches formatted summary strings from `metadataModel`.
+For the dedicated stats page, `metadataModel` should expose typed series data so charts do not
+duplicate metadata parsing.
 
-Use `stroke-dasharray` + `stroke-dashoffset` on `<circle>` elements.
-
-- `r = 15.9155` (so circumference ≈ 100)
-- Each segment: `stroke-dasharray = "pct remainder"` with `stroke-dashoffset` for rotation
-- Needs a small JS helper to compute offsets from the data array
-
-### Data Table
-
-Plain `<table>` with `scope="col"` headers. Sortable via click on `<th>`.
-Use `aria-sort="ascending|descending|none"`.
-
-## Enum Label Maps
-
-```ts
-// enumLabels.ts
-export const jobFamilyLabels: Record<JobFamily | "", string> = {
-  engineering: "Engineering",
-  design: "Design",
-  product: "Product",
-  data: "Data & Analytics",
-  it: "IT",
-  security: "Security",
-  marketing: "Marketing",
-  sales: "Sales",
-  customer_success: "Customer Success",
-  ops: "Operations",
-  finance: "Finance",
-  hr: "HR",
-  legal: "Legal",
-  healthcare: "Healthcare",
-  "": "Other",
-};
-
-export const presenceLabels = {
-  remote: "Remote",
-  hybrid: "Hybrid",
-  onsite: "On-site",
-  "": "Unspecified",
-};
-export const seniorityLabels = {
-  intern: "Intern",
-  entry: "Entry",
-  mid: "Mid",
-  senior: "Senior",
-  "staff+": "Staff+",
-  manager: "Manager",
-  "director+": "Director+",
-  "": "Unspecified",
-};
-// ... etc
-```
+Decision: Keep `getCountStrings()` for the home page and add separate stats-oriented helpers.
 
 ## Technical Constraints
 
-- No new npm dependencies (policy)
-- All chart rendering must work without JavaScript for the static HTML skeleton
-  (graceful degradation: skeleton is visible, JS populates it)
-- Accessible: color is not the only channel (include text labels on all charts)
-- Data loaded via `metadataModel` (TanStack cache, 1-hour TTL) — same single fetch for all sections
+- No new npm dependencies.
+- Use SVG/CSS for charts.
+- Use `ComponentBase` and current Shadow DOM conventions.
+- Keep visible chart values in text, not color-only.
+- Use existing TanStack Query metadata caching through `api.fetchMetadata()`.
+- Run `npm run pre-checkin` before committing code.
 
 ## Resources
 
-- `packages/backend/src/db/db.ts` — `aggregateMetadata()` function
-- `packages/backend/src/models/models.ts` — `Metadata` interface
-- `packages/backend/src/models/clientModels.ts` — `ClientMetadata` interface
-- `packages/backend/src/models/enums.ts` — all enum definitions
-- `packages/frontend/src/api/metadataModel.ts` — `MetadataModel` class
-- `packages/frontend/src/home/stats.ts` — existing stats component (simplified reference)
-- `packages/frontend/src/components/componentBase.ts` — base class
+- `packages/backend/src/db/db.ts`
+- `packages/backend/src/controllers/metadata.ts`
+- `packages/backend/src/models/models.ts`
+- `packages/backend/src/models/clientModels.ts`
+- `packages/backend/src/sync/jobs.ts`
+- `packages/frontend/src/api/apiTypes.ts`
+- `packages/frontend/src/api/apiEnums.ts`
+- `packages/frontend/src/api/metadataModel.ts`
+- `packages/frontend/src/home/stats.ts`
+- `packages/frontend/src/components/componentBase.ts`
+- `node_modules/dry-utils-cosmosdb/README.md`
+- `node_modules/dry-utils-cosmosdb/dist/container.d.ts`
+- `node_modules/dry-utils-cosmosdb/dist/mockQueryProcessor.js`
