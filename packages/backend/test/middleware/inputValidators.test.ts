@@ -272,17 +272,24 @@ suite("useFilters", () => {
     { workTimeBasis: "part_time" },
     { workTimeBasis: "variable" },
     { workTimeBasis: "per_diem" },
+    { workTimeBasis: "Per_Diem" },
     { workTimeBasis: "" },
     { jobFamily: "engineering" },
+    { jobFamily: "ENGINEERING" },
     { jobFamily: "" },
     { companyStage: "series_a" },
+    { companyStage: "Series_A" },
     { companyStage: "" },
     { payCadence: "hourly" },
+    { payCadence: "HOURLY" },
     { payCadence: "" },
     { currency: "USD" },
     { currency: "usd" },
     { title: SEARCH_TERM },
-    { location: SEARCH_TERM },
+    { city: SEARCH_TERM },
+    { state: "WA" },
+    { state: "wa" },
+    { state: "" },
     { daysSince: "30" },
     { daysSince: 90 },
     { maxExperience: "5" },
@@ -296,7 +303,8 @@ suite("useFilters", () => {
       jobFamily: "design",
       companyStage: "series_b",
       title: SEARCH_TERM,
-      location: SEARCH_TERM,
+      city: SEARCH_TERM,
+      state: "WA",
       daysSince: "30",
       maxExperience: "5",
       minSalary: "50000",
@@ -317,6 +325,16 @@ suite("useFilters", () => {
     return { [key]: parseInt(String(val)) };
   }
 
+  function uppercase(key: string, val?: unknown) {
+    if (val == null) return {};
+    return { [key]: String(val).toUpperCase() };
+  }
+
+  function lowercase(key: string, val?: unknown) {
+    if (val == null) return {};
+    return { [key]: String(val).toLowerCase() };
+  }
+
   validCases.forEach((input) => {
     test(toTestName("Valid input", input), () => {
       const result = useFilters(input);
@@ -327,6 +345,11 @@ suite("useFilters", () => {
         ...coerceInt("daysSince", input.daysSince),
         ...coerceInt("maxExperience", input.maxExperience),
         ...coerceInt("minSalary", input.minSalary),
+        ...lowercase("workTimeBasis", input.workTimeBasis),
+        ...lowercase("jobFamily", input.jobFamily),
+        ...lowercase("companyStage", input.companyStage),
+        ...lowercase("payCadence", input.payCadence),
+        ...uppercase("state", input.state),
         ...(input.currency ? { currency: input.currency.toUpperCase() } : {}),
       };
       assert.deepEqual(result, expected);
@@ -351,8 +374,10 @@ suite("useFilters", () => {
     { currency: 123 },
     { title: SEARCH_TOO_SHORT },
     { title: SEARCH_TOO_LONG },
-    { location: SEARCH_TOO_SHORT },
-    { location: SEARCH_TOO_LONG },
+    { city: SEARCH_TOO_SHORT },
+    { city: SEARCH_TOO_LONG },
+    { state: "XX" },
+    { state: "WAA" },
     { daysSince: "0" },
     { daysSince: "91" },
     { daysSince: "not-a-number" },

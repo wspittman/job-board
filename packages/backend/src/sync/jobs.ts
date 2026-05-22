@@ -123,7 +123,8 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
 
   const skip = async (reason: string, value: string) => {
     logProperty(`Skipped_${reason}`, value);
-    return await db.ignoreJob.upsert(job.item.id, companyKey, reason);
+    await db.ignoreJob.upsert(job.item.id, companyKey, reason);
+    return;
   };
 
   if (await llm.isGeneralApplication(job.item.title)) {

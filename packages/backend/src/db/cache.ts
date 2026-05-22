@@ -1,14 +1,13 @@
-import type { Location } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { logCounter, logError } from "../utils/telemetry.ts";
 import { db } from "./db.ts";
 import { LRUCache } from "./lruCache.ts";
 
-const locationMemoryCache = new LRUCache<string, Location>(1000);
+const locationMemoryCache = new LRUCache<string, string>(1000);
 
 export async function getCachedLocation(
   locationText: string,
-): Promise<Location | undefined> {
+): Promise<string | undefined> {
   try {
     const key = normalize(locationText);
     const cachedResult = locationMemoryCache.get(key);
@@ -22,10 +21,11 @@ export async function getCachedLocation(
 
     if (dbCachedResult) {
       logCounter("GetCachedLocation_DBHit");
-      const { city, regionCode, countryCode } = dbCachedResult;
-      const cleanedLocation = { city, regionCode, countryCode };
-      locationMemoryCache.set(key, cleanedLocation);
-      return cleanedLocation;
+      const { city } = dbCachedResult;
+      if (city) {
+        locationMemoryCache.set(key, city);
+        return city;
+      }
     }
   } catch (e) {
     logError(new AppError("GetCachedLocation", undefined, e));
@@ -34,16 +34,16 @@ export async function getCachedLocation(
   return undefined;
 }
 
-export function setCachedLocation(locationText: string, location: Location) {
+export function setCachedLocation(locationText: string, city: string) {
   try {
     const key = normalize(locationText);
-    locationMemoryCache.set(key, location);
+    locationMemoryCache.set(key, city);
 
     // Don't await on cache insertion
     void db.locationCache.upsertItem({
       id: key,
       pKey: key[0]!,
-      ...location,
+      city,
     });
   } catch (e) {
     logError(new AppError("SetCachedLocation", undefined, e));

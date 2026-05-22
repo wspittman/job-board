@@ -1,16 +1,17 @@
 {
   // References
-  // - https://tduyng.com/blog/tsconfig-options-you-should-use/
-  // - https://2ality.com/2025/01/tsconfig-json.html
+  // https://tduyng.com/blog/tsconfig-options-you-should-use/
+  // https://2ality.com/2025/01/tsconfig-json.html
+  // https://github.com/tsconfig/bases
 
   "compilerOptions": {
     "outDir": "../deploy",
     "rootDir": "./",
 
     // [Environment Dependent]
-    // Node 22 App/Lib: ES2022, NodeNext, NodeNext
-    // Browser App    : ES2020, ESNext, node
-    "target": "ES2022",
+    // Node 24 App/Lib: es2024, NodeNext, NodeNext
+    // Browser App    : es2023, esnext, node
+    "target": "es2024",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
 
@@ -21,17 +22,6 @@
     // Perf improvements
     "incremental": true,
     "skipLibCheck": true,
-
-    // Strict typechecking, a combination of (at least)
-    // - noImplicitAny
-    // - strictNullChecks
-    // - strictFunctionTypes
-    // - strictBindCallApply
-    // - strictPropertyInitialization
-    // - noImplicitThis
-    // - alwaysStrict
-    // - useUnknownInCatchVariables
-    "strict": true,
 
     // Debugging
     "sourceMap": true,

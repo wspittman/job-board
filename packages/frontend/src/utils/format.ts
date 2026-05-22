@@ -2,7 +2,10 @@
  * A utility class for formatting numbers, percentages, dates, and currency values.
  */
 class Format {
-  #number = new Intl.NumberFormat(undefined, { notation: "compact" });
+  #number = new Intl.NumberFormat(undefined, {
+    notation: "compact",
+    roundingMode: "trunc",
+  });
   #percent = new Intl.NumberFormat(undefined, { style: "percent" });
   #dateTime = new Intl.DateTimeFormat(undefined, {
     dateStyle: "full",
@@ -15,9 +18,11 @@ class Format {
   #currency = new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 1,
     notation: "compact",
+    roundingMode: "trunc",
   });
+  #collator = new Intl.Collator(undefined, { sensitivity: "base" });
 
   /**
    * Formats a number using compact notation.
@@ -79,6 +84,19 @@ class Format {
    */
   currency(value: number): string {
     return this.#currency.format(value);
+  }
+
+  /**
+   * Sorts an array of [value, label] entries into an array of { value, label } objects sorted by label.
+   * @param entries The array of [value, label] entries to sort and format.
+   * @returns An array of { value, label } objects sorted by label.
+   */
+  sortedOptions(
+    entries: [string, string][],
+  ): { value: string; label: string }[] {
+    return entries
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => this.#collator.compare(a.label, b.label));
   }
 }
 

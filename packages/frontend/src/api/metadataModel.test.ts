@@ -1,4 +1,5 @@
 import { expect, suite, test } from "vitest";
+import { fmt } from "../utils/format";
 import { mockMetadata } from "../utils/testUtils";
 import { metadataModel } from "./metadataModel";
 
@@ -7,15 +8,9 @@ suite("metadataModel", () => {
     mockMetadata();
     const result = await metadataModel.getCountStrings();
 
-    expect(result.jobCount).toBe(
-      (1000).toLocaleString(undefined, { notation: "compact" }),
-    );
-    expect(result.recentJobCount).toBe(
-      (100).toLocaleString(undefined, { notation: "compact" }),
-    );
-    expect(result.companyCount).toBe(
-      (3).toLocaleString(undefined, { notation: "compact" }),
-    );
+    expect(result.jobCount).toBe(fmt.number(1000));
+    expect(result.recentJobCount).toBe(fmt.number(100));
+    expect(result.companyCount).toBe(fmt.number(3));
   });
 
   test("getCountStrings: computes remotePct", async () => {

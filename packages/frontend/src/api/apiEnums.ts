@@ -1,3 +1,5 @@
+import { fmt } from "../utils/format";
+
 // #region Helper Functions
 
 type Enum<T extends string> = Record<T, string>;
@@ -5,7 +7,11 @@ type Enum<T extends string> = Record<T, string>;
 function asEnum<T extends string>(obj: Enum<T>, value: unknown): T | undefined {
   if (typeof value !== "string") return undefined;
   const val = value.trim() as T;
-  return obj[val] ? val : undefined;
+  if (obj[val]) return val;
+  const lower = val.toLowerCase() as T;
+  if (obj[lower]) return lower;
+  const upper = val.toUpperCase() as T;
+  return obj[upper] ? upper : undefined;
 }
 
 function asLabel<T extends string>(obj: Enum<T>, value: unknown): string {
@@ -14,9 +20,7 @@ function asLabel<T extends string>(obj: Enum<T>, value: unknown): string {
 }
 
 function toOptions<T extends string>(obj: Enum<T>) {
-  return Object.entries<string>(obj)
-    .map(([value, label]) => ({ value, label }))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  return fmt.sortedOptions(Object.entries(obj));
 }
 
 // #endregion
@@ -90,3 +94,69 @@ export const toPayCadence = (value: unknown): PayCadence | undefined =>
   asEnum(payCadence, value);
 export const toPayCadenceLabel = (value: unknown): string =>
   asLabel(payCadence, value);
+
+const usState = {
+  AL: "Alabama",
+  AK: "Alaska",
+  AZ: "Arizona",
+  AR: "Arkansas",
+  CA: "California",
+  CO: "Colorado",
+  CT: "Connecticut",
+  DE: "Delaware",
+  FL: "Florida",
+  GA: "Georgia",
+  HI: "Hawaii",
+  ID: "Idaho",
+  IL: "Illinois",
+  IN: "Indiana",
+  IA: "Iowa",
+  KS: "Kansas",
+  KY: "Kentucky",
+  LA: "Louisiana",
+  ME: "Maine",
+  MD: "Maryland",
+  MA: "Massachusetts",
+  MI: "Michigan",
+  MN: "Minnesota",
+  MS: "Mississippi",
+  MO: "Missouri",
+  MT: "Montana",
+  NE: "Nebraska",
+  NV: "Nevada",
+  NH: "New Hampshire",
+  NJ: "New Jersey",
+  NM: "New Mexico",
+  NY: "New York",
+  NC: "North Carolina",
+  ND: "North Dakota",
+  OH: "Ohio",
+  OK: "Oklahoma",
+  OR: "Oregon",
+  PA: "Pennsylvania",
+  RI: "Rhode Island",
+  SC: "South Carolina",
+  SD: "South Dakota",
+  TN: "Tennessee",
+  TX: "Texas",
+  UT: "Utah",
+  VT: "Vermont",
+  VA: "Virginia",
+  WA: "Washington",
+  WV: "West Virginia",
+  WI: "Wisconsin",
+  WY: "Wyoming",
+  DC: "District of Columbia",
+  AS: "American Samoa",
+  GU: "Guam",
+  MP: "Northern Mariana Islands",
+  PR: "Puerto Rico",
+  VI: "U.S. Virgin Islands",
+} as const;
+
+export type UsState = keyof typeof usState;
+export const stateOptions = toOptions(usState);
+export const toUsState = (value: unknown): UsState | undefined =>
+  asEnum(usState, value);
+export const toUsStateLabel = (value: unknown): string =>
+  asLabel(usState, value);

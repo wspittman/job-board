@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "target": "es2023",
+    "module": "esnext",
+    "lib": ["ES2023", "DOM"],
     "types": ["vite/client"],
 
     /* Bundler mode */
@@ -19,17 +18,6 @@
     // Perf improvements
     "incremental": true,
     "skipLibCheck": true,
-
-    // Strict typechecking, a combination of (at least)
-    // - noImplicitAny
-    // - strictNullChecks
-    // - strictFunctionTypes
-    // - strictBindCallApply
-    // - strictPropertyInitialization
-    // - noImplicitThis
-    // - alwaysStrict
-    // - useUnknownInCatchVariables
-    "strict": true,
 
     // Code Quality
     "noUnusedParameters": true,

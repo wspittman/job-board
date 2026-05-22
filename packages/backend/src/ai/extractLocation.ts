@@ -1,25 +1,24 @@
 import { jsonCompletion } from "dry-utils-openai";
 import { getLLMOptions } from "../config.ts";
 import { getCachedLocation, setCachedLocation } from "../db/cache.ts";
-import { ExtractionLocation } from "../models/extractionModels.ts";
-import type { Location } from "../models/models.ts";
-import { setExtractedData } from "./setExtractedData.ts";
+import { ExtractionFilters } from "../models/extractionModels.ts";
 
-const prompt = `You are a detail-oriented clerical worker who excels at identifying user intent.
-Your goal is to extract location information from a potentially partial human-written text.
-Carefully review the text to identify a likely intended location.
-Format your response in JSON, adhering to the provided schema. Use null for any fields that cannot be confidently determined.`;
+const prompt = `You are a detail-oriented clerical worker who excels at normalizing location input.
+Your goal is to take a potentially misspelled, abbreviated, or informal city name and return the correct, properly capitalized English city name.
+Return an empty string if the input is not a recognizable city name.`;
 
 /**
- * Extracts location information.
- * @param location The location object to extract data into
- * @returns True if extraction was successful, false otherwise
+ * Normalizes a city name using an LLM.
+ * @param city The potentially misspelled or informal city name to normalize.
+ * @returns The normalized city name, or undefined if the input is not a recognizable city.
  */
-export async function extractLocation(location: string): Promise<Location> {
-  if (!location) return {};
+export async function extractLocation(
+  city: string,
+): Promise<string | undefined> {
+  city = city.trim();
+  if (!city) return undefined;
 
-  const cachedResult = await getCachedLocation(location);
-
+  const cachedResult = await getCachedLocation(city);
   if (cachedResult) {
     return cachedResult;
   }
@@ -27,16 +26,13 @@ export async function extractLocation(location: string): Promise<Location> {
   const { content } = await jsonCompletion(
     "extractLocation",
     prompt,
-    location,
-    ExtractionLocation,
+    city,
+    ExtractionFilters.pick({ city: true }),
     getLLMOptions("extractLocation"),
   );
 
-  if (!content) return {};
+  if (!content?.city) return undefined;
 
-  const extractedLocation: Location = {};
-  setExtractedData(extractedLocation, content);
-  setCachedLocation(location, extractedLocation);
-
-  return extractedLocation;
+  setCachedLocation(city, content.city);
+  return content.city;
 }

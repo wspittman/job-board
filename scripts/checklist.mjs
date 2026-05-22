@@ -20,7 +20,7 @@ function npmCommand(cmd, ...args) {
 }
 
 if (!!isFull) {
-  npmCommand("update", "--min-release-age", 5);
+  npmCommand("update", "--min-release-age", 3);
   npmCommand("run", "clean");
   npmCommand("install");
 }
