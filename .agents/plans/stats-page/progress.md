@@ -87,3 +87,32 @@ helpers, and related frontend tests. Do not start Phase 4 until Phase 3 is imple
   - Removed `Learnings.md` because it encoded the incorrect empty-bucket assumption
 - **Stop point:**
   - Phase 3 is complete. Do not begin Phase 4 until reviewed.
+
+### Phase 4: Frontend Stats Page Shell
+
+- **Status:** complete
+- **Actions started:**
+  - Re-read Phase 4 scope and current MPA page examples
+  - Confirmed Phase 5 chart components are out of scope for this pass
+- **Actions completed:**
+  - Added root `/stats` MPA entry
+  - Added stats page module entry and page stylesheet
+  - Added stats page shell markup with summary, breakdown, location, and salary sections
+  - Added a `Stats` link to the shared header navigation
+  - Did not add chart web components or chart data wiring; those remain Phase 5+
+- **Files created:**
+  - `packages/frontend/src/stats.html`
+  - `packages/frontend/src/stats/stats.ts`
+  - `packages/frontend/src/stats/stats.html`
+  - `packages/frontend/src/stats/stats.css`
+- **Files modified:**
+  - `packages/frontend/src/partials/header.html`
+  - `.agents/plans/stats-page/task_plan.md`
+  - `.agents/plans/stats-page/progress.md`
+- **Validation:**
+  - `npm run build --workspace=frontend` passed
+  - `npm run test --workspace=frontend` passed: 22 files, 224 tests
+  - In-app browser tooling was not exposed in this session after `tool_search`, so visual browser
+    verification was not run
+- **Stop point:**
+  - Phase 4 is complete. Do not begin Phase 5 until reviewed.

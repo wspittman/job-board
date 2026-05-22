@@ -1,0 +1,88 @@
+<main class="stats-page">
+  <section class="stats-hero" aria-labelledby="stats-title">
+    <div>
+      <h1 id="stats-title">Job Market Stats</h1>
+      <p class="stats-intro">
+        A current snapshot of the roles, companies, locations, and compensation
+        patterns in Better Job Board.
+      </p>
+    </div>
+    <a class="abtn stats-cta" href="/jobs">Browse Jobs</a>
+  </section>
+
+  <section class="summary-grid" aria-label="Summary">
+    <article class="summary-card card">
+      <span class="summary-value" id="stats-job-count">-</span>
+      <span class="summary-label">Jobs</span>
+    </article>
+    <article class="summary-card card">
+      <span class="summary-value" id="stats-company-count">-</span>
+      <span class="summary-label">Companies</span>
+    </article>
+    <article class="summary-card card">
+      <span class="summary-value" id="stats-remote-pct">-</span>
+      <span class="summary-label">Remote</span>
+    </article>
+    <article class="summary-card card">
+      <span class="summary-value" id="stats-updated">-</span>
+      <span class="summary-label">Last Updated</span>
+    </article>
+  </section>
+
+  <section class="stats-grid" aria-label="Breakdowns">
+    <section class="stats-panel card" aria-labelledby="job-families-title">
+      <div class="panel-heading">
+        <h2 id="job-families-title">Job Families</h2>
+      </div>
+      <div class="chart-shell" id="job-families-chart"></div>
+    </section>
+
+    <section class="stats-panel card" aria-labelledby="arrangement-title">
+      <div class="panel-heading">
+        <h2 id="arrangement-title">Work Arrangement</h2>
+      </div>
+      <div class="donut-shell" id="presence-chart"></div>
+    </section>
+
+    <section class="stats-panel card" aria-labelledby="work-type-title">
+      <div class="panel-heading">
+        <h2 id="work-type-title">Work Type</h2>
+      </div>
+      <div class="chart-shell" id="work-time-chart"></div>
+    </section>
+
+    <section class="stats-panel card" aria-labelledby="stage-title">
+      <div class="panel-heading">
+        <h2 id="stage-title">Company Stage</h2>
+      </div>
+      <div class="chart-shell" id="company-stage-chart"></div>
+    </section>
+
+    <section class="stats-panel card" aria-labelledby="locations-title">
+      <div class="panel-heading">
+        <h2 id="locations-title">Top Locations</h2>
+      </div>
+      <div class="chart-shell" id="locations-chart"></div>
+    </section>
+
+    <section class="stats-panel card wide-panel" aria-labelledby="salary-title">
+      <div class="panel-heading">
+        <h2 id="salary-title">Salary Insights</h2>
+      </div>
+      <div class="table-shell" id="salary-table">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Group</th>
+              <th scope="col">P25</th>
+              <th scope="col">Median</th>
+              <th scope="col">P75</th>
+              <th scope="col">Samples</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+</main>

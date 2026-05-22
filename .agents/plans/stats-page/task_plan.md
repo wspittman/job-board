@@ -8,7 +8,7 @@ ad-hoc database queries from the request path.
 
 ## Current Phase
 
-Phase 3 - complete, awaiting review. Stop here before starting Phase 4. The plan was refreshed on
+Phase 4 - complete, awaiting review. Stop here before starting Phase 5. The plan was refreshed on
 2026-05-22 for the current codebase and `dry-utils-cosmosdb@0.6.1`.
 
 ## Phases
@@ -168,7 +168,7 @@ Removed from the original plan:
 - Company size breakdown
 - Currency segmentation
 
-- **Status:** pending
+- **Status:** complete
 
 ---
 
