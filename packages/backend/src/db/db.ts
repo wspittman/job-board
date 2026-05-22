@@ -10,6 +10,7 @@ import {
   CompanyStage,
   JobFamily,
   Presence,
+  UsState,
   WorkTimeBasis,
 } from "../models/enums.ts";
 import type {
@@ -134,16 +135,6 @@ class JobContainer extends Container<Job> {
       salaryRange?: { cadence?: string; min?: number; max?: number };
     };
 
-    // GROUP BY in the DB; mock requires a custom mockDBProjects handler (see DB.connect)
-    const locationQuery = {
-      query:
-        "SELECT c.primaryLocation.regionCode AS regionCode, COUNT(1) AS count" +
-        " FROM c" +
-        " WHERE (IS_DEFINED(c.primaryLocation.regionCode)) AND (c.primaryLocation.countryCode = @countryCode)" +
-        " GROUP BY c.primaryLocation.regionCode",
-      parameters: [{ name: "@countryCode", value: "US" }],
-    };
-
     // WHERE pushdown; mock built-in handles nested-path parameterized conditions
     const salaryQuery = {
       query:
@@ -167,7 +158,7 @@ class JobContainer extends Container<Job> {
       this.getCountBy("jobFamily"),
       this.getCountBy("workTimeBasis"),
       this.getCountBy("companyStage"),
-      this.query<{ regionCode: string; count: number }>(locationQuery),
+      this.getCountBy("primaryLocation.regionCode"),
       this.query<SalaryRow>(salaryQuery),
     ]);
 
@@ -176,9 +167,10 @@ class JobContainer extends Container<Job> {
     const workTimeCounts = toCountRecord(workTimeRows, WorkTimeBasis);
     const stageCounts = toCountRecord(stageRows, CompanyStage);
 
-    const topLocations = locationRows
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
+    const topLocationCounts = toCountRecord(
+      locationRows.sort((a, b) => b.count - a.count).slice(0, 10),
+      UsState,
+    );
 
     const salaryStats = computeSalaryStats(salaryRaw);
 
@@ -190,7 +182,7 @@ class JobContainer extends Container<Job> {
       jobFamilyCounts,
       workTimeCounts,
       stageCounts,
-      topLocations,
+      topLocationCounts,
       salaryStats,
     };
   }
@@ -273,30 +265,6 @@ class DB {
         mockDataJson: config.DATABASE_MOCK_DATA_JSON,
         mockDataPath: config.DATABASE_MOCK_DATA_PATH,
       }),
-      mockDBProjects: {
-        job: [
-          {
-            // Handles the location GROUP BY query in aggregateMetadata()
-            matcher:
-              /^c\.primaryLocation\.regionCode\s+AS\s+regionCode\s*,\s*COUNT\(1\)\s+AS\s+count$/i,
-            fn: ({ items }) => {
-              const counts = new Map<string, number>();
-              for (const item of items) {
-                const rc = (
-                  item["primaryLocation"] as { regionCode?: string } | undefined
-                )?.regionCode;
-                if (rc) counts.set(rc, (counts.get(rc) ?? 0) + 1);
-              }
-              return Array.from(counts.entries()).map(
-                ([regionCode, count]) => ({
-                  regionCode,
-                  count,
-                }),
-              );
-            },
-          },
-        ],
-      },
       containers: [
         {
           name: "company",

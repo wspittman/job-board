@@ -90,7 +90,7 @@ export interface ClientMetadata {
   jobFamilyCounts: Partial<Record<JobFamily, number>>;
   workTimeCounts: Partial<Record<WorkTimeBasis, number>>;
   stageCounts: Partial<Record<CompanyStage, number>>;
-  topLocations: { regionCode: string; count: number }[];
+  topLocationCounts: Partial<Record<UsState, number>>;
   salaryStats: SalaryStat[];
 }
 
