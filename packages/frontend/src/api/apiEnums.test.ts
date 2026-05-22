@@ -6,6 +6,7 @@ import {
   toJobFamilyLabel,
   toPayCadence,
   toPayCadenceLabel,
+  toPresenceLabel,
   toWorkTimeBasis,
   toWorkTimeBasisLabel,
 } from "./apiEnums";
@@ -14,11 +15,13 @@ suite("apiEnums", () => {
   test.for([
     ["full_time", "Full-time"],
     ["part_time", "Part-time"],
+    ["variable", "Variable"],
+    ["per_diem", "Per diem"],
     ["unknown", ""],
     [undefined, ""],
     [null, ""],
   ] as [unknown, string][])(
-    "toWorkTimeBasisLabel(%s) → %s",
+    "toWorkTimeBasisLabel(%s) -> %s",
     ([value, expected]) => {
       expect(toWorkTimeBasisLabel(value)).toBe(expected);
     },
@@ -33,7 +36,7 @@ suite("apiEnums", () => {
     ["unknown", ""],
     [undefined, ""],
   ] as [unknown, string][])(
-    "toJobFamilyLabel(%s) → %s",
+    "toJobFamilyLabel(%s) -> %s",
     ([value, expected]) => {
       expect(toJobFamilyLabel(value)).toBe(expected);
     },
@@ -47,9 +50,22 @@ suite("apiEnums", () => {
     ["unknown", ""],
     [undefined, ""],
   ] as [unknown, string][])(
-    "toCompanyStageLabel(%s) → %s",
+    "toCompanyStageLabel(%s) -> %s",
     ([value, expected]) => {
       expect(toCompanyStageLabel(value)).toBe(expected);
+    },
+  );
+
+  test.for([
+    ["remote", "Remote"],
+    ["hybrid", "Hybrid"],
+    ["onsite", "On-site"],
+    ["unknown", ""],
+    [undefined, ""],
+  ] as [unknown, string][])(
+    "toPresenceLabel(%s) -> %s",
+    ([value, expected]) => {
+      expect(toPresenceLabel(value)).toBe(expected);
     },
   );
 
@@ -60,7 +76,7 @@ suite("apiEnums", () => {
     ["unknown", ""],
     [undefined, ""],
   ] as [unknown, string][])(
-    "toPayCadenceLabel(%s) → %s",
+    "toPayCadenceLabel(%s) -> %s",
     ([value, expected]) => {
       expect(toPayCadenceLabel(value)).toBe(expected);
     },
@@ -69,28 +85,32 @@ suite("apiEnums", () => {
   test.for([
     ["contract", undefined],
     ["full_time", "full_time"],
-  ] as [unknown, string][])("toWorkTimeBasis(%s) → %s", ([value, expected]) => {
-    expect(toWorkTimeBasis(value)).toBe(expected);
-  });
+    ["variable", "variable"],
+  ] as [unknown, string][])(
+    "toWorkTimeBasis(%s) -> %s",
+    ([value, expected]) => {
+      expect(toWorkTimeBasis(value)).toBe(expected);
+    },
+  );
 
   test.for([
     ["unknown", undefined],
     ["engineering", "engineering"],
-  ] as [unknown, string][])("toJobFamily(%s) → %s", ([value, expected]) => {
+  ] as [unknown, string][])("toJobFamily(%s) -> %s", ([value, expected]) => {
     expect(toJobFamily(value)).toBe(expected);
   });
 
   test.for([
     ["unknown", undefined],
     ["series_b", "series_b"],
-  ] as [unknown, string][])("toCompanyStage(%s) → %s", ([value, expected]) => {
+  ] as [unknown, string][])("toCompanyStage(%s) -> %s", ([value, expected]) => {
     expect(toCompanyStage(value)).toBe(expected);
   });
 
   test.for([
     ["monthly", undefined],
     ["salary", "salary"],
-  ] as [unknown, string][])("toPayCadence(%s) → %s", ([value, expected]) => {
+  ] as [unknown, string][])("toPayCadence(%s) -> %s", ([value, expected]) => {
     expect(toPayCadence(value)).toBe(expected);
   });
 });

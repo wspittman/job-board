@@ -15,6 +15,18 @@ export interface MetadataModelApi {
   recentJobCount: number;
   presenceCounts: Partial<Record<Presence, number>>;
   jobFamilyCounts: Partial<Record<JobFamily, number>>;
+  workTimeCounts: Partial<Record<WorkTimeBasis, number>>;
+  stageCounts: Partial<Record<CompanyStage, number>>;
+  topLocationCounts: Partial<Record<UsState, number>>;
+  salaryStats: SalaryStat[];
+}
+
+export interface SalaryStat {
+  jobFamily?: JobFamily;
+  count: number;
+  p25: number;
+  median: number;
+  p75: number;
 }
 
 export interface JobModelApi {

@@ -1,5 +1,11 @@
 import { fmt } from "../utils/format";
 
+/*
+These are the frontend representations of the enums defined in enums.ts in the backend.
+These are not exact mirrors. They may be missing values where data is poor. They include label mappings.
+Also, the backend enums include an empty string option but we expect to never see these values in the frontend.
+*/
+
 // #region Helper Functions
 
 type Enum<T extends string> = Record<T, string>;
@@ -25,11 +31,21 @@ function toOptions<T extends string>(obj: Enum<T>) {
 
 // #endregion
 
-export type Presence = "onsite" | "remote" | "hybrid";
+const presence = {
+  remote: "Remote",
+  hybrid: "Hybrid",
+  onsite: "On-site",
+} as const;
+
+export type Presence = keyof typeof presence;
+export const toPresenceLabel = (value: unknown): string =>
+  asLabel(presence, value);
 
 const workTimeBasis = {
   full_time: "Full-time",
   part_time: "Part-time",
+  variable: "Variable",
+  per_diem: "Per diem",
 } as const;
 
 export type WorkTimeBasis = keyof typeof workTimeBasis;
@@ -76,6 +92,18 @@ const companyStage = {
 } as const;
 
 export type CompanyStage = keyof typeof companyStage;
+export const companyStageProgression: CompanyStage[] = [
+  "bootstrapped",
+  "pre_seed",
+  "seed",
+  "series_a",
+  "series_b",
+  "series_c",
+  "series_d_plus",
+  "private_equity",
+  "public",
+  "nonprofit",
+];
 export const companyStageOptions = toOptions(companyStage);
 export const toCompanyStage = (value: unknown): CompanyStage | undefined =>
   asEnum(companyStage, value);

@@ -8,8 +8,8 @@ ad-hoc database queries from the request path.
 
 ## Current Phase
 
-Phase 3 - pending. The plan was refreshed on 2026-05-22 for the current codebase and
-`dry-utils-cosmosdb@0.6.1`.
+Phase 3 - complete, awaiting review. Stop here before starting Phase 4. The plan was refreshed on
+2026-05-22 for the current codebase and `dry-utils-cosmosdb@0.6.1`.
 
 ## Phases
 
@@ -111,8 +111,7 @@ Required updates:
 - Keep label logic in `apiEnums.ts`; do not create a new `enumLabels.ts`.
 - Add `toPresenceLabel()` or equivalent, since stats needs display labels for presence values.
 - Expand `workTimeBasis` labels to include `variable` and `per_diem`, matching the backend enum.
-- Treat empty or unknown metadata buckets deliberately in helper methods, usually as
-  `"Unspecified"` or by filtering them out depending on the chart.
+- Filter out unknown/unlabeled metadata buckets in helper methods.
 
 New `metadataModel` helper methods:
 
@@ -129,7 +128,7 @@ Implementation notes:
 - Keep `getCountStrings()` intact for the existing home page.
 - Prefer shared internal helpers for count-record to series conversion and percentage math.
 
-- **Status:** pending
+- **Status:** complete
 
 ---
 
@@ -269,4 +268,7 @@ Per repository instructions, always run `npm run pre-checkin` before committing 
 
 | Error | Attempt | Resolution |
 | ----- | ------- | ---------- |
-| -     | -       | -          |
+| Incorrectly assumed empty-string metadata buckets could appear in frontend metadata helpers | Review | Removed empty-string enum values/tests; empty fields are stripped before DB insert and `getCountBy()` only returns defined properties |
+| Frontend build failed on generic `Object.entries()` typing in `toOptions()` | 1 | Reverted `toOptions()` to the simpler existing implementation after removing empty enum values |
+| PowerShell text replacement failed due encoded arrow characters in a test title | 1 | Rewrote the touched test file with ASCII test names via `apply_patch` |
+| `rg` search failed due malformed quoting around `""` | 1 | Re-ran the search with simpler fixed patterns |

@@ -1,5 +1,11 @@
 import { z } from "dry-utils-openai";
 
+/*
+Important note regarding empty string options:
+Each enum contains an empty string option so LLM extraction can specify that a property is absent/unclear.
+Properties that receive the empty string option are stripped from objects before they are stored in the DB.
+*/
+
 // #region Company
 
 export const CompanySizeBand = z

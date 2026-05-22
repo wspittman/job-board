@@ -111,6 +111,38 @@ export function mockMetadata(overrides: Partial<MetadataModelApi> = {}) {
       design: 150,
       marketing: 100,
     },
+    workTimeCounts: {
+      full_time: 700,
+      part_time: 200,
+      variable: 75,
+      per_diem: 25,
+    },
+    stageCounts: {
+      seed: 100,
+      series_a: 300,
+      series_b: 150,
+      public: 400,
+    },
+    topLocationCounts: {
+      CA: 300,
+      NY: 200,
+      WA: 100,
+    },
+    salaryStats: [
+      {
+        count: 40,
+        p25: 100_000,
+        median: 120_000,
+        p75: 150_000,
+      },
+      {
+        jobFamily: "engineering",
+        count: 20,
+        p25: 110_000,
+        median: 130_000,
+        p75: 160_000,
+      },
+    ],
     ...overrides,
   });
 }

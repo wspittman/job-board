@@ -158,9 +158,12 @@ Current gaps for the stats page:
 - no presence label helper
 - `workTimeBasis` only includes `full_time` and `part_time`, while the backend enum also includes
   `variable` and `per_diem`
-- empty backend enum buckets may arrive and need an intentional display rule
 
 Decision: Extend `apiEnums.ts`; do not add `enumLabels.ts`.
+
+Correction from Phase 3 review: frontend enum maps should not include empty-string values for stats
+metadata. Empty properties are stripped before database insert, and `getCountBy()` only returns
+defined properties.
 
 ## Component Architecture
 
@@ -169,6 +172,10 @@ For the dedicated stats page, `metadataModel` should expose typed series data so
 duplicate metadata parsing.
 
 Decision: Keep `getCountStrings()` for the home page and add separate stats-oriented helpers.
+
+Phase 3 added `MetadataSeries` helpers that return `{ label, count, pct }` entries. Percentages
+are numeric values from 0 to 100 so later chart components can choose their own formatting.
+Unknown or unlabeled buckets are filtered out.
 
 ## Technical Constraints
 

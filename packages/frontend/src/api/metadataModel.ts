@@ -1,7 +1,23 @@
 import type { FormOption } from "../components/form-element";
 import { fmt } from "../utils/format";
 import { api } from "./api";
-import { toJobFamilyLabel } from "./apiEnums";
+import {
+  companyStageProgression,
+  toCompanyStageLabel,
+  toJobFamilyLabel,
+  toPresenceLabel,
+  toUsStateLabel,
+  toWorkTimeBasisLabel,
+} from "./apiEnums";
+import type { SalaryStat } from "./apiTypes";
+
+export interface MetadataSeries {
+  label: string;
+  count: number;
+  pct: number;
+}
+
+type CountRecord<T extends string> = Partial<Record<T, number>>;
 
 /**
  * Manages metadata related to job listings, such as company names, job counts, and timestamps.
@@ -57,6 +73,74 @@ class MetadataModel {
   }
 
   /**
+   * Retrieves all job family counts as chart-ready series data.
+   * @returns Job family entries sorted by count descending.
+   */
+  async getJobFamilySeries(): Promise<MetadataSeries[]> {
+    const { jobCount, jobFamilyCounts } = await this.#fetch();
+    return countRecordToSeries(jobFamilyCounts, jobCount, toJobFamilyLabel);
+  }
+
+  /**
+   * Retrieves presence mode counts as chart-ready series data.
+   * @returns Presence entries in a stable display order.
+   */
+  async getPresenceSeries(): Promise<MetadataSeries[]> {
+    const { jobCount, presenceCounts } = await this.#fetch();
+    return countRecordToSeries(presenceCounts, jobCount, toPresenceLabel, [
+      "remote",
+      "hybrid",
+      "onsite",
+    ]);
+  }
+
+  /**
+   * Retrieves work time basis counts as chart-ready series data.
+   * @returns Work time entries in a stable display order.
+   */
+  async getWorkTimeSeries(): Promise<MetadataSeries[]> {
+    const { jobCount, workTimeCounts } = await this.#fetch();
+    return countRecordToSeries(workTimeCounts, jobCount, toWorkTimeBasisLabel, [
+      "full_time",
+      "part_time",
+      "variable",
+      "per_diem",
+    ]);
+  }
+
+  /**
+   * Retrieves job-weighted company stage counts as chart-ready series data.
+   * @returns Company stage entries sorted by funding progression.
+   */
+  async getCompanyStageSeries(): Promise<MetadataSeries[]> {
+    const { jobCount, stageCounts } = await this.#fetch();
+    return countRecordToSeries(
+      stageCounts,
+      jobCount,
+      toCompanyStageLabel,
+      companyStageProgression,
+    );
+  }
+
+  /**
+   * Retrieves the top location counts as chart-ready series data.
+   * @returns State and territory entries sorted by count descending.
+   */
+  async getTopLocations(): Promise<MetadataSeries[]> {
+    const { jobCount, topLocationCounts } = await this.#fetch();
+    return countRecordToSeries(topLocationCounts, jobCount, toUsStateLabel);
+  }
+
+  /**
+   * Retrieves annual salary percentile buckets.
+   * @returns Salary stats emitted by backend metadata aggregation.
+   */
+  async getSalaryStats(): Promise<SalaryStat[]> {
+    const { salaryStats } = await this.#fetch();
+    return salaryStats;
+  }
+
+  /**
    * Retrieves company names in a format suitable for form options.
    * @returns The array of form options for companies.
    */
@@ -85,6 +169,33 @@ class MetadataModel {
 
     return data;
   }
+}
+
+function countRecordToSeries<T extends string>(
+  counts: CountRecord<T>,
+  total: number,
+  toLabel: (value: unknown) => string,
+  order?: readonly T[],
+): MetadataSeries[] {
+  const entries = order
+    ? order.map((key) => [key, counts[key]] as const)
+    : (Object.entries(counts) as [T, number | undefined][]).sort(
+        ([, a], [, b]) => (b ?? 0) - (a ?? 0),
+      );
+
+  return entries
+    .map(([key, count = 0]) => ({
+      label: toLabel(key),
+      count,
+      pct: toPct(count, total),
+    }))
+    .filter(({ label, count }) => label && count > 0);
+}
+
+function toPct(value: number = 0, total: number = 0): number {
+  value = Math.max(value, 0);
+  total = Math.max(total, 0);
+  return total > 0 ? (value / total) * 100 : 0;
 }
 
 export const metadataModel = new MetadataModel();
