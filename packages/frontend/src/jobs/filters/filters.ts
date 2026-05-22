@@ -7,6 +7,7 @@ import {
   companyStageOptions,
   jobFamilyOptions,
   payCadenceOptions,
+  stateOptions,
   workTimeBasisOptions,
 } from "../../api/apiEnums";
 import { FilterModel, type FilterModelKey } from "../../api/filterModel";
@@ -104,10 +105,16 @@ const filterDefs: Record<string, FormElementDef[]> = {
     },
     {
       type: "jb-form-input",
-      name: "location",
-      label: "Location",
+      name: "city",
+      label: "City",
       prefix: "Working from",
       maxLength: 100,
+    },
+    {
+      type: "jb-form-select",
+      name: "state",
+      label: "State / Territory",
+      options: stateOptions,
     },
     {
       type: "jb-form-input",

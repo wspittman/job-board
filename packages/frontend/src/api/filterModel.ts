@@ -6,6 +6,8 @@ import {
   toJobFamilyLabel,
   toPayCadence,
   toPayCadenceLabel,
+  toUsState,
+  toUsStateLabel,
   toWorkTimeBasis,
   toWorkTimeBasisLabel,
 } from "./apiEnums";
@@ -119,8 +121,10 @@ export class FilterModel {
           return [key, value ? "Remote" : "In-Person / Hybrid"];
         case "title":
           return [key, `Title: ${value}`];
-        case "location":
-          return [key, `Location: ${value}`];
+        case "city":
+          return [key, `City: ${value}`];
+        case "state":
+          return [key, `State: ${toUsStateLabel(value) || value}`];
         case "daysSince":
           return [key, `Posted: Within ${value} days`];
         case "maxExperience":
@@ -153,6 +157,20 @@ export class FilterModel {
     const normalized = new URLSearchParams(
       [...params].map(([key, value]) => [key.toLowerCase(), value]),
     );
+
+    // Backward compat: parse legacy ?location= param when no ?city= or ?state= is present
+    if (
+      normalized.has("location") &&
+      !normalized.has("city") &&
+      !normalized.has("state")
+    ) {
+      const location = normalized.get("location");
+      if (location) {
+        normalized.set("city", location);
+      }
+      normalized.delete("location");
+    }
+
     this.#fromGeneric((key) => normalized.get(key.toLowerCase()));
   }
 
@@ -171,7 +189,8 @@ export class FilterModel {
     this.#filters.companyStage = toCompanyStage(get("companyStage"));
     this.#filters.payCadence = toPayCadence(get("payCadence"));
     this.#filters.isRemote = normBoolean(get("isRemote"));
-    this.#filters.location = normSearchString(get("location"));
+    this.#filters.city = normSearchString(get("city"));
+    this.#filters.state = toUsState(get("state"));
     this.#filters.minSalary = normNumber(get("minSalary"));
     this.#filters.maxExperience = normNumber(get("maxExperience"));
     this.#filters.daysSince = normNumber(get("daysSince"));

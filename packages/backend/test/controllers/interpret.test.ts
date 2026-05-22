@@ -9,7 +9,7 @@ suite("interpretFilters controller", () => {
     const mockFilters: Filters = {
       title: "Software Engineer",
       isRemote: true,
-      location: "Berlin",
+      city: "Seattle",
     };
     const interpretFiltersMock = mock.method(
       llm,
@@ -24,7 +24,7 @@ suite("interpretFilters controller", () => {
     assert.equal(interpretFiltersMock.mock.callCount(), 1);
     assert.equal(result.title, "Software Engineer");
     assert.equal(result.isRemote, true);
-    assert.equal(result.location, "Berlin");
+    assert.equal(result.city, "Seattle");
 
     interpretFiltersMock.mock.restore();
   });
@@ -32,7 +32,8 @@ suite("interpretFilters controller", () => {
   test("transforms LLM output into standard Filters", async () => {
     const mockFilters: Filters = {
       isRemote: true,
-      location: "San Francisco, CA, United States (US)",
+      city: "San Francisco",
+      state: "CA",
       title: "Fullstack",
     };
 
@@ -46,7 +47,8 @@ suite("interpretFilters controller", () => {
     const result = await interpretFilters(query);
 
     assert.equal(result.isRemote, true);
-    assert.equal(result.location, "San Francisco, CA, United States (US)");
+    assert.equal(result.city, "San Francisco");
+    assert.equal(result.state, "CA");
     assert.equal(result.title, "Fullstack");
 
     interpretFiltersMock.mock.restore();

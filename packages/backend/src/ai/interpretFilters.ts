@@ -2,7 +2,6 @@ import { jsonCompletion } from "dry-utils-openai";
 import { getLLMOptions } from "../config.ts";
 import type { Filters } from "../models/clientModels.ts";
 import { ExtractionFilters } from "../models/extractionModels.ts";
-import { normalizedLocation } from "../utils/location.ts";
 import { logProperty } from "../utils/telemetry.ts";
 import { setExtractedData } from "./setExtractedData.ts";
 
@@ -45,7 +44,6 @@ export async function interpretFilters(query: string): Promise<Filters> {
   const mappedContent: Filters = {
     ...extractedFilters,
     isRemote,
-    location: normalizedLocation(extractedFilters.location),
   };
 
   const result: Filters = {};

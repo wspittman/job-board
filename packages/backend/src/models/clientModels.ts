@@ -3,6 +3,7 @@ import type {
   JobFamily,
   PayCadence,
   Presence,
+  UsState,
   WorkTimeBasis,
 } from "./enums.ts";
 import type { CompanyKey, SalaryStat } from "./models.ts";
@@ -21,7 +22,8 @@ export interface Filters {
   currency?: string;
   // Substring Match
   title?: string;
-  location?: string;
+  city?: string;
+  state?: UsState;
   // Range Match
   daysSince?: number;
   maxExperience?: number;

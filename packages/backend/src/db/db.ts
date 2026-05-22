@@ -1,8 +1,8 @@
 import { batch } from "dry-utils-async";
 import {
   Container,
-  Query,
   connectDB,
+  loadMockDBData,
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
@@ -29,7 +29,6 @@ import {
   subscribeError,
   subscribeLog,
 } from "../utils/telemetry.ts";
-import { loadMockDBData } from "./mockDBOptions.ts";
 
 subscribeCosmosDBLogging({
   log: subscribeLog,
@@ -69,7 +68,7 @@ class CompanyContainer extends Container<Company> {
   }
 
   async upsert(company: Company) {
-    return this.upsertItem(company);
+    await this.upsertItem(company);
   }
 
   async remove({ id, ats }: CompanyKey) {
@@ -114,7 +113,7 @@ class JobContainer extends Container<Job> {
       "",
     ].join("|");
 
-    return this.upsertItem(job);
+    await this.upsertItem(job);
   }
 
   async remove({ id, companyId }: JobKey) {
@@ -129,7 +128,6 @@ class JobContainer extends Container<Job> {
 
   async aggregateMetadata(): Promise<Metadata> {
     const weekMs = Date.now() - 7 * MS_PER_DAY;
-    const recent = new Query("COUNT", ["postTS", ">=", weekMs]);
 
     type SalaryRow = {
       jobFamily?: string;
@@ -155,7 +153,7 @@ class JobContainer extends Container<Job> {
 
     const [
       jobCount,
-      recentCounts,
+      recentJobCount,
       presenceRows,
       jobFamilyRows,
       workTimeRows,
@@ -164,7 +162,7 @@ class JobContainer extends Container<Job> {
       salaryRaw,
     ] = await Promise.all([
       this.getCount(),
-      this.query<number>(recent),
+      this.getCount(["postTS", ">=", weekMs]),
       this.getCountBy("presence"),
       this.getCountBy("jobFamily"),
       this.getCountBy("workTimeBasis"),
@@ -187,7 +185,7 @@ class JobContainer extends Container<Job> {
     return {
       id: "job",
       jobCount,
-      recentJobCount: recentCounts[0] ?? 0,
+      recentJobCount,
       presenceCounts,
       jobFamilyCounts,
       workTimeCounts,
@@ -212,7 +210,7 @@ class IgnoreJobContainer extends Container<IgnoreJob> {
   }
 
   async upsert(jobId: string, key: CompanyKey, reason: string) {
-    return this.upsertItem({
+    await this.upsertItem({
       id: jobId,
       atsCompany: this.#asPKey(key),
       reason,
@@ -221,9 +219,9 @@ class IgnoreJobContainer extends Container<IgnoreJob> {
 
   async upsertMany(jobIds: string[], key: CompanyKey, reason: string) {
     const atsCompany = this.#asPKey(key);
-    return await batch("UpsertIgnoreJob", jobIds, (id) =>
-      this.upsertItem({ id, atsCompany, reason }),
-    );
+    return await batch("UpsertIgnoreJob", jobIds, async (id) => {
+      await this.upsertItem({ id, atsCompany, reason });
+    });
   }
 
   #asPKey({ ats, id }: CompanyKey) {

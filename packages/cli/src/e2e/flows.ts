@@ -20,35 +20,36 @@ const pings: Step[] = [
   formStep("Ping", req.get(""), res.ok({ status: "success" })),
   formStep("404", req.get("unknown"), res(404, "Not Found")),
   formStep("Empty query", req.get("jobs"), res.ok([])),
-  formStep("Status check", req.get("metadata"), res.ok({})),
+  formStep("Metadata", req.get("metadata"), res.ok({})),
+  formStep("Beacon", req.post("beacon"), res(204)),
 ];
 
-const validations: Step[] = [
-  // Refresh Jobs
+const refreshJobsErrors: Step[] = [
   formStep(
     "Auth Missing",
     req.post("refresh/jobs", { asAdmin: false }),
     res.err("Unauthorized", 401),
   ),
   formStep(
-    "Unknown Arg Error",
+    "Unknown Argument",
     req.post("refresh/jobs", { body: { ats, companyIds, unknown } }),
     res.err('Unrecognized key: "unknown"'),
   ),
   formStep(
-    "Company without ATS Error",
+    "Missing ATS",
     req.post("refresh/jobs", { body: { companyIds } }),
     res.err("ats field is required when using companyIds"),
   ),
   formStep(
-    "Unknown ATS Error",
+    "Unknown ATS",
     req.post("refresh/jobs", { body: { ats: unknown, companyIds } }),
     res.err(
       `ats field is invalid: Invalid option: expected one of ${atsTypes.map((type) => `"${type}"`).join("|")}`,
     ),
   ),
+];
 
-  // Company
+const companyErrors: Step[] = [
   formStep(
     "Empty Body Error",
     req.put("company", { asAdmin: false, body: {} }),
@@ -73,8 +74,9 @@ const validations: Step[] = [
     req.del("company", { body: {} }),
     res.err(UNDEFINED_ID),
   ),
+];
 
-  // Job
+const jobErrors: Step[] = [
   formStep("Missing Query Error", req.get("job/apply"), res.err(UNDEFINED_ID)),
   formStep(
     "Not Found Error",
@@ -93,6 +95,12 @@ const validations: Step[] = [
       "companyId field is invalid: Invalid input: expected string, received undefined",
     ),
   ),
+];
+
+const allErrors: Step[] = [
+  ...refreshJobsErrors,
+  ...companyErrors,
+  ...jobErrors,
 ];
 
 const unknowns: Step[] = [
@@ -152,28 +160,55 @@ const companies: Step[] = [
   ),
 ];
 
-const manual = [
+const jobsBaseBody = { ats, companyIds: [companyId] };
+const jobsLongAgo = new Date(2026, 0, 1).getTime();
+const jobs: Step[] = [
   formStep(
-    "Refresh Jobs for Company",
+    "Specific Company",
+    req.post("refresh/jobs", { body: jobsBaseBody }),
+    res.accepted,
+    `Verify jobs refreshed for ${ats}/${companyId}`,
+  ),
+  formStep(
+    "Specific Company",
+    req.post("refresh/jobs", { body: jobsBaseBody }),
+    res.accepted,
+    `Verify jobs refreshed for ${ats}/${companyId} again (no new jobs)`,
+  ),
+  formStep(
+    "Specific Company",
     req.post("refresh/jobs", {
-      body: {
-        ats: "greenhouse",
-        companyIds: ["propublica"],
-      },
+      body: { ...jobsBaseBody, replaceJobsOlderThan: jobsLongAgo },
     }),
     res.accepted,
+    `Verify jobs refreshed for ${ats}/${companyId} (no new jobs)`,
+  ),
+  formStep(
+    "Specific Company",
+    req.post("refresh/jobs", {
+      body: { ...jobsBaseBody, replaceJobsOlderThan: "now" },
+    }),
+    res.accepted,
+    `Verify jobs refreshed for ${ats}/${companyId}`,
+  ),
+  formStep(
+    "Full ATS",
+    req.post("refresh/jobs", { body: { ats } }),
+    res.accepted,
+    `Verify jobs refreshed for ${ats}`,
+  ),
+  formStep(
+    "Full Site",
+    req.post("refresh/jobs"),
+    res.accepted,
+    `Verify jobs refreshed for full site`,
   ),
 ];
 
 /*
 To be added to a flow:
-
-/refresh/jobs
 /refresh/jobs for specific ATS
-/refresh/jobs for specific company
-/refresh/jobs for specific company (does not exist)
-/refresh/jobs for the same specific company (no changes expected)
-/refresh/jobs for specific company with replaceJobsOlderThan=now
+/refresh/jobs
 (async -> trigger job info queue -> job metadata executor)
 
 /job/apply (greenhouse, lever)
@@ -190,9 +225,11 @@ TBD: reading metadata specifically to diffing expected changes?
 
 export const flows: Record<string, Step[]> = {
   pings,
-  validations,
+  refreshJobsErrors,
+  companyErrors,
+  validations: allErrors,
   unknowns,
   companies,
-  smoke: [...pings, ...validations, ...unknowns, ...companies],
-  manual,
+  jobs,
+  smoke: [...pings, ...allErrors, ...unknowns, ...companies, ...jobs],
 };
