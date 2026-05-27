@@ -66,7 +66,7 @@ export class FormCombobox extends FormElement {
    */
   protected override onInput() {
     this.#formValue = "";
-    this.intake.classList.toggle("has-value", !!this.intake.value);
+    this.setElHasValue(!!this.intake.value);
     this.#menu.filter(this.intake.value);
     this.#menu.open();
   }

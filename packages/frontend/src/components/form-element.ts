@@ -47,6 +47,7 @@ export interface FormElementProps {
 export abstract class FormElement extends ComponentBase {
   static formAssociated = true;
 
+  protected container!: HTMLElement;
   protected intake!: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
   #internals = this.attachInternals();
 
@@ -66,6 +67,7 @@ export abstract class FormElement extends ComponentBase {
   constructor(intakeType: "input" | "select" | "textarea", css: CSSStyleSheet) {
     super(html, [cssSheet, css]);
 
+    this.container = this.root.firstChild as HTMLElement;
     this.intake = document.createElement(intakeType);
     this.intake.id = "intake";
     this.intake.className = "intake";
@@ -81,8 +83,14 @@ export abstract class FormElement extends ComponentBase {
     this.getEl("intake-wrap")!.prepend(this.intake);
 
     // Keep the external form value attribute in sync with the internal input value
-    const update = () => this.onInput();
-    this.addEventListener("input", update);
+    this.addEventListener("input", () => this.onInput());
+
+    this.intake.addEventListener("focus", () =>
+      this.container.classList.add("has-focus"),
+    );
+    this.intake.addEventListener("blur", () =>
+      this.container.classList.remove("has-focus"),
+    );
   }
 
   /**
@@ -130,8 +138,12 @@ export abstract class FormElement extends ComponentBase {
     this.#syncAttribute();
   }
 
+  protected setElHasValue(hasValue: boolean) {
+    this.container.classList.toggle("has-value", hasValue);
+  }
+
   #syncAttribute() {
-    this.intake.classList.toggle("has-value", !!this.intake.value);
+    this.setElHasValue(!!this.intake.value);
     const formValue = this.getFormValue();
     this.setAttribute("value", formValue);
     this.#internals.setFormValue(formValue);
