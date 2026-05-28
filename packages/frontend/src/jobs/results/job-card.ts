@@ -1,6 +1,6 @@
 import type { JobModel } from "../../api/jobModel.ts";
+import { Chip } from "../../components/chip.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
-import { JobChips } from "../../components/job-chips.ts";
 
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
@@ -29,7 +29,11 @@ export class JobCard extends ComponentBase {
   static create({ job, isSelected }: Props) {
     const element = document.createElement(tag);
 
-    element.getEl<JobChips>("chips")?.init({ job, useShort: true });
+    const chipHolder = element.getEl<HTMLElement>("chips")!;
+    const chips = job
+      .getDisplayFacets(true)
+      .map((label) => Chip.create({ label }));
+    chipHolder.replaceChildren(...chips);
 
     const { title, company, summary } = job.getDisplayDetail();
 

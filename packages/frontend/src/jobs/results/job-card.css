@@ -34,7 +34,7 @@
 }
 
 .chips {
-  margin: var(--space-1) 0;
+  margin-block-end: var(--space-1);
 }
 
 .summary {

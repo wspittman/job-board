@@ -1,6 +1,6 @@
 import type { JobModel } from "../../api/jobModel.ts";
+import { Chip } from "../../components/chip.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
-import { JobChips } from "../../components/job-chips.ts";
 import { DetailEmbed } from "./detail-embed.ts";
 
 import css from "./details.css?raw";
@@ -23,7 +23,7 @@ export class Details extends ComponentBase {
   readonly #applyLink: HTMLAnchorElement;
   readonly #companyLink: HTMLAnchorElement;
   readonly #companyExternalIcon: HTMLElement;
-  readonly #jobChips: JobChips;
+  readonly #jobChips: HTMLElement;
   readonly #detailEmbed: DetailEmbed;
   #job?: JobModel;
   #copyResetHandle?: number;
@@ -37,7 +37,7 @@ export class Details extends ComponentBase {
     this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
     this.#companyLink = this.getEl<HTMLAnchorElement>("companyLink")!;
     this.#companyExternalIcon = this.getEl<HTMLElement>("companyExternalIcon")!;
-    this.#jobChips = this.getEl<JobChips>("chips")!;
+    this.#jobChips = this.getEl<HTMLElement>("chips")!;
     this.#detailEmbed = this.getEl<DetailEmbed>("description")!;
     this.#copyButton.addEventListener("click", () => void this.#copyJobLink());
   }
@@ -77,7 +77,11 @@ export class Details extends ComponentBase {
       this.#companyLink.removeAttribute("aria-label");
     }
 
-    this.#jobChips.init({ job: this.#job });
+    const chips = this.#job
+      .getDisplayFacets()
+      .map((label) => Chip.create({ label }));
+    this.#jobChips.replaceChildren(...chips);
+
     this.#detailEmbed.description = this.#job.description;
     this.#applyLink.href = this.#job.applyUrl;
     this.#applyLink.setAttribute(
