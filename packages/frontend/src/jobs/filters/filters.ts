@@ -77,14 +77,14 @@ const filterDefs: Record<string, FormElementDef[]> = {
     {
       type: "jb-form-select",
       name: "payCadence",
-      label: "Pay By",
+      label: "Pay Interval",
       options: payCadenceOptions,
     },
     {
       type: "jb-form-input",
       name: "minSalary",
       label: "Minimum Rate",
-      tooltip: "This may have unexpected results if Pay By is not specified.",
+      tooltip: "For best results, set alongside Pay Interval.",
       prefix: "$",
       validation: {
         type: "int",
