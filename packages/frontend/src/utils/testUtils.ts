@@ -14,6 +14,7 @@ export { spies } from "./testSetup";
 
 export type XrayComponent<T extends ComponentBase = ComponentBase> = T & {
   shadowRoot: ShadowRoot;
+  container: ComponentBase["container"];
   onLoad: ComponentBase["onLoad"];
   setText: ComponentBase["setText"];
   setManyTexts: ComponentBase["setManyTexts"];

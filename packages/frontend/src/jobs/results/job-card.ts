@@ -1,6 +1,6 @@
 import type { JobModel } from "../../api/jobModel.ts";
+import { Chip } from "../../components/chip.ts";
 import { ComponentBase } from "../../components/componentBase.ts";
-import { JobChips } from "../../components/job-chips.ts";
 
 import css from "./job-card.css?raw";
 import html from "./job-card.html?raw";
@@ -29,7 +29,11 @@ export class JobCard extends ComponentBase {
   static create({ job, isSelected }: Props) {
     const element = document.createElement(tag);
 
-    element.getEl<JobChips>("chips")?.init({ job, useShort: true });
+    const chipHolder = element.getEl<HTMLElement>("chips")!;
+    const chips = job
+      .getDisplayFacets(true)
+      .map((label) => Chip.create({ label }));
+    chipHolder.replaceChildren(...chips);
 
     const { title, company, summary } = job.getDisplayDetail();
 
@@ -53,7 +57,7 @@ export class JobCard extends ComponentBase {
    * Applies the job card template and default styles to the element instance.
    */
   constructor() {
-    super(html, cssSheet);
+    super(html, cssSheet, { byoc: true });
   }
 
   get jobId() {
@@ -62,17 +66,14 @@ export class JobCard extends ComponentBase {
 
   /**
    * Updates the selected state styling and accessibility attributes for the card.
-   * @param value - Whether the card should appear selected.
+   * @param value Whether the card should appear selected.
    */
   set isSelected(value: boolean) {
     if (this.#isSelected === value) return;
     this.#isSelected = value;
 
-    const el = this.getEl("container");
-    if (el) {
-      el.classList.toggle("is-selected", this.#isSelected);
-      el.setAttribute("aria-pressed", String(this.#isSelected));
-    }
+    this.container.classList.toggle("is-selected", this.#isSelected);
+    this.container.setAttribute("aria-pressed", String(this.#isSelected));
   }
 }
 

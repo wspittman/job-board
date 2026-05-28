@@ -1,8 +1,26 @@
 .container {
   position: relative;
 
-  &:has(.intake-wrap:focus-within) .label,
-  &:has(.has-value) .label {
+  .label {
+    position: absolute;
+    max-width: 90%;
+
+    font-size: var(--font-size-5);
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    transform: translate(var(--space-2), calc(var(--space-4) - 2px));
+
+    transition:
+      color 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,
+      transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,
+      max-width 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  }
+
+  &.has-value .label,
+  &.has-focus .label {
     font-size: var(--font-size-6);
     transform: translate(
       calc(var(--space-2) - 1px),
@@ -10,114 +28,96 @@
     );
   }
 
-  &:has(.intake-wrap:focus-within) .label {
+  &.has-focus .label {
     color: var(--primary-main);
   }
-}
 
-.label {
-  position: absolute;
-  max-width: 90%;
+  .help {
+    position: absolute;
+    right: 0px;
+    width: clamp(5%, var(--space-6), 10%);
+    border: 1px solid var(--bg-border);
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    font-size: var(--font-size-6);
+    cursor: help;
 
-  font-size: var(--font-size-5);
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    &:hover,
+    &:focus-visible {
+      border-color: var(--primary-main);
+      color: var(--primary-main);
+      box-shadow: var(--shadow-focus);
+      outline: none;
 
-  transform: translate(var(--space-2), calc(var(--space-4) - 2px));
-
-  transition:
-    color 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,
-    transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms,
-    max-width 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
-}
-
-.help {
-  position: absolute;
-  right: 0px;
-  width: clamp(5%, var(--space-6), 10%);
-  border: 1px solid var(--bg-border);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  font-size: var(--font-size-6);
-  cursor: help;
-
-  &:hover,
-  &:focus-visible {
-    border-color: var(--primary-main);
-    color: var(--primary-main);
-    box-shadow: var(--shadow-focus);
-    outline: none;
-
-    & + .tooltip {
-      display: block;
+      & + .tooltip {
+        display: block;
+      }
     }
   }
-}
 
-.tooltip {
-  display: none;
-  position: absolute;
-  width: calc(100% - clamp(5%, var(--space-6), 10%));
-  min-height: 100%;
-  padding: var(--space-1) var(--space-1);
-  border-radius: var(--radius);
-  border: 1px solid var(--bg-border);
-  background: var(--bg-surface);
-  color: var(--text-muted);
-  box-shadow: var(--shadow-soft);
-  font-size: var(--font-size-6);
-  line-height: 1.4;
-  cursor: help;
-  z-index: 1;
-}
+  .tooltip {
+    display: none;
+    position: absolute;
+    width: calc(100% - clamp(5%, var(--space-6), 10%));
+    min-height: 100%;
+    padding: var(--space-1) var(--space-1);
+    border-radius: var(--radius);
+    border: 1px solid var(--bg-border);
+    background: var(--bg-surface);
+    color: var(--text-muted);
+    box-shadow: var(--shadow-soft);
+    font-size: var(--font-size-6);
+    line-height: 1.4;
+    cursor: help;
+    z-index: 1;
+  }
 
-.intake-wrap {
-  display: inline-flex;
-  align-items: center;
-  width: 100%;
+  .intake-wrap {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
+  }
 
-  &:focus-within .legend,
-  &:has(.has-value) .legend {
+  .intake {
+    box-sizing: content-box;
+    width: 100%;
+    appearance: none;
+    border: none;
+    background: none;
+  }
+
+  &.has-focus .intake {
+    outline: none;
+  }
+
+  .legend-wrap {
+    pointer-events: none;
+    position: absolute;
+    inset: calc(0px - (var(--space-1) / 2)) 0 0;
+    margin: 0;
+    padding: 0 var(--space-1);
+    border: solid 1px var(--bg-border);
+    border-radius: var(--radius);
+  }
+
+  &.has-focus .legend-wrap {
+    border-color: var(--primary-main);
+  }
+
+  .legend {
+    pointer-events: none;
+    visibility: hidden;
+    height: var(--space-1);
+    font-size: var(--font-size-6);
+    text-align: left;
+    max-width: 0.01px;
+    transition: max-width 50ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  }
+
+  &.has-value .legend,
+  &.has-focus .legend {
     max-width: 100%;
     padding: 0 var(--space-1);
     transition: max-width 100ms cubic-bezier(0, 0, 0.2, 1) 50ms;
   }
-
-  &:focus-within .legend-wrap {
-    border-color: var(--primary-main);
-  }
-}
-
-.intake {
-  box-sizing: content-box;
-  width: 100%;
-  appearance: none;
-  border: none;
-  background: none;
-
-  &:focus {
-    outline: none;
-  }
-}
-
-.legend-wrap {
-  pointer-events: none;
-  position: absolute;
-  inset: calc(0px - (var(--space-1) / 2)) 0 0;
-  margin: 0;
-  padding: 0 var(--space-1);
-  border: solid 1px var(--bg-border);
-  border-radius: var(--radius);
-}
-
-.legend {
-  pointer-events: none;
-  visibility: hidden;
-  height: var(--space-1);
-  font-size: var(--font-size-6);
-  text-align: left;
-  max-width: 0.01px;
-  transition: max-width 50ms cubic-bezier(0, 0, 0.2, 1) 0ms;
 }

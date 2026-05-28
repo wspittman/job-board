@@ -8,7 +8,7 @@ const create = (): Xray => document.createElement("jobs-results") as Xray;
 
 function isCardSelected(el: Element): boolean {
   const xray = el as XrayComponent;
-  return xray.getEl("container")?.classList.contains("is-selected") ?? false;
+  return xray.container.classList.contains("is-selected");
 }
 
 suite("Results", () => {

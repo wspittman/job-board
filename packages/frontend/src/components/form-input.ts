@@ -15,6 +15,7 @@ const tag = "jb-form-input";
  */
 export class FormInput extends FormElement {
   #validation?: FormElementProps["validation"];
+  #hasPrefix = false;
 
   /**
    * Creates an instance of the input element with associated styles.
@@ -47,8 +48,10 @@ export class FormInput extends FormElement {
     }
 
     this.#removeAdornments();
-    this.#createAdornment(true, prefix);
-    this.#createAdornment(false, suffix);
+    this.#createAdornment("beforebegin", prefix);
+    this.#createAdornment("afterend", suffix);
+    this.#hasPrefix = !!prefix;
+    this.setElHasValue(!!this.intake.value);
   }
 
   /**
@@ -71,18 +74,20 @@ export class FormInput extends FormElement {
     super.onInput();
   }
 
+  protected override setElHasValue(hasValue: boolean) {
+    super.setElHasValue(this.#hasPrefix || hasValue);
+  }
+
   #removeAdornments() {
     this.getEl("intake-wrap")
       ?.querySelectorAll(".adornment")
       .forEach((adornment) => adornment.remove());
   }
 
-  #createAdornment(isPrefix: boolean, text?: string) {
+  #createAdornment(pos: "beforebegin" | "afterend", text?: string) {
     if (!text) return;
-    const pos = isPrefix ? "beforebegin" : "afterend";
     const el = document.createElement("p");
     el.className = "adornment";
-    if (isPrefix) el.classList.add("has-value");
     el.textContent = text;
     this.intake.insertAdjacentElement(pos, el);
   }

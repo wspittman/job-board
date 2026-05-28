@@ -79,7 +79,7 @@ suite("NLSearch", () => {
     expect(errorEl.hidden).toBe(false);
     expect(errorEl.textContent).toBe("Failed. Please try again.");
     expect(element.getEl<HTMLButtonElement>("update")!.textContent).toBe(
-      "Search",
+      "Find Jobs",
     );
   });
 

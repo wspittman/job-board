@@ -20,6 +20,10 @@ function getMenuEl(element: Xray) {
   return element.shadowRoot?.querySelector(".options") as HTMLUListElement;
 }
 
+function getContainer(element: Xray) {
+  return element.shadowRoot.querySelector(".container");
+}
+
 suite("FormCombobox", () => {
   test("initializes combobox semantics and menu container", () => {
     const element = create();
@@ -68,6 +72,7 @@ suite("FormCombobox", () => {
     );
 
     expect(element.getAttribute("value")).toBe("");
+    expect(getContainer(element)?.classList.contains("has-value")).toBe(true);
     expect(readMenuOptions(element)).toEqual([
       { text: "Backend Engineer", value: "backend", active: true },
     ]);

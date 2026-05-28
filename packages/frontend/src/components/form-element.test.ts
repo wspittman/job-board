@@ -17,6 +17,9 @@ class TestFormElement extends FormElement {
 const create = (intakeType?: IntakeType) =>
   createComponent(TestFormElement, intakeType) as XrayFormElement;
 
+const getContainer = (element: XrayFormElement) =>
+  element.shadowRoot.querySelector(".container");
+
 suite("FormElement", () => {
   test.for(["input", "textarea", "select"] as const)(
     "creates the expected native intake for %s",
@@ -56,7 +59,7 @@ suite("FormElement", () => {
     expect(element.getEl("tooltip")?.textContent).toBe("Enter annual salary");
     expect(element.getEl("help")?.hasAttribute("hidden")).toBe(false);
     expect(element.intake.value).toBe("125000");
-    expect(element.intake.classList.contains("has-value")).toBe(true);
+    expect(getContainer(element)?.classList.contains("has-value")).toBe(true);
     expect(spies.setFormValue).toHaveBeenCalledWith("125000");
   });
 
@@ -83,7 +86,7 @@ suite("FormElement", () => {
 
     expect(element.getAttribute("value")).toBe("serialized:backend");
     expect(element.intake.value).toBe("backend");
-    expect(element.intake.classList.contains("has-value")).toBe(true);
+    expect(getContainer(element)?.classList.contains("has-value")).toBe(true);
     expect(spies.setFormValue).toHaveBeenCalledWith("serialized:backend");
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy.mock.calls[0]?.[0]).toBeInstanceOf(CustomEvent);
@@ -99,8 +102,19 @@ suite("FormElement", () => {
 
     expect(element.intake.value).toBe("");
     expect(element.getAttribute("value")).toBe("");
-    expect(element.intake.classList.contains("has-value")).toBe(false);
+    expect(getContainer(element)?.classList.contains("has-value")).toBe(false);
     expect(spies.setFormValue).toHaveBeenLastCalledWith("");
+  });
+
+  test("toggles focused visual state from native intake focus events", () => {
+    const element = create();
+    const container = getContainer(element);
+
+    element.intake.dispatchEvent(new FocusEvent("focus"));
+    expect(container?.classList.contains("has-focus")).toBe(true);
+
+    element.intake.dispatchEvent(new FocusEvent("blur"));
+    expect(container?.classList.contains("has-focus")).toBe(false);
   });
 
   test("responds to bubbling input events from the native intake", () => {
@@ -111,6 +125,7 @@ suite("FormElement", () => {
     );
 
     expect(element.getAttribute("value")).toBe("new text");
+    expect(getContainer(element)?.classList.contains("has-value")).toBe(true);
     expect(spies.setFormValue).toHaveBeenCalledWith("new text");
   });
 

@@ -1,10 +1,17 @@
 ---
 title: Progress Report
 description: A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
-date: May 21, 2026
+date: May 28, 2026
 ---
 
 A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
+
+## May 28, 2026
+
+- Improved display issues with iOS webkit (eg. Chrome/Safari on iPhone).
+- Assorted spacing and wording improvements in the Home page.
+
+Note: During the summer months we may not post updates every week. We'll be spending less time on visible features and more time focused on the underlying data. We want to make some significant improvements to how we collect and understand jobs postings.
 
 ## May 21, 2026
 

@@ -37,7 +37,7 @@ export class Chip extends ComponentBase {
     element.setText("label", label);
 
     if (filled) {
-      element.getEl("container")!.classList.add("filled");
+      element.container.classList.add("filled");
     }
 
     if (deleteKey) {

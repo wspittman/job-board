@@ -34,18 +34,14 @@ suite("MessageCard", () => {
 
   test("Error variant adds error-card class to container", () => {
     const element = MessageCard.create({ message: "Error" }) as unknown as Xray;
-    expect(element.getEl("container")?.classList.contains("error-card")).toBe(
-      true,
-    );
+    expect(element.container.classList.contains("error-card")).toBe(true);
   });
 
   test("non-Error variant does not have error-card class", () => {
     const element = MessageCard.create({
       message: "NoMatches",
     }) as unknown as Xray;
-    expect(element.getEl("container")?.classList.contains("error-card")).toBe(
-      false,
-    );
+    expect(element.container.classList.contains("error-card")).toBe(false);
   });
 
   test("count-derived message: no args defaults to AddFilters", () => {

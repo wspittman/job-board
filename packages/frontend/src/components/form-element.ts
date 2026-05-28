@@ -81,8 +81,14 @@ export abstract class FormElement extends ComponentBase {
     this.getEl("intake-wrap")!.prepend(this.intake);
 
     // Keep the external form value attribute in sync with the internal input value
-    const update = () => this.onInput();
-    this.addEventListener("input", update);
+    this.addEventListener("input", () => this.onInput());
+
+    this.intake.addEventListener("focus", () =>
+      this.container.classList.add("has-focus"),
+    );
+    this.intake.addEventListener("blur", () =>
+      this.container.classList.remove("has-focus"),
+    );
   }
 
   /**
@@ -130,8 +136,12 @@ export abstract class FormElement extends ComponentBase {
     this.#syncAttribute();
   }
 
+  protected setElHasValue(hasValue: boolean) {
+    this.container.classList.toggle("has-value", hasValue);
+  }
+
   #syncAttribute() {
-    this.intake.classList.toggle("has-value", !!this.intake.value);
+    this.setElHasValue(!!this.intake.value);
     const formValue = this.getFormValue();
     this.setAttribute("value", formValue);
     this.#internals.setFormValue(formValue);

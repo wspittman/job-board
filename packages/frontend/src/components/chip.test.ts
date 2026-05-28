@@ -20,9 +20,8 @@ suite("Chip", () => {
     "Proper fill variant if filled=%s",
     (filled) => {
       const element = Chip.create({ label: "Hybrid", filled }) as Xray;
-      const container = element.getEl("container");
 
-      expect(container?.classList.contains("filled")).toBe(!!filled);
+      expect(element.container.classList.contains("filled")).toBe(!!filled);
     },
   );
 

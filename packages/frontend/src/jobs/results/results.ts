@@ -20,7 +20,7 @@ export class Results extends ComponentBase {
    * Initializes the results list container and associated template.
    */
   constructor() {
-    super(html, cssSheet);
+    super(html, cssSheet, { byoc: true });
     this.#listEl = this.getEl("list")!;
     this.updateJobs(undefined);
   }

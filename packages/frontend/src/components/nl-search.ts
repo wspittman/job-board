@@ -54,6 +54,7 @@ export class NLSearch extends ComponentBase {
       this.listen(NL_SEARCH_RESULT, (filters: FilterModel) =>
         this.#navigateToJobs(filters),
       );
+      this.getEl("helper")!.hidden = false;
     }
 
     return Promise.resolve();
@@ -90,7 +91,7 @@ export class NLSearch extends ComponentBase {
       this.#error.hidden = false;
     } finally {
       this.#query.disabled = false;
-      this.#update.textContent = "Search";
+      this.#update.textContent = "Find Jobs";
       this.#setNLUpdateState();
     }
   }

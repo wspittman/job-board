@@ -1,24 +1,24 @@
 .container {
-  &:has(.has-value) .intake {
+  option {
     color: var(--text-default);
   }
 
-  & option {
+  .intake-wrap::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    right: var(--space-2);
+    border-inline-start: 5px solid transparent;
+    border-inline-end: 5px solid transparent;
+    border-block-start: 5px solid var(--text-muted);
+  }
+
+  .intake {
+    padding: var(--space-4) var(--space-2);
+    color: transparent;
+  }
+
+  &.has-value .intake {
     color: var(--text-default);
   }
-}
-
-.intake-wrap::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  right: var(--space-2);
-  border-inline-start: 5px solid transparent;
-  border-inline-end: 5px solid transparent;
-  border-block-start: 5px solid var(--text-muted);
-}
-
-.intake {
-  padding: var(--space-4) var(--space-2);
-  color: transparent;
 }

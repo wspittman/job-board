@@ -6,6 +6,8 @@ import { FormInput } from "./form-input";
 type Xray = XrayFormElement<FormInput>;
 
 const create = () => document.createElement("jb-form-input") as Xray;
+const getContainer = (element: Xray) =>
+  element.shadowRoot.querySelector(".container");
 
 suite("FormInput", () => {
   test("applies input constraints and renders optional adornments", () => {
@@ -25,10 +27,11 @@ suite("FormInput", () => {
     expect(element.intake.inputMode).toBe("numeric");
     expect((element.intake as HTMLInputElement).maxLength).toBe(6);
     expect(prefix?.textContent).toBe("$");
-    expect(prefix?.className).toBe("adornment has-value");
+    expect(prefix?.className).toBe("adornment");
     expect(intake).toBe(element.intake);
     expect(suffix?.textContent).toBe("USD");
     expect(suffix?.className).toBe("adornment");
+    expect(getContainer(element)?.classList.contains("has-value")).toBe(true);
   });
 
   test("does not duplicate adornments on subsequent init calls", () => {
@@ -52,6 +55,24 @@ suite("FormInput", () => {
     const adornments = intakeWrap?.querySelectorAll(".adornment") ?? [];
 
     expect(adornments).toHaveLength(2);
+  });
+
+  test("clears prefixed visual state when reinitialized without a prefix", () => {
+    const element = create();
+
+    element.init({
+      label: "Salary",
+      name: "salary",
+      prefix: "$",
+    });
+
+    element.init({
+      label: "Salary",
+      name: "salary",
+    });
+
+    expect(element.intake.value).toBe("");
+    expect(getContainer(element)?.classList.contains("has-value")).toBe(false);
   });
 
   test("leaves inputMode and maxLength untouched without integer validation or maxLength", () => {

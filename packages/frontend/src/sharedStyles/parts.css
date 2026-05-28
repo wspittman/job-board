@@ -56,3 +56,11 @@ button,
   box-shadow: var(--shadow-soft);
   padding: var(--space-3) var(--space-4);
 }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  column-gap: var(--space-1);
+  margin-block-end: var(--space-1);
+}
