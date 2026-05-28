@@ -12,9 +12,10 @@ const create = (isSelected = false) =>
 
 suite("JobCard", () => {
   function checkSelected(element: Xray, expected: boolean) {
-    const container = element.getEl("container");
-    expect(container?.classList.contains("is-selected")).toBe(expected);
-    expect(container?.getAttribute("aria-pressed")).toBe(expected.toString());
+    expect(element.container.classList.contains("is-selected")).toBe(expected);
+    expect(element.container.getAttribute("aria-pressed")).toBe(
+      expected.toString(),
+    );
   }
 
   test("create sets title, company, and summary from job", () => {

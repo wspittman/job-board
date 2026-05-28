@@ -14,6 +14,16 @@ class TestComponent extends ComponentBase {
   }
 }
 
+class OwnContainerComponent extends ComponentBase {
+  constructor() {
+    super(
+      '<section id="shell" class="card"><div id="title"></div></section>',
+      ComponentBase.createCSSSheet(":host { display: block; }"),
+      { byoc: true },
+    );
+  }
+}
+
 const create = (params?: Options) =>
   createComponent(TestComponent, params) as XrayComponent;
 
@@ -28,6 +38,26 @@ suite("ComponentBase", () => {
     expect(allowEl.shadowRoot?.innerHTML).toContain('<div id="title"></div>');
     expect(omitEl.shadowRoot?.adoptedStyleSheets).toHaveLength(2);
     expect(allowEl.shadowRoot?.adoptedStyleSheets).toHaveLength(3);
+  });
+
+  test("wraps component html in a container by default", () => {
+    const component = create();
+
+    expect(component.container.tagName).toBe("DIV");
+    expect(component.container.className).toBe("container");
+    expect(component.shadowRoot.firstElementChild).toBe(component.container);
+    expect(component.container.querySelector("#title")).not.toBeNull();
+    expect(component.container.querySelector("#subtitle")).not.toBeNull();
+  });
+
+  test("uses the provided container when byoc is enabled", () => {
+    const component = createComponent(OwnContainerComponent) as XrayComponent;
+
+    expect(component.container.tagName).toBe("SECTION");
+    expect(component.container.id).toBe("shell");
+    expect(component.container.classList.contains("card")).toBe(true);
+    expect(component.container.classList.contains("container")).toBe(true);
+    expect(component.shadowRoot.firstElementChild).toBe(component.container);
   });
 
   test("sets and gets elements inside the shadow root", () => {

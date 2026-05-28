@@ -37,14 +37,6 @@
   line-height: 1.4;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  gap: var(--space-1);
-  margin-block-end: var(--space-1);
-}
-
 .form {
   display: flex;
   flex-direction: column;

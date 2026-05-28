@@ -161,7 +161,6 @@ const filterDefs: Record<string, FormElementDef[]> = {
  * Custom element that manages the filters pane, exposing user selections via callbacks.
  */
 export class Filters extends ComponentBase {
-  readonly #container: HTMLElement;
   readonly #toggle: HTMLButtonElement;
   readonly #chips: HTMLElement;
   readonly #form: HTMLFormElement;
@@ -175,8 +174,7 @@ export class Filters extends ComponentBase {
    * Sets up the filters pane structure, event handlers, and form inputs.
    */
   constructor() {
-    super(html, cssSheet);
-    this.#container = this.getEl("container")!;
+    super(html, cssSheet, { byoc: true });
     this.#toggle = this.getEl<HTMLButtonElement>("toggle")!;
     this.#chips = this.getEl("chips")!;
     this.#form = this.getEl<HTMLFormElement>("form")!;
@@ -312,7 +310,7 @@ export class Filters extends ComponentBase {
 
   #setCollapsed(collapsed: boolean): void {
     this.#isCollapsed = collapsed;
-    this.#container.classList.toggle("collapsed", collapsed);
+    this.container.classList.toggle("collapsed", collapsed);
     this.#toggle.textContent = collapsed ? "\u203A" : "\u2039";
     this.#toggle.setAttribute("aria-expanded", String(!collapsed));
     this.#toggle.setAttribute(

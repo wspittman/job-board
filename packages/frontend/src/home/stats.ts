@@ -8,7 +8,7 @@ const tag = "home-stats";
 
 class Stats extends ComponentBase {
   constructor() {
-    super(html, cssSheet);
+    super(html, cssSheet, { byoc: true });
   }
 
   override async onLoad() {

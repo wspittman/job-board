@@ -47,7 +47,6 @@ export interface FormElementProps {
 export abstract class FormElement extends ComponentBase {
   static formAssociated = true;
 
-  protected container!: HTMLElement;
   protected intake!: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
   #internals = this.attachInternals();
 
@@ -67,7 +66,6 @@ export abstract class FormElement extends ComponentBase {
   constructor(intakeType: "input" | "select" | "textarea", css: CSSStyleSheet) {
     super(html, [cssSheet, css]);
 
-    this.container = this.root.firstChild as HTMLElement;
     this.intake = document.createElement(intakeType);
     this.intake.id = "intake";
     this.intake.className = "intake";

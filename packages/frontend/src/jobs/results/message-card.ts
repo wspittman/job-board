@@ -75,6 +75,7 @@ export class MessageCard extends ComponentBase {
    */
   constructor() {
     super(html, cssSheet);
+    this.container.setAttribute("role", "listitem");
   }
 
   /**
@@ -97,7 +98,7 @@ export class MessageCard extends ComponentBase {
     });
 
     if (message === "Error") {
-      element.getEl("container")!.classList.add("error-card");
+      element.container.classList.add("error-card");
       element.setAttribute("role", "alert");
     }
 

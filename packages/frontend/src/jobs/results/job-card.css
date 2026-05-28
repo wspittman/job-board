@@ -33,10 +33,6 @@
   color: var(--primary-dark);
 }
 
-.chips {
-  margin-block-end: var(--space-1);
-}
-
 .summary {
   font-size: var(--font-size-6);
 }

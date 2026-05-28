@@ -32,7 +32,7 @@ export class Details extends ComponentBase {
    * Creates a details panel and wires up references to internal elements.
    */
   constructor() {
-    super(html, cssSheet);
+    super(html, cssSheet, { byoc: true });
     this.#copyButton = this.getEl<HTMLButtonElement>("copy")!;
     this.#applyLink = this.getEl<HTMLAnchorElement>("apply")!;
     this.#companyLink = this.getEl<HTMLAnchorElement>("companyLink")!;

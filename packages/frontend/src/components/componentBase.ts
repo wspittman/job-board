@@ -3,6 +3,7 @@ import parts from "../sharedStyles/parts.css?raw";
 
 interface Options {
   omitPartsCss?: boolean;
+  byoc?: boolean;
 }
 
 /**
@@ -13,13 +14,15 @@ export abstract class ComponentBase extends HTMLElement {
   static readonly #normSheet = ComponentBase.createCSSSheet(norm);
   static readonly #partsSheet = ComponentBase.createCSSSheet(parts);
 
-  protected root: ShadowRoot;
+  protected readonly root: ShadowRoot;
+  protected readonly container: HTMLElement;
 
   /**
    * Creates a new component with Shadow DOM.
-   * @param html - The HTML content to render inside the shadow root
-   * @param css - The component-specific CSS stylesheet
-   * @param options - Configuration options for the component
+   * By default, the HTML content is rendered inside a container div (class="container").
+   * @param html The HTML content
+   * @param css The component-specific CSS stylesheet
+   * @param options Configuration options for the component
    */
   constructor(
     html: string,
@@ -27,7 +30,7 @@ export abstract class ComponentBase extends HTMLElement {
     options: Options = {},
   ) {
     const cssSheets = Array.isArray(css) ? css : [css];
-    const { omitPartsCss = false } = options;
+    const { omitPartsCss, byoc } = options;
 
     super();
     this.root = this.attachShadow({ mode: "open" });
@@ -37,7 +40,16 @@ export abstract class ComponentBase extends HTMLElement {
       : [ComponentBase.#normSheet, ComponentBase.#partsSheet, ...cssSheets];
     this.root.adoptedStyleSheets = sheets;
 
-    this.root.innerHTML = html;
+    if (byoc) {
+      this.root.innerHTML = html;
+      this.container = this.root.firstElementChild as HTMLElement;
+    } else {
+      this.container = document.createElement("div");
+      this.container.innerHTML = html;
+      this.root.appendChild(this.container);
+    }
+
+    this.container.classList.add("container");
   }
 
   /**

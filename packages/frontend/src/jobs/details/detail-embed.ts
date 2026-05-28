@@ -1,6 +1,5 @@
 import { ComponentBase } from "../../components/componentBase";
 
-const html = '<div id="content"></div>';
 const cssSheet = ComponentBase.createCSSSheet(
   "* { font: var(--font-size-6)/1.5 var(--fonts); }",
 );
@@ -13,7 +12,7 @@ export class DetailEmbed extends ComponentBase {
    * Initializes the embed with minimal styling and markup.
    */
   constructor() {
-    super(html, cssSheet, { omitPartsCss: true });
+    super("", cssSheet, { omitPartsCss: true });
   }
 
   /**
@@ -21,7 +20,7 @@ export class DetailEmbed extends ComponentBase {
    * @param descriptionHtml - Pre-formatted HTML for the job description.
    */
   set description(descriptionHtml: string) {
-    this.getEl("content")!.innerHTML = descriptionHtml;
+    this.container.innerHTML = descriptionHtml;
   }
 }
 
