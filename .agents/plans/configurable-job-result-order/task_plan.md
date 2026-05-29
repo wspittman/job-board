@@ -6,7 +6,7 @@ Add a filter-pane control that lets job seekers choose a known result ordering, 
 
 ## Current Phase
 
-Phase 1 complete. Stopped for review before Phase 2.
+Phase 2 complete. Stopped for review before Phase 3.
 
 ## Proposed Sort Options
 
@@ -33,12 +33,12 @@ The exact initial set can be adjusted before implementation, but every option mu
 
 ### Phase 2: Backend Query Ordering
 
-- [ ] Replace the hard-coded `query.orderBy("postTS", "DESC")` call with a helper that maps `Filters.orderBy` to a known database field and direction.
-- [ ] Default missing `orderBy` to `post_time`.
-- [ ] Keep the mapping private or narrowly exported for tests, and never pass request values directly into `orderBy`.
-- [ ] Add targeted backend tests for each supported option and for invalid/missing input.
-- [ ] Verify behavior for jobs with missing salary or experience fields, especially whether Cosmos/mock DB keeps those jobs and places them predictably.
-- **Status:** pending
+- [x] Replace the hard-coded `query.orderBy("postTS", "DESC")` call with a helper that maps `Filters.orderBy` to a known database field and direction.
+- [x] Default missing `orderBy` to `post_time`.
+- [x] Keep the mapping private or narrowly exported for tests, and never pass request values directly into `orderBy`.
+- [x] Add targeted backend tests for each supported option and for invalid/missing input.
+- [x] Verify behavior for jobs with missing salary or experience fields, especially whether Cosmos/mock DB keeps those jobs and places them predictably.
+- **Status:** complete
 
 ### Phase 3: Frontend Filter Pane
 

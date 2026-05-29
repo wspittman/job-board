@@ -63,3 +63,44 @@
 | Frontend enum tests | `npm run test --workspace=frontend -- src/api/apiEnums.test.ts` | Pass | Pass | passed |
 | Backend build | `npm run build --workspace=backend` | Pass | Pass | passed |
 | Frontend build | `npm run build --workspace=frontend` | Pass | Pass | passed |
+
+### Phase 2: Backend Query Ordering
+
+- **Status:** complete
+- **Started:** 2026-05-29 11:24 America/Los_Angeles
+- **Completed:** 2026-05-29 11:30 America/Los_Angeles
+
+#### Actions Taken
+
+- Added `applyJobOrder` in `packages/backend/src/controllers/job.ts`.
+- Replaced `query.orderBy("postTS", "DESC")` with the allow-listed helper.
+- Mapped `post_time` to `postTS DESC`.
+- Mapped `highest_salary` to `salaryRange.min DESC`.
+- Mapped `lowest_experience` to `requiredExperience ASC`.
+- Added controller tests for supported orderings, missing order, and invalid runtime input fallback.
+- Verified mock DB behavior for missing salary and missing experience fields.
+- Stopped before filter-pane UI and frontend URL parsing work, per request.
+
+#### Files Created/Modified
+
+- `.agents/plans/configurable-job-result-order/task_plan.md`
+- `.agents/plans/configurable-job-result-order/findings.md`
+- `.agents/plans/configurable-job-result-order/progress.md`
+- `packages/backend/src/controllers/job.ts`
+- `packages/backend/test/controllers/job.test.ts`
+
+#### Test Results
+
+| Test | Input | Expected | Actual | Status |
+| ---- | ----- | -------- | ------ | ------ |
+| Backend controller tests | `npm run test --workspace=backend -- test/controllers/job.test.ts` | Pass | Pass | passed |
+| Backend validator tests | `npm run test --workspace=backend -- test/middleware/inputValidators.test.ts` | Pass | Pass | passed |
+| Backend build | `npm run build --workspace=backend` | Pass | Pass | passed |
+| Backend lint | `npm run lint --workspace=backend` | Pass | Pass | passed |
+
+#### Review Correction
+
+- **Status:** complete
+- **Completed:** 2026-05-29 after Phase 2 review
+
+Removed the `IS_DEFINED` field guards after review clarified that MockDB's ordering is wrong for this case. Real Cosmos DB sorts missing numeric values below defined numbers, so missing salary naturally appears last for `DESC`, and missing required experience naturally appears first for `ASC`. Added a code comment in `packages/backend/src/controllers/job.ts` so future order-by additions preserve this behavior intentionally.
