@@ -62,9 +62,6 @@ export interface Job extends JobKey, DeepPartialNullToUndef<ExtractionJob> {
   // Denormalized from Company to reduce joins
   companyStage?: Company["stage"];
   companySize?: Company["size"];
-
-  // For simplified location searches
-  locationSearchKey?: string;
 }
 
 /**

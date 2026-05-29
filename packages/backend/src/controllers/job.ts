@@ -7,6 +7,8 @@ import { AppError } from "../utils/AppError.ts";
 import { MS_PER_DAY } from "../utils/constants.ts";
 import { logProperty } from "../utils/telemetry.ts";
 
+type Where = ReturnType<typeof Query.condition>;
+
 /**
  * Retrieves jobs matching the specified filters
  * @param filterInput - Filter criteria for jobs search
@@ -148,39 +150,64 @@ async function readJobsByFilters({
     query.whereCondition("title", "CONTAINS", title);
   }
 
-  if (city || state) {
-    const remoteMatch = "c.presence = 'remote'";
-    // Marked as US or worldwide remote
-    const countryMatch = `c.locationSearchKey = '|||US|' OR c.locationSearchKey = '||||'`;
-    const stateMatch = `c.locationSearchKey = CONCAT('||', @state, '|US|')`;
-
-    let locClause: string;
-    let remoteMatches = [countryMatch];
-
-    if (city && state) {
-      locClause = `c.locationSearchKey = CONCAT('|', @city, '|', @state, '|US|')`;
-      remoteMatches = [stateMatch, countryMatch];
-    } else if (state) {
-      locClause = `ENDSWITH(c.locationSearchKey, CONCAT('|', @state, '|US|'))`;
-    } else {
-      // city only — match city in any state
-      locClause = `STARTSWITH(c.locationSearchKey, CONCAT('|', @city, '|'))`;
-    }
-
-    if (isRemote !== false) {
-      locClause += ` OR (${remoteMatch} AND (${remoteMatches.join(" OR ")}))`;
-    }
-
-    query.where([
-      locClause,
-      {
-        "@city": city ?? "",
-        "@state": state ?? "",
-      },
-    ]);
+  const locationWhere = buildLocationWhere({ city, state, isRemote });
+  if (locationWhere) {
+    query.where(locationWhere);
   }
 
   return db.job.query<Job>(query.orderBy("postTS", "DESC").build());
+}
+
+/**
+ * Builds the location filter clause for job search queries.
+ * @returns A Cosmos SQL WHERE clause and parameters, or undefined when no location filter is needed.
+ */
+export function buildLocationWhere({
+  city,
+  state,
+  isRemote,
+}: Filters): Where | undefined {
+  if (!city && !state) {
+    return undefined;
+  }
+
+  const presenceRemote = "c.presence = 'remote'";
+
+  const noCity = `NOT IS_DEFINED(c.primaryLocation.city)`;
+  const noRegion = `NOT IS_DEFINED(c.primaryLocation.regionCode)`;
+  const noCountry = `NOT IS_DEFINED(c.primaryLocation.countryCode)`;
+
+  const usCountry = `c.primaryLocation.countryCode = 'US'`;
+  const stateMatch = `c.primaryLocation.regionCode = @state`;
+  const cityMatch = `(CONTAINS(c.primaryLocation.city, @city, true) OR CONTAINS(@city, c.primaryLocation.city, true))`;
+
+  const usOrGlobal = `(${usCountry} OR ${noCountry})`;
+  const countryWideRemote = `${noCity} AND ${noRegion} AND ${usOrGlobal}`;
+  const stateWideRemote = `${noCity} AND ${stateMatch} AND ${usCountry}`;
+
+  let locClause: string;
+  let remoteMatches = [countryWideRemote];
+
+  if (city && state) {
+    locClause = `${usCountry} AND ${stateMatch} AND ${cityMatch}`;
+    remoteMatches = [stateWideRemote, countryWideRemote];
+  } else if (state) {
+    locClause = `${usCountry} AND ${stateMatch}`;
+  } else {
+    locClause = `${usCountry} AND ${cityMatch}`;
+  }
+
+  if (isRemote !== false) {
+    locClause += ` OR (${presenceRemote} AND (${remoteMatches.join(" OR ")}))`;
+  }
+
+  return [
+    locClause,
+    {
+      "@city": city ?? "",
+      "@state": state ?? "",
+    },
+  ];
 }
 
 // #endregion
