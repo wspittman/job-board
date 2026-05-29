@@ -162,7 +162,7 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "orderBy",
       label: "Order By",
       tooltip:
-        "After the filters have narrowed the result, this determines the sort used to get the best results for you.",
+        "After filters narrow the results, this determines the sort. Required Experience puts jobs with no listed requirement first.",
       options: jobOrderByOptions,
     },
   ],
