@@ -6,6 +6,7 @@ import "../../components/nl-search";
 import {
   companyStageOptions,
   jobFamilyOptions,
+  jobOrderByOptions,
   payCadenceOptions,
   stateOptions,
   workTimeBasisOptions,
@@ -153,6 +154,16 @@ const filterDefs: Record<string, FormElementDef[]> = {
       type: "jb-form-input",
       name: "refresh",
       label: "Refresh",
+    },
+  ],
+  Results: [
+    {
+      type: "jb-form-select",
+      name: "orderBy",
+      label: "Order By",
+      tooltip:
+        "After the filters have narrowed the result, this determines the sort used to get the best results for you.",
+      options: jobOrderByOptions,
     },
   ],
 } as const;

@@ -2,10 +2,10 @@ import { expect, suite, test } from "vitest";
 import {
   toCompanyStage,
   toCompanyStageLabel,
-  toJobOrderBy,
-  toJobOrderByLabel,
   toJobFamily,
   toJobFamilyLabel,
+  toJobOrderBy,
+  toJobOrderByLabel,
   toPayCadence,
   toPayCadenceLabel,
   toWorkTimeBasis,
@@ -97,9 +97,9 @@ suite("apiEnums", () => {
   });
 
   test.for([
-    ["post_time", "Newest"],
-    ["highest_salary", "Highest Salary"],
-    ["lowest_experience", "Lowest Required Experience"],
+    ["post_time", "Post Time"],
+    ["highest_salary", "Pay Rate"],
+    ["lowest_experience", "Required Experience"],
     ["unknown", ""],
     [undefined, ""],
   ] as [unknown, string][])(

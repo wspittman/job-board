@@ -6,7 +6,7 @@ Add a filter-pane control that lets job seekers choose a known result ordering, 
 
 ## Current Phase
 
-Phase 2 complete. Stopped for review before Phase 3.
+Phase 3 complete. Stopped for review before Phase 4.
 
 ## Proposed Sort Options
 
@@ -42,12 +42,12 @@ The exact initial set can be adjusted before implementation, but every option mu
 
 ### Phase 3: Frontend Filter Pane
 
-- [ ] Add an "Order by" `jb-form-select` to the filter pane, likely in the `Other` group or a new compact "Results" group.
-- [ ] Parse and serialize `orderBy` in `FilterModel` so bookmarked URLs work.
-- [ ] Render a friendly chip label for non-default ordering, or decide intentionally whether the default should remain chipless.
-- [ ] Ensure natural-language filter updates do not erase an existing manual ordering unless the API starts returning this field.
-- [ ] Add/update `FilterModel` and `Filters` component tests for parsing, URL serialization, selected initial value, change emission, and chip behavior.
-- **Status:** pending
+- [x] Add an "Order by" `jb-form-select` to the filter pane, likely in the `Other` group or a new compact "Results" group.
+- [x] Parse and serialize `orderBy` in `FilterModel` so bookmarked URLs work.
+- [x] Render a friendly chip label for non-default ordering, or decide intentionally whether the default should remain chipless.
+- [x] Ensure natural-language filter updates do not erase an existing manual ordering unless the API starts returning this field.
+- [x] Add/update `FilterModel` and `Filters` component tests for parsing, URL serialization, selected initial value, change emission, and chip behavior.
+- **Status:** complete
 
 ### Phase 4: Verification and Documentation
 

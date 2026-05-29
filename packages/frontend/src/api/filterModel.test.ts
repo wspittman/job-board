@@ -23,6 +23,10 @@ suite("FilterModel", () => {
     ["?city=Chicago&location=Seattle%2C+IL", { city: "Chicago" }],
     // Backward compat: state already present — location param is ignored
     ["?state=WA&location=Seattle", { state: "WA" }],
+    ["?orderBy=highest_salary", { orderBy: "highest_salary" }],
+    ["?orderBy=HIGHEST_SALARY", { orderBy: "highest_salary" }],
+    ["?orderBy=post_time", { orderBy: "post_time" }],
+    ["?orderBy=invalid", {}],
   ];
 
   test.for(fromLocationSearchStringCases)(
@@ -30,7 +34,7 @@ suite("FilterModel", () => {
     ([query, expected]) => {
       const model = FilterModel.fromLocationSearchString(query);
       const entries = Object.fromEntries(model.toEntries());
-      expect(model.isEmpty()).toBe(!Object.keys(expected).length);
+      expect(model.isEmpty()).toBe(isSearchEmpty(expected));
       expect(entries).toEqual(expected);
     },
   );
@@ -39,10 +43,12 @@ suite("FilterModel", () => {
     const fd = new FormData();
     fd.set("title", "designer");
     fd.set("city", "New York");
+    fd.set("orderBy", "lowest_experience");
     const model = FilterModel.fromFormData(fd);
     const entries = Object.fromEntries(model.toEntries());
     expect(entries["title"]).toBe("designer");
     expect(entries["city"]).toBe("New York");
+    expect(entries["orderBy"]).toBe("lowest_experience");
   });
 
   test("fromFormData: missing field resolves to undefined (not included in entries)", () => {
@@ -52,16 +58,17 @@ suite("FilterModel", () => {
 
   const fromApiCases: [FilterModelApi, Record<string, unknown>][] = [
     [
-      { title: "engineer", minSalary: 100000 },
-      { title: "engineer", minSalary: 100000 },
+      { title: "engineer", minSalary: 100000, orderBy: "highest_salary" },
+      { title: "engineer", minSalary: 100000, orderBy: "highest_salary" },
     ],
+    [{ orderBy: "post_time" }, { orderBy: "post_time" }],
     [{ companyId: undefined }, {}],
   ];
 
   test.for(fromApiCases)("fromApi(%o) → %o", ([apiInput, expected]) => {
     const model = FilterModel.fromApi(apiInput);
     const entries = Object.fromEntries(model.toEntries());
-    expect(model.isEmpty()).toBe(!Object.keys(expected).length);
+    expect(model.isEmpty()).toBe(isSearchEmpty(expected));
     expect(entries).toEqual(expected);
   });
 
@@ -87,6 +94,8 @@ suite("FilterModel", () => {
     ["daysSince", "7", "Posted: Within 7 days"],
     ["maxExperience", "5", "Experience: 5 years"],
     ["minSalary", "100000", `Pay Rate: ${fmt.currency(100000)}`],
+    ["orderBy", "highest_salary", "Order: Pay Rate"],
+    ["orderBy", "post_time", "Order: Post Time"],
     ["companyId", "acme-corp", "Company: Acme Inc."],
   ] as [string, string, string][])(
     "toFriendlyStrings: key=%s value=%s → label contains '%s'",
@@ -111,6 +120,9 @@ suite("FilterModel", () => {
   test.for([
     ["", true],
     ["?title=engineer", false],
+    ["?orderBy=highest_salary", true],
+    ["?orderBy=post_time", true],
+    ["?title=engineer&orderBy=highest_salary", false],
   ] as [string, boolean][])("isEmpty: '%s' → %s", ([qs, expected]) => {
     expect(FilterModel.fromLocationSearchString(qs).isEmpty()).toBe(expected);
   });
@@ -164,3 +176,7 @@ suite("FilterModel", () => {
     expect(model.toEntries().map(([k]) => k)).not.toContain("companyId");
   });
 });
+
+function isSearchEmpty(filters: Record<string, unknown>) {
+  return Object.keys(filters).every((key) => key === "orderBy");
+}

@@ -96,9 +96,9 @@ export const toPayCadenceLabel = (value: unknown): string =>
   asLabel(payCadence, value);
 
 const jobOrderBy = {
-  post_time: "Newest",
-  highest_salary: "Highest Salary",
-  lowest_experience: "Lowest Required Experience",
+  post_time: "Post Time",
+  highest_salary: "Pay Rate",
+  lowest_experience: "Required Experience",
 } as const;
 
 export type JobOrderBy = keyof typeof jobOrderBy;

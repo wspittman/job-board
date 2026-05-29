@@ -41,6 +41,15 @@
 - Missing or invalid `orderBy` values fall back to `post_time`, so existing callers keep the current newest-first behavior.
 - Review correction: MockDB's missing-value ordering differs from Cosmos DB here. Cosmos DB sorts missing values below the lowest number, so `salaryRange.min DESC` puts missing salary after defined salaries and `requiredExperience ASC` puts missing experience before defined experience. Phase 2 now keeps those fields unguarded.
 - The backend mapping includes a code comment documenting this Cosmos behavior so future order-by options do not rediscover or copy the temporary `IS_DEFINED` guard approach.
+- Phase 3 added a `Results` group to the filter pane with an `Order By` select.
+- The default frontend option is labeled `Newest` and serializes as empty, keeping default post-time ordering chipless and preserving the empty `/jobs` starting state.
+- Non-default orderings serialize as `orderBy=highest_salary` or `orderBy=lowest_experience` and render friendly chips like `Order: Highest Salary`.
+- The `Order By` tooltip tells users that lowest required experience puts jobs with no listed experience requirement first.
+- Natural-language filter updates preserve an existing manual order selection because `#handleNLUpdate` only applies fields present in the incoming `FilterModel`.
+- Phase 3 review moved the `Results` filter group to the bottom of the filter pane.
+- Phase 3 review renamed user-facing sort labels to `Post Date`, `Pay Rate`, and `Required Experience`.
+- Phase 3 review made `orderBy` alone insufficient to run a search. `FilterModel.isEmpty()` now treats a model containing only `orderBy` as empty, while still serializing the selected order to the URL.
+- Follow-up Phase 3 review kept the default `jb-form-select` `Any` option and includes all three explicit ordering options. `Any` and `Post Date` currently produce the same backend order, but `Post Date` can round-trip as `orderBy=post_time`.
 
 ## Resources
 
@@ -50,7 +59,10 @@
 - `packages/frontend/src/api/filterModel.ts`
 - `packages/frontend/src/api/apiTypes.ts`
 - `packages/frontend/src/api/apiEnums.ts`
+- `packages/frontend/src/components/form-select.ts`
+- `packages/frontend/src/components/form-element.ts`
 - `packages/frontend/src/jobs/filters/filters.ts`
 - `packages/backend/test/middleware/inputValidators.test.ts`
 - `packages/frontend/src/api/filterModel.test.ts`
 - `packages/frontend/src/jobs/filters/filters.test.ts`
+- `packages/frontend/src/components/form-select.test.ts`

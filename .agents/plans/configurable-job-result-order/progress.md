@@ -104,3 +104,80 @@
 - **Completed:** 2026-05-29 after Phase 2 review
 
 Removed the `IS_DEFINED` field guards after review clarified that MockDB's ordering is wrong for this case. Real Cosmos DB sorts missing numeric values below defined numbers, so missing salary naturally appears last for `DESC`, and missing required experience naturally appears first for `ASC`. Added a code comment in `packages/backend/src/controllers/job.ts` so future order-by additions preserve this behavior intentionally.
+
+### Phase 3: Frontend Filter Pane
+
+- **Status:** complete
+- **Started:** 2026-05-29 15:47 America/Los_Angeles
+- **Completed:** 2026-05-29 15:55 America/Los_Angeles
+
+#### Actions Taken
+
+- Added an `Order By` select in a new `Results` filter group.
+- Added `anyLabel` support to `jb-form-select` so this select can show `Newest` for the empty/default value while other selects continue showing `Any`.
+- Parsed `orderBy` in `FilterModel` from URL strings, form data, and API objects.
+- Serialized only non-default orderings; `post_time` normalizes to empty/default so the default stays chipless.
+- Added friendly order chips for non-default values.
+- Added a tooltip clue that lowest required experience places jobs with no listed experience requirement first.
+- Verified natural-language filter updates preserve an existing manual `orderBy` selection.
+- Stopped before Phase 4 final verification and commit/pre-checkin work, per request.
+
+#### Files Created/Modified
+
+- `.agents/plans/configurable-job-result-order/task_plan.md`
+- `.agents/plans/configurable-job-result-order/findings.md`
+- `.agents/plans/configurable-job-result-order/progress.md`
+- `packages/frontend/src/api/filterModel.ts`
+- `packages/frontend/src/api/filterModel.test.ts`
+- `packages/frontend/src/components/form-element.ts`
+- `packages/frontend/src/components/form-select.ts`
+- `packages/frontend/src/components/form-select.test.ts`
+- `packages/frontend/src/jobs/filters/filters.ts`
+- `packages/frontend/src/jobs/filters/filters.test.ts`
+
+#### Test Results
+
+| Test | Input | Expected | Actual | Status |
+| ---- | ----- | -------- | ------ | ------ |
+| Filter model tests | `npm run test --workspace=frontend -- src/api/filterModel.test.ts` | Pass | Pass | passed |
+| Filter pane tests | `npm run test --workspace=frontend -- src/jobs/filters/filters.test.ts` | Pass | Pass | passed |
+| Form select tests | `npm run test --workspace=frontend -- src/components/form-select.test.ts` | Pass | Pass | passed |
+| Frontend build | `npm run build --workspace=frontend` | Pass | Pass | passed |
+| Frontend lint | `npm run lint --workspace=frontend` | Pass | Pass | passed |
+
+#### Follow-Up Review Adjustment
+
+- **Status:** complete
+- **Completed:** 2026-05-29 16:20 America/Los_Angeles
+
+Removed the custom `anyLabel` extension from `jb-form-select`, restored the standard `Any` empty option, and changed the Order By select to include all three explicit options: `Post Date`, `Pay Rate`, and `Required Experience`. `Post Date` now round-trips as `orderBy=post_time`, while order-only models still count as empty for search execution.
+
+| Test | Input | Expected | Actual | Status |
+| ---- | ----- | -------- | ------ | ------ |
+| Form select behavior | `npm run test --workspace=frontend -- src/components/form-select.test.ts` | Pass | Pass | passed |
+| Filter pane behavior | `npm run test --workspace=frontend -- src/jobs/filters/filters.test.ts` | Pass | Pass | passed |
+| Filter model behavior | `npm run test --workspace=frontend -- src/api/filterModel.test.ts` | Pass | Pass | passed |
+| Jobs page order-only behavior | `npm run test --workspace=frontend -- src/jobs/jobs.test.ts` | Pass | Pass | passed |
+| Frontend tests | `npm run test --workspace=frontend` | Pass | 21 files / 232 tests passed | passed |
+| Frontend build | `npm run build --workspace=frontend` | Pass | Pass | passed |
+| Frontend lint | `npm run lint --workspace=frontend` | Pass | Pass | passed |
+| Frontend tests | `npm run test --workspace=frontend` | Pass | 21 files / 227 tests passed | passed |
+| Browser check | Browser plugin/dev server | Inspect `/jobs` visually | Browser tool unavailable; background dev server failed to stay up through PowerShell Start-Process | skipped |
+
+#### Review Adjustments
+
+- **Status:** complete
+- **Completed:** 2026-05-29 16:05 America/Los_Angeles
+
+Moved the `Results` group to the bottom of the filter pane, renamed the visible sort labels to `Post Date`, `Pay Rate`, and `Required Experience`, and changed `FilterModel.isEmpty()` so order-only changes update the URL/chips but do not trigger a job search. Added targeted tests for group order, labels, filter emptiness, and the jobs page no-fetch behavior.
+
+| Test | Input | Expected | Actual | Status |
+| ---- | ----- | -------- | ------ | ------ |
+| API enum labels | `npm run test --workspace=frontend -- src/api/apiEnums.test.ts` | Pass | Pass | passed |
+| Filter model behavior | `npm run test --workspace=frontend -- src/api/filterModel.test.ts` | Pass | Pass | passed |
+| Filter pane behavior | `npm run test --workspace=frontend -- src/jobs/filters/filters.test.ts` | Pass | Pass | passed |
+| Jobs page order-only behavior | `npm run test --workspace=frontend -- src/jobs/jobs.test.ts` | Pass | Pass | passed |
+| Form select behavior | `npm run test --workspace=frontend -- src/components/form-select.test.ts` | Pass | Pass | passed |
+| Frontend tests | `npm run test --workspace=frontend` | Pass | 21 files / 231 tests passed | passed |
+| Frontend build | `npm run build --workspace=frontend` | Pass | Pass | passed |
+| Frontend lint | `npm run lint --workspace=frontend` | Pass | Pass | passed |
