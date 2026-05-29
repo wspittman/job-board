@@ -296,6 +296,10 @@ suite("useFilters", () => {
     { maxExperience: 5 },
     { minSalary: "50000" },
     { minSalary: 50000 },
+    { orderBy: "post_time" },
+    { orderBy: "POST_TIME" },
+    { orderBy: "highest_salary" },
+    { orderBy: "lowest_experience" },
     {
       companyId,
       isRemote: "true",
@@ -349,6 +353,7 @@ suite("useFilters", () => {
         ...lowercase("jobFamily", input.jobFamily),
         ...lowercase("companyStage", input.companyStage),
         ...lowercase("payCadence", input.payCadence),
+        ...lowercase("orderBy", input.orderBy),
         ...uppercase("state", input.state),
         ...(input.currency ? { currency: input.currency.toUpperCase() } : {}),
       };
@@ -387,6 +392,9 @@ suite("useFilters", () => {
     { minSalary: "0" },
     { minSalary: "10000001" },
     { minSalary: "not-a-number" },
+    { orderBy: "salaryRange.min" },
+    { orderBy: "invalid_value" },
+    { orderBy: 123 },
     { refresh: "not-a-bool" },
   ];
 

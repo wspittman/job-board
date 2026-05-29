@@ -1,5 +1,6 @@
 import type {
   CompanyStage,
+  JobOrderBy,
   JobFamily,
   PayCadence,
   Presence,
@@ -64,6 +65,8 @@ export interface FilterModelApi {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+  // Ordering
+  orderBy?: JobOrderBy;
   // Admin
   refresh?: boolean;
 }

@@ -1,6 +1,7 @@
 import type {
   CompanyStage,
   JobFamily,
+  JobOrderBy,
   PayCadence,
   Presence,
   UsState,
@@ -28,6 +29,8 @@ export interface Filters {
   daysSince?: number;
   maxExperience?: number;
   minSalary?: number;
+  // Ordering
+  orderBy?: JobOrderBy;
   // Admin
   refresh?: boolean;
 }

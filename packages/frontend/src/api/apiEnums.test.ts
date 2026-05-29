@@ -2,6 +2,8 @@ import { expect, suite, test } from "vitest";
 import {
   toCompanyStage,
   toCompanyStageLabel,
+  toJobOrderBy,
+  toJobOrderByLabel,
   toJobFamily,
   toJobFamilyLabel,
   toPayCadence,
@@ -92,5 +94,27 @@ suite("apiEnums", () => {
     ["salary", "salary"],
   ] as [unknown, string][])("toPayCadence(%s) → %s", ([value, expected]) => {
     expect(toPayCadence(value)).toBe(expected);
+  });
+
+  test.for([
+    ["post_time", "Newest"],
+    ["highest_salary", "Highest Salary"],
+    ["lowest_experience", "Lowest Required Experience"],
+    ["unknown", ""],
+    [undefined, ""],
+  ] as [unknown, string][])(
+    "toJobOrderByLabel(%s) → %s",
+    ([value, expected]) => {
+      expect(toJobOrderByLabel(value)).toBe(expected);
+    },
+  );
+
+  test.for([
+    ["unknown", undefined],
+    ["post_time", "post_time"],
+    ["POST_TIME", "post_time"],
+    ["highest_salary", "highest_salary"],
+  ] as [unknown, string][])("toJobOrderBy(%s) → %s", ([value, expected]) => {
+    expect(toJobOrderBy(value)).toBe(expected);
   });
 });

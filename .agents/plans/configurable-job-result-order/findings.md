@@ -30,6 +30,13 @@
 | Default missing/invalid ordering to post time | Existing links and searches should continue returning newest jobs first. |
 | Include targeted tests before full pre-checkin | The repo expects `npm run pre-checkin` before commits, but narrower tests are faster while developing. |
 
+## Implementation Findings
+
+- Phase 1 added `JobOrderBy` backend enum values: `post_time`, `highest_salary`, and `lowest_experience`.
+- Backend `useFilters` accepts `orderBy` case-insensitively and strips invalid values through the existing `soft(lower(...))` validation pattern.
+- Frontend `apiEnums` now exposes `JobOrderBy`, `jobOrderByOptions`, `toJobOrderBy`, and `toJobOrderByLabel`.
+- Frontend `FilterModelApi` includes `orderBy?: JobOrderBy`, but `FilterModel` parsing/serialization is intentionally left for Phase 3.
+
 ## Resources
 
 - `packages/backend/src/controllers/job.ts`

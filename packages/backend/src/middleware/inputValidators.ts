@@ -3,6 +3,7 @@ import type { Filters, RefreshJobsOptions } from "../models/clientModels.ts";
 import {
   CompanyStage,
   JobFamily,
+  JobOrderBy,
   PayCadence,
   UsState,
   WorkTimeBasis,
@@ -76,6 +77,7 @@ const FiltersSchema = z.object({
   daysSince: coerceInt(z.int().positive().max(JOB_EXPIRY_DAYS)),
   maxExperience: coerceInt(z.int().nonnegative().max(100)),
   minSalary: coerceInt(z.int().positive().max(10_000_000)),
+  orderBy: soft(lower(JobOrderBy)),
   refresh: coerceString(z.stringbool()),
 });
 

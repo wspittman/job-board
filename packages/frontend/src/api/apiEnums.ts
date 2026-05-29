@@ -95,6 +95,19 @@ export const toPayCadence = (value: unknown): PayCadence | undefined =>
 export const toPayCadenceLabel = (value: unknown): string =>
   asLabel(payCadence, value);
 
+const jobOrderBy = {
+  post_time: "Newest",
+  highest_salary: "Highest Salary",
+  lowest_experience: "Lowest Required Experience",
+} as const;
+
+export type JobOrderBy = keyof typeof jobOrderBy;
+export const jobOrderByOptions = toOptions(jobOrderBy);
+export const toJobOrderBy = (value: unknown): JobOrderBy | undefined =>
+  asEnum(jobOrderBy, value);
+export const toJobOrderByLabel = (value: unknown): string =>
+  asLabel(jobOrderBy, value);
+
 const usState = {
   AL: "Alabama",
   AK: "Alaska",

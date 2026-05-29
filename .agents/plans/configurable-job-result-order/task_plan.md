@@ -6,7 +6,7 @@ Add a filter-pane control that lets job seekers choose a known result ordering, 
 
 ## Current Phase
 
-Planning complete. Next implementation session should start with Phase 1 and stop for feedback after Phase 1 is complete.
+Phase 1 complete. Stopped for review before Phase 2.
 
 ## Proposed Sort Options
 
@@ -24,12 +24,12 @@ The exact initial set can be adjusted before implementation, but every option mu
 
 ### Phase 1: Shared Order Contract
 
-- [ ] Add a `JobOrderBy`/similar type to backend client models.
-- [ ] Add a matching frontend API type and enum helpers/options.
-- [ ] Add `orderBy?: JobOrderBy` to backend `Filters` and frontend `FilterModelApi`.
-- [ ] Validate `orderBy` in `useFilters`, preserving current behavior when the field is absent or invalid.
-- [ ] Add/update validator and frontend enum tests.
-- **Status:** pending
+- [x] Add a `JobOrderBy`/similar type to backend client models.
+- [x] Add a matching frontend API type and enum helpers/options.
+- [x] Add `orderBy?: JobOrderBy` to backend `Filters` and frontend `FilterModelApi`.
+- [x] Validate `orderBy` in `useFilters`, preserving current behavior when the field is absent or invalid.
+- [x] Add/update validator and frontend enum tests.
+- **Status:** complete
 
 ### Phase 2: Backend Query Ordering
 
