@@ -10,7 +10,7 @@ A job board that prioritizes the job seeker's experience.
 ### Verifying Changes
 
 - If you are working with or from a plan, review to ensure that the plan files are structured correctly and up to date.
-- Always run `npm run pre-checkin` before committing code.
+- Always run `npm run pre-checkin` before committing code or handing back for human review.
 
 ## NPM Workspaces
 
@@ -31,6 +31,8 @@ Run from the repository root:
 - `npm run start:frontend`: Start the frontend.
 - `npm run cli -- help`: Learn about the available CLI commands.
 
+Do NOT run `node --test` directly and your harness will likely require human intervention.
+
 ## Skills
 
 - `planning-with-files`: Use for complex, multi-step tasks that require maintaining state across many tool calls.
@@ -41,8 +43,9 @@ Run from the repository root:
 
 ## Conventions
 
+- We believe strongly in YAGNI.
 - Avoid adding new dependencies and warn when you do.
-- Use red/green TDD for new features and bug fixes when practical.
+- Use red/green TDD for new features and bug fixes when possible.
 
 ### Documentation
 
