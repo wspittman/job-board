@@ -237,7 +237,7 @@ export class Filters extends ComponentBase {
       // ignore
     }
 
-    if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
+    if (this.#initialFilters) {
       for (const [key, value] of this.#initialFilters.toEntries()) {
         const input = this.#inputs.get(key);
         if (input) {

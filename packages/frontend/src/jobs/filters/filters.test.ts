@@ -78,6 +78,25 @@ suite("Filters", () => {
     ]);
   });
 
+  test("hydrates initial order by when it is the only URL value", async () => {
+    const element = document.createElement("jobs-filters") as Xray;
+    element.init({
+      initialFilters: FilterModel.fromLocationSearchString(
+        "orderBy=highest_salary",
+      ),
+    });
+    document.body.append(element);
+    await element.onLoad();
+
+    const orderByInput = element.shadowRoot.querySelector<HTMLElement>(
+      '[name="orderBy"]',
+    ) as XrayFormElement;
+
+    expect(orderByInput.intake.value).toBe("highest_salary");
+
+    element.remove();
+  });
+
   test("renders Results as the final filter group", async () => {
     const element = await createLoaded();
     const labels = [...element.shadowRoot.querySelectorAll(".group-label")].map(
