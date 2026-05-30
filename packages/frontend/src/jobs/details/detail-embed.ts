@@ -1,7 +1,11 @@
 import { ComponentBase } from "../../components/componentBase";
 
 const cssSheet = ComponentBase.createCSSSheet(
-  "* { font: var(--font-size-6)/1.5 var(--fonts); }",
+  `* {
+    font: var(--font-size-6)/1.5 var(--fonts);
+    overflow-wrap: anywhere;
+  },
+  `,
 );
 
 /**
