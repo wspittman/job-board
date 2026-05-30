@@ -1,7 +1,12 @@
+import { Query } from "dry-utils-cosmosdb";
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 
-import { buildLocationWhere } from "../../src/controllers/job.ts";
+import {
+  applyJobOrder,
+  buildLocationWhere,
+  hasJobSearchFilters,
+} from "../../src/controllers/job.ts";
 import type { Filters } from "../../src/models/clientModels.ts";
 
 type LocationWhereCase = {
@@ -86,6 +91,91 @@ suite("buildLocationWhere", () => {
 
     cases.forEach(({ name, filters, expected }) => {
       assert.deepEqual(buildLocationWhere(filters), expected, name);
+    });
+  });
+});
+
+suite("applyJobOrder", () => {
+  const cases: {
+    name: string;
+    orderBy: Filters["orderBy"];
+    expectedQuery: string;
+  }[] = [
+    {
+      name: "missing order defaults to newest post time",
+      orderBy: undefined,
+      expectedQuery: "SELECT TOP 24 * FROM c ORDER BY c.postTS DESC",
+    },
+    {
+      name: "post time orders by newest post time",
+      orderBy: "post_time",
+      expectedQuery: "SELECT TOP 24 * FROM c ORDER BY c.postTS DESC",
+    },
+    {
+      name: "highest salary orders by salary",
+      orderBy: "highest_salary",
+      expectedQuery: "SELECT TOP 24 * FROM c ORDER BY c.salaryRange.min DESC",
+    },
+    {
+      name: "lowest experience orders by experience",
+      orderBy: "lowest_experience",
+      expectedQuery: "SELECT TOP 24 * FROM c ORDER BY c.requiredExperience ASC",
+    },
+    {
+      name: "invalid order results in no ordering applied",
+      orderBy: "salaryRange.min" as Filters["orderBy"],
+      expectedQuery: "SELECT TOP 24 * FROM c",
+    },
+  ];
+
+  cases.forEach(({ name, orderBy, expectedQuery }) => {
+    test(name, () => {
+      const q = new Query().top(24);
+      applyJobOrder(q, orderBy);
+      const { query, parameters } = q.build();
+
+      assert.equal(query, expectedQuery);
+      assert.deepEqual(parameters, []);
+    });
+  });
+});
+
+suite("hasJobSearchFilters", () => {
+  const cases: {
+    name: string;
+    filters: Filters;
+    expected: boolean;
+  }[] = [
+    {
+      name: "empty filters are not searchable",
+      filters: {},
+      expected: false,
+    },
+    {
+      name: "order by alone is not searchable",
+      filters: { orderBy: "highest_salary" },
+      expected: false,
+    },
+    {
+      name: "title is searchable",
+      filters: { title: "engineer" },
+      expected: true,
+    },
+    {
+      name: "false boolean filter is searchable",
+      filters: { isRemote: false },
+      expected: true,
+    },
+    {
+      name: "real filter with order by is searchable",
+      filters: { title: "engineer", orderBy: "lowest_experience" },
+      expected: true,
+    },
+  ];
+
+  cases.forEach(({ name, filters, expected }) => {
+    test(name, () => {
+      assert.equal(hasJobSearchFilters(filters), expected);
     });
   });
 });

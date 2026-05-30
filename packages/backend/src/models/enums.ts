@@ -248,6 +248,13 @@ export type JobFamily = z.infer<typeof JobFamily>;
 
 // #endregion
 
+export const JobOrderBy = z.enum([
+  "post_time",
+  "highest_salary",
+  "lowest_experience",
+] as const);
+export type JobOrderBy = z.infer<typeof JobOrderBy>;
+
 /** US states, DC, and inhabited territories as 2-character codes. */
 export const UsState = z
   .enum([

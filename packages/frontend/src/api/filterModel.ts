@@ -4,6 +4,8 @@ import {
   toCompanyStageLabel,
   toJobFamily,
   toJobFamilyLabel,
+  toJobOrderBy,
+  toJobOrderByLabel,
   toPayCadence,
   toPayCadenceLabel,
   toUsState,
@@ -62,7 +64,7 @@ export class FilterModel {
    * @returns True if the filter model is empty, false otherwise.
    */
   isEmpty(): boolean {
-    return Object.values(this.#filters).every(isEmpty);
+    return this.toEntries().every(([key]) => key === "orderBy");
   }
 
   /**
@@ -131,6 +133,8 @@ export class FilterModel {
           return [key, `Experience: ${value} years`];
         case "minSalary":
           return [key, `Pay Rate: ${fmt.currency(Number(value))}`];
+        case "orderBy":
+          return [key, `Order: ${toJobOrderByLabel(value)}`];
         default:
           return [key, `${key}: ${value}`];
       }
@@ -194,6 +198,7 @@ export class FilterModel {
     this.#filters.minSalary = normNumber(get("minSalary"));
     this.#filters.maxExperience = normNumber(get("maxExperience"));
     this.#filters.daysSince = normNumber(get("daysSince"));
+    this.#filters.orderBy = toJobOrderBy(get("orderBy"));
     this.#filters.jobId = !isEmpty(this.#filters.companyId)
       ? normIdString(get("jobId"))
       : undefined;

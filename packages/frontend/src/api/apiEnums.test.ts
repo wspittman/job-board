@@ -4,6 +4,8 @@ import {
   toCompanyStageLabel,
   toJobFamily,
   toJobFamilyLabel,
+  toJobOrderBy,
+  toJobOrderByLabel,
   toPayCadence,
   toPayCadenceLabel,
   toWorkTimeBasis,
@@ -92,5 +94,27 @@ suite("apiEnums", () => {
     ["salary", "salary"],
   ] as [unknown, string][])("toPayCadence(%s) → %s", ([value, expected]) => {
     expect(toPayCadence(value)).toBe(expected);
+  });
+
+  test.for([
+    ["post_time", "Post Time"],
+    ["highest_salary", "Pay Rate"],
+    ["lowest_experience", "Required Experience"],
+    ["unknown", ""],
+    [undefined, ""],
+  ] as [unknown, string][])(
+    "toJobOrderByLabel(%s) → %s",
+    ([value, expected]) => {
+      expect(toJobOrderByLabel(value)).toBe(expected);
+    },
+  );
+
+  test.for([
+    ["unknown", undefined],
+    ["post_time", "post_time"],
+    ["POST_TIME", "post_time"],
+    ["highest_salary", "highest_salary"],
+  ] as [unknown, string][])("toJobOrderBy(%s) → %s", ([value, expected]) => {
+    expect(toJobOrderBy(value)).toBe(expected);
   });
 });

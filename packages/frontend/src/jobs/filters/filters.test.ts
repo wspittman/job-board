@@ -3,6 +3,7 @@ import { FilterModel } from "../../api/filterModel";
 import { metadataModel } from "../../api/metadataModel";
 import { CHIP_DELETE } from "../../components/chip";
 import { FORM_ELEMENT_UPDATE } from "../../components/form-element";
+import { NL_SEARCH_RESULT } from "../../components/nl-search";
 import type { XrayComponent, XrayFormElement } from "../../utils/testUtils";
 import { FILTERS_UPDATED, Filters } from "./filters";
 
@@ -57,5 +58,71 @@ suite("Filters", () => {
     );
 
     expect(titleInput.intake.value).toBe("");
+  });
+
+  test("initializes order by with Any and all order options", async () => {
+    const element = await createLoaded();
+    const orderByInput = element.shadowRoot.querySelector<HTMLElement>(
+      '[name="orderBy"]',
+    ) as XrayFormElement;
+
+    const options = [...(orderByInput.intake as HTMLSelectElement).options].map(
+      ({ textContent, value }) => ({ label: textContent, value }),
+    );
+
+    expect(options).toEqual([
+      { label: "Any", value: "" },
+      { label: "Pay Rate", value: "highest_salary" },
+      { label: "Post Time", value: "post_time" },
+      { label: "Required Experience", value: "lowest_experience" },
+    ]);
+  });
+
+  test("hydrates initial order by when it is the only URL value", async () => {
+    const element = document.createElement("jobs-filters") as Xray;
+    element.init({
+      initialFilters: FilterModel.fromLocationSearchString(
+        "orderBy=highest_salary",
+      ),
+    });
+    document.body.append(element);
+    await element.onLoad();
+
+    const orderByInput = element.shadowRoot.querySelector<HTMLElement>(
+      '[name="orderBy"]',
+    ) as XrayFormElement;
+
+    expect(orderByInput.intake.value).toBe("highest_salary");
+
+    element.remove();
+  });
+
+  test("renders Results as the final filter group", async () => {
+    const element = await createLoaded();
+    const labels = [...element.shadowRoot.querySelectorAll(".group-label")].map(
+      (label) => label.textContent,
+    );
+
+    expect(labels.at(-1)).toBe("Results");
+  });
+
+  test("preserves manual order by selection after natural language updates", async () => {
+    const element = await createLoaded();
+    const orderByInput = element.shadowRoot.querySelector<HTMLElement>(
+      '[name="orderBy"]',
+    ) as XrayFormElement;
+
+    orderByInput.intake.value = "highest_salary";
+
+    element.dispatchEvent(
+      new CustomEvent(NL_SEARCH_RESULT, {
+        bubbles: true,
+        detail: FilterModel.fromApi({ title: "engineer" }),
+      }),
+    );
+
+    vi.advanceTimersByTime(DEBOUNCE_DELAY);
+
+    expect(orderByInput.intake.value).toBe("highest_salary");
   });
 });

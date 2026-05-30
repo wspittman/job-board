@@ -6,6 +6,7 @@ import "../../components/nl-search";
 import {
   companyStageOptions,
   jobFamilyOptions,
+  jobOrderByOptions,
   payCadenceOptions,
   stateOptions,
   workTimeBasisOptions,
@@ -155,6 +156,16 @@ const filterDefs: Record<string, FormElementDef[]> = {
       label: "Refresh",
     },
   ],
+  Results: [
+    {
+      type: "jb-form-select",
+      name: "orderBy",
+      label: "Order By",
+      tooltip:
+        "After filters narrow the results, this determines the sort. Required Experience puts jobs with no listed requirement first.",
+      options: jobOrderByOptions,
+    },
+  ],
 } as const;
 
 /**
@@ -226,7 +237,7 @@ export class Filters extends ComponentBase {
       // ignore
     }
 
-    if (this.#initialFilters && !this.#initialFilters.isEmpty()) {
+    if (this.#initialFilters) {
       for (const [key, value] of this.#initialFilters.toEntries()) {
         const input = this.#inputs.get(key);
         if (input) {
