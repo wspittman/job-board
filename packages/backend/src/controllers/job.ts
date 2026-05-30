@@ -28,7 +28,7 @@ const JOB_ORDER_BY: Record<JobOrderBy, [string, "ASC" | "DESC"]> = {
  * @returns Array of jobs matching the filters, empty if no filters provided
  */
 export async function getJobs(filterInput: Filters) {
-  if (!Object.keys(filterInput).length) {
+  if (!hasJobSearchFilters(filterInput)) {
     return [];
   }
 
@@ -181,6 +181,15 @@ export function applyJobOrder(query: Query, orderBy: JobOrderBy = "post_time") {
   if (orderBy && JOB_ORDER_BY[orderBy]) {
     query.orderBy(...JOB_ORDER_BY[orderBy]);
   }
+}
+
+/**
+ * Checks whether filters include at least one criterion that narrows job results.
+ */
+export function hasJobSearchFilters(filters: Filters): boolean {
+  return Object.entries(filters).some(
+    ([key, value]) => key !== "orderBy" && value != null && value !== "",
+  );
 }
 
 /**

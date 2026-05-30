@@ -5,6 +5,7 @@ import { suite, test } from "node:test";
 import {
   applyJobOrder,
   buildLocationWhere,
+  hasJobSearchFilters,
 } from "../../src/controllers/job.ts";
 import type { Filters } from "../../src/models/clientModels.ts";
 
@@ -135,6 +136,46 @@ suite("applyJobOrder", () => {
 
       assert.equal(query, expectedQuery);
       assert.deepEqual(parameters, []);
+    });
+  });
+});
+
+suite("hasJobSearchFilters", () => {
+  const cases: {
+    name: string;
+    filters: Filters;
+    expected: boolean;
+  }[] = [
+    {
+      name: "empty filters are not searchable",
+      filters: {},
+      expected: false,
+    },
+    {
+      name: "order by alone is not searchable",
+      filters: { orderBy: "highest_salary" },
+      expected: false,
+    },
+    {
+      name: "title is searchable",
+      filters: { title: "engineer" },
+      expected: true,
+    },
+    {
+      name: "false boolean filter is searchable",
+      filters: { isRemote: false },
+      expected: true,
+    },
+    {
+      name: "real filter with order by is searchable",
+      filters: { title: "engineer", orderBy: "lowest_experience" },
+      expected: true,
+    },
+  ];
+
+  cases.forEach(({ name, filters, expected }) => {
+    test(name, () => {
+      assert.equal(hasJobSearchFilters(filters), expected);
     });
   });
 });
