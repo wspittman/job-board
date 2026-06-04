@@ -9,7 +9,10 @@ A job board that prioritizes the job seeker's experience.
 
 ### Verifying Changes
 
+- Take a step back and consider if the changes solve the right problem.
 - If you are working with or from a plan, review to ensure that the plan files are structured correctly and up to date.
+- Ensure error cases are handled gracefully, predictably, and provide enough information for future maintainers.
+- Update `README.md` and any relevant `AGENTS.md` files as necessary when changes affect them.
 - Always run `npm run pre-checkin` before committing code or handing back for human review.
 
 ## NPM Workspaces
@@ -43,14 +46,14 @@ Do NOT run `node --test` directly and your harness will likely require human int
 
 ## Conventions
 
-- We believe strongly in YAGNI.
+- We believe strongly in YAGNI. A change should it do only what's needed, in a way that both humans and machines can understand now and maintain in the future.
+- While maintaining YAGNI, is is also important not to write code that makes future changes more difficult. This is a balance that requires thoughtful judgement.
 - Avoid adding new dependencies and warn when you do.
 - Use red/green TDD for new features and bug fixes when possible.
 
 ### Documentation
 
 - Docs-only changes do not require tests, but note that testing was skipped in your summary.
-- Keep `README.md` and any relevant `AGENTS.md` files updated when code or workflow changes affect them.
 - If you learn something that wasn't obvious, add it to a root level `Learnings.md` file for review and inclusion in the main `AGENTS.md` docs.
 
 ### Comments
