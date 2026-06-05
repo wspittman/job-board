@@ -91,15 +91,15 @@ export const ExtractionLocation = z
       "Exclude country/region names.",
       "Examples:",
       "'Located in downtown Seattle' → Seattle;",
-      "'Our office is in Cologne, Germany' → Cologne;",
+      "'Our office is in New York City' → New York;",
       "'We are headquartered in São Paulo' → São Paulo;",
       "'Remote US only' → ''.",
     ),
     regionCode: zString(
-      "ISO 3166-2 subdivision code (uppercase) excluding country prefix.",
+      "Two-letter ISO 3166-2 subdivision code (uppercase) excluding country prefix.",
       "Examples:",
       "'Located in downtown Seattle' → WA;",
-      "'Our office is in Cologne, Germany' → NW;",
+      "'Our office is in New York, New York' → NY;",
       "'We are headquartered in São Paulo' → SP;",
       "'Remote US only' → ''.",
     ),
@@ -158,6 +158,7 @@ export const ExtractionRemoteEligibility = z
   .describe(
     [
       "Remote work eligibility as explicitly stated.",
+      "If the role is in-person, on-site, or hybrid, return empty values",
       "Uppercase codes, no duplicates.",
     ].join(" "),
   );
@@ -257,6 +258,7 @@ export const ExtractionJob = z
       "Examples:",
       "'5-8 years' → 5;",
       "'3+ years' → 3;",
+      "'5 years experience preferred' → 0 (not explicitly required).",
     ),
     jdLanguage: zString(
       "ISO 639-1 alpha-2 language code for the language the job description is written in (lowercase), e.g. 'en'.",

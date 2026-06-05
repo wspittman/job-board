@@ -35,6 +35,17 @@ suite("jobs", () => {
     expect(mockApi.fetchJobs).toHaveBeenCalledTimes(1);
   });
 
+  test("FILTERS_UPDATED with only order by does not fetch jobs", async () => {
+    const filters = FilterModel.fromLocationSearchString(
+      "orderBy=highest_salary",
+    );
+    window.dispatchEvent(new CustomEvent(FILTERS_UPDATED, { detail: filters }));
+
+    await Promise.resolve();
+
+    expect(mockApi.fetchJobs).not.toHaveBeenCalled();
+  });
+
   test("JOB_CARD_SELECTED updates the details pane with the selected job title", async () => {
     mockJobs();
     const filters = FilterModel.fromLocationSearchString("title=engineer");

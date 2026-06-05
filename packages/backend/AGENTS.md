@@ -8,31 +8,15 @@ Package-specific Tech Stack: Express, Application Insights, CosmosDB via dry-uti
 
 Important: Azure CosmosDB Emulator or an Azure CosmosDB account is required to run the backend API locally. Agents may not have this available depending on their environment.
 
-When running in environments without a Cosmos DB emulator (such as AI agent containers), you can enable in-memory mocks powered by `dry-utils-cosmosdb`:
+When running in environments without a Cosmos DB emulator (such as AI agent containers), you can enable in-memory mocks powered by `dry-utils-cosmosdb`. The `dry-utils-cosmosdb-mockdb`skill will show you how.
 
-1. Create a JSON object keyed by container name (`company`, `job`, etc.).
-2. Provide it through `DATABASE_MOCK_DATA_JSON` (inline JSON) or `DATABASE_MOCK_DATA_PATH` (path to JSON file).
-3. Start the backend normally; `connectDB` will use the mock state/query handlers instead of reaching Azure Cosmos DB.
-
-If both variables are set, file-based options load first and inline JSON overrides duplicate container keys.
-
-Example JSON:
-
-```json
-{
-  "company": [{ "id": "acme", "ats": "greenhouse", "name": "Acme" }],
-  "job": [
-    {
-      "id": "job-1",
-      "companyId": "acme",
-      "title": "Engineer",
-      "status": "open"
-    }
-  ]
-}
-```
+The code is already set up to look for the `DATABASE_MOCK_DATA_JSON` (inline JSON) or `DATABASE_MOCK_DATA_PATH` (path to JSON file) environment variables.
 
 ## Development workflows
 
 - Development server: `npm run start:backend`
 - Environment variables are loaded from `.env`. See `src/config.ts`.
+
+## Common Issues
+
+`packages\backend\src\models\extractionModels.ts` shows that objects created by LLMs may have empty string ("") values to indicate absence. Any properties with "" is stripped from the object before it is saved into the DB. Therefore you can assume that objects coming out of the DB will not have empty properties.

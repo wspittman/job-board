@@ -1,10 +1,38 @@
 ---
 title: Progress Report
 description: A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
-date: May 28, 2026
+date: June 4, 2026
 ---
 
 A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
+
+## June 4, 2026
+
+- Job Details: Fix a bug where long links were not wrapping properly. This was especially annoying in mobile.
+
+### New "filter": Order By
+
+When you add filters, we return up to 24 matching jobs.
+
+You can always tighten the filters to be more specific. But sometimes you want, say, the highest paying jobs. This required a bunch of playing with the Pay Rate filter and didn't bookmark well.
+
+Now with the Order By option you have more control. You can request the:
+
+- Newest jobs
+  - Specifically, those with the most recent post/update time.
+- Highest paying jobs
+  - Specifically, the highest value for the minimum end of the pay rate range.
+  - Jobs without a listed pay rate are only returned after all matching jobs with a listed pay rate.
+- Jobs with the lowest required experience.
+  - Jobs without any required experience are listed first.
+
+### Job Processing
+
+We've made some updates to how we extract information from job descriptions.
+
+Our test measurements indicate that our error rate should decrease by about 17%.
+
+We will, of course, continue to find ways to make it better.
 
 ## May 28, 2026
 

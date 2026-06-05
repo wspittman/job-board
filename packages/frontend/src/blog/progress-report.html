@@ -25,13 +25,70 @@
       <article>
         <header class="blog-header">
           <h1>Progress Report</h1>
-          <p>May 28, 2026</p>
+          <p>June 4, 2026</p>
         </header>
         <section>
           <p>
             A running record of the improvements we're making as we do our best
             to put the "better" in Better Job Board.
           </p>
+          <h2>June 4, 2026</h2>
+          <ul>
+            <li>
+              Job Details: Fix a bug where long links were not wrapping
+              properly. This was especially annoying in mobile.
+            </li>
+          </ul>
+          <h3>New "filter": Order By</h3>
+          <p>When you add filters, we return up to 24 matching jobs.</p>
+          <p>
+            You can always tighten the filters to be more specific. But
+            sometimes you want, say, the highest paying jobs. This required a
+            bunch of playing with the Pay Rate filter and didn't bookmark well.
+          </p>
+          <p>
+            Now with the Order By option you have more control. You can request
+            the:
+          </p>
+          <ul>
+            <li>
+              Newest jobs
+              <ul>
+                <li>
+                  Specifically, those with the most recent post/update time.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Highest paying jobs
+              <ul>
+                <li>
+                  Specifically, the highest value for the minimum end of the pay
+                  rate range.
+                </li>
+                <li>
+                  Jobs without a listed pay rate are only returned after all
+                  matching jobs with a listed pay rate.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Jobs with the lowest required experience.
+              <ul>
+                <li>Jobs without any required experience are listed first.</li>
+              </ul>
+            </li>
+          </ul>
+          <h3>Job Processing</h3>
+          <p>
+            We've made some updates to how we extract information from job
+            descriptions.
+          </p>
+          <p>
+            Our test measurements indicate that our error rate should decrease
+            by about 17%.
+          </p>
+          <p>We will, of course, continue to find ways to make it better.</p>
           <h2>May 28, 2026</h2>
           <ul>
             <li>
