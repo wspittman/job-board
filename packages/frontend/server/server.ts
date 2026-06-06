@@ -36,7 +36,7 @@ declare module "express-serve-static-core" {
 
 // #endregion
 
-const PAGES = new Set(["blog", "index", "faq", "404", "jobs"]);
+const PAGES = new Set(["blog", "index", "faq", "jobs"]);
 const METHOD_ALLOWED = new Set(["GET", "HEAD", "POST"]);
 const POST_ALLOWED = new Set(["/api/beacon", "/api/interpret"]);
 
@@ -133,6 +133,10 @@ app.use(async (req, res, next) => {
     return res.redirect(urlParts);
   }
 
+  if (urlParts.base === "404") {
+    res.status(404);
+  }
+
   await setCompressionUrl(urlParts, encodings);
   req._urlParts = urlParts;
   req.url = urlParts.urlPath;
@@ -203,7 +207,7 @@ function getEncodings(req: Request): Encodings {
 /**
  * Given a request, determines the corresponding file to serve based on URL patterns and available files.
  * @param req The incoming HTTP request object.
- * @returns The URL parts if a corresponding file is found, otherwise a redirect path or "404_hard"
+ * @returns The URL parts if a corresponding file is found, otherwise a redirect path or "404_hard".
  */
 async function getUrlParts(req: Request): Promise<UrlParts | string> {
   const url = URL.parse(req.url, "http://does.not.matter");
@@ -221,7 +225,7 @@ async function getUrlParts(req: Request): Promise<UrlParts | string> {
   }
 
   if (dir === "/blog") {
-    return (await fileExists(urlParts)) ? urlParts : "/404";
+    return (await fileExists(urlParts)) ? urlParts : getNotFoundUrlParts();
   }
 
   // The /jobs path was previously /explore, so we want to support old links.
@@ -230,7 +234,16 @@ async function getUrlParts(req: Request): Promise<UrlParts | string> {
   }
 
   const isRootPage = dir === "/" && PAGES.has(base);
-  return isRootPage ? urlParts : "/404";
+  return isRootPage ? urlParts : getNotFoundUrlParts();
+}
+
+function getNotFoundUrlParts(): UrlParts {
+  return {
+    dir: "/",
+    base: "404",
+    ext: ".html",
+    urlPath: "/404.html",
+  };
 }
 
 async function setCompressionUrl(
