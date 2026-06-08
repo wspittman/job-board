@@ -137,6 +137,10 @@ app.use(async (req, res, next) => {
     res.status(404);
   }
 
+  if (urlParts.base === "jobs" && Object.keys(req.query).length) {
+    res.setHeader("X-Robots-Tag", "noindex, follow");
+  }
+
   await setCompressionUrl(urlParts, encodings);
   req._urlParts = urlParts;
   req.url = urlParts.urlPath;
