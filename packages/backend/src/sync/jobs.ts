@@ -10,6 +10,7 @@ import { logProperty } from "../utils/telemetry.ts";
 
 const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
   onComplete: refreshMetadata,
+  taskDelayMs: 25,
 });
 
 /**
