@@ -82,16 +82,20 @@ production server wrappers.
 
 ## Screenshots
 
-UI Snapshots from December 8, 2025
+UI Snapshots from June 8, 2026
 
 ### Home Page
 
-![Home page from 12/8/25](screenshots/12_8_25_Home.png)
+![Home page from 6/8/26](screenshots/6_8_26_Home.jpg)
 
-### Explore Page
+### Jobs Page
 
-![Explore page from 12/8/25](screenshots/12_8_25_Explore.png)
+![Explore page from 6/8/26](screenshots/6_8_26_Jobs.jpg)
+
+### Blog Page
+
+![Blog page from 6/8/26](screenshots/6_8_26_Blog.jpg)
 
 ### FAQ Page
 
-![FAQ page from 12/8/25](screenshots/12_8_25_FAQ.png)
+![FAQ page from 6/8/26](screenshots/6_8_26_FAQ.jpg)
