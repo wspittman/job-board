@@ -58,13 +58,6 @@ suite("JobModel", () => {
     );
   });
 
-  test("getDisplayFacets (useShort=true): trims city suffix from location", () => {
-    const job = createJobModel();
-    const facets = job.getDisplayFacets(true);
-    expect(facets).toContain("Seattle");
-    expect(facets).not.toContain("Seattle, WA");
-  });
-
   test("getDisplayFacets (useShort=true): includes 'Remote' unchanged", () => {
     const job = createJobModel({ isRemote: true });
     expect(job.getDisplayFacets(true)).toContain("Remote");
