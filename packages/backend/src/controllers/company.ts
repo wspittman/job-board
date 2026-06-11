@@ -20,7 +20,7 @@ const companyJobQueue = new AsyncQueue(
   {
     onComplete: refreshMetadata,
     concurrentLimit: 3,
-    taskDelayMs: 100,
+    taskDelayMs: 150,
   },
 );
 

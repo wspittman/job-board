@@ -62,9 +62,8 @@ export class JobModel {
   }
 
   getDisplayFacets(useShort = false): string[] {
-    const { workTimeBasis, jobFamily, minSalary, postTS } = this.#job;
-
-    const loc = this.#getLocationFacet(useShort);
+    const { workTimeBasis, jobFamily, minSalary, postTS, isRemote, location } =
+      this.#job;
 
     const days = Math.floor((Date.now() - postTS) / MS_PER_DAY);
     const post = useShort ? fmt.daysAgo(days) : fmt.date(postTS);
@@ -84,7 +83,7 @@ export class JobModel {
     };
 
     pushIf(useShort && days < 7, p1, p3, post);
-    pushIf(loc === "Remote", p1, p2, loc);
+    pushIf(isRemote, p1, p2, isRemote ? "Remote" : location);
     pushIf(minSalary != null, p1, p3, this.#getCompString(useShort));
     pushIf(true, p2, undefined, this.#getExperienceFacet(useShort));
     pushIf(true, p2, undefined, toJobFamilyLabel(jobFamily));
@@ -92,16 +91,6 @@ export class JobModel {
     pushIf(true, p2, undefined, this.#getStageFacet(useShort));
 
     return [...p1, ...p2, ...p3.reverse()];
-  }
-
-  #getLocationFacet(useShort: boolean): string {
-    const { isRemote, location } = this.#job;
-
-    return isRemote
-      ? "Remote"
-      : useShort && location.includes(",")
-        ? location.slice(0, location.lastIndexOf(","))
-        : location;
   }
 
   #getExperienceFacet(useShort: boolean): string | undefined {

@@ -100,8 +100,8 @@ export async function runBlog(
   const sectionHtml = markdownToHtml(blog.content);
 
   const output = template
-    .replace("{{TITLE}}", () => blog.title)
-    .replace("{{DESCRIPTION}}", () => blog.description)
+    .replaceAll("{{TITLE}}", () => blog.title)
+    .replaceAll("{{DESCRIPTION}}", () => blog.description)
     .replaceAll("{{SLUG}}", () => slug)
     .replace("{{HEADER_HTML}}", () => headerHtml)
     .replace("{{SECTION_HTML}}", () => sectionHtml);
