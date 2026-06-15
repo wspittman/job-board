@@ -1,4 +1,4 @@
-import { Container, type DBOptions } from "dry-utils-cosmosdb";
+import { Container, type ContainerOptions } from "dry-utils-cosmosdb";
 import type { Company, CompanyKey, CompanyQuickRef } from "../models/models.ts";
 
 const ContainerName = "company";
@@ -6,7 +6,7 @@ const ContainerName = "company";
 /** Database operations for ATS companies. */
 export class CompanyContainer extends Container<Company> {
   /** Returns the Cosmos DB initialization options for this container. */
-  static ContainerOptions(): DBOptions["containers"][number] {
+  static ContainerOptions(): ContainerOptions {
     return {
       name: ContainerName,
       partitionKey: "ats",

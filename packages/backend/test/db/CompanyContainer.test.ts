@@ -16,7 +16,7 @@ suite("CompanyContainer", () => {
       mockDBData: {
         company: [
           { id: "acme", ats: "greenhouse", name: "Acme", website: "acme.com" },
-          { id: "beta", ats: "greenhouse", name: "Beta" },
+          { id: "beta%20inc", ats: "greenhouse", name: "Beta" },
           { id: "acme", ats: "lever", name: "Lever Acme" },
         ],
       },
@@ -40,16 +40,19 @@ suite("CompanyContainer", () => {
       (await company.get({ id: "acme", ats: "greenhouse" }))?.name,
       "Acme",
     );
-    assert.deepEqual(await company.getIds("greenhouse"), ["acme", "beta"]);
+    assert.deepEqual(await company.getIds("greenhouse"), [
+      "acme",
+      "beta%20inc",
+    ]);
     assert.equal((await company.getAll("greenhouse")).length, 2);
     assert.deepEqual(await company.getKeys(), [
       { id: "acme", ats: "greenhouse" },
-      { id: "beta", ats: "greenhouse" },
+      { id: "beta%20inc", ats: "greenhouse" },
       { id: "acme", ats: "lever" },
     ]);
     assert.deepEqual(await company.getQuickRefs(), [
       ["acme", "Acme", "acme.com"],
-      ["beta", "Beta", undefined],
+      ["beta%20inc", "Beta", undefined],
       ["acme", "Lever Acme", undefined],
     ]);
   });

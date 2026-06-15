@@ -1,5 +1,5 @@
 import { batch } from "dry-utils-async";
-import { Container, type DBOptions } from "dry-utils-cosmosdb";
+import { Container, type ContainerOptions } from "dry-utils-cosmosdb";
 import type { CompanyKey, IgnoreJob } from "../models/models.ts";
 import { JOB_EXPIRY_SEC } from "../utils/constants.ts";
 
@@ -8,7 +8,7 @@ const ContainerName = "ignoreJob";
 /** Database operations for jobs excluded from ATS synchronization. */
 export class IgnoreJobContainer extends Container<IgnoreJob> {
   /** Returns the Cosmos DB initialization options for this container. */
-  static ContainerOptions(): DBOptions["containers"][number] {
+  static ContainerOptions(): ContainerOptions {
     return {
       name: ContainerName,
       partitionKey: "atsCompany",
