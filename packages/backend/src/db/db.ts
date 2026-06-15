@@ -1,4 +1,3 @@
-import { batch } from "dry-utils-async";
 import {
   Container,
   connectDB,
@@ -6,181 +5,27 @@ import {
   subscribeCosmosDBLogging,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
-import { JobFamily, Presence } from "../models/enums.ts";
 import type {
   Company,
-  CompanyKey,
-  CompanyQuickRef,
   IgnoreJob,
   Job,
-  JobKey,
   Location,
   Metadata,
 } from "../models/models.ts";
-import { JOB_EXPIRY_SEC, MS_PER_DAY } from "../utils/constants.ts";
 import {
   createSubscribeAggregator,
   subscribeError,
   subscribeLog,
 } from "../utils/telemetry.ts";
+import { CompanyContainer } from "./CompanyContainer.ts";
+import { IgnoreJobContainer } from "./IgnoreJobContainer.ts";
+import { JobContainer } from "./JobContainer.ts";
 
 subscribeCosmosDBLogging({
   log: subscribeLog,
   error: subscribeError,
   aggregate: createSubscribeAggregator("db", 10),
 });
-
-class CompanyContainer extends Container<Company> {
-  constructor(container: Container<Company>) {
-    super("company", container.container);
-  }
-
-  async get({ id, ats }: CompanyKey) {
-    return this.getItem(id, ats);
-  }
-
-  async getIds(ats: string) {
-    return this.getIdsByPartitionKey(ats);
-  }
-
-  async getAll(ats: string) {
-    return this.getItemsByPartitionKey(ats);
-  }
-
-  async getKeys() {
-    return this.query<CompanyKey>(`SELECT c.id, c.ats FROM c`);
-  }
-
-  async getQuickRefs(): Promise<CompanyQuickRef[]> {
-    const refObjs = await this.query<{
-      id: string;
-      name: string;
-      website?: string;
-    }>("SELECT c.id, c.name, c.website FROM c");
-
-    return refObjs.map(({ id, name, website }) => [id, name, website]);
-  }
-
-  async upsert(company: Company) {
-    await this.upsertItem(company);
-  }
-
-  async remove({ id, ats }: CompanyKey) {
-    return this.deleteItem(id, ats);
-  }
-}
-
-class JobContainer extends Container<Job> {
-  constructor(container: Container<Job>) {
-    super("job", container.container);
-  }
-
-  async get({ id, companyId }: JobKey) {
-    return this.getItem(id, companyId);
-  }
-
-  async getIds(companyId: string) {
-    return this.getIdsByPartitionKey(companyId);
-  }
-
-  async getAll(companyId: string) {
-    return this.getItemsByPartitionKey(companyId);
-  }
-
-  async getIdsAndTimestamps(companyId: string) {
-    return this.query<{ id: string; _ts: number }>(
-      "SELECT c.id, c._ts FROM c",
-      { partitionKey: companyId },
-    );
-  }
-
-  async getCompanyIds(): Promise<string[]> {
-    return await this.query<string>("SELECT DISTINCT VALUE c.companyId FROM c");
-  }
-
-  async upsert(job: Job) {
-    await this.upsertItem(job);
-  }
-
-  async remove({ id, companyId }: JobKey) {
-    return this.deleteItem(id, companyId);
-  }
-
-  async removeMany(jobIds: string[], companyId: string) {
-    return await batch("DeleteJob", jobIds, (id) =>
-      this.remove({ id, companyId }),
-    );
-  }
-
-  async aggregateMetadata(): Promise<Metadata> {
-    const weekMs = Date.now() - 7 * MS_PER_DAY;
-
-    const [jobCount, recentJobCount, presenceRows, jobFamilyRows] =
-      await Promise.all([
-        this.getCount(),
-        this.getCount(["postTS", ">=", weekMs]),
-        this.getCountBy("presence"),
-        this.getCountBy("jobFamily"),
-      ]);
-
-    const presenceCounts: Partial<Record<Presence, number>> = {};
-    presenceRows.forEach(({ name, count }) => {
-      const parsed = Presence.safeParse(name);
-      if (parsed.success) {
-        presenceCounts[parsed.data] = count;
-      }
-    });
-
-    const jobFamilyCounts: Partial<Record<JobFamily, number>> = {};
-    jobFamilyRows.forEach(({ name, count }) => {
-      const parsed = JobFamily.safeParse(name);
-      if (parsed.success) {
-        jobFamilyCounts[parsed.data] = count;
-      }
-    });
-
-    return {
-      id: "job",
-      jobCount,
-      recentJobCount,
-      presenceCounts,
-      jobFamilyCounts,
-    };
-  }
-}
-
-class IgnoreJobContainer extends Container<IgnoreJob> {
-  constructor(container: Container<IgnoreJob>) {
-    super("ignoreJob", container.container);
-  }
-
-  async get(jobId: string, key: CompanyKey) {
-    return this.getItem(jobId, this.#asPKey(key));
-  }
-
-  async getIds(key: CompanyKey) {
-    return this.getIdsByPartitionKey(this.#asPKey(key));
-  }
-
-  async upsert(jobId: string, key: CompanyKey, reason: string) {
-    await this.upsertItem({
-      id: jobId,
-      atsCompany: this.#asPKey(key),
-      reason,
-    });
-  }
-
-  async upsertMany(jobIds: string[], key: CompanyKey, reason: string) {
-    const atsCompany = this.#asPKey(key);
-    return await batch("UpsertIgnoreJob", jobIds, async (id) => {
-      await this.upsertItem({ id, atsCompany, reason });
-    });
-  }
-
-  #asPKey({ ats, id }: CompanyKey) {
-    return `${ats}+${id}`;
-  }
-}
 
 class DB {
   #company: CompanyContainer | undefined;
@@ -227,21 +72,9 @@ class DB {
         mockDataPath: config.DATABASE_MOCK_DATA_PATH,
       }),
       containers: [
-        {
-          name: "company",
-          partitionKey: "ats",
-          indexExclusions: ["/description/?", "/website/?"],
-        },
-        {
-          name: "job",
-          partitionKey: "companyId",
-        },
-        {
-          name: "ignoreJob",
-          partitionKey: "atsCompany",
-          ttlSeconds: JOB_EXPIRY_SEC,
-          indexExclusions: "all",
-        },
+        CompanyContainer.ContainerOptions(),
+        JobContainer.ContainerOptions(),
+        IgnoreJobContainer.ContainerOptions(),
         {
           name: "metadata",
           partitionKey: "id",
