@@ -2,6 +2,7 @@ import { AppError } from "../utils/AppError.ts";
 import { logCounter, logError } from "../utils/telemetry.ts";
 import { db } from "./db.ts";
 import { LRUCache } from "./lruCache.ts";
+import { normalizeId } from "./utils.ts";
 
 const locationMemoryCache = new LRUCache<string, string>(1000);
 
@@ -9,7 +10,8 @@ export async function getCachedLocation(
   locationText: string,
 ): Promise<string | undefined> {
   try {
-    const key = normalize(locationText);
+    const key = normalizeId(locationText);
+    if (!key) return undefined;
     const cachedResult = locationMemoryCache.get(key);
 
     if (cachedResult) {
@@ -36,7 +38,8 @@ export async function getCachedLocation(
 
 export function setCachedLocation(locationText: string, city: string) {
   try {
-    const key = normalize(locationText);
+    const key = normalizeId(locationText);
+    if (!key) return;
     locationMemoryCache.set(key, city);
 
     // Don't await on cache insertion
@@ -48,14 +51,4 @@ export function setCachedLocation(locationText: string, city: string) {
   } catch (e) {
     logError(new AppError("SetCachedLocation", undefined, e));
   }
-}
-
-function normalize(key: string) {
-  return (
-    key
-      .toLowerCase()
-      .trim()
-      // ['/', '\\', '#'] cannot be used in CosmosDB keys (ie. for the DB cache)
-      .replace(/[/\\#]/g, "_")
-  );
 }
