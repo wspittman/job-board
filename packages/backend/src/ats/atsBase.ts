@@ -16,17 +16,17 @@ type StatusResponse = { status: number; statusText: string };
  * providing common functionality and required interface
  */
 export abstract class ATSBase {
-  protected ats: ATS;
-  protected baseUrl: string;
+  readonly #ats: ATS;
+  readonly #baseUrl: string;
 
   constructor(ats: ATS, baseUrl: string) {
-    this.ats = ats;
-    this.baseUrl = baseUrl;
+    this.#ats = ats;
+    this.#baseUrl = baseUrl;
   }
 
   /**
    * Retrieves company information from the ATS
-   * @param full - Whether to fetch full job details
+   * @param full Whether to fetch full job details
    */
   abstract getCompany(
     key: CompanyKey,
@@ -35,7 +35,7 @@ export abstract class ATSBase {
 
   /**
    * Fetches jobs for a company from the ATS
-   * @param full - Whether to fetch full job details
+   * @param full Whether to fetch full job details
    */
   abstract getJobs(key: CompanyKey, full?: boolean): Promise<Context<Job>[]>;
 
@@ -46,9 +46,9 @@ export abstract class ATSBase {
 
   /**
    * Makes an HTTP GET request to the ATS API
-   * @param name - Name of the operation for logging
-   * @param id - Company identifier
-   * @param url - API endpoint URL
+   * @param name Name of the operation for logging
+   * @param id Company identifier
+   * @param url API endpoint URL
    * @returns API response data
    * @throws AppError for 404 or other error responses
    */
@@ -61,7 +61,7 @@ export abstract class ATSBase {
     let logStatus: StatusResponse;
 
     try {
-      const response = await fetch(`${this.baseUrl}/${id}/${url}`, {
+      const response = await fetch(`${this.#baseUrl}/${id}/${url}`, {
         signal: AbortSignal.timeout(15_000),
       });
 
@@ -70,32 +70,32 @@ export abstract class ATSBase {
 
       if (!ok) {
         if (status === 404) {
-          throw new AppError(`${this.ats} / ${id}: Not Found`, 404);
+          throw new AppError(`${this.#ats} / ${id}: Not Found`, 404);
         }
 
-        throw new AppError(`${this.ats} / ${id}: Request Failed`, 500);
+        throw new AppError(`${this.#ats} / ${id}: Request Failed`, 500);
       }
 
       return (await response.json()) as T;
     } catch (error) {
-      logStatus = this.errorToStatus(error);
+      logStatus = this.#errorToStatus(error);
 
       if (error instanceof AppError) {
         throw error;
       }
 
-      throw new AppError(`${this.ats} / ${id}: Request Failed`, 500, error);
+      throw new AppError(`${this.#ats} / ${id}: Request Failed`, 500, error);
     } finally {
       const duration = Date.now() - start;
       logStatus ??= {
         status: 500,
         statusText: "Request Exception",
       };
-      logAtsCall(`GET ${name}`, this.ats, id, duration, logStatus);
+      logAtsCall(`GET ${name}`, this.#ats, id, duration, logStatus);
     }
   }
 
-  private errorToStatus(error: unknown): StatusResponse {
+  #errorToStatus(error: unknown): StatusResponse {
     if (error instanceof AppError) {
       return { status: error.statusCode, statusText: error.message };
     }

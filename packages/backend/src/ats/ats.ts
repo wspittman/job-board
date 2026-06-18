@@ -12,7 +12,7 @@ import { Greenhouse } from "./greenhouse.ts";
 import { Lever } from "./lever.ts";
 
 class ATSConnector {
-  private readonly atsEndpoints: Record<ATS, ATSBase> = {
+  readonly #atsEndpoints: Record<ATS, ATSBase> = {
     greenhouse: new Greenhouse(),
     lever: new Lever(),
     ashby: new Ashby(),
@@ -20,25 +20,25 @@ class ATSConnector {
 
   /**
    * Retrieves company information from the appropriate ATS
-   * @param full - Whether to fetch full company details
+   * @param full Whether to fetch full company details
    */
   async getCompany(key: CompanyKey, full?: boolean): Promise<Context<Company>> {
-    return this.atsEndpoints[key.ats].getCompany(key, full);
+    return this.#atsEndpoints[key.ats].getCompany(key, full);
   }
 
   /**
    * Fetches jobs for a company from the appropriate ATS
-   * @param full - Whether to fetch full job details
+   * @param full Whether to fetch full job details
    */
   async getJobs(key: CompanyKey, full?: boolean): Promise<Context<Job>[]> {
-    return this.atsEndpoints[key.ats].getJobs(key, full);
+    return this.#atsEndpoints[key.ats].getJobs(key, full);
   }
 
   /**
    * Retrieves detailed information for a specific job
    */
   async getJob(key: CompanyKey, jobKey: JobKey): Promise<Context<Job>> {
-    return this.atsEndpoints[key.ats].getJob(jobKey);
+    return this.#atsEndpoints[key.ats].getJob(jobKey);
   }
 }
 
