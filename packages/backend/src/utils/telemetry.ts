@@ -103,6 +103,35 @@ export function withAsyncContext(
 }
 
 /**
+ * Executes an async function within a local telemetry context and logs the
+ * captured summary when the function settles.
+ * @param name Name of the operation for the log summary.
+ * @param fn Async function to execute.
+ * @returns The resolved value from the async function.
+ * @remarks Intended for in-process callers, such as CLI portal functions, that
+ * need backend telemetry context without starting Application Insights.
+ */
+export function withLocalTelemetryContext<T>(
+  name: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const start = Date.now();
+  const context: Bag = {};
+
+  return asyncLocalStorage.run(context, async () => {
+    try {
+      return await fn();
+    } finally {
+      logger.debug(new Date().toISOString(), {
+        name,
+        duration: Date.now() - start,
+        ...context,
+      });
+    }
+  });
+}
+
+/**
  * Get the current logging context, initializing it if necessary
  */
 function getContext(): Bag {
