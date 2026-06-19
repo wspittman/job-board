@@ -59,6 +59,7 @@ export abstract class ATSBase {
   ): Promise<T> {
     const start = Date.now();
     let logStatus: StatusResponse;
+    let bytes = -1;
 
     try {
       const response = await fetch(`${this.#baseUrl}/${id}/${url}`, {
@@ -67,6 +68,7 @@ export abstract class ATSBase {
 
       const { status, statusText, ok } = response;
       logStatus = { status, statusText };
+      bytes = await this.#getContentLength(response);
 
       if (!ok) {
         if (status === 404) {
@@ -91,7 +93,23 @@ export abstract class ATSBase {
         status: 500,
         statusText: "Request Exception",
       };
-      logAtsCall(`GET ${name}`, this.#ats, id, duration, logStatus);
+      logAtsCall(`GET ${name}`, this.#ats, id, duration, bytes, logStatus);
+    }
+  }
+
+  async #getContentLength(res: Response) {
+    try {
+      // The easy way if the server supports it
+      const cl = res.headers.get("content-length");
+      if (cl != null) return Number(cl);
+
+      // The more annoying way
+      const buf = await res.clone().arrayBuffer();
+      return buf.byteLength;
+    } catch (error) {
+      // Length is only for telemetry, so just log and move on.
+      logError(error);
+      return -1;
     }
   }
 
@@ -117,10 +135,11 @@ function logAtsCall(
   ats: ATS,
   id: string,
   ms: number,
+  bytes: number,
   { status, statusText }: StatusResponse,
 ) {
   try {
-    const log: Bag = { name, ats, id, ms };
+    const log: Bag = { name, ats, id, ms, bytes };
 
     if (status !== 200) {
       log["status"] = status;
@@ -130,7 +149,7 @@ function logAtsCall(
     subscribeAggregator({
       tag: `${ats} ${name}`,
       dense: log,
-      metrics: { ms },
+      metrics: { ms, bytes },
       blob: {},
     });
   } catch (error) {
