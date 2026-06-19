@@ -10,14 +10,19 @@ import { afterReset, logBasePath, mockFetch } from "../setup.ts";
 after(afterReset);
 
 const updatedAt = new Date().toISOString();
+const logFile = path.join(logBasePath, "test.log");
 
-async function waitForLogText(expected: string): Promise<string> {
-  const logFile = path.join(logBasePath, "test.log");
+async function waitForLogText(
+  expected: string,
+  startPosition: number,
+): Promise<string> {
   const start = Date.now();
   let text = "";
 
   while (Date.now() - start < 500) {
-    text = await readFile(logFile, "utf8").catch(() => "");
+    text = (await readFile(logFile, "utf8").catch(() => "")).slice(
+      startPosition,
+    );
 
     if (text.includes(expected)) {
       return text;
@@ -67,17 +72,19 @@ suite("portal pFuncs", () => {
   test("fetchJobCounts writes backend ATS telemetry to the CLI log file", async () => {
     const companyId = `portal-log-${randomUUID()}`;
     const fetchMock = mockFetch(async () => jobsResponse(companyId));
+    const logStartPosition = (await readFile(logFile, "utf8").catch(() => ""))
+      .length;
 
     const result = await fetchJobCounts("greenhouse", companyId);
 
     assert.deepEqual(result, { total: 2, fresh: 1 });
     assert.equal(fetchMock.callCount(), 1);
 
-    const logText = await waitForLogText(companyId);
+    const logText = await waitForLogText(companyId, logStartPosition);
     assert.match(logText, /"name": "Portal\.FetchJobCounts"/);
     assert.match(logText, /"greenhouse GET JobsBasic": 1/);
     assert.match(logText, new RegExp(`"id": "${companyId}"`));
     assert.match(logText, /"ats": "greenhouse"/);
-    assert.match(logText, /"metrics": \{\s+"ms": \d+\s+\}/);
+    assert.match(logText, /"metrics": \{\s+"ms": \d+,\s+"bytes": \d+\s+\}/);
   });
 });
