@@ -16,10 +16,10 @@ export class Ashby extends ATSBase {
   }
 
   async getCompany({ id }: CompanyKey): Promise<Context<Company>> {
-    const companyResult = await this.fetchCompany(id);
-    const company = this.formatCompany(id);
+    const companyResult = await this.#fetchCompany(id);
+    const company = this.#formatCompany(id);
     if (companyResult.jobs.length > 0 && companyResult.jobs[0]) {
-      const exampleJob = this.formatJob(id, companyResult.jobs[0]);
+      const exampleJob = this.#formatJob(id, companyResult.jobs[0]);
 
       const context = {
         description: "Example job from the company",
@@ -39,8 +39,8 @@ export class Ashby extends ATSBase {
   }
 
   async getJobs({ id }: CompanyKey): Promise<Context<Job>[]> {
-    const { jobs } = await this.fetchCompany(id, true);
-    return jobs.map((job) => this.formatJob(id, job));
+    const { jobs } = await this.#fetchCompany(id, true);
+    return jobs.map((job) => this.#formatJob(id, job));
   }
 
   async getJob(jobKey: JobKey): Promise<Context<Job>> {
@@ -49,16 +49,16 @@ export class Ashby extends ATSBase {
     // We log an error so we can track if this accidentally happens in production
     logError("Ashby.getJob: This should never be called when deployed");
 
-    const { jobs } = await this.fetchCompany(jobKey.companyId, true);
+    const { jobs } = await this.#fetchCompany(jobKey.companyId, true);
     const job = jobs.find((job) => job.id === jobKey.id);
     if (!job) {
       throw new AppError("Job not found", 404);
     }
 
-    return this.formatJob(jobKey.companyId, job);
+    return this.#formatJob(jobKey.companyId, job);
   }
 
-  private formatCompany(id: string): Company {
+  #formatCompany(id: string): Company {
     id = id.trim();
     return {
       // Keys
@@ -71,14 +71,14 @@ export class Ashby extends ATSBase {
     };
   }
 
-  private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
+  #formatJob(companyId: string, jobResult: JobResult): Context<Job> {
     if (jobResult.isListed === false) {
       logError(
         `Ashby.formatJob: ${companyId}\\${jobResult.id} marked as unlisted.`,
       );
     }
 
-    const result = this.formatJobBasic(companyId, jobResult);
+    const result = this.#formatJobBasic(companyId, jobResult);
 
     const {
       address,
@@ -114,7 +114,7 @@ export class Ashby extends ATSBase {
     return result;
   }
 
-  private async fetchCompany(
+  async #fetchCompany(
     id: string,
     includeComp: boolean = false,
   ): Promise<CompanyResult> {
@@ -122,7 +122,7 @@ export class Ashby extends ATSBase {
     return this.httpCall<CompanyResult>("Company", id, route);
   }
 
-  private formatJobBasic(
+  #formatJobBasic(
     companyId: string,
     { id, title, publishedAt, applyUrl }: JobResult,
   ): Context<Job> {

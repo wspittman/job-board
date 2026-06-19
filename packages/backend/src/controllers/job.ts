@@ -1,4 +1,4 @@
-import { Query } from "dry-utils-cosmosdb";
+import { Query, type Where } from "dry-utils-cosmosdb";
 import { llm } from "../ai/llm.ts";
 import { db } from "../db/db.ts";
 import type { Filters } from "../models/clientModels.ts";
@@ -7,8 +7,6 @@ import type { Job, JobKey } from "../models/models.ts";
 import { AppError } from "../utils/AppError.ts";
 import { MS_PER_DAY } from "../utils/constants.ts";
 import { logProperty } from "../utils/telemetry.ts";
-
-type Where = ReturnType<typeof Query.condition>;
 
 // Cosmos DB sorts missing values below defined numbers. That means:
 // - DESC numeric sorts place missing values after all defined values.

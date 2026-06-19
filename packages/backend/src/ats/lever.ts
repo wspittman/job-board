@@ -55,12 +55,12 @@ export class Lever extends ATSBase {
   }
 
   async getCompany({ id }: CompanyKey): Promise<Context<Company>> {
-    const [exampleJob] = await this.fetchJobs(id, true);
-    const company = this.formatCompany(id);
+    const [exampleJob] = await this.#fetchJobs(id, true);
+    const company = this.#formatCompany(id);
 
     if (!exampleJob) return { item: company };
 
-    const cleanJob = this.formatJob(id, exampleJob);
+    const cleanJob = this.#formatJob(id, exampleJob);
 
     const context = {
       description: "Example job from the company",
@@ -77,8 +77,8 @@ export class Lever extends ATSBase {
   }
 
   async getJobs({ id }: CompanyKey): Promise<Context<Job>[]> {
-    const jobs = await this.fetchJobs(id);
-    return jobs.map((job) => this.formatJob(id, job));
+    const jobs = await this.#fetchJobs(id);
+    return jobs.map((job) => this.#formatJob(id, job));
   }
 
   async getJob({ id, companyId }: JobKey): Promise<Context<Job>> {
@@ -87,17 +87,17 @@ export class Lever extends ATSBase {
     // We log an error so we can track if this accidentally happens in production
     logError("Lever.getJob: This should never be called when deployed");
 
-    const jobs = await this.fetchJobs(companyId);
+    const jobs = await this.#fetchJobs(companyId);
     const job = jobs.find((job) => job.id === id);
 
     if (!job) {
       throw new AppError("Job not found", 404);
     }
 
-    return this.formatJob(companyId, job);
+    return this.#formatJob(companyId, job);
   }
 
-  private formatCompany(id: string): Company {
+  #formatCompany(id: string): Company {
     return {
       // Keys
       id,
@@ -109,7 +109,7 @@ export class Lever extends ATSBase {
     };
   }
 
-  private formatJob(
+  #formatJob(
     companyId: string,
     {
       id,
@@ -162,7 +162,7 @@ export class Lever extends ATSBase {
     };
   }
 
-  private async fetchJobs(id: string, single = false): Promise<JobResult[]> {
+  async #fetchJobs(id: string, single = false): Promise<JobResult[]> {
     const query = single ? "?mode=json&limit=1" : "?mode=json";
     return this.httpCall<JobResult[]>("Jobs", id, query);
   }

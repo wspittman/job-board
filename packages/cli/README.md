@@ -129,6 +129,7 @@ npm run cli -- playground
 ## Logs and output
 
 Run information is logged to the console. Detailed output is saved to `packages/cli/logs/app.log`.
+Commands that invoke backend code directly also write backend telemetry summaries to this log.
 Evaluation artifacts are organized under `logs/`:
 
 ```

@@ -62,14 +62,14 @@ export class Greenhouse extends ATSBase {
     { id }: CompanyKey,
     full?: boolean,
   ): Promise<Context<Company>> {
-    const companyResult = await this.fetchCompany(id);
-    const company = this.formatCompany(id, companyResult);
+    const companyResult = await this.#fetchCompany(id);
+    const company = this.#formatCompany(id, companyResult);
 
     if (!full) {
       return { item: company };
     }
 
-    const { jobs } = await this.fetchJobsBasic(id);
+    const { jobs } = await this.#fetchJobsBasic(id);
 
     if (jobs.length) {
       const exampleJob = await this.getJob({
@@ -96,20 +96,20 @@ export class Greenhouse extends ATSBase {
 
   async getJobs({ id }: CompanyKey, full = false): Promise<Context<Job>[]> {
     if (!full) {
-      const { jobs } = await this.fetchJobsBasic(id);
-      return jobs.map((job) => this.formatJobBasic(id, job));
+      const { jobs } = await this.#fetchJobsBasic(id);
+      return jobs.map((job) => this.#formatJobBasic(id, job));
     } else {
-      const { jobs } = await this.fetchJobs(id);
-      return jobs.map((job) => this.formatJob(id, job));
+      const { jobs } = await this.#fetchJobs(id);
+      return jobs.map((job) => this.#formatJob(id, job));
     }
   }
 
   async getJob({ id, companyId }: JobKey): Promise<Context<Job>> {
-    const response = await this.fetchJob(companyId, id);
-    return this.formatJob(companyId, response);
+    const response = await this.#fetchJob(companyId, id);
+    return this.#formatJob(companyId, response);
   }
 
-  private formatCompany(id: string, { name, content }: CompanyResult): Company {
+  #formatCompany(id: string, { name, content }: CompanyResult): Company {
     return {
       // Keys
       id,
@@ -123,7 +123,7 @@ export class Greenhouse extends ATSBase {
     };
   }
 
-  private formatJobBasic(
+  #formatJobBasic(
     companyId: string,
     { id, title, updated_at, absolute_url }: JobResultBasic,
   ): Context<Job> {
@@ -143,8 +143,8 @@ export class Greenhouse extends ATSBase {
     return { item: job };
   }
 
-  private formatJob(companyId: string, jobResult: JobResult): Context<Job> {
-    const result = this.formatJobBasic(companyId, jobResult);
+  #formatJob(companyId: string, jobResult: JobResult): Context<Job> {
+    const result = this.#formatJobBasic(companyId, jobResult);
 
     const { id, metadata, content, departments, offices, location } = jobResult;
 
@@ -165,19 +165,19 @@ export class Greenhouse extends ATSBase {
     return result;
   }
 
-  private async fetchCompany(id: string): Promise<CompanyResult> {
+  async #fetchCompany(id: string): Promise<CompanyResult> {
     return this.httpCall<CompanyResult>("Company", id, "");
   }
 
-  private async fetchJob(id: string, jobId: string): Promise<JobResult> {
+  async #fetchJob(id: string, jobId: string): Promise<JobResult> {
     return this.httpCall<JobResult>("Job", id, `jobs/${jobId}`);
   }
 
-  private async fetchJobs(id: string): Promise<JobsResult> {
+  async #fetchJobs(id: string): Promise<JobsResult> {
     return this.httpCall<JobsResult>("Jobs", id, "/jobs?content=true");
   }
 
-  private async fetchJobsBasic(id: string): Promise<JobsResultBasic> {
+  async #fetchJobsBasic(id: string): Promise<JobsResultBasic> {
     return this.httpCall<JobsResultBasic>("JobsBasic", id, "/jobs");
   }
 }

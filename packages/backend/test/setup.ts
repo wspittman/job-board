@@ -1,5 +1,10 @@
+import { configureGlobal } from "dry-utils-logger";
 import express from "express";
 import { mock } from "node:test";
+
+configureGlobal({
+  filename: "logs/test.log",
+});
 
 process.env.ADMIN_TOKEN ??= "test-admin-token-123456";
 process.env.NODE_ENV ??= "test";
