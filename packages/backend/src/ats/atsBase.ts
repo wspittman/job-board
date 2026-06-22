@@ -11,38 +11,39 @@ import { createSubscribeAggregator, logError } from "../utils/telemetry.ts";
 
 type StatusResponse = { status: number; statusText: string };
 
+export abstract class ATSInterface {
+  /** Get company information from the ATS */
+  abstract getCompany(key: CompanyKey): Promise<Company>;
+
+  /**
+   * Get all of a company's jobs from the ATS.
+   * @param meta If true and the ATS supports it, only fetch metadata (no context, item valid but not fully defined)
+   */
+  abstract getJobs(key: CompanyKey, meta?: boolean): Promise<Context<Job>[]>;
+
+  /** Get detailed information for an example job */
+  abstract getExampleJob(key: CompanyKey): Promise<Context<Job> | undefined>;
+
+  /** Get detailed information for a specific job */
+  abstract getSpecificJob(
+    jobKey: JobKey,
+    key: CompanyKey,
+  ): Promise<Context<Job>>;
+}
+
 /**
  * Base class for ATS (Applicant Tracking System) implementations
  * providing common functionality and required interface
  */
-export abstract class ATSBase {
+export abstract class ATSBase extends ATSInterface {
   readonly #ats: ATS;
   readonly #baseUrl: string;
 
   constructor(ats: ATS, baseUrl: string) {
+    super();
     this.#ats = ats;
     this.#baseUrl = baseUrl;
   }
-
-  /**
-   * Retrieves company information from the ATS
-   * @param full Whether to fetch full job details
-   */
-  abstract getCompany(
-    key: CompanyKey,
-    full?: boolean,
-  ): Promise<Context<Company>>;
-
-  /**
-   * Fetches jobs for a company from the ATS
-   * @param full Whether to fetch full job details
-   */
-  abstract getJobs(key: CompanyKey, full?: boolean): Promise<Context<Job>[]>;
-
-  /**
-   * Retrieves detailed information for a specific job
-   */
-  abstract getJob(jobKey: JobKey): Promise<Context<Job>>;
 
   /**
    * Makes an HTTP GET request to the ATS API

@@ -74,8 +74,8 @@ async function getAtsJobs(
 ) {
   const idSet = (x: Context<Job>[]) => new Set(x.map(({ item: { id } }) => id));
 
-  // If there are no current jobs, assume newly added company and get full job data for all jobs
-  const atsJobs = await ats.getJobs(key, !currentIds.length);
+  // Ask for meta if any current jobs exist. Otherwise assume newly added company and get full job data for all jobs.
+  const atsJobs = await ats.getJobs(key, !!currentIds.length);
   logProperty("ATS_Jobs_All", atsJobs.length);
 
   // Filter out any jobs that are beyond the expiry window to avoid processing stale listings
@@ -111,7 +111,7 @@ async function getAtsJobs(
     newJobs.length > 0.1 * atsJobs.length &&
     !atsJobs[0]?.context
   ) {
-    const atsJobsFull = await ats.getJobs(key, true);
+    const atsJobsFull = await ats.getJobs(key, false);
     const newIdSet = idSet(newJobs);
     newJobs = atsJobsFull.filter(({ item: { id } }) => newIdSet.has(id));
   }
@@ -133,7 +133,7 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   }
 
   if (!job.context) {
-    job = await ats.getJob(companyKey, job.item);
+    job = await ats.getSpecificJob(job.item, companyKey);
   }
 
   const success = await llm.fillJobInfo(job);

@@ -15,47 +15,39 @@ export class Ashby extends ATSBase {
     super(NAME, config.ASHBY_URL);
   }
 
-  async getCompany({ id }: CompanyKey): Promise<Context<Company>> {
-    const companyResult = await this.#fetchCompany(id);
-    const company = this.#formatCompany(id);
-    if (companyResult.jobs.length > 0 && companyResult.jobs[0]) {
-      const exampleJob = this.#formatJob(id, companyResult.jobs[0]);
-
-      const context = {
-        description: "Example job from the company",
-        content: {
-          ...exampleJob.item,
-          ...(exampleJob.context?.[0]?.content ?? {}),
-        },
-      };
-
-      return {
-        item: company,
-        context: [context],
-      };
-    }
-
-    return { item: company };
+  async getCompany({ id }: CompanyKey): Promise<Company> {
+    return Promise.resolve(this.#formatCompany(id));
   }
 
   async getJobs({ id }: CompanyKey): Promise<Context<Job>[]> {
-    const { jobs } = await this.#fetchCompany(id, true);
+    const { jobs } = await this.#fetchCompany(id);
     return jobs.map((job) => this.#formatJob(id, job));
   }
 
-  async getJob(jobKey: JobKey): Promise<Context<Job>> {
+  async getExampleJob({ id }: CompanyKey): Promise<Context<Job> | undefined> {
+    const { jobs } = await this.#fetchCompany(id);
+
+    if (!jobs.length) return undefined;
+
+    const idx = Math.floor(Math.random() * jobs.length);
+    const job = jobs[idx]!;
+    return this.#formatJob(id, job);
+  }
+
+  async getSpecificJob({ id, companyId }: JobKey): Promise<Context<Job>> {
     // Ashby ALWAYS returns the all jobs, so we have to fetch them all and find the right one
     // This is inefficient and should be avoided
     // We log an error so we can track if this accidentally happens in production
-    logError("Ashby.getJob: This should never be called when deployed");
+    logError("Ashby.getSpecificJob: This should never be called when deployed");
 
-    const { jobs } = await this.#fetchCompany(jobKey.companyId, true);
-    const job = jobs.find((job) => job.id === jobKey.id);
+    const { jobs } = await this.#fetchCompany(companyId);
+    const job = jobs.find((job) => job.id === id);
+
     if (!job) {
       throw new AppError("Job not found", 404);
     }
 
-    return this.#formatJob(jobKey.companyId, job);
+    return this.#formatJob(companyId, job);
   }
 
   #formatCompany(id: string): Company {
@@ -114,11 +106,8 @@ export class Ashby extends ATSBase {
     return result;
   }
 
-  async #fetchCompany(
-    id: string,
-    includeComp: boolean = false,
-  ): Promise<CompanyResult> {
-    const route = includeComp ? "?includeCompensation=true" : "";
+  async #fetchCompany(id: string): Promise<CompanyResult> {
+    const route = "?includeCompensation=true";
     return this.httpCall<CompanyResult>("Company", id, route);
   }
 

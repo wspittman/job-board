@@ -1,6 +1,11 @@
 import { logger } from "dry-utils-logger";
 import timers from "node:timers/promises";
-import { fetchCompany, fetchJob, fetchJobCounts } from "../portal/pFuncs.ts";
+import {
+  fetchCompany,
+  fetchExampleJob,
+  fetchJobCounts,
+  fetchSpecificJob,
+} from "../portal/pFuncs.ts";
 import type { Command } from "../types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
 import { validateCompanyArgs, validateJobArgs } from "../utils/utils.ts";
@@ -71,8 +76,12 @@ const job: Command = {
 
     logger.info(`Fetching ${ats} jobs`, companyIds);
     await runMany(companyIds, async (companyId) => {
-      const result = await fetchJob(ats, companyId);
-      await save("job", result, ats, companyId, result.item.id);
+      const result = await fetchExampleJob(ats, companyId);
+      if (result) {
+        await save("job", result, ats, companyId, result.item.id);
+      } else {
+        logger.info("No jobs for company", companyId);
+      }
     });
   },
 };
@@ -84,7 +93,7 @@ const exactJob: Command = {
     const { ats, companyId, jobId } = validateJobArgs(args);
 
     logger.info(`Fetching job ${ats}/${companyId}/${jobId}`);
-    const result = await fetchJob(ats, companyId, jobId);
+    const result = await fetchSpecificJob(ats, companyId, jobId);
     await save("job", result, ats, companyId, jobId);
   },
 };

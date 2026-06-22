@@ -58,44 +58,13 @@ export class Greenhouse extends ATSBase {
     super("greenhouse", config.GREENHOUSE_URL);
   }
 
-  async getCompany(
-    { id }: CompanyKey,
-    full?: boolean,
-  ): Promise<Context<Company>> {
+  async getCompany({ id }: CompanyKey): Promise<Company> {
     const companyResult = await this.#fetchCompany(id);
-    const company = this.#formatCompany(id, companyResult);
-
-    if (!full) {
-      return { item: company };
-    }
-
-    const { jobs } = await this.#fetchJobsBasic(id);
-
-    if (jobs.length) {
-      const exampleJob = await this.getJob({
-        id: String(jobs[0]?.id),
-        companyId: id,
-      });
-
-      const context = {
-        description: "Example job from the company",
-        content: {
-          ...exampleJob.item,
-          ...(exampleJob.context?.[0]?.content ?? {}),
-        },
-      };
-
-      return {
-        item: company,
-        context: [context],
-      };
-    }
-
-    return { item: company };
+    return this.#formatCompany(id, companyResult);
   }
 
-  async getJobs({ id }: CompanyKey, full = false): Promise<Context<Job>[]> {
-    if (!full) {
+  async getJobs({ id }: CompanyKey, meta = false): Promise<Context<Job>[]> {
+    if (meta) {
       const { jobs } = await this.#fetchJobsBasic(id);
       return jobs.map((job) => this.#formatJobBasic(id, job));
     } else {
@@ -104,7 +73,17 @@ export class Greenhouse extends ATSBase {
     }
   }
 
-  async getJob({ id, companyId }: JobKey): Promise<Context<Job>> {
+  async getExampleJob({ id }: CompanyKey): Promise<Context<Job> | undefined> {
+    const { jobs } = await this.#fetchJobsBasic(id);
+
+    if (!jobs.length) return undefined;
+
+    const idx = Math.floor(Math.random() * jobs.length);
+    const jobId = String(jobs[idx]!.id);
+    return await this.getSpecificJob({ id: jobId, companyId: id });
+  }
+
+  async getSpecificJob({ id, companyId }: JobKey): Promise<Context<Job>> {
     const response = await this.#fetchJob(companyId, id);
     return this.#formatJob(companyId, response);
   }
@@ -165,19 +144,19 @@ export class Greenhouse extends ATSBase {
     return result;
   }
 
-  async #fetchCompany(id: string): Promise<CompanyResult> {
+  async #fetchCompany(id: string) {
     return this.httpCall<CompanyResult>("Company", id, "");
   }
 
-  async #fetchJob(id: string, jobId: string): Promise<JobResult> {
+  async #fetchJob(id: string, jobId: string) {
     return this.httpCall<JobResult>("Job", id, `jobs/${jobId}`);
   }
 
-  async #fetchJobs(id: string): Promise<JobsResult> {
+  async #fetchJobs(id: string) {
     return this.httpCall<JobsResult>("Jobs", id, "/jobs?content=true");
   }
 
-  async #fetchJobsBasic(id: string): Promise<JobsResultBasic> {
+  async #fetchJobsBasic(id: string) {
     return this.httpCall<JobsResultBasic>("JobsBasic", id, "/jobs");
   }
 }

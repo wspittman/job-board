@@ -54,26 +54,8 @@ export class Lever extends ATSBase {
     super("lever", config.LEVER_URL);
   }
 
-  async getCompany({ id }: CompanyKey): Promise<Context<Company>> {
-    const [exampleJob] = await this.#fetchJobs(id, true);
-    const company = this.#formatCompany(id);
-
-    if (!exampleJob) return { item: company };
-
-    const cleanJob = this.#formatJob(id, exampleJob);
-
-    const context = {
-      description: "Example job from the company",
-      content: {
-        ...cleanJob.item,
-        ...(cleanJob.context?.[0]?.content ?? {}),
-      },
-    };
-
-    return {
-      item: company,
-      context: [context],
-    };
+  async getCompany({ id }: CompanyKey): Promise<Company> {
+    return Promise.resolve(this.#formatCompany(id));
   }
 
   async getJobs({ id }: CompanyKey): Promise<Context<Job>[]> {
@@ -81,11 +63,21 @@ export class Lever extends ATSBase {
     return jobs.map((job) => this.#formatJob(id, job));
   }
 
-  async getJob({ id, companyId }: JobKey): Promise<Context<Job>> {
+  async getExampleJob({ id }: CompanyKey): Promise<Context<Job> | undefined> {
+    const jobs = await this.#fetchJobs(id);
+
+    if (!jobs.length) return undefined;
+
+    const idx = Math.floor(Math.random() * jobs.length);
+    const job = jobs[idx]!;
+    return this.#formatJob(id, job);
+  }
+
+  async getSpecificJob({ id, companyId }: JobKey): Promise<Context<Job>> {
     // Lever ALWAYS returns the top X jobs, so we have to fetch them all and find the right one
     // This is inefficient and should be avoided
     // We log an error so we can track if this accidentally happens in production
-    logError("Lever.getJob: This should never be called when deployed");
+    logError("Lever.getSpecificJob: This should never be called when deployed");
 
     const jobs = await this.#fetchJobs(companyId);
     const job = jobs.find((job) => job.id === id);
