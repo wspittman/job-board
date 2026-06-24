@@ -8,8 +8,8 @@ interface Options {
 }
 
 class Node<T> {
-  public value: T;
-  public next?: Node<T>;
+  value: T;
+  next?: Node<T>;
   constructor(value: T, next?: Node<T>) {
     this.value = value;
     this.next = next;
@@ -21,15 +21,15 @@ class Node<T> {
  * Tasks are processed in FIFO order with a configurable batch size limit.
  */
 export class AsyncQueue<T> {
-  private head: Node<T> | undefined;
-  private tail: Node<T> | undefined;
-  private active = 0;
+  #head: Node<T> | undefined;
+  #tail: Node<T> | undefined;
+  #active = 0;
 
-  protected name: string;
-  protected fn: (task: T) => Promise<void>;
-  protected onComplete?: () => void;
-  protected concurrentLimit: number;
-  protected taskDelayMs: number;
+  #name: string;
+  #fn: (task: T) => Promise<void>;
+  #onComplete?: () => void;
+  #concurrentLimit: number;
+  #taskDelayMs: number;
 
   /**
    * Creates a new AsyncQueue instance.
@@ -42,11 +42,11 @@ export class AsyncQueue<T> {
     fn: (task: T) => Promise<void>,
     { concurrentLimit = 5, taskDelayMs = 0, onComplete }: Options = {},
   ) {
-    this.name = name;
-    this.fn = fn;
-    this.onComplete = onComplete;
-    this.concurrentLimit = concurrentLimit;
-    this.taskDelayMs = taskDelayMs;
+    this.#name = name;
+    this.#fn = fn;
+    this.#onComplete = onComplete;
+    this.#concurrentLimit = concurrentLimit;
+    this.#taskDelayMs = taskDelayMs;
   }
 
   /**
@@ -54,57 +54,57 @@ export class AsyncQueue<T> {
    * @param tasks - Array of tasks to be added to the queue
    */
   add(tasks: T[]): void {
-    logProperty(`Queue_${this.name}_Add`, tasks.length);
-    tasks.forEach((task) => this.enqueue(task));
-    this.begin();
+    logProperty(`Queue_${this.#name}_Add`, tasks.length);
+    tasks.forEach((task) => this.#enqueue(task));
+    this.#begin();
   }
 
-  private begin() {
+  #begin() {
     // If there are no tasks or the batch is full, return
-    if (!this.head || this.active >= this.concurrentLimit) return;
+    if (!this.#head || this.#active >= this.#concurrentLimit) return;
 
-    void this.runTask(this.dequeue());
-    this.begin();
+    void this.#runTask(this.#dequeue());
+    this.#begin();
   }
 
-  private enqueue(task: T) {
-    if (!this.tail) {
+  #enqueue(task: T) {
+    if (!this.#tail) {
       // First node
-      this.head = this.tail = new Node(task);
+      this.#head = this.#tail = new Node(task);
     } else {
       // Add to existing tail
-      this.tail.next = new Node(task);
-      this.tail = this.tail.next;
+      this.#tail.next = new Node(task);
+      this.#tail = this.#tail.next;
     }
   }
 
-  private dequeue() {
-    if (!this.head) return;
+  #dequeue() {
+    if (!this.#head) return;
 
-    const current = this.head;
-    this.head = current.next;
+    const current = this.#head;
+    this.#head = current.next;
 
-    if (!this.head) {
+    if (!this.#head) {
       // This was the last node, set tail also
-      this.tail = undefined;
+      this.#tail = undefined;
     }
 
     return current.value;
   }
 
-  private async runTask(item?: T) {
+  async #runTask(item?: T) {
     try {
       if (!item) return;
-      this.active++;
-      await withAsyncContext(this.name, async () => {
-        await this.fn(item);
-        this.onComplete?.();
+      this.#active++;
+      await withAsyncContext(this.#name, async () => {
+        await this.#fn(item);
+        this.#onComplete?.();
       });
     } catch (error) {
       logError(error);
     } finally {
-      this.active--;
-      timers.setTimeout(() => this.begin(), this.taskDelayMs);
+      this.#active--;
+      timers.setTimeout(() => this.#begin(), this.#taskDelayMs);
     }
   }
 }
