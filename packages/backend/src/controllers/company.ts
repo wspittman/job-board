@@ -56,12 +56,12 @@ export async function addCompanies({ ids, ats }: CompanyKeys) {
  */
 export async function removeCompany(key: CompanyKey) {
   const companyId = key.id;
-  const jobIds = await db.job.getIds(companyId);
-  await db.company.remove(key);
-  if (jobIds.length) {
-    await batch("RemoveCompanyJobs", jobIds, (id) =>
-      db.job.remove({ id, companyId }),
-    );
+  const [, idRes] = await Promise.all([
+    db.company.remove(key),
+    db.job.removeAll(companyId),
+  ]);
+
+  if (idRes.length) {
     refreshMetadata();
   }
 }
