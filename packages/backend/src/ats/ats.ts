@@ -1,6 +1,7 @@
 import type { ATS, CompanyKey, JobKey } from "../models/models.ts";
 import { Ashby } from "./ashby.ts";
-import { ATSBase, ATSInterface } from "./atsBase.ts";
+import { ATSBase } from "./atsBase.ts";
+import { ATSInterface } from "./ATSInterface.ts";
 import { Greenhouse } from "./greenhouse.ts";
 import { Lever } from "./lever.ts";
 
