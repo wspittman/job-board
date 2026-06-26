@@ -68,7 +68,7 @@ suite("useBeacon", () => {
 
     test(toTestName("Valid input", input), () => {
       useBeacon(input);
-      const actual = (telemetryContext.requestContext as Bag)?.prop ?? {};
+      const actual = (telemetryContext as Bag)?.prop ?? {};
       assert.deepEqual(actual, expected);
     });
   });

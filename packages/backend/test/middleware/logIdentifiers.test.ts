@@ -67,7 +67,7 @@ suite("logIdentifiers", () => {
       logIdentifiers(req, res, next);
 
       assert.equal(next.mock.callCount(), 1);
-      const actual = (telemetryContext.requestContext as Bag)?.prop ?? {};
+      const actual = (telemetryContext as Bag)?.prop ?? {};
       assert.deepStrictEqual(actual, testInput.expected);
     });
   });
@@ -84,7 +84,7 @@ suite("logIdentifiers", () => {
     assert.doesNotThrow(() => logIdentifiers(req, res, next));
 
     assert.equal(next.mock.callCount(), 1);
-    const actual = (telemetryContext.requestContext as Bag)?.prop ?? {};
+    const actual = (telemetryContext as Bag)?.prop ?? {};
     assert.deepStrictEqual(actual, {});
   });
 });

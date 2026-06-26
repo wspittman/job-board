@@ -1,12 +1,35 @@
+import { logger } from "dry-utils-logger";
 import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
-import { withLocalTelemetryContext } from "../../../backend/src/telemetry/telemetry.ts";
+import {
+  configureTelemetry,
+  getContext,
+  withAsyncContext,
+} from "../../../backend/src/telemetry/telemetry.ts";
 import { JOB_EXPIRY_MS } from "../../../backend/src/utils/constants.ts";
 import { CommandError, type Bag } from "../types.ts";
 import type { ATS } from "./atsConsts.ts";
 import { llmActionTypes, type Context, type LLMAction } from "./pTypes.ts";
 
 export { getLLMOptions } from "../../../backend/src/config.ts";
+
+const context: Bag = {};
+
+const baseContext = () => context;
+
+function trackEvent(name: string, duration: number): void {
+  logger.debug(new Date().toISOString(), { name, duration, ...getContext() });
+}
+
+function trackError(error: Error, props?: Bag | string[]): void {
+  logger.debug(new Date().toISOString(), {
+    error: error.message,
+    stack: error.stack,
+    props,
+  });
+}
+
+configureTelemetry({ baseContext, trackEvent, trackError });
 
 /**
  * Validate LLM action argument.
@@ -29,9 +52,11 @@ export function validateLLMAction(llmAction?: string): LLMAction {
  * @returns A company object from the ATS
  */
 export async function fetchCompany(ats: ATS, companyId: string) {
-  return await withLocalTelemetryContext("Portal.FetchCompany", async () => {
+  const res = await withAsyncContext("Portal.FetchCompany", async () => {
     return await atsObj.getCompany({ id: companyId, ats });
   });
+  if (!res) throw new Error("Portal.FetchSpecificJob Failure");
+  return res;
 }
 
 /**
@@ -41,7 +66,7 @@ export async function fetchCompany(ats: ATS, companyId: string) {
  * @returns A job object from the ATS or undefined if no jobs exist for the company.
  */
 export async function fetchExampleJob(ats: ATS, companyId: string) {
-  return await withLocalTelemetryContext("Portal.FetchExampleJob", async () => {
+  return await withAsyncContext("Portal.FetchExampleJob", async () => {
     return atsObj.getExampleJob({ id: companyId, ats });
   });
 }
@@ -58,15 +83,14 @@ export async function fetchSpecificJob(
   companyId: string,
   jobId: string,
 ) {
-  return await withLocalTelemetryContext(
-    "Portal.FetchSpecificJob",
-    async () => {
-      return atsObj.getSpecificJob(
-        { id: jobId, companyId },
-        { id: companyId, ats },
-      );
-    },
-  );
+  const res = await withAsyncContext("Portal.FetchSpecificJob", async () => {
+    return atsObj.getSpecificJob(
+      { id: jobId, companyId },
+      { id: companyId, ats },
+    );
+  });
+  if (!res) throw new Error("Portal.FetchSpecificJob Failure");
+  return res;
 }
 
 /**
@@ -79,7 +103,7 @@ export async function fetchJobCounts(
   ats: ATS,
   companyId: string,
 ): Promise<{ total: number; fresh: number }> {
-  return await withLocalTelemetryContext("Portal.FetchJobCounts", async () => {
+  const res = await withAsyncContext("Portal.FetchJobCounts", async () => {
     const jobs = await atsObj.getJobs({ id: companyId, ats }, true);
     const expiryWindow = Date.now() - JOB_EXPIRY_MS;
     const freshJobs = jobs.filter(
@@ -87,13 +111,15 @@ export async function fetchJobCounts(
     );
     return { total: jobs.length, fresh: freshJobs.length };
   });
+  if (!res) throw new Error("Portal.FetchJobCounts Failure");
+  return res;
 }
 
 export async function infer(
   llmAction: LLMAction,
   arg: string | Context<Bag>,
 ): Promise<Bag> {
-  return await withLocalTelemetryContext("Portal.Infer", async () => {
+  const res = await withAsyncContext("Portal.Infer", async () => {
     switch (llmAction) {
       case "fillCompanyInfo":
       case "fillJobInfo":
@@ -114,4 +140,6 @@ export async function infer(
       }
     }
   });
+  if (!res) throw new Error("Portal.Infer Failure");
+  return res;
 }

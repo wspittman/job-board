@@ -127,9 +127,10 @@ export class AsyncQueue<T> {
     this.#active++;
 
     try {
-      success = await withAsyncContext(this.#name, async () => {
+      await withAsyncContext(this.#name, async () => {
         await this.#fn(item.task);
         this.#onComplete?.();
+        success = true;
       });
     } catch (error) {
       success = false;

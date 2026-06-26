@@ -1,6 +1,7 @@
 import { configureGlobal } from "dry-utils-logger";
 import express from "express";
 import { beforeEach, mock } from "node:test";
+import { configureTelemetry } from "../src/telemetry/telemetry.ts";
 import { Bag } from "../src/types/types.ts";
 
 configureGlobal({
@@ -13,27 +14,9 @@ process.env.OPENAI_API_KEY ??= "test-openai-key-123456";
 
 // #region Telemetry
 
-const telemetryWorkaround = (
-  await import("../src/telemetry/telemetryWorkaround.cjs")
-).default;
-
-const telemetryClient = {
-  addTelemetryProcessor: () => {},
-  config: { disableAppInsights: true },
-};
-
 export let telemetryContext: Bag = {};
 
-// no-op telemetry bootstrap
-mock.method(telemetryWorkaround, "setup", () => ({ start() {} }));
-
-mock.method(telemetryWorkaround, "getClient", () => telemetryClient);
-
-mock.method(
-  telemetryWorkaround,
-  "getCorrelationContext",
-  () => telemetryContext,
-);
+configureTelemetry({ baseContext: () => telemetryContext });
 
 beforeEach(() => {
   telemetryContext = {};
