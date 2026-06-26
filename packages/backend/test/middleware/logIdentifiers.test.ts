@@ -2,8 +2,8 @@ import type { Request, Response } from "express";
 import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test } from "node:test";
 import { logIdentifiers } from "../../src/middleware/logIdentifiers.ts";
-import telemetryWorkaround from "../../src/telemetry/telemetryWorkaround.cjs";
 import { Bag } from "../../src/types/types.ts";
+import { telemetryContext } from "../setup.ts";
 
 const headers = {
   "jb-visitor-id": "d4e08dd6-9d72-4c39-a9c2-7c4895a2c072",
@@ -37,17 +37,9 @@ const caseDefaults: CaseInput = {
 suite("logIdentifiers", () => {
   const res = {} as Response;
   const next = mock.fn();
-  let correlationContext: Bag = {};
-
-  mock.method(
-    telemetryWorkaround,
-    "getCorrelationContext",
-    () => correlationContext,
-  );
 
   beforeEach(() => {
     next.mock.resetCalls();
-    correlationContext = {};
   });
 
   const cases: Partial<CaseInput>[] = [
@@ -75,7 +67,7 @@ suite("logIdentifiers", () => {
       logIdentifiers(req, res, next);
 
       assert.equal(next.mock.callCount(), 1);
-      const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
+      const actual = (telemetryContext.requestContext as Bag)?.prop ?? {};
       assert.deepStrictEqual(actual, testInput.expected);
     });
   });
@@ -92,7 +84,7 @@ suite("logIdentifiers", () => {
     assert.doesNotThrow(() => logIdentifiers(req, res, next));
 
     assert.equal(next.mock.callCount(), 1);
-    const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
+    const actual = (telemetryContext.requestContext as Bag)?.prop ?? {};
     assert.deepStrictEqual(actual, {});
   });
 });
