@@ -1,6 +1,9 @@
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
-import { refreshMetadata } from "../controllers/metadata.ts";
+import {
+  getCompanyQuickRef,
+  refreshMetadata,
+} from "../controllers/metadata.ts";
 import { db } from "../db/db.ts";
 import type { CompanyKey, Job } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
@@ -24,12 +27,19 @@ export async function refreshJobsForCompany(
   logProperty("Input", key);
   const companyId = key.id;
 
+  // If the company is not in the quick ref map, then it has 0 jobs on the board
+  const exists = (await getCompanyQuickRef(companyId)) != null;
+
+  // Ask for meta if the company exists. Otherwise assume newly added company and get full job data for all jobs.
+  const atsJobs = await ats.getJobs(key, exists);
+  logProperty("ATS_Jobs_All", atsJobs.length);
+
   const [currentIds, ignoreIds] = await Promise.all([
     getJobIds(companyId, key.replaceJobsOlderThan),
     db.ignoreJob.getIds(key),
   ]);
 
-  const [add, remove] = await getAtsJobs(key, currentIds, ignoreIds);
+  const [add, remove] = await groupAtsJobs(key, atsJobs, currentIds, ignoreIds);
 
   if (remove.length) {
     await db.job.removeMany(remove, companyId);
@@ -67,16 +77,13 @@ async function getJobIds(companyId: string, cutoffMS?: number) {
   return pairs.filter(({ _ts }) => _ts >= cutoff).map(({ id }) => id);
 }
 
-async function getAtsJobs(
+async function groupAtsJobs(
   key: CompanyKey,
+  atsJobs: Context<Job>[],
   currentIds: string[],
   ignoreIds: string[] = [],
 ) {
   const idSet = (x: Context<Job>[]) => new Set(x.map(({ item: { id } }) => id));
-
-  // Ask for meta if any current jobs exist. Otherwise assume newly added company and get full job data for all jobs.
-  const atsJobs = await ats.getJobs(key, !!currentIds.length);
-  logProperty("ATS_Jobs_All", atsJobs.length);
 
   // Filter out any jobs that are beyond the expiry window to avoid processing stale listings
   const expiryWindow = Date.now() - JOB_EXPIRY_MS;
