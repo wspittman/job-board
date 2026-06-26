@@ -84,4 +84,74 @@ suite("AsyncQueue", () => {
 
     assert.deepEqual(started, [1, 2]);
   });
+
+  test("invokes each group callback after its tasks settle", async () => {
+    interface Task {
+      delayMs: number;
+      group: string;
+      shouldThrow?: boolean;
+    }
+
+    const finished: string[] = [];
+    const groupResults: Array<{
+      finished: string[];
+      group: string;
+      hasFailures: boolean;
+    }> = [];
+    const queue = new AsyncQueue<Task>(
+      "test",
+      async ({ delayMs, group, shouldThrow }) => {
+        await timers.setTimeout(delayMs);
+        finished.push(group);
+        if (shouldThrow) throw new Error("Boom");
+      },
+      { concurrentLimit: 3 },
+    );
+
+    queue.add(
+      [
+        { delayMs: 20, group: "first" },
+        { delayMs: 5, group: "first" },
+      ],
+      (hasFailures) => {
+        groupResults.push({
+          group: "first",
+          hasFailures,
+          finished: [...finished],
+        });
+        return Promise.resolve();
+      },
+    );
+    queue.add(
+      [{ delayMs: 1, group: "second", shouldThrow: true }],
+      (hasFailures) => {
+        groupResults.push({
+          group: "second",
+          hasFailures,
+          finished: [...finished],
+        });
+        return Promise.resolve();
+      },
+    );
+
+    await waitFor(() => groupResults.length === 2, 500);
+
+    assert.deepEqual(groupResults, [
+      { group: "second", hasFailures: true, finished: ["second"] },
+      {
+        group: "first",
+        hasFailures: false,
+        finished: ["second", "first", "first"],
+      },
+    ]);
+  });
+
+  test("immediately completes an empty group", () => {
+    const onGroupComplete = mock.fn<(hasFailures: boolean) => Promise<void>>();
+    const queue = new AsyncQueue<number>("test", async () => undefined);
+
+    queue.add([], onGroupComplete);
+
+    assert.deepEqual(onGroupComplete.mock.calls[0]?.arguments, [false]);
+  });
 });
