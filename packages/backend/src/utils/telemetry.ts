@@ -9,9 +9,26 @@ import type {
 import type NodeClient from "applicationinsights/out/Library/NodeClient.js";
 import { subscribeAsyncLogging } from "dry-utils-async";
 import { logger } from "dry-utils-logger";
-import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
+import type { Bag } from "../types/types.ts";
 import { AppError } from "./AppError.ts";
+import {
+  getTelemetryContext,
+  logProperty,
+  setTelemetryContextFallback,
+  withTelemetryContext,
+} from "./telemetryContext.ts";
+export {
+  createSubscribeAggregator,
+  getTelemetryContext,
+  getTelemetrySubContext,
+  logCounter,
+  logProperty,
+  setTelemetryContextFallback,
+  withLocalTelemetryContext,
+  withTelemetryContext,
+} from "./telemetryContext.ts";
+
 /*
 A workaround for Application Insights defaultClient issue with requires CommonJS-style lazy loading.
 In ESM environments, the module loader enumerates all exported properties during initialization.
@@ -19,10 +36,7 @@ This means that the getter for defaultClient is executed before the client is in
 Consequently, defaultClient remains undefined even after setup() is called.
 https://github.com/microsoft/ApplicationInsights-node.js/issues/1354
 */
-import type { Bag } from "../types/types.ts";
 import telemetryWorkaround from "./telemetryWorkaround.cjs";
-
-// #region Types and Startup
 
 interface TypedRequestData extends RequestData {
   properties: Bag | unknown[] | undefined;
@@ -33,8 +47,28 @@ interface TypedEventData extends EventData {
 interface TypedExceptionData extends ExceptionData {
   properties: Bag | unknown[] | undefined;
 }
+interface LogSub {
+  tag: string;
+  val: unknown;
+}
+interface CustomContext extends CorrelationContext {
+  requestContext?: Bag;
+}
 
 let _client: NodeClient;
+
+configureApplicationInsightsContext();
+
+function configureApplicationInsightsContext(): void {
+  setTelemetryContextFallback(() => {
+    const context =
+      telemetryWorkaround.getCorrelationContext() as CustomContext;
+    if (!context) return undefined;
+
+    context.requestContext ??= {};
+    return context.requestContext;
+  });
+}
 
 export function startTelemetry(): void {
   telemetryWorkaround
@@ -45,52 +79,24 @@ export function startTelemetry(): void {
   _client.config.disableAppInsights = config.NODE_ENV === "dev";
 
   subscribeAsyncLogging({
-    log: ({ tag, val }) => logProperty(tag, val),
-    error: ({ tag, val }) => logError(new Error(tag, { cause: val })),
+    log: subscribeLog,
+    error: subscribeError,
   });
 }
 
-type NumBag = Record<string, number>;
-interface AgBag {
-  count: number;
-  counts: NumBag;
-  calls: Bag[];
-  metrics: NumBag;
-}
-interface LogSub {
-  tag: string;
-  val: unknown;
-}
-interface AgSub {
-  tag: string;
-  dense: Bag;
-  metrics: NumBag;
-  blob: Bag;
-}
-
-interface CustomContext extends CorrelationContext {
-  requestContext?: Bag;
-}
-
-const asyncLocalStorage = new AsyncLocalStorage<Bag>();
-
-// #endregion
-
-// #region Context Management
-
 /**
- * Executes an async function within a new telemetry context
- * @param name - Name of the operation for tracking
- * @param fn - Async function to execute
- * @returns Promise that resolves when the function completes
- * @remarks Automatically tracks duration and errors
+ * Executes an async function within a new telemetry context.
+ * @param name Name of the operation for tracking.
+ * @param fn Async function to execute.
+ * @returns The resolved value from the async function.
+ * @remarks Automatically tracks duration and logs errors without rethrowing them.
  */
 export function withAsyncContext(
   name: string,
   fn: () => Promise<void>,
 ): Promise<void> {
   const start = Date.now();
-  return asyncLocalStorage.run({}, async () => {
+  return withTelemetryContext(async () => {
     try {
       await fn();
     } catch (error) {
@@ -103,104 +109,8 @@ export function withAsyncContext(
 }
 
 /**
- * Executes an async function within a local telemetry context and logs the
- * captured summary when the function settles.
- * @param name Name of the operation for the log summary.
- * @param fn Async function to execute.
- * @returns The resolved value from the async function.
- * @remarks Intended for in-process callers, such as CLI portal functions, that
- * need backend telemetry context without starting Application Insights.
- */
-export function withLocalTelemetryContext<T>(
-  name: string,
-  fn: () => Promise<T>,
-): Promise<T> {
-  const start = Date.now();
-  const context: Bag = {};
-
-  return asyncLocalStorage.run(context, async () => {
-    try {
-      return await fn();
-    } finally {
-      logger.debug(new Date().toISOString(), {
-        name,
-        duration: Date.now() - start,
-        ...context,
-      });
-    }
-  });
-}
-
-/**
- * Get the current logging context, initializing it if necessary
- */
-function getContext(): Bag {
-  // If an async context is already set, use it
-  const asyncContext = asyncLocalStorage.getStore();
-  if (asyncContext) return asyncContext;
-
-  // Otherwise, use the request-level context
-  const context = telemetryWorkaround.getCorrelationContext() as CustomContext;
-  if (context) {
-    context.requestContext ??= {};
-    return context.requestContext;
-  }
-
-  // If no context (eg. on startup), return an empty object
-  return {};
-}
-
-/**
- * Gets a named sub-section of the telemetry context
- * @param name - Name of the sub-context
- * @param base - Initial value if sub-context does not exist
- * @returns The requested sub-context
- */
-function getSubContext<T>(name: string, base: T): T {
-  const context = getContext();
-  context[name] ??= base;
-  return context[name] as T;
-}
-
-// #endregion
-
-// #region Logging Functions
-
-/**
- * Logs a property to the current telemetry context
- * @param name - Name of the property
- * @param value - Value to log
- * @remarks If property already exists, converts to array of values
- */
-export function logProperty(name: string, value: unknown): void {
-  const context = getSubContext<Bag>("prop", {});
-
-  if (name in context) {
-    const current = context[name];
-
-    if (Array.isArray(current) && !Array.isArray(value)) {
-      current.push(value);
-    } else {
-      context[name] = [current, value];
-    }
-  } else {
-    context[name] = value;
-  }
-}
-
-/**
- * Increments a counter in the current telemetry context
- * @param name - Name of the counter
- * @param value - Amount to increment by (default: 1)
- */
-export function logCounter(name: string, value: number = 1): void {
-  const context = getContext();
-  context[name] = ((context[name] as number) ?? 0) + value;
-}
-
-/**
- * Logs an error to Application Insights
- * @param error - Error to log
+ * Logs an error to Application Insights.
+ * @param error Error to log.
  */
 export function logError(error: unknown): void {
   const exception = error instanceof Error ? error : new Error(String(error));
@@ -216,70 +126,24 @@ export function logError(error: unknown): void {
   _client?.trackException({ exception, properties });
 }
 
-// #endregion
-
-// #region Dry-Utils Subscribers
-
 /**
- * Helper to translate dry-utils subscribers to logProperty calls
+ * Helper to translate dry-utils subscribers to logProperty calls.
  */
 export function subscribeLog({ tag, val }: LogSub): void {
   logProperty(tag, val);
 }
 
 /**
- * Helper to translate dry-utils subscribers to logError calls
+ * Helper to translate dry-utils subscribers to logError calls.
  */
 export function subscribeError({ tag, val }: LogSub): void {
   logError(new Error(tag, { cause: val }));
 }
 
 /**
- * Creates a subscriber aggregator for telemetry events
- * @param source - Name of the sub-context to use
- * @param callLimit - Maximum number of calls to include verbatim
- * @returns A function that accepts telemetry events
- */
-export function createSubscribeAggregator(
-  source: string,
-  callLimit: number,
-): (sub: AgSub) => void {
-  return ({ tag, dense, metrics, blob }: AgSub) => {
-    const ag = getSubContext<AgBag>(source, {
-      count: 0,
-      counts: {},
-      calls: [],
-      metrics: {},
-    });
-
-    if (!ag) return;
-
-    ag.count++;
-    ag.counts[tag] = (ag.counts[tag] ?? 0) + 1;
-
-    if (ag.calls.length < callLimit) {
-      ag.calls.push(dense);
-    }
-
-    Object.entries(metrics).forEach(([key, val]) => {
-      ag.metrics[key] = (ag.metrics[key] ?? 0) + val;
-    });
-
-    if (config.ENABLE_VERBOSE_BLOB_LOGGING) {
-      // TBD: Sent to a blob storage DB
-      logger.debug("Aggregator Blob", blob);
-    }
-  };
-}
-
-// #endregion
-
-// #region (Send) Telemetry Processor
-
-/**
- * Application Insights telemetry processor that enriches telemetry with context
- * @param envelope - Telemetry envelope to process
- * @returns true to allow the event to be sent
+ * Application Insights telemetry processor that enriches telemetry with context.
+ * @param envelope Telemetry envelope to process.
+ * @returns true to allow the event to be sent.
  */
 export function telemetryProcessor({ data }: EnvelopeTelemetry): boolean {
   try {
@@ -323,13 +187,9 @@ function appendContext(baseData: TypedRequestData | TypedEventData) {
   const requestData = baseData;
   requestData.properties = {
     ...requestData.properties,
-    ...getContext(),
+    ...getTelemetryContext(),
   };
 }
-
-// #endregion
-
-// #region Development Logging
 
 function devLogRequest(requestData: TypedRequestData) {
   if (config.NODE_ENV === "dev") {
@@ -384,5 +244,3 @@ function devLog(data: object) {
     logger.info(new Date().toISOString(), data);
   }
 }
-
-// #endregion
