@@ -1,12 +1,35 @@
+import { logger } from "dry-utils-logger";
 import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
+import {
+  configureTelemetry,
+  getContext,
+  withAsyncContext,
+} from "../../../backend/src/telemetry/telemetry.ts";
 import { JOB_EXPIRY_MS } from "../../../backend/src/utils/constants.ts";
-import { withLocalTelemetryContext } from "../../../backend/src/utils/telemetry.ts";
 import { CommandError, type Bag } from "../types.ts";
 import type { ATS } from "./atsConsts.ts";
 import { llmActionTypes, type Context, type LLMAction } from "./pTypes.ts";
 
 export { getLLMOptions } from "../../../backend/src/config.ts";
+
+const context: Bag = {};
+
+const baseContext = () => context;
+
+function trackEvent(name: string, duration: number): void {
+  logger.debug(new Date().toISOString(), { name, duration, ...getContext() });
+}
+
+function trackError(error: Error, props?: Bag | string[]): void {
+  logger.debug(new Date().toISOString(), {
+    error: error.message,
+    stack: error.stack,
+    props,
+  });
+}
+
+configureTelemetry({ baseContext, trackEvent, trackError });
 
 /**
  * Validate LLM action argument.
@@ -29,43 +52,45 @@ export function validateLLMAction(llmAction?: string): LLMAction {
  * @returns A company object from the ATS
  */
 export async function fetchCompany(ats: ATS, companyId: string) {
-  return await withLocalTelemetryContext("Portal.FetchCompany", async () => {
-    return await atsObj.getCompany({ id: companyId, ats }, true);
+  const res = await withAsyncContext("Portal.FetchCompany", async () => {
+    return await atsObj.getCompany({ id: companyId, ats });
+  });
+  if (!res) throw new Error("Portal.FetchSpecificJob Failure");
+  return res;
+}
+
+/**
+ * Fetches an example (random) job from the ATS.
+ * @param ats ATS provider key.
+ * @param companyId ATS company slug/id.
+ * @returns A job object from the ATS or undefined if no jobs exist for the company.
+ */
+export async function fetchExampleJob(ats: ATS, companyId: string) {
+  return await withAsyncContext("Portal.FetchExampleJob", async () => {
+    return atsObj.getExampleJob({ id: companyId, ats });
   });
 }
 
 /**
- * Fetches a job from the ATS, either by a provided job ID or by randomly selecting one from the company's job listings.
+ * Fetches a specific job from the ATS.
  * @param ats ATS provider key.
  * @param companyId ATS company slug/id.
- * @param jobId Optional job ID to fetch. If not provided, a random job from the company's listings will be fetched.
+ * @param jobId job ID
  * @returns A job object from the ATS.
- * @throws CommandError when the company has no jobs.
  */
-export async function fetchJob(ats: ATS, companyId: string, jobId?: string) {
-  return await withLocalTelemetryContext("Portal.FetchJob", async () => {
-    if (!jobId) {
-      const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
-
-      if (!jobs.length) {
-        throw new CommandError(`No jobs available for ${ats} / ${companyId}`);
-      }
-
-      const job = jobs[Math.floor(Math.random() * jobs.length)]!;
-
-      // If the ATS didn't support partial job fetching, we can skip the extra fetch
-      if (job.context) {
-        return job;
-      }
-
-      jobId = job.item.id;
-    }
-
-    return await atsObj.getJob(
-      { id: companyId, ats },
+export async function fetchSpecificJob(
+  ats: ATS,
+  companyId: string,
+  jobId: string,
+) {
+  const res = await withAsyncContext("Portal.FetchSpecificJob", async () => {
+    return atsObj.getSpecificJob(
       { id: jobId, companyId },
+      { id: companyId, ats },
     );
   });
+  if (!res) throw new Error("Portal.FetchSpecificJob Failure");
+  return res;
 }
 
 /**
@@ -78,21 +103,23 @@ export async function fetchJobCounts(
   ats: ATS,
   companyId: string,
 ): Promise<{ total: number; fresh: number }> {
-  return await withLocalTelemetryContext("Portal.FetchJobCounts", async () => {
-    const jobs = await atsObj.getJobs({ id: companyId, ats }, false);
+  const res = await withAsyncContext("Portal.FetchJobCounts", async () => {
+    const jobs = await atsObj.getJobs({ id: companyId, ats }, true);
     const expiryWindow = Date.now() - JOB_EXPIRY_MS;
     const freshJobs = jobs.filter(
       ({ item: { postTS } }) => postTS >= expiryWindow,
     );
     return { total: jobs.length, fresh: freshJobs.length };
   });
+  if (!res) throw new Error("Portal.FetchJobCounts Failure");
+  return res;
 }
 
 export async function infer(
   llmAction: LLMAction,
   arg: string | Context<Bag>,
 ): Promise<Bag> {
-  return await withLocalTelemetryContext("Portal.Infer", async () => {
+  const res = await withAsyncContext("Portal.Infer", async () => {
     switch (llmAction) {
       case "fillCompanyInfo":
       case "fillJobInfo":
@@ -113,4 +140,6 @@ export async function infer(
       }
     }
   });
+  if (!res) throw new Error("Portal.Infer Failure");
+  return res;
 }

@@ -5,9 +5,9 @@ import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../models/clientModels.ts";
 import type { CompanyKey, CompanyKeys, FullJobKey } from "../models/models.ts";
 import { refreshJobsForCompany } from "../sync/jobs.ts";
+import { logProperty } from "../telemetry/telemetry.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
-import { logProperty } from "../utils/telemetry.ts";
 import { refreshMetadata } from "./metadata.ts";
 
 const companyInfoQueue = new AsyncQueue(
@@ -56,12 +56,12 @@ export async function addCompanies({ ids, ats }: CompanyKeys) {
  */
 export async function removeCompany(key: CompanyKey) {
   const companyId = key.id;
-  const jobIds = await db.job.getIds(companyId);
-  await db.company.remove(key);
-  if (jobIds.length) {
-    await batch("RemoveCompanyJobs", jobIds, (id) =>
-      db.job.remove({ id, companyId }),
-    );
+  const [, idRes] = await Promise.all([
+    db.company.remove(key),
+    db.job.removeAll(companyId),
+  ]);
+
+  if (idRes.length) {
     refreshMetadata();
   }
 }
@@ -160,18 +160,34 @@ async function addCompanyInternal(key: CompanyKey) {
   const exists = await db.company.get(key);
   if (exists) return false;
 
-  const { item: company } = await ats.getCompany(key);
-  if (!company) return false;
-
+  const company = await ats.getCompany(key);
   await db.company.upsert(company);
+
   // Don't add to companyInfoQueue here, we want the caller to do it so they can batch
   return true;
 }
 
 async function refreshCompanyInfo(key: CompanyKey) {
   logProperty("Input", key);
-  const company = await ats.getCompany(key, true);
-  if (company.context && (await llm.fillCompanyInfo(company))) {
-    await db.company.upsert(company.item);
+  const company = await ats.getCompany(key);
+  const exampleJob = await ats.getExampleJob(key);
+
+  if (exampleJob) {
+    const context = {
+      description: "Example job from the company",
+      content: {
+        ...exampleJob.item,
+        ...(exampleJob.context?.[0]?.content ?? {}),
+      },
+    };
+
+    const success = await llm.fillCompanyInfo({
+      item: company,
+      context: [context],
+    });
+
+    if (success) {
+      await db.company.upsert(company);
+    }
   }
 }

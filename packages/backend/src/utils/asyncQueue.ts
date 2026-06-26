@@ -1,5 +1,9 @@
 import timers from "node:timers";
-import { logError, logProperty, withAsyncContext } from "./telemetry.ts";
+import {
+  logError,
+  logProperty,
+  withAsyncContext,
+} from "../telemetry/telemetry.ts";
 
 interface Options {
   onComplete?: () => void;
@@ -7,9 +11,22 @@ interface Options {
   taskDelayMs?: number;
 }
 
+type OnGroupEnd = (hasFailures: boolean) => Promise<void>;
+
+interface TaskGroup {
+  remaining: number;
+  hasFailures?: boolean;
+  onGroupEnd: OnGroupEnd;
+}
+
+interface Item<T> {
+  task: T;
+  group?: TaskGroup;
+}
+
 class Node<T> {
-  public value: T;
-  public next?: Node<T>;
+  value: T;
+  next?: Node<T>;
   constructor(value: T, next?: Node<T>) {
     this.value = value;
     this.next = next;
@@ -21,90 +38,128 @@ class Node<T> {
  * Tasks are processed in FIFO order with a configurable batch size limit.
  */
 export class AsyncQueue<T> {
-  private head: Node<T> | undefined;
-  private tail: Node<T> | undefined;
-  private active = 0;
+  #head: Node<Item<T>> | undefined;
+  #tail: Node<Item<T>> | undefined;
+  #active = 0;
 
-  protected name: string;
-  protected fn: (task: T) => Promise<void>;
-  protected onComplete?: () => void;
-  protected concurrentLimit: number;
-  protected taskDelayMs: number;
+  #name: string;
+  #fn: (task: T) => Promise<void>;
+  #onComplete?: () => void;
+  #concurrentLimit: number;
+  #taskDelayMs: number;
 
   /**
    * Creates a new AsyncQueue instance.
-   * @param name - The name of the queue for context tracking
-   * @param fn - The async function to process each task
-   * @param options - Configuration options for the queue
+   * @param name The name of the queue for context tracking
+   * @param fn The async function to process each task
+   * @param options Configuration options for the queue
    */
   constructor(
     name: string,
     fn: (task: T) => Promise<void>,
     { concurrentLimit = 5, taskDelayMs = 0, onComplete }: Options = {},
   ) {
-    this.name = name;
-    this.fn = fn;
-    this.onComplete = onComplete;
-    this.concurrentLimit = concurrentLimit;
-    this.taskDelayMs = taskDelayMs;
+    this.#name = name;
+    this.#fn = fn;
+    this.#onComplete = onComplete;
+    this.#concurrentLimit = concurrentLimit;
+    this.#taskDelayMs = taskDelayMs;
   }
 
   /**
    * Adds multiple tasks to the queue and begins processing if possible.
-   * @param tasks - Array of tasks to be added to the queue
+   * @param tasks Array of tasks to be added to the queue
+   * @param onGroupEnd Called after every task in this group settles
    */
-  add(tasks: T[]): void {
-    logProperty(`Queue_${this.name}_Add`, tasks.length);
-    tasks.forEach((task) => this.enqueue(task));
-    this.begin();
+  add(tasks: T[], onGroupEnd?: OnGroupEnd): void {
+    logProperty(`Queue_${this.#name}_Add`, tasks.length);
+
+    if (!tasks.length) {
+      if (onGroupEnd) this.#endGroup(onGroupEnd);
+      return;
+    }
+
+    const group: TaskGroup | undefined = onGroupEnd
+      ? { remaining: tasks.length, onGroupEnd }
+      : undefined;
+
+    tasks.forEach((task) => this.#enqueue({ task, group }));
+    this.#begin();
   }
 
-  private begin() {
+  #begin() {
     // If there are no tasks or the batch is full, return
-    if (!this.head || this.active >= this.concurrentLimit) return;
+    if (!this.#head || this.#active >= this.#concurrentLimit) return;
 
-    void this.runTask(this.dequeue());
-    this.begin();
+    void this.#runTask(this.#dequeue());
+    this.#begin();
   }
 
-  private enqueue(task: T) {
-    if (!this.tail) {
+  #enqueue(item: Item<T>) {
+    if (!this.#tail) {
       // First node
-      this.head = this.tail = new Node(task);
+      this.#head = this.#tail = new Node(item);
     } else {
       // Add to existing tail
-      this.tail.next = new Node(task);
-      this.tail = this.tail.next;
+      this.#tail.next = new Node(item);
+      this.#tail = this.#tail.next;
     }
   }
 
-  private dequeue() {
-    if (!this.head) return;
+  #dequeue() {
+    if (!this.#head) return;
 
-    const current = this.head;
-    this.head = current.next;
+    const current = this.#head;
+    this.#head = current.next;
 
-    if (!this.head) {
+    if (!this.#head) {
       // This was the last node, set tail also
-      this.tail = undefined;
+      this.#tail = undefined;
     }
 
     return current.value;
   }
 
-  private async runTask(item?: T) {
+  async #runTask(item?: Item<T>) {
+    if (!item) return;
+
+    let success = false;
+    this.#active++;
+
     try {
-      if (!item) return;
-      this.active++;
-      await withAsyncContext(this.name, async () => {
-        await this.fn(item);
-        this.onComplete?.();
+      await withAsyncContext(this.#name, async () => {
+        await this.#fn(item.task);
+        this.#onComplete?.();
+        success = true;
+      });
+    } catch (error) {
+      success = false;
+      logError(error);
+    } finally {
+      this.#active--;
+      this.#updateGroup(!success, item.group);
+      timers.setTimeout(() => this.#begin(), this.#taskDelayMs);
+    }
+  }
+
+  #updateGroup(failed: boolean, group?: TaskGroup): void {
+    if (!group) return;
+
+    group.hasFailures ||= failed;
+    group.remaining--;
+
+    if (!group.remaining) {
+      this.#endGroup(group.onGroupEnd, group.hasFailures);
+    }
+  }
+
+  #endGroup(onGroupEnd: OnGroupEnd, hasFailures: boolean = false): void {
+    try {
+      void withAsyncContext(this.#name, async () => {
+        await onGroupEnd(hasFailures);
       });
     } catch (error) {
       logError(error);
-    } finally {
-      this.active--;
-      timers.setTimeout(() => this.begin(), this.taskDelayMs);
     }
   }
 }

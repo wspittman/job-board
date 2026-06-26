@@ -1,4 +1,4 @@
-import { logError, startTelemetry } from "./utils/telemetry.ts";
+import { startTelemetry } from "./telemetry/appInsights.ts";
 
 // We need this as early as possible, for reasons
 startTelemetry();
@@ -12,6 +12,7 @@ import { config } from "./config.ts";
 import { db } from "./db/db.ts";
 import { logIdentifiers } from "./middleware/logIdentifiers.ts";
 import { router } from "./routes/routes.ts";
+import { logError } from "./telemetry/telemetry.ts";
 import { AppError } from "./utils/AppError.ts";
 
 const app = express();

@@ -1,44 +1,31 @@
-import type {
-  ATS,
-  Company,
-  CompanyKey,
-  Job,
-  JobKey,
-} from "../models/models.ts";
-import type { Context } from "../types/types.ts";
+import type { ATS, CompanyKey, JobKey } from "../models/models.ts";
 import { Ashby } from "./ashby.ts";
 import { ATSBase } from "./atsBase.ts";
+import { ATSInterface } from "./ATSInterface.ts";
 import { Greenhouse } from "./greenhouse.ts";
 import { Lever } from "./lever.ts";
 
-class ATSConnector {
+class ATSConnector extends ATSInterface {
   readonly #atsEndpoints: Record<ATS, ATSBase> = {
     greenhouse: new Greenhouse(),
     lever: new Lever(),
     ashby: new Ashby(),
   };
 
-  /**
-   * Retrieves company information from the appropriate ATS
-   * @param full Whether to fetch full company details
-   */
-  async getCompany(key: CompanyKey, full?: boolean): Promise<Context<Company>> {
-    return this.#atsEndpoints[key.ats].getCompany(key, full);
+  getCompany(key: CompanyKey) {
+    return this.#atsEndpoints[key.ats].getCompany(key);
   }
 
-  /**
-   * Fetches jobs for a company from the appropriate ATS
-   * @param full Whether to fetch full job details
-   */
-  async getJobs(key: CompanyKey, full?: boolean): Promise<Context<Job>[]> {
-    return this.#atsEndpoints[key.ats].getJobs(key, full);
+  getJobs(key: CompanyKey, meta?: boolean) {
+    return this.#atsEndpoints[key.ats].getJobs(key, meta);
   }
 
-  /**
-   * Retrieves detailed information for a specific job
-   */
-  async getJob(key: CompanyKey, jobKey: JobKey): Promise<Context<Job>> {
-    return this.#atsEndpoints[key.ats].getJob(jobKey);
+  getExampleJob(key: CompanyKey) {
+    return this.#atsEndpoints[key.ats].getExampleJob(key);
+  }
+
+  getSpecificJob(jobKey: JobKey, key: CompanyKey) {
+    return this.#atsEndpoints[key.ats].getSpecificJob(jobKey, key);
   }
 }
 

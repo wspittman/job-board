@@ -31,7 +31,7 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Latest commit only
           fetch-depth: 1
@@ -39,7 +39,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Node.js version
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24.x"
 
@@ -67,7 +67,7 @@ jobs:
         run: zip -r ../release.zip ./*
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-${{ github.run_number }}
           path: release.zip
@@ -87,12 +87,12 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: frontend-${{ github.run_number }}
 
       - name: Azure login (OIDC)
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_BETTER_JOB_BOARD_ID_9432  }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CCB273F3D13F48FAB5C669116A6B0EB2 }}

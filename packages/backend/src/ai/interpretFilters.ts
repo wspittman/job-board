@@ -2,7 +2,7 @@ import { jsonCompletion } from "dry-utils-openai";
 import { getLLMOptions } from "../config.ts";
 import type { Filters } from "../models/clientModels.ts";
 import { ExtractionFilters } from "../models/extractionModels.ts";
-import { logProperty } from "../utils/telemetry.ts";
+import { logProperty } from "../telemetry/telemetry.ts";
 import { setExtractedData } from "./setExtractedData.ts";
 
 const prompt = `You are a job-search assistant. Your goal is to translate a user's natural language search query into a structured set of filters.

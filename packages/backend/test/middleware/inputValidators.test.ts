@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { beforeEach, mock, suite, test } from "node:test";
+import { suite, test } from "node:test";
 import {
   useBeacon,
   useCompanyKey,
@@ -11,7 +11,7 @@ import {
   useRefreshJobsOptions,
 } from "../../src/middleware/inputValidators";
 import { Bag } from "../../src/types/types";
-import telemetryWorkaround from "../../src/utils/telemetryWorkaround.cjs";
+import { telemetryContext } from "../setup";
 
 // Simple valid keys
 const ats = "lever";
@@ -43,18 +43,6 @@ const SEARCH_TOO_SHORT = "a";
 const SEARCH_TOO_LONG = "x".repeat(101);
 
 suite("useBeacon", () => {
-  let correlationContext: Bag = {};
-
-  mock.method(
-    telemetryWorkaround,
-    "getCorrelationContext",
-    () => correlationContext,
-  );
-
-  beforeEach(() => {
-    correlationContext = {};
-  });
-
   const validCases: (Bag | [Bag, Bag])[] = [
     {},
     { tag: "home" },
@@ -80,7 +68,7 @@ suite("useBeacon", () => {
 
     test(toTestName("Valid input", input), () => {
       useBeacon(input);
-      const actual = (correlationContext.requestContext as Bag)?.prop ?? {};
+      const actual = (telemetryContext as Bag)?.prop ?? {};
       assert.deepEqual(actual, expected);
     });
   });
@@ -90,7 +78,7 @@ suite("useBeacon", () => {
   invalidCases.forEach((input) => {
     test(toTestName("Invalid input", { input }), () => {
       assert.throws(() => useBeacon(input));
-      assert.deepEqual(correlationContext, {});
+      assert.deepEqual(telemetryContext, {});
     });
   });
 });

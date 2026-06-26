@@ -1,13 +1,8 @@
-import type {
-  ATS,
-  Company,
-  CompanyKey,
-  Job,
-  JobKey,
-} from "../models/models.ts";
-import type { Bag, Context } from "../types/types.ts";
+import type { ATS } from "../models/models.ts";
+import { createSubscribeAggregator, logError } from "../telemetry/telemetry.ts";
+import type { Bag } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
-import { createSubscribeAggregator, logError } from "../utils/telemetry.ts";
+import { ATSInterface } from "./ATSInterface.ts";
 
 type StatusResponse = { status: number; statusText: string };
 
@@ -15,34 +10,15 @@ type StatusResponse = { status: number; statusText: string };
  * Base class for ATS (Applicant Tracking System) implementations
  * providing common functionality and required interface
  */
-export abstract class ATSBase {
+export abstract class ATSBase extends ATSInterface {
   readonly #ats: ATS;
   readonly #baseUrl: string;
 
   constructor(ats: ATS, baseUrl: string) {
+    super();
     this.#ats = ats;
     this.#baseUrl = baseUrl;
   }
-
-  /**
-   * Retrieves company information from the ATS
-   * @param full Whether to fetch full job details
-   */
-  abstract getCompany(
-    key: CompanyKey,
-    full?: boolean,
-  ): Promise<Context<Company>>;
-
-  /**
-   * Fetches jobs for a company from the ATS
-   * @param full Whether to fetch full job details
-   */
-  abstract getJobs(key: CompanyKey, full?: boolean): Promise<Context<Job>[]>;
-
-  /**
-   * Retrieves detailed information for a specific job
-   */
-  abstract getJob(jobKey: JobKey): Promise<Context<Job>>;
 
   /**
    * Makes an HTTP GET request to the ATS API

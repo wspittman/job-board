@@ -1,5 +1,5 @@
 import timers from "node:timers";
-import { withAsyncContext } from "./telemetry.ts";
+import { withAsyncContext } from "../telemetry/telemetry.ts";
 
 /**
  * Creates a debounced function that delays invoking `fn` until after `delay` milliseconds

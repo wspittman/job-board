@@ -66,6 +66,16 @@ export class JobContainer extends Container<Job> {
     );
   }
 
+  /** Removes all jobs for a company. */
+  async removeAll(companyId: string) {
+    const ids = await this.getIds(companyId);
+    if (!ids.length) return [];
+
+    return await batch("RemoveAllJobs", ids, (id) =>
+      this.deleteItem(id, companyId),
+    );
+  }
+
   /** Aggregates job metadata used by search filters and site statistics. */
   async aggregateMetadata(): Promise<Metadata> {
     const weekMs = Date.now() - 7 * MS_PER_DAY;

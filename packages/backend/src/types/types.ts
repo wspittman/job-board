@@ -1,4 +1,5 @@
 export type Bag = Record<string, unknown>;
+export type NumBag = Record<string, number>;
 
 export interface Context<T> {
   item: T;

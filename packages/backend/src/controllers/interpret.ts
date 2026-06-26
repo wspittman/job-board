@@ -1,6 +1,6 @@
 import { llm } from "../ai/llm.ts";
 import type { Filters } from "../models/clientModels.ts";
-import { logProperty } from "../utils/telemetry.ts";
+import { logProperty } from "../telemetry/telemetry.ts";
 
 /**
  * Interprets a natural language search query and returns structured filters.
