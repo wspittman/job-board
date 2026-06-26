@@ -14,6 +14,7 @@ export class Ashby extends ATSBase {
   }
 
   async getCompany({ id }: CompanyKey): Promise<Company> {
+    await this.#validateKey(id);
     return Promise.resolve(formatCompany(id));
   }
 
@@ -46,6 +47,10 @@ export class Ashby extends ATSBase {
     }
 
     return formatJob(companyId, job);
+  }
+
+  async #validateKey(id: string) {
+    return this.httpCall<CompanyResult>("Company", id, "");
   }
 
   async #fetchCompany(id: string): Promise<CompanyResult> {

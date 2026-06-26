@@ -21,6 +21,7 @@ export class Lever extends ATSBase {
   }
 
   async getCompany({ id }: CompanyKey): Promise<Company> {
+    await this.#validateKey(id);
     return Promise.resolve(formatCompany(id));
   }
 
@@ -55,8 +56,13 @@ export class Lever extends ATSBase {
     return formatJob(companyId, job);
   }
 
-  async #fetchJobs(id: string, single = false): Promise<JobResult[]> {
-    const query = single ? "?mode=json&limit=1" : "?mode=json";
+  async #validateKey(id: string) {
+    const query = "?mode=json&limit=1";
+    return this.httpCall<JobResult[]>("Jobs", id, query);
+  }
+
+  async #fetchJobs(id: string) {
+    const query = "?mode=json";
     return this.httpCall<JobResult[]>("Jobs", id, query);
   }
 }
