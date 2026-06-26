@@ -1,8 +1,8 @@
 import { db } from "../db/db.ts";
 import type { ClientMetadata } from "../models/clientModels.ts";
 import type { CompanyQuickRef } from "../models/models.ts";
+import { logProperty } from "../telemetry/telemetry.ts";
 import { debounceAsync, debouncePromise } from "../utils/debounceUtils.ts";
-import { logProperty } from "../utils/telemetry.ts";
 
 const getCompanyMetadata = () => db.metadata.getItem("company", "company");
 const getJobMetadata = () => db.metadata.getItem("job", "job");

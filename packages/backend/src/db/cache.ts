@@ -1,5 +1,5 @@
+import { logCounter, logError } from "../telemetry/telemetry.ts";
 import { AppError } from "../utils/AppError.ts";
-import { logCounter, logError } from "../utils/telemetry.ts";
 import { db } from "./db.ts";
 import { LRUCache } from "./lruCache.ts";
 import { normalizeId } from "./utils.ts";

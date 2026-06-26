@@ -1,7 +1,7 @@
 import { llm } from "../../../backend/src/ai/llm.ts";
 import { ats as atsObj } from "../../../backend/src/ats/ats.ts";
+import { withLocalTelemetryContext } from "../../../backend/src/telemetry/telemetry.ts";
 import { JOB_EXPIRY_MS } from "../../../backend/src/utils/constants.ts";
-import { withLocalTelemetryContext } from "../../../backend/src/utils/telemetry.ts";
 import { CommandError, type Bag } from "../types.ts";
 import type { ATS } from "./atsConsts.ts";
 import { llmActionTypes, type Context, type LLMAction } from "./pTypes.ts";

@@ -11,7 +11,7 @@ import { subscribeAsyncLogging } from "dry-utils-async";
 import { logger } from "dry-utils-logger";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { config } from "../config.ts";
-import { AppError } from "./AppError.ts";
+import { AppError } from "../utils/AppError.ts";
 /*
 A workaround for Application Insights defaultClient issue with requires CommonJS-style lazy loading.
 In ESM environments, the module loader enumerates all exported properties during initialization.

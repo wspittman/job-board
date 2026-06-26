@@ -8,7 +8,7 @@ import {
   logCounter,
   logProperty,
   withLocalTelemetryContext,
-} from "../../src/utils/telemetry.ts";
+} from "../../src/telemetry/telemetry.ts";
 
 async function waitForLogText(expected: string): Promise<string> {
   const start = Date.now();

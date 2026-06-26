@@ -10,8 +10,8 @@ import {
   useJobKey,
   useRefreshJobsOptions,
 } from "../../src/middleware/inputValidators";
+import telemetryWorkaround from "../../src/telemetry/telemetryWorkaround.cjs";
 import { Bag } from "../../src/types/types";
-import telemetryWorkaround from "../../src/utils/telemetryWorkaround.cjs";
 
 // Simple valid keys
 const ats = "lever";

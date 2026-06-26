@@ -4,9 +4,9 @@ import { db } from "../db/db.ts";
 import type { Filters } from "../models/clientModels.ts";
 import type { JobOrderBy } from "../models/enums.ts";
 import type { Job, JobKey } from "../models/models.ts";
+import { logProperty } from "../telemetry/telemetry.ts";
 import { AppError } from "../utils/AppError.ts";
 import { MS_PER_DAY } from "../utils/constants.ts";
-import { logProperty } from "../utils/telemetry.ts";
 
 // Cosmos DB sorts missing values below defined numbers. That means:
 // - DESC numeric sorts place missing values after all defined values.

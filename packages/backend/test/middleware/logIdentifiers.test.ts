@@ -2,8 +2,8 @@ import type { Request, Response } from "express";
 import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test } from "node:test";
 import { logIdentifiers } from "../../src/middleware/logIdentifiers.ts";
+import telemetryWorkaround from "../../src/telemetry/telemetryWorkaround.cjs";
 import { Bag } from "../../src/types/types.ts";
-import telemetryWorkaround from "../../src/utils/telemetryWorkaround.cjs";
 
 const headers = {
   "jb-visitor-id": "d4e08dd6-9d72-4c39-a9c2-7c4895a2c072",

@@ -1,4 +1,4 @@
-import { logError, startTelemetry } from "./utils/telemetry.ts";
+import { logError, startTelemetry } from "./telemetry/telemetry.ts";
 
 // We need this as early as possible, for reasons
 startTelemetry();

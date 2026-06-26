@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { logError, withAsyncContext } from "../utils/telemetry.ts";
+import { logError, withAsyncContext } from "../telemetry/telemetry.ts";
 
 const SUCCESS = { status: "success" };
 

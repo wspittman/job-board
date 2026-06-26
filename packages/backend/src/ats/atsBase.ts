@@ -5,9 +5,9 @@ import type {
   Job,
   JobKey,
 } from "../models/models.ts";
+import { createSubscribeAggregator, logError } from "../telemetry/telemetry.ts";
 import type { Bag, Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
-import { createSubscribeAggregator, logError } from "../utils/telemetry.ts";
 
 type StatusResponse = { status: number; statusText: string };
 

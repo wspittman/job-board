@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
+import { logError } from "../telemetry/telemetry.ts";
 import type { Bag } from "../types/types.ts";
-import { logError } from "../utils/telemetry.ts";
 import { useBeacon } from "./inputValidators.ts";
 
 const visitorHeader = "jb-visitor-id";

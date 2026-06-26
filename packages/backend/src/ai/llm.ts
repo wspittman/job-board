@@ -1,11 +1,11 @@
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import type { Company, Job } from "../models/models.ts";
-import type { Context } from "../types/types.ts";
 import {
   createSubscribeAggregator,
   subscribeError,
   subscribeLog,
-} from "../utils/telemetry.ts";
+} from "../telemetry/telemetry.ts";
+import type { Context } from "../types/types.ts";
 import { extractLocation } from "./extractLocation.ts";
 import { fillCompanyInfo } from "./fillCompanyInfo.ts";
 import { fillJobInfo } from "./fillJobInfo.ts";

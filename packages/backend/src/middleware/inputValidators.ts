@@ -20,10 +20,10 @@ import {
   type FullJobKey,
   type JobKey,
 } from "../models/models.ts";
+import { logProperty } from "../telemetry/telemetry.ts";
 import { AppError } from "../utils/AppError.ts";
 import { JOB_EXPIRY_DAYS } from "../utils/constants.ts";
 import { stripObj } from "../utils/objUtils.ts";
-import { logProperty } from "../utils/telemetry.ts";
 
 // Z Helpers
 type Z<T> = z.ZodType<T>;

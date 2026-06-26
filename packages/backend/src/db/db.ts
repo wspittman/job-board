@@ -16,7 +16,7 @@ import {
   createSubscribeAggregator,
   subscribeError,
   subscribeLog,
-} from "../utils/telemetry.ts";
+} from "../telemetry/telemetry.ts";
 import { CompanyContainer } from "./CompanyContainer.ts";
 import { IgnoreJobContainer } from "./IgnoreJobContainer.ts";
 import { JobContainer } from "./JobContainer.ts";

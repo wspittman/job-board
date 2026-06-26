@@ -1,5 +1,9 @@
 import timers from "node:timers";
-import { logError, logProperty, withAsyncContext } from "./telemetry.ts";
+import {
+  logError,
+  logProperty,
+  withAsyncContext,
+} from "../telemetry/telemetry.ts";
 
 interface Options {
   onComplete?: () => void;

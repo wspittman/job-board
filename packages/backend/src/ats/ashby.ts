@@ -1,9 +1,9 @@
 import { standardizeUntrustedHtml } from "dry-utils-text";
 import { config } from "../config.ts";
 import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
+import { logError } from "../telemetry/telemetry.ts";
 import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
-import { logError } from "../utils/telemetry.ts";
 import type { CompanyResult } from "./ashby/companyResult.ts";
 import type { JobResult } from "./ashby/jobResult.ts";
 import { ATSBase } from "./atsBase.ts";
