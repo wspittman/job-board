@@ -7,6 +7,7 @@ import {
 import { config } from "../config.ts";
 import type {
   Company,
+  ETag,
   IgnoreJob,
   Job,
   Location,
@@ -18,6 +19,7 @@ import {
   subscribeLog,
 } from "../telemetry/telemetry.ts";
 import { CompanyContainer } from "./CompanyContainer.ts";
+import { ETagContainer } from "./ETagContainer.ts";
 import { IgnoreJobContainer } from "./IgnoreJobContainer.ts";
 import { JobContainer } from "./JobContainer.ts";
 
@@ -33,6 +35,7 @@ class DB {
   #ignoreJob: IgnoreJobContainer | undefined;
   #metadata: Container<Metadata> | undefined;
   #locationCache: Container<Location> | undefined;
+  #eTag: ETagContainer | undefined;
 
   get company() {
     return this.#validate(this.#company);
@@ -52,6 +55,10 @@ class DB {
 
   get locationCache() {
     return this.#validate(this.#locationCache);
+  }
+
+  get eTag() {
+    return this.#validate(this.#eTag);
   }
 
   /**
@@ -85,6 +92,7 @@ class DB {
           partitionKey: "pKey",
           indexExclusions: "all",
         },
+        ETagContainer.ContainerOptions(),
       ],
     });
 
@@ -97,6 +105,7 @@ class DB {
     );
     this.#metadata = containers["metadata"] as Container<Metadata>;
     this.#locationCache = containers["locationCache"];
+    this.#eTag = new ETagContainer(containers["etag"] as Container<ETag>);
   }
 
   #validate<T>(container: T | undefined): T {
