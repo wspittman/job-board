@@ -8,6 +8,53 @@ import { JOB_EXPIRY_MS } from "../../src/utils/constants.ts";
 const key = { id: "acme", ats: "lever" } as const;
 
 suite("refreshJobsForCompany", () => {
+  test("saves a new ETag when an unstable ATS response has no new jobs", async (context) => {
+    const eTagSet = context.mock.fn(async () => {});
+
+    context.mock.getter(db, "metadata", () => ({
+      getItem: async () => ({
+        id: "company",
+        companyQuickRef: [[key.id, "Acme"]],
+      }),
+    }));
+    context.mock.getter(db, "eTag", () => ({
+      get: async () => "old-etag",
+      set: eTagSet,
+    }));
+    context.mock.getter(db, "ignoreJob", () => ({
+      getIds: async () => [],
+    }));
+    context.mock.getter(db, "job", () => ({
+      getIds: async () => ["job-1"],
+    }));
+    context.mock.method(ats, "supportsETag", () => true);
+    context.mock.method(ats, "getJobsETag", async () => ({
+      stable: false,
+      etag: "new-etag",
+      data: [
+        {
+          item: {
+            id: "job-1",
+            companyId: key.id,
+            title: "Software Engineer",
+            description: "",
+            postTS: Date.now(),
+            applyUrl: "https://example.com/job-1",
+          },
+        },
+      ],
+    }));
+
+    await refreshJobsForCompany(key);
+
+    assert.equal(eTagSet.mock.callCount(), 1);
+    assert.deepEqual(eTagSet.mock.calls[0]?.arguments, [
+      "RefreshJobsForCompany_true",
+      key,
+      "new-etag",
+    ]);
+  });
+
   test("removes expired saved jobs when the ATS ETag is stable", async (context) => {
     const now = Date.now();
     const getExpiredIds = context.mock.fn(async () => ["expired"]);

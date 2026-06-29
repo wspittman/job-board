@@ -54,6 +54,7 @@ export async function refreshJobsForCompany(
   ]);
 
   const [add, remove] = await groupAtsJobs(key, atsJobs, currentIds, ignoreIds);
+  const onJobsProcessed = createETagCallback(etagId, key, newEtag);
 
   if (remove.length) {
     await db.job.removeMany(remove, companyId);
@@ -77,8 +78,10 @@ export async function refreshJobsForCompany(
 
     jobInfoQueue.add(
       add.map((job) => [key, job]),
-      setETagCallback(etagId, key, newEtag),
+      onJobsProcessed,
     );
+  } else {
+    await onJobsProcessed?.(false);
   }
 }
 
@@ -203,7 +206,7 @@ async function getETag(
   return db.eTag.get(id, key);
 }
 
-function setETagCallback(
+function createETagCallback(
   id: string,
   key: CompanyKey,
   etag?: string,
