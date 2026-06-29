@@ -45,7 +45,7 @@ export async function refreshJobsForCompany(
     return;
   }
 
-  const atsJobs = atsTags.data;
+  const { data: atsJobs, etag: newEtag } = atsTags;
   logProperty("ATS_Jobs_All", atsJobs.length);
 
   const [currentIds, ignoreIds] = await Promise.all([
@@ -77,7 +77,7 @@ export async function refreshJobsForCompany(
 
     jobInfoQueue.add(
       add.map((job) => [key, job]),
-      setETagCallback(etagId, key, etag),
+      setETagCallback(etagId, key, newEtag),
     );
   }
 }
