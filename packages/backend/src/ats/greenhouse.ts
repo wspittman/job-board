@@ -1,6 +1,5 @@
 import { config } from "../config.ts";
-import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
-import type { Context } from "../types/types.ts";
+import type { CompanyKey, JobKey } from "../models/models.ts";
 import { ATSBase } from "./atsBase.ts";
 import {
   formatCompany,
@@ -19,16 +18,16 @@ import {
  */
 export class Greenhouse extends ATSBase {
   constructor() {
-    super("greenhouse", config.GREENHOUSE_URL);
+    super("greenhouse", config.GREENHOUSE_URL, true);
   }
 
-  async getCompany({ id }: CompanyKey): Promise<Company> {
+  async getCompany({ id }: CompanyKey) {
     const companyResult = await this.#fetchCompany(id);
     return formatCompany(id, companyResult);
   }
 
-  async getJobs({ id }: CompanyKey, meta = false): Promise<Context<Job>[]> {
-    if (meta) {
+  async getJobs({ id }: CompanyKey, onlyMetadata?: boolean) {
+    if (onlyMetadata) {
       const res = await this.#fetchJobsBasic(id);
       return formatJobsBasic(id, res);
     } else {
@@ -37,7 +36,17 @@ export class Greenhouse extends ATSBase {
     }
   }
 
-  async getExampleJob({ id }: CompanyKey): Promise<Context<Job> | undefined> {
+  async getJobsETag({ id }: CompanyKey, etag?: string, onlyMetadata?: boolean) {
+    if (onlyMetadata) {
+      const res = await this.#fetchJobsBasicETag(id, etag);
+      return this.formatTags(id, res, formatJobsBasic);
+    } else {
+      const res = await this.#fetchJobsETag(id, etag);
+      return this.formatTags(id, res, formatJobs);
+    }
+  }
+
+  async getExampleJob({ id }: CompanyKey) {
     const { jobs } = await this.#fetchJobsBasic(id);
 
     if (!jobs.length) return undefined;
@@ -47,7 +56,7 @@ export class Greenhouse extends ATSBase {
     return await this.getSpecificJob({ id: jobId, companyId: id });
   }
 
-  async getSpecificJob({ id, companyId }: JobKey): Promise<Context<Job>> {
+  async getSpecificJob({ id, companyId }: JobKey) {
     const response = await this.#fetchJob(companyId, id);
     return formatJob(companyId, response);
   }
@@ -66,5 +75,14 @@ export class Greenhouse extends ATSBase {
 
   async #fetchJobsBasic(id: string) {
     return this.httpCall<JobsResultBasic>("JobsBasic", id, "/jobs");
+  }
+
+  async #fetchJobsETag(id: string, etag?: string) {
+    const route = "/jobs?content=true";
+    return this.httpCallETag<JobsResult>("Jobs", id, route, etag);
+  }
+
+  async #fetchJobsBasicETag(id: string, etag?: string) {
+    return this.httpCallETag<JobsResultBasic>("JobsBasic", id, "/jobs", etag);
   }
 }
