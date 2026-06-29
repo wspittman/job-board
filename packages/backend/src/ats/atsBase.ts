@@ -93,7 +93,6 @@ export abstract class ATSBase extends ATSInterface {
     init?: RequestInit,
   ) {
     const start = Date.now();
-
     let logStatus: StatusResponse;
     let bytes = -1;
 
@@ -103,18 +102,11 @@ export abstract class ATSBase extends ATSInterface {
         signal: AbortSignal.timeout(15_000),
       });
 
-      const { status, statusText, ok, headers } = response;
+      const { status, statusText } = response;
       logStatus = { status, statusText };
       bytes = await this.#getContentLength(response);
 
-      if (status === 404) {
-        throw new AppError(`${this.#ats} / ${id}: Not Found`, 404);
-      } else if (!ok) {
-        throw new AppError(`${this.#ats} / ${id}: Request Failed`, 500);
-      }
-
-      const data = (await response.json()) as T;
-      return { data, status, headers };
+      return this.#processResponse<T>(id, response);
     } catch (error) {
       logStatus = this.#errorToStatus(error);
 
@@ -147,6 +139,24 @@ export abstract class ATSBase extends ATSInterface {
       logError(error);
       return -1;
     }
+  }
+
+  async #processResponse<T>(id: string, res: Response) {
+    const { status, ok, headers } = res;
+
+    if (!ok) {
+      switch (status) {
+        case 304:
+          return { data: undefined as T, status, headers };
+        case 404:
+          throw new AppError(`${this.#ats} / ${id}: Not Found`, 404);
+        default:
+          throw new AppError(`${this.#ats} / ${id}: Request Failed`, 500);
+      }
+    }
+
+    const data = (await res.json()) as T;
+    return { data, status, headers };
   }
 
   #errorToStatus(error: unknown): StatusResponse {
