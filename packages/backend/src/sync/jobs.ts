@@ -8,7 +8,7 @@ import { db } from "../db/db.ts";
 import type { CompanyKey, Job } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import type { Context } from "../types/types.ts";
-import { AsyncQueue } from "../utils/asyncQueue.ts";
+import { AsyncQueue, type OnGroupEnd } from "../utils/asyncQueue.ts";
 import { JOB_EXPIRY_MS } from "../utils/constants.ts";
 
 const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
@@ -29,9 +29,19 @@ export async function refreshJobsForCompany(
 
   // If the company is not in the quick ref map, then it has 0 jobs on the board
   const exists = (await getCompanyQuickRef(companyId)) != null;
+  const etagId = `RefreshJobsForCompany_${exists}`;
+  const etag = await getETag(etagId, key);
 
+  // Use the ETag caching flow
   // Ask for meta if the company exists. Otherwise assume newly added company and get full job data for all jobs.
-  const atsJobs = await ats.getJobs(key, exists);
+  const atsTags = await ats.getJobsETag(key, etag, exists);
+
+  if (atsTags.stable) {
+    logProperty("ATS_Jobs_Stable", true);
+    return;
+  }
+
+  const atsJobs = atsTags.data;
   logProperty("ATS_Jobs_All", atsJobs.length);
 
   const [currentIds, ignoreIds] = await Promise.all([
@@ -61,7 +71,10 @@ export async function refreshJobsForCompany(
       if (size) item.companySize = size;
     });
 
-    jobInfoQueue.add(add.map((job) => [key, job]));
+    jobInfoQueue.add(
+      add.map((job) => [key, job]),
+      setETagCallback(etagId, key, etag),
+    );
   }
 }
 
@@ -165,4 +178,26 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
   }
 
   await db.job.upsert(job.item);
+}
+
+async function getETag(
+  id: string,
+  key: CompanyKey,
+): Promise<string | undefined> {
+  if (!ats.supportsETag(key)) return undefined;
+  return db.eTag.get(id, key);
+}
+
+function setETagCallback(
+  id: string,
+  key: CompanyKey,
+  etag?: string,
+): OnGroupEnd | undefined {
+  if (!ats.supportsETag(key) || !etag) return undefined;
+  return async (hasFailure: boolean) => {
+    if (!hasFailure) {
+      // Set etag only when and if all job tasks have finished successfully
+      await db.eTag.set(id, key, etag);
+    }
+  };
 }

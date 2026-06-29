@@ -5,13 +5,13 @@ import {
   withAsyncContext,
 } from "../telemetry/telemetry.ts";
 
-interface Options {
+export interface Options {
   onComplete?: () => void;
   concurrentLimit?: number;
   taskDelayMs?: number;
 }
 
-type OnGroupEnd = (hasFailures: boolean) => Promise<void>;
+export type OnGroupEnd = (hasFailures: boolean) => Promise<void>;
 
 interface TaskGroup {
   remaining: number;

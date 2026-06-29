@@ -59,6 +59,7 @@ export async function removeCompany(key: CompanyKey) {
   const [, idRes] = await Promise.all([
     db.company.remove(key),
     db.job.removeAll(companyId),
+    db.eTag.deleteAll(key),
   ]);
 
   if (idRes.length) {
