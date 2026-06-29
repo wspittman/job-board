@@ -41,6 +41,7 @@ export async function refreshJobsForCompany(
 
   if (atsTags.stable) {
     logProperty("ATS_Jobs_Stable", true);
+    await removeExpiredJobs(companyId);
     return;
   }
 
@@ -78,6 +79,17 @@ export async function refreshJobsForCompany(
       add.map((job) => [key, job]),
       setETagCallback(etagId, key, etag),
     );
+  }
+}
+
+async function removeExpiredJobs(companyId: string) {
+  const expiryWindow = Date.now() - JOB_EXPIRY_MS;
+  const expiredIds = await db.job.getExpiredIds(companyId, expiryWindow);
+
+  logProperty("Saved_Jobs_Expired", expiredIds.length);
+
+  if (expiredIds.length) {
+    await db.job.removeMany(expiredIds, companyId);
   }
 }
 
