@@ -26,8 +26,8 @@ export class Greenhouse extends ATSBase {
     return formatCompany(id, companyResult);
   }
 
-  async getJobs({ id }: CompanyKey, onlyMetadata?: boolean) {
-    if (onlyMetadata) {
+  async getJobs({ id }: CompanyKey, meta?: boolean) {
+    if (meta) {
       const res = await this.#fetchJobsBasic(id);
       return formatJobsBasic(id, res);
     } else {
@@ -36,8 +36,8 @@ export class Greenhouse extends ATSBase {
     }
   }
 
-  async getJobsETag({ id }: CompanyKey, etag?: string, onlyMetadata?: boolean) {
-    if (onlyMetadata) {
+  async getJobsETag({ id }: CompanyKey, etag?: string, meta?: boolean) {
+    if (meta) {
       const res = await this.#fetchJobsBasicETag(id, etag);
       return this.formatTags(id, res, formatJobsBasic);
     } else {

@@ -83,7 +83,7 @@ suite("Greenhouse", () => {
   [
     {
       name: "full jobs by default",
-      onlyMetadata: undefined,
+      meta: undefined,
       body: { jobs: [makeJob()], meta: { total: 1 } },
       expectedUrl:
         "https://boards-api.greenhouse.io/v1/boards/acme//jobs?content=true",
@@ -92,7 +92,7 @@ suite("Greenhouse", () => {
     },
     {
       name: "metadata jobs when requested",
-      onlyMetadata: true,
+      meta: true,
       body: { jobs: [makeJobBasic()], meta: { total: 1 } },
       expectedUrl: "https://boards-api.greenhouse.io/v1/boards/acme//jobs",
       expectedDescription: "",
@@ -101,7 +101,7 @@ suite("Greenhouse", () => {
   ].forEach(
     ({
       name,
-      onlyMetadata,
+      meta,
       body,
       expectedUrl,
       expectedDescription,
@@ -112,7 +112,7 @@ suite("Greenhouse", () => {
 
         const jobs = await new Greenhouse().getJobs(
           { id: "acme", ats: "greenhouse" },
-          onlyMetadata,
+          meta,
         );
 
         assert.equal(jobs[0]?.item.id, "42");

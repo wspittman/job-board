@@ -20,12 +20,12 @@ class ATSConnector extends ATSInterface {
     return this.#atsEndpoints[key.ats].getCompany(key);
   }
 
-  getJobs(key: CompanyKey, onlyMetadata?: boolean) {
-    return this.#atsEndpoints[key.ats].getJobs(key, onlyMetadata);
+  getJobs(key: CompanyKey, meta?: boolean) {
+    return this.#atsEndpoints[key.ats].getJobs(key, meta);
   }
 
-  getJobsETag(key: CompanyKey, etag?: string, onlyMetadata?: boolean) {
-    return this.#atsEndpoints[key.ats].getJobsETag(key, etag, onlyMetadata);
+  getJobsETag(key: CompanyKey, etag?: string, meta?: boolean) {
+    return this.#atsEndpoints[key.ats].getJobsETag(key, etag, meta);
   }
 
   getExampleJob(key: CompanyKey) {
