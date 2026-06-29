@@ -8,6 +8,7 @@ import { db } from "../db/db.ts";
 import type { CompanyKey, Job } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import type { Context } from "../types/types.ts";
+import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue, type OnGroupEnd } from "../utils/asyncQueue.ts";
 import { JOB_EXPIRY_MS } from "../utils/constants.ts";
 
@@ -178,7 +179,9 @@ async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
 
   // Do not add a job that failed to extract facets
   if (!success) {
-    return;
+    throw new AppError(
+      `${companyKey.ats}/${companyKey.id}/${job.item.id}: Extraction Failure`,
+    );
   }
 
   // This is a stopgap until we can add better US-only filters prior to main LLM processing.
