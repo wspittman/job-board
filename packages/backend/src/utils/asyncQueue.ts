@@ -157,7 +157,7 @@ export class AsyncQueue<T> {
     try {
       void withAsyncContext(this.#name, async () => {
         await onGroupEnd(hasFailures);
-      });
+      }).catch(logError);
     } catch (error) {
       logError(error);
     }
