@@ -2,7 +2,7 @@ import type { ATS } from "../models/models.ts";
 import { createSubscribeAggregator, logError } from "../telemetry/telemetry.ts";
 import type { Bag } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
-import { ATSInterface } from "./ATSInterface.ts";
+import { ATSInterface, type Tags } from "./ATSInterface.ts";
 
 type StatusResponse = { status: number; statusText: string };
 
@@ -13,11 +13,27 @@ type StatusResponse = { status: number; statusText: string };
 export abstract class ATSBase extends ATSInterface {
   readonly #ats: ATS;
   readonly #baseUrl: string;
+  readonly #supportsETag: boolean;
 
-  constructor(ats: ATS, baseUrl: string) {
+  constructor(ats: ATS, baseUrl: string, supportsETag: boolean) {
     super();
     this.#ats = ats;
     this.#baseUrl = baseUrl;
+    this.#supportsETag = supportsETag;
+  }
+
+  supportsETag(): boolean {
+    return this.#supportsETag;
+  }
+
+  protected formatTags<IN, OUT>(
+    id: string,
+    tags: Tags<IN>,
+    fmt: (id: string, x: IN) => OUT,
+  ): Tags<OUT> {
+    if (tags.stable) return tags;
+    const { stable, data, etag } = tags;
+    return { stable, data: fmt(id, data), etag };
   }
 
   /**
@@ -33,28 +49,64 @@ export abstract class ATSBase extends ATSInterface {
     id: string,
     url: string,
   ): Promise<T> {
+    const { data } = await this.#httpCallInternal<T>(name, id, url);
+    return data;
+  }
+
+  /**
+   * Makes an HTTP GET request to the ATS API
+   * @param name Name of the operation for logging
+   * @param id Company identifier
+   * @param url API endpoint URL
+   * @param etag If truthy, send this etag value to the ATS
+   * @returns API response data, wrapped in a Tag with etag metadata
+   * @throws AppError for 404 or other error responses
+   */
+  protected async httpCallETag<T>(
+    name: string,
+    id: string,
+    url: string,
+    etag?: string,
+  ): Promise<Tags<T>> {
+    const init: RequestInit = !etag
+      ? {}
+      : {
+          // Use force-cache to keep Node's fetch from adding headers that conflict with Lever's ETag behavior.
+          cache: "force-cache",
+          headers: { "If-None-Match": etag },
+        };
+
+    const res = await this.#httpCallInternal<T>(name, id, url, init);
+    const { data, status, headers } = res;
+
+    if (etag && status === 304) {
+      return { stable: true };
+    }
+
+    return { stable: false, data, etag: headers.get("etag") ?? undefined };
+  }
+
+  async #httpCallInternal<T>(
+    name: string,
+    id: string,
+    url: string,
+    init?: RequestInit,
+  ) {
     const start = Date.now();
     let logStatus: StatusResponse;
     let bytes = -1;
 
     try {
       const response = await fetch(`${this.#baseUrl}/${id}/${url}`, {
+        ...init,
         signal: AbortSignal.timeout(15_000),
       });
 
-      const { status, statusText, ok } = response;
+      const { status, statusText } = response;
       logStatus = { status, statusText };
       bytes = await this.#getContentLength(response);
 
-      if (!ok) {
-        if (status === 404) {
-          throw new AppError(`${this.#ats} / ${id}: Not Found`, 404);
-        }
-
-        throw new AppError(`${this.#ats} / ${id}: Request Failed`, 500);
-      }
-
-      return (await response.json()) as T;
+      return this.#processResponse<T>(id, response);
     } catch (error) {
       logStatus = this.#errorToStatus(error);
 
@@ -87,6 +139,24 @@ export abstract class ATSBase extends ATSInterface {
       logError(error);
       return -1;
     }
+  }
+
+  async #processResponse<T>(id: string, res: Response) {
+    const { status, ok, headers } = res;
+
+    if (!ok) {
+      switch (status) {
+        case 304:
+          return { data: undefined as T, status, headers };
+        case 404:
+          throw new AppError(`${this.#ats} / ${id}: Not Found`, 404);
+        default:
+          throw new AppError(`${this.#ats} / ${id}: Request Failed`, 500);
+      }
+    }
+
+    const data = (await res.json()) as T;
+    return { data, status, headers };
   }
 
   #errorToStatus(error: unknown): StatusResponse {

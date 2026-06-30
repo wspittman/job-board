@@ -78,6 +78,19 @@ export interface IgnoreJob {
 }
 
 /**
+ * Latest ETag for an ATS resource.
+ * - id: The workflow path assuming responsibility
+ * - atsCompany: `${ats}+${companyId}`
+ * - Index: Point reads only
+ * - TTL: 30 Days
+ */
+export interface ETag {
+  id: string;
+  atsCompany: string;
+  etag: string;
+}
+
+/**
  * Aggregated metadata for other containers. Cached in the backend service.
  * - id: The type of metadata
  * - pKey: id
