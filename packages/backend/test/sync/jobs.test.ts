@@ -49,7 +49,7 @@ suite("refreshJobsForCompany", () => {
 
     assert.equal(eTagSet.mock.callCount(), 1);
     assert.deepEqual(eTagSet.mock.calls[0]?.arguments, [
-      "RefreshJobsForCompany_true",
+      "RefreshJobsForCompany_exists",
       key,
       "new-etag",
     ]);
