@@ -146,7 +146,7 @@ async function groupAtsJobs(
   // - We don't already have full job data
   // Better to do one big API call with unnecessary data than many small API calls
   if (
-    newJobs.length &&
+    newJobs.length > 1 &&
     newJobs.length > 0.1 * atsJobs.length &&
     !atsJobs[0]?.context
   ) {
