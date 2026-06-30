@@ -155,7 +155,7 @@ export class AsyncQueue<T> {
 
   #endGroup(onGroupEnd: OnGroupEnd, hasFailures: boolean = false): void {
     try {
-      void withAsyncContext(this.#name, async () => {
+      void withAsyncContext(`${this.#name}_EndGroup`, async () => {
         await onGroupEnd(hasFailures);
       }).catch(logError);
     } catch (error) {
