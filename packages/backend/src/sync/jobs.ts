@@ -30,7 +30,7 @@ export async function refreshJobsForCompany(
 
   // If the company is not in the quick ref map, then it has 0 jobs on the board
   const exists = (await getCompanyQuickRef(companyId)) != null;
-  const etagId = `RefreshJobsForCompany_${exists}`;
+  const etagId = `RefreshJobsForCompany_${exists ? "exists" : "absent"}`;
 
   // Get the saved etag, unless we are doing forced reprocessing
   const etag =
