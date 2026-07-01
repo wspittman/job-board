@@ -64,7 +64,15 @@ export class FilterModel {
    * @returns True if the filter model is empty, false otherwise.
    */
   isEmpty(): boolean {
-    return this.toEntries().every(([key]) => key === "orderBy");
+    return this.size() === 0;
+  }
+
+  /**
+   * Returns the number of active filters in the filter model, excluding the "orderBy" filter.
+   * @returns The count of active filters.
+   */
+  size(): number {
+    return this.toEntries().filter(([key]) => key !== "orderBy").length;
   }
 
   /**
