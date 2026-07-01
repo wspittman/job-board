@@ -44,8 +44,7 @@
   padding-block-end: var(--space-6);
 
   /* Hidden fields */
-  & [name="jobId"],
-  & [name="refresh"] {
+  & [name="jobId"] {
     display: none;
   }
 }

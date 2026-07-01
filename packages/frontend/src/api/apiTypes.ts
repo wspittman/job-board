@@ -67,6 +67,4 @@ export interface FilterModelApi {
   minSalary?: number;
   // Ordering
   orderBy?: JobOrderBy;
-  // Admin
-  refresh?: boolean;
 }

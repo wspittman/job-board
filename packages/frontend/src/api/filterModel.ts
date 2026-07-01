@@ -202,7 +202,6 @@ export class FilterModel {
     this.#filters.jobId = !isEmpty(this.#filters.companyId)
       ? normIdString(get("jobId"))
       : undefined;
-    this.#filters.refresh = normBoolean(get("refresh"));
   }
 }
 
