@@ -94,7 +94,6 @@ async function readJobsByFilters({
   payCadence,
   currency,
   orderBy,
-  refresh,
 }: Filters) {
   // The limit of 24 items is intentional to prevent excessive data retrieval.
   const query = new Query().top(24);
@@ -149,11 +148,6 @@ async function readJobsByFilters({
 
   if (minSalary) {
     query.whereCondition("salaryRange.min", ">=", minSalary);
-  }
-
-  if (refresh) {
-    const cutoffSeconds = Math.floor((Date.now() - MS_PER_DAY) / 1000);
-    query.whereCondition("_ts", ">=", cutoffSeconds);
   }
 
   // Substring Matches

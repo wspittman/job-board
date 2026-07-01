@@ -250,12 +250,6 @@ suite("useFilters", () => {
     { isRemote: "FALSE" },
     { isRemote: 0 },
     { isRemote: 1 },
-    { refresh: "true" },
-    { refresh: "TRUE" },
-    { refresh: "false" },
-    { refresh: "FALSE" },
-    { refresh: 0 },
-    { refresh: 1 },
     { workTimeBasis: "full_time" },
     { workTimeBasis: "part_time" },
     { workTimeBasis: "variable" },
@@ -333,7 +327,6 @@ suite("useFilters", () => {
       const expected = {
         ...input,
         ...coerceBool("isRemote", input.isRemote),
-        ...coerceBool("refresh", input.refresh),
         ...coerceInt("daysSince", input.daysSince),
         ...coerceInt("maxExperience", input.maxExperience),
         ...coerceInt("minSalary", input.minSalary),
@@ -383,7 +376,6 @@ suite("useFilters", () => {
     { orderBy: "salaryRange.min" },
     { orderBy: "invalid_value" },
     { orderBy: 123 },
-    { refresh: "not-a-bool" },
   ];
 
   invalidCases.forEach((input) => {

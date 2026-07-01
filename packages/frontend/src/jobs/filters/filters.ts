@@ -149,12 +149,6 @@ const filterDefs: Record<string, FormElementDef[]> = {
       name: "jobId",
       label: "Job ID",
     },
-    {
-      // Hidden via CSS
-      type: "jb-form-input",
-      name: "refresh",
-      label: "Refresh",
-    },
   ],
   Results: [
     {
