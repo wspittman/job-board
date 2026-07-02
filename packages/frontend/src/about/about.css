@@ -1,0 +1,21 @@
+.about-page {
+  padding: var(--space-6) 0;
+}
+
+.about-hero {
+  text-align: center;
+  margin-block-end: var(--space-4);
+}
+
+.about-intro {
+  color: var(--text-muted);
+}
+
+.about-content {
+  line-height: 1.5;
+
+  & h2,
+  & p {
+    margin-block-end: var(--space-2);
+  }
+}

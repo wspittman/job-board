@@ -16,14 +16,19 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://betterjobboard.net/jobs</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://betterjobboard.net/faq</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://betterjobboard.net/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://betterjobboard.net/jobs</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://betterjobboard.net/blog/moving-to-90-day-expiration</loc>
