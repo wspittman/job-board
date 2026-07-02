@@ -12,12 +12,20 @@ class ATSConnector extends ATSInterface {
     ashby: new Ashby(),
   };
 
+  supportsETag(key: CompanyKey) {
+    return this.#atsEndpoints[key.ats].supportsETag();
+  }
+
   getCompany(key: CompanyKey) {
     return this.#atsEndpoints[key.ats].getCompany(key);
   }
 
   getJobs(key: CompanyKey, meta?: boolean) {
     return this.#atsEndpoints[key.ats].getJobs(key, meta);
+  }
+
+  getJobsETag(key: CompanyKey, etag?: string, meta?: boolean) {
+    return this.#atsEndpoints[key.ats].getJobsETag(key, etag, meta);
   }
 
   getExampleJob(key: CompanyKey) {

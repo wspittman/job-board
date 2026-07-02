@@ -22,8 +22,7 @@ export type DeepPartialNullToUndef<T> =
         ? {
             // optional properties
             [K in keyof T]?:
-              | DeepPartialNullToUndef<NonNullable<T[K]>>
-              | undefined;
+              DeepPartialNullToUndef<NonNullable<T[K]>> | undefined;
           }
         : // primitives & unions: swap null with undefined
           [T] extends [null]
@@ -32,7 +31,6 @@ export type DeepPartialNullToUndef<T> =
             ? undefined
             : // distribute over unions so `X | null` -> `X | undefined`
               T extends infer U
-              ?
-                  | (U extends null ? never : U)
-                  | (undefined extends U ? undefined : never)
+              ? | (U extends null ? never : U)
+                | (undefined extends U ? undefined : never)
               : never;

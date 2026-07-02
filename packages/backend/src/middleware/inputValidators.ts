@@ -78,7 +78,6 @@ const FiltersSchema = z.object({
   maxExperience: coerceInt(z.int().nonnegative().max(100)),
   minSalary: coerceInt(z.int().positive().max(10_000_000)),
   orderBy: soft(lower(JobOrderBy)),
-  refresh: coerceString(z.stringbool()),
 });
 
 const beaconSchema = z.object({

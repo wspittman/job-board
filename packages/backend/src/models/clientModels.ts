@@ -31,8 +31,6 @@ export interface Filters {
   minSalary?: number;
   // Ordering
   orderBy?: JobOrderBy;
-  // Admin
-  refresh?: boolean;
 }
 
 export interface RefreshJobsOptions {

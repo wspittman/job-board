@@ -205,6 +205,31 @@ const jobs: Step[] = [
   ),
 ];
 
+const manualAts = "ashby";
+const manualCompanyId = "asdf";
+const manual: Step[] = [
+  /*formStep(
+    `Add ${manualAts} company ${manualCompanyId}`,
+    req.put("company", {
+      asAdmin: false,
+      body: { ats: manualAts, id: manualCompanyId },
+    }),
+    res.ok(),
+  ),*/
+  formStep(
+    `Specific Company ${manualCompanyId}`,
+    req.post("refresh/jobs", {
+      body: { ats: manualAts, companyIds: [manualCompanyId] },
+    }),
+    res.accepted,
+  ),
+  /*formStep(
+    `Delete ${manualAts} company ${manualCompanyId}`,
+    req.del("company", { body: { ats: manualAts, id: manualCompanyId } }),
+    res.ok(),
+  ),*/
+];
+
 /*
 To be added to a flow:
 /refresh/jobs for specific ATS
@@ -232,4 +257,5 @@ export const flows: Record<string, Step[]> = {
   companies,
   jobs,
   smoke: [...pings, ...allErrors, ...unknowns, ...companies, ...jobs],
+  manual,
 };

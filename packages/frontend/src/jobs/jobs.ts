@@ -15,6 +15,7 @@ const jobMap = new Map<string, JobModel>();
 const initialFilters = FilterModel.fromLocationSearchString(location.search);
 let activePane: Pane = initialFilters.isEmpty() ? "filters" : "results";
 let lastRequestId = 0;
+let activeFilterCount = initialFilters.size();
 
 // #region Element references, initialization, and event handlers
 
@@ -67,6 +68,7 @@ function onJobSelect(jobId: string) {
  * @param filters - The current set of filters emitted by the filters pane.
  */
 async function onFilterChange(filters: FilterModel) {
+  activeFilterCount = filters.size();
   updateQueryString(filters);
   const requestId = ++lastRequestId;
 
@@ -145,11 +147,13 @@ function updateActionButton() {
 function getActionButtonLabel() {
   switch (activePane) {
     case "filters":
-      return `View ${jobMap.size} Jobs`;
+      return jobMap.size
+        ? `View Jobs (${jobMap.size} results)`
+        : "Add filters to view jobs";
     case "results":
-      return "Show Filters";
+      return `Edit Filters (${activeFilterCount} active)`;
     case "details":
-      return "Back to Results";
+      return `Back to Jobs (${jobMap.size} results)`;
   }
 }
 

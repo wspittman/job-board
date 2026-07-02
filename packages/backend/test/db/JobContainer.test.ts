@@ -82,6 +82,15 @@ suite("JobContainer", () => {
     assert.deepEqual(await jobs.getCompanyIds(), ["acme", "beta"]);
   });
 
+  test("reads expired job IDs from a single company partition", async () => {
+    const cutoff = now - 90 * MS_PER_DAY;
+
+    await jobs.upsert(job("old-acme", "acme", cutoff - 1));
+    await jobs.upsert(job("old-beta", "beta", cutoff - 1));
+
+    assert.deepEqual(await jobs.getExpiredIds("acme", cutoff), ["old-acme"]);
+  });
+
   test("saves and removes jobs", async () => {
     const saved = job("new", "new-company", now);
 

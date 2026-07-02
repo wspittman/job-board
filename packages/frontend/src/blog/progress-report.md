@@ -1,10 +1,16 @@
 ---
 title: Progress Report
 description: A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
-date: June 4, 2026
+date: July 2, 2026
 ---
 
 A running record of the improvements we're making as we do our best to put the "better" in Better Job Board.
+
+## July 2, 2026
+
+- Added a new [About](../about) page to explain what Better Job Board is, why it exists, how it works, and what we believe.
+- Mobile: Update primary action button wording and include filter/job counts
+- We've also been making some behind-the-scenes efficiency improvements. If all goes well this should allow us to process more jobs faster, which in turn will allow us to add many more companies to the board in the coming weeks.
 
 ## June 4, 2026
 
