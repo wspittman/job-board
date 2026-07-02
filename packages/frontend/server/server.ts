@@ -36,7 +36,7 @@ declare module "express-serve-static-core" {
 
 // #endregion
 
-const PAGES = new Set(["blog", "index", "faq", "jobs"]);
+const PAGES = new Set(["blog", "index", "faq", "jobs", "about"]);
 const METHOD_ALLOWED = new Set(["GET", "HEAD", "POST"]);
 const POST_ALLOWED = new Set(["/api/beacon", "/api/interpret"]);
 
