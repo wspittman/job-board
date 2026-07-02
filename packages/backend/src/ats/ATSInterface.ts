@@ -2,8 +2,7 @@ import type { Company, CompanyKey, Job, JobKey } from "../models/models.ts";
 import type { Context } from "../types/types.ts";
 
 export type Tags<T> =
-  | { stable: true }
-  | { stable: false; data: T; etag?: string };
+  { stable: true } | { stable: false; data: T; etag?: string };
 
 export abstract class ATSInterface {
   /** True if this ATS support ETag caching */
