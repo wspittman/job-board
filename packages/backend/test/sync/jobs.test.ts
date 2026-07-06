@@ -26,6 +26,7 @@ suite("refreshJobsForCompany", () => {
     }));
     context.mock.getter(db, "job", () => ({
       getIds: async () => ["job-1"],
+      getExpiredIds: async () => [],
     }));
     context.mock.method(ats, "supportsETag", () => true);
     context.mock.method(ats, "getJobsETag", async () => ({

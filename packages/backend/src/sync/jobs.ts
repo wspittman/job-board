@@ -28,11 +28,18 @@ export async function refreshJobsForCompany(
   logProperty("Input", key);
   const companyId = key.id;
 
-  // If the company is not in the quick ref map, then it has 0 jobs on the board
+  // If the company is in the quick ref map, then it has jobs in the DB
   const exists = (await getCompanyQuickRef(companyId)) != null;
-  const etagId = `RefreshJobsForCompany_${exists ? "exists" : "absent"}`;
+
+  if (exists) {
+    logProperty("Company_HasDBJobs", true);
+    // We should always jobs that show as expired in the DB, regardless of ETag state
+    // Jobs that have been updated in the ATS (and given and updated, unexpired post time) will be reprocessed as if new
+    await removeExpiredJobs(companyId);
+  }
 
   // Get the saved etag, unless we are doing forced reprocessing
+  const etagId = `RefreshJobsForCompany_${exists ? "exists" : "absent"}`;
   const etag =
     key.replaceJobsOlderThan == null ? await getETag(etagId, key) : undefined;
 
@@ -42,7 +49,6 @@ export async function refreshJobsForCompany(
 
   if (atsTags.stable) {
     logProperty("ATS_Jobs_Stable", true);
-    await removeExpiredJobs(companyId);
     return;
   }
 
@@ -90,9 +96,8 @@ async function removeExpiredJobs(companyId: string) {
   const expiryWindow = Date.now() - JOB_EXPIRY_MS;
   const expiredIds = await db.job.getExpiredIds(companyId, expiryWindow);
 
-  logProperty("Saved_Jobs_Expired", expiredIds.length);
-
   if (expiredIds.length) {
+    logProperty("DB_Jobs_Expired", expiredIds.length);
     await db.job.removeMany(expiredIds, companyId);
   }
 }
@@ -154,6 +159,9 @@ async function groupAtsJobs(
     const newIdSet = idSet(newJobs);
     newJobs = atsJobsFull.filter(({ item: { id } }) => newIdSet.has(id));
   }
+
+  logProperty("ATS_Jobs_ToAdd", newJobs.length);
+  logProperty("ATS_Jobs_ToRemove", removeJobs.length);
 
   return [newJobs, removeJobs] as const;
 }
