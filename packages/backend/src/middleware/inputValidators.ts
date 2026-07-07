@@ -64,13 +64,6 @@ const FiltersSchema = z.object({
   jobFamily: soft(lower(JobFamily)),
   companyStage: soft(lower(CompanyStage)),
   payCadence: soft(lower(PayCadence)),
-  currency: soft(
-    z
-      .string()
-      .length(3)
-      .regex(/^[a-z]+$/i)
-      .toUpperCase(),
-  ),
   title: soft(SearchSchema),
   city: soft(SearchSchema),
   state: soft(upper(UsState)),

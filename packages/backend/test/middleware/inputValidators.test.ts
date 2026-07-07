@@ -265,8 +265,6 @@ suite("useFilters", () => {
     { payCadence: "hourly" },
     { payCadence: "HOURLY" },
     { payCadence: "" },
-    { currency: "USD" },
-    { currency: "usd" },
     { title: SEARCH_TERM },
     { city: SEARCH_TERM },
     { state: "WA" },
@@ -336,7 +334,6 @@ suite("useFilters", () => {
         ...lowercase("payCadence", input.payCadence),
         ...lowercase("orderBy", input.orderBy),
         ...uppercase("state", input.state),
-        ...(input.currency ? { currency: input.currency.toUpperCase() } : {}),
       };
       assert.deepEqual(result, expected);
     });
@@ -354,10 +351,6 @@ suite("useFilters", () => {
     { companyStage: 123 },
     { payCadence: "invalid_value" },
     { payCadence: 123 },
-    { currency: "" },
-    { currency: "US" },
-    { currency: "USDD" },
-    { currency: 123 },
     { title: SEARCH_TOO_SHORT },
     { title: SEARCH_TOO_LONG },
     { city: SEARCH_TOO_SHORT },

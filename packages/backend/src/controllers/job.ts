@@ -92,7 +92,6 @@ async function readJobsByFilters({
   jobFamily,
   companyStage,
   payCadence,
-  currency,
   orderBy,
 }: Filters) {
   // The limit of 24 items is intentional to prevent excessive data retrieval.
@@ -129,10 +128,6 @@ async function readJobsByFilters({
 
   if (payCadence) {
     query.whereCondition("salaryRange.cadence", "=", payCadence);
-  }
-
-  if (currency) {
-    query.whereCondition("salaryRange.currency", "=", currency.toUpperCase());
   }
 
   // Range Matches
@@ -201,26 +196,22 @@ export function buildLocationWhere({
 
   const noCity = `NOT IS_DEFINED(c.primaryLocation.city)`;
   const noRegion = `NOT IS_DEFINED(c.primaryLocation.regionCode)`;
-  const noCountry = `NOT IS_DEFINED(c.primaryLocation.countryCode)`;
-
-  const usCountry = `c.primaryLocation.countryCode = 'US'`;
   const stateMatch = `c.primaryLocation.regionCode = @state`;
   const cityMatch = `(CONTAINS(c.primaryLocation.city, @city, true) OR CONTAINS(@city, c.primaryLocation.city, true))`;
 
-  const usOrGlobal = `(${usCountry} OR ${noCountry})`;
-  const countryWideRemote = `${noCity} AND ${noRegion} AND ${usOrGlobal}`;
-  const stateWideRemote = `${noCity} AND ${stateMatch} AND ${usCountry}`;
+  const countryWideRemote = `${noCity} AND ${noRegion}`;
+  const stateWideRemote = `${noCity} AND ${stateMatch}`;
 
   let locClause: string;
   let remoteMatches = [countryWideRemote];
 
   if (city && state) {
-    locClause = `${usCountry} AND ${stateMatch} AND ${cityMatch}`;
+    locClause = `${stateMatch} AND ${cityMatch}`;
     remoteMatches = [stateWideRemote, countryWideRemote];
   } else if (state) {
-    locClause = `${usCountry} AND ${stateMatch}`;
+    locClause = stateMatch;
   } else {
-    locClause = `${usCountry} AND ${cityMatch}`;
+    locClause = cityMatch;
   }
 
   if (isRemote !== false) {
