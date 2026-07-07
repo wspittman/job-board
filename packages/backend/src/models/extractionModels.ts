@@ -296,7 +296,6 @@ export const ExtractionFilters = z
     jobFamily: JobFamily,
     companyStage: CompanyStage,
     payCadence: PayCadence,
-    currency: zString("ISO 4217 currency code (uppercase), e.g. 'USD'."),
     title: zString(
       "A partial match search on job title text.",
       "Example: 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
@@ -323,9 +322,12 @@ export const ExtractionFilters = z
       "Example: 'Roles that require less than 5 years experience' → 4.",
     ),
     minSalary: zPosNum(
-      "Minimum salary the user is looking for, in the specified currency and cadence.",
+      "Minimum USD salary the user is looking for, in the specified cadence.",
+      "Only set this for USD or dollar-denominated salary preferences.",
+      "For other currencies, leave this unset and describe the currency preference in unmappedIntent.",
       "Example: '$100k a year' → 100000.",
       "Example: '$50 an hour' → 50.",
+      "Example: 'EUR jobs over 100k' → -1 and unmappedIntent notes the EUR preference.",
     ),
     unmappedIntent: zString(
       "Minimally describe missing filters the user wished existed.",
@@ -340,6 +342,7 @@ export const ExtractionFilters = z
       "Fix common misspellings and typos.",
       "Set string fields to '' when not explicitly stated.",
       "Set numeric fields to -1 when not explicitly stated.",
+      "Non-USD salary currency preferences are unsupported; put them in unmappedIntent instead of minSalary.",
     ].join(" "),
   );
 export type ExtractionFilters = z.infer<typeof ExtractionFilters>;
