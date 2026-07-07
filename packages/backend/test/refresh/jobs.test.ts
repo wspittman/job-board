@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import { ats } from "../../src/ats/ats.ts";
 import { db } from "../../src/db/db.ts";
-import { refreshJobsForCompany } from "../../src/sync/jobs.ts";
+import { refreshJobsForCompany } from "../../src/refresh/jobs.ts";
 import { JOB_EXPIRY_MS } from "../../src/utils/constants.ts";
 
 const key = { id: "acme", ats: "lever" } as const;

@@ -4,7 +4,7 @@ import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../models/clientModels.ts";
 import type { CompanyKey, CompanyKeys, FullJobKey } from "../models/models.ts";
-import { refreshJobsForCompany } from "../sync/jobs.ts";
+import { refreshJobsForCompany } from "../refresh/jobs.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
