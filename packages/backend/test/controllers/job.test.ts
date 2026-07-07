@@ -17,11 +17,9 @@ type LocationWhereCase = {
 
 const noCity = `NOT IS_DEFINED(c.primaryLocation.city)`;
 const noRegion = `NOT IS_DEFINED(c.primaryLocation.regionCode)`;
-const noCountry = `NOT IS_DEFINED(c.primaryLocation.countryCode)`;
-const usCountry = `c.primaryLocation.countryCode = 'US'`;
 const stateMatch = `c.primaryLocation.regionCode = @state`;
 const cityMatch = `(CONTAINS(c.primaryLocation.city, @city, true) OR CONTAINS(@city, c.primaryLocation.city, true))`;
-const countryWideRemote = `${noCity} AND ${noRegion} AND (${usCountry} OR ${noCountry})`;
+const countryWideRemote = `${noCity} AND ${noRegion}`;
 
 suite("buildLocationWhere", () => {
   test("returns undefined without city or state", () => {
@@ -34,25 +32,19 @@ suite("buildLocationWhere", () => {
         name: "city and state",
         filters: { city: "Seattle", state: "WA", isRemote: false },
         expected: [
-          `${usCountry} AND ${stateMatch} AND ${cityMatch}`,
+          `${stateMatch} AND ${cityMatch}`,
           { "@city": "Seattle", "@state": "WA" },
         ],
       },
       {
         name: "state only",
         filters: { state: "WA", isRemote: false },
-        expected: [
-          `${usCountry} AND ${stateMatch}`,
-          { "@city": "", "@state": "WA" },
-        ],
+        expected: [stateMatch, { "@city": "", "@state": "WA" }],
       },
       {
         name: "city only",
         filters: { city: "Seattle", isRemote: false },
-        expected: [
-          `${usCountry} AND ${cityMatch}`,
-          { "@city": "Seattle", "@state": "" },
-        ],
+        expected: [cityMatch, { "@city": "Seattle", "@state": "" }],
       },
     ];
 
@@ -64,26 +56,26 @@ suite("buildLocationWhere", () => {
   test("includes remote wildcard matches by default", () => {
     const cases: LocationWhereCase[] = [
       {
-        name: "city and state includes state-wide, US-wide, and worldwide remote",
+        name: "city and state includes state-wide and country-wide remote",
         filters: { city: "Seattle", state: "WA" },
         expected: [
-          `${usCountry} AND ${stateMatch} AND ${cityMatch} OR (c.presence = 'remote' AND (${noCity} AND ${stateMatch} AND ${usCountry} OR ${countryWideRemote}))`,
+          `${stateMatch} AND ${cityMatch} OR (c.presence = 'remote' AND (${noCity} AND ${stateMatch} OR ${countryWideRemote}))`,
           { "@city": "Seattle", "@state": "WA" },
         ],
       },
       {
-        name: "state only includes US-wide and worldwide remote",
+        name: "state only includes country-wide remote",
         filters: { state: "WA" },
         expected: [
-          `${usCountry} AND ${stateMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
+          `${stateMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
           { "@city": "", "@state": "WA" },
         ],
       },
       {
-        name: "city only includes US-wide and worldwide remote",
+        name: "city only includes country-wide remote",
         filters: { city: "Seattle" },
         expected: [
-          `${usCountry} AND ${cityMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
+          `${cityMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
           { "@city": "Seattle", "@state": "" },
         ],
       },
