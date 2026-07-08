@@ -22,6 +22,7 @@ import { CompanyContainer } from "./CompanyContainer.ts";
 import { ETagContainer } from "./ETagContainer.ts";
 import { IgnoreJobContainer } from "./IgnoreJobContainer.ts";
 import { JobContainer } from "./JobContainer.ts";
+import { MetadataContainer } from "./MetadataContainer.ts";
 
 subscribeCosmosDBLogging({
   log: subscribeLog,
@@ -33,7 +34,7 @@ class DB {
   #company: CompanyContainer | undefined;
   #job: JobContainer | undefined;
   #ignoreJob: IgnoreJobContainer | undefined;
-  #metadata: Container<Metadata> | undefined;
+  #metadata: MetadataContainer | undefined;
   #locationCache: Container<Location> | undefined;
   #eTag: ETagContainer | undefined;
 
@@ -82,11 +83,7 @@ class DB {
         CompanyContainer.ContainerOptions(),
         JobContainer.ContainerOptions(),
         IgnoreJobContainer.ContainerOptions(),
-        {
-          name: "metadata",
-          partitionKey: "id",
-          indexExclusions: "all",
-        },
+        MetadataContainer.ContainerOptions(),
         {
           name: "locationCache",
           partitionKey: "pKey",
@@ -103,7 +100,9 @@ class DB {
     this.#ignoreJob = new IgnoreJobContainer(
       containers["ignoreJob"] as Container<IgnoreJob>,
     );
-    this.#metadata = containers["metadata"] as Container<Metadata>;
+    this.#metadata = new MetadataContainer(
+      containers["metadata"] as Container<Metadata>,
+    );
     this.#locationCache = containers["locationCache"];
     this.#eTag = new ETagContainer(containers["etag"] as Container<ETag>);
   }
