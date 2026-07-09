@@ -19,9 +19,16 @@ export class MetadataContainer extends Container<Metadata> {
     super(ContainerName, container.container);
   }
 
-  /** Gets a metadata document. */
-  async get(id: Metadata["id"]) {
-    return this.getItem(id, id);
+  async getCompany() {
+    const doc = await this.getItem("company", "company");
+    // For proper return type
+    return doc?.id === "company" ? doc : undefined;
+  }
+
+  async getJob() {
+    const doc = await this.getItem("job", "job");
+    // For proper return type
+    return doc?.id === "job" ? doc : undefined;
   }
 
   /** Creates or updates a metadata document. */

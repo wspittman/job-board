@@ -96,19 +96,18 @@ export interface ETag {
  * - pKey: id
  * - Index: Point reads only
  */
-export interface Metadata {
-  // Keys
-  id: "company" | "job";
-
-  // For company type
-  companyCount?: number;
-  companyQuickRef?: CompanyQuickRef[];
-
-  // For job type
-  jobCount?: number;
-  recentJobCount?: number;
-  presenceCounts?: Partial<Record<Presence, number>>;
-  jobFamilyCounts?: Partial<Record<JobFamily, number>>;
+export type Metadata = CompanyMetadata | JobMetadata;
+export interface CompanyMetadata {
+  id: "company";
+  companyCount: number;
+  companyQuickRef: CompanyQuickRef[];
+}
+export interface JobMetadata {
+  id: "job";
+  jobCount: number;
+  recentJobCount: number;
+  presenceCounts: Partial<Record<Presence, number>>;
+  jobFamilyCounts: Partial<Record<JobFamily, number>>;
 }
 
 /**

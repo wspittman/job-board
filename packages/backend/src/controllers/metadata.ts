@@ -4,8 +4,8 @@ import type { CompanyQuickRef } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import { debounceAsync, debouncePromise } from "../utils/debounceUtils.ts";
 
-const getCompanyMetadata = () => db.metadata.getItem("company", "company");
-const getJobMetadata = () => db.metadata.getItem("job", "job");
+const getCompanyMetadata = () => db.metadata.getCompany();
+const getJobMetadata = () => db.metadata.getJob();
 const cacheCompanyMeta = debouncePromise(getCompanyMetadata);
 const cacheJobMeta = debouncePromise(getJobMetadata);
 
@@ -48,8 +48,8 @@ async function refreshInternal() {
   }
 
   await Promise.all([
-    db.metadata.upsertItem(jobMetadata),
-    db.metadata.upsertItem({
+    db.metadata.upsert(jobMetadata),
+    db.metadata.upsert({
       id: "company",
       companyCount: validRefs.length,
       companyQuickRef: validRefs,

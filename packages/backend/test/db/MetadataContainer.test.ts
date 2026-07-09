@@ -32,11 +32,11 @@ suite("MetadataContainer", () => {
   });
 
   test("reads metadata by type", async () => {
-    assert.deepEqual(await metadata.get("company"), {
+    assert.deepEqual(await metadata.getCompany(), {
       id: "company",
       companyCount: 3,
     });
-    assert.equal(await metadata.get("job"), undefined);
+    assert.equal(await metadata.getJob(), undefined);
   });
 
   test("saves metadata by type", async () => {
@@ -44,10 +44,12 @@ suite("MetadataContainer", () => {
       id: "job",
       jobCount: 7,
       recentJobCount: 2,
+      presenceCounts: {},
+      jobFamilyCounts: {},
     } as const;
 
     await metadata.upsert(jobMetadata);
 
-    assert.deepEqual(await metadata.get("job"), jobMetadata);
+    assert.deepEqual(await metadata.getJob(), jobMetadata);
   });
 });
