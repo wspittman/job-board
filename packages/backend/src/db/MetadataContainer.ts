@@ -1,5 +1,5 @@
 import { Container, type ContainerOptions } from "dry-utils-cosmosdb";
-import type { Metadata } from "../models/models.ts";
+import type { CompanyQuickRef, Metadata } from "../models/models.ts";
 import { debouncePromise } from "../utils/debounceUtils.ts";
 
 const ContainerName = "metadata";
@@ -21,9 +21,13 @@ export class MetadataContainer extends Container<Metadata> {
   }
 
   async getCompany() {
-    const doc = await this.#cacheCompanyMeta();
-    // For proper return type
-    return doc?.id === "company" ? doc : undefined;
+    const { company } = await this.#cacheCompanyMeta();
+    return company;
+  }
+
+  async getCompanyQuickRef(id: string) {
+    const { quickRefMap } = await this.#cacheCompanyMeta();
+    return quickRefMap.get(id);
   }
 
   async getJob() {
@@ -43,8 +47,18 @@ export class MetadataContainer extends Container<Metadata> {
     }
   }
 
-  #cacheCompanyMeta = debouncePromise(() => this.#get("company"));
+  #cacheCompanyMeta = debouncePromise(() => this.#getCompanyEtc());
   #cacheJobMeta = debouncePromise(() => this.#get("job"));
+
+  async #getCompanyEtc() {
+    const meta = await this.#get("company");
+    const company = meta?.id === "company" ? meta : undefined;
+    const refs = company?.companyQuickRef ?? [];
+    const quickRefMap = new Map(
+      refs.map((x) => [x[0], x] as [string, CompanyQuickRef]),
+    );
+    return { company, quickRefMap };
+  }
 
   async #get(id: Metadata["id"]) {
     return await this.getItem(id, id);

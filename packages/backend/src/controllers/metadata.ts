@@ -1,21 +1,12 @@
 import { db } from "../db/db.ts";
 import type { ClientMetadata } from "../models/clientModels.ts";
-import type { CompanyQuickRef } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import { debounceAsync, debouncePromise } from "../utils/debounceUtils.ts";
 
-const cacheQuickRefMap = debouncePromise(getQuickRefMap);
 const cachedClientMetadata = debouncePromise(getClientMetadata);
 
 export function getMetadata(): Promise<ClientMetadata> {
   return cachedClientMetadata();
-}
-
-export async function getCompanyQuickRef(
-  id: string,
-): Promise<CompanyQuickRef | undefined> {
-  const companyMap = await cacheQuickRefMap();
-  return companyMap.get(id);
 }
 
 export const refreshMetadata = debounceAsync(
@@ -56,14 +47,7 @@ async function refreshInternal() {
     companyCount: validRefs.length,
   });
 
-  cacheQuickRefMap.clear();
   cachedClientMetadata.clear();
-}
-
-async function getQuickRefMap(): Promise<Map<string, CompanyQuickRef>> {
-  const metadata = await db.metadata.getCompany();
-  const refs = metadata?.companyQuickRef ?? [];
-  return new Map(refs.map((x) => [x[0], x] as [string, CompanyQuickRef]));
 }
 
 async function getClientMetadata(): Promise<ClientMetadata> {

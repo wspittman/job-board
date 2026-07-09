@@ -1,9 +1,6 @@
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
-import {
-  getCompanyQuickRef,
-  refreshMetadata,
-} from "../controllers/metadata.ts";
+import { refreshMetadata } from "../controllers/metadata.ts";
 import { db } from "../db/db.ts";
 import type { CompanyKey, Job } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
@@ -29,7 +26,7 @@ export async function refreshJobsForCompany(
   const companyId = key.id;
 
   // If the company is in the quick ref map, then it has jobs in the DB
-  const exists = (await getCompanyQuickRef(companyId)) != null;
+  const exists = (await db.metadata.getCompanyQuickRef(companyId)) != null;
 
   if (exists) {
     logProperty("Company_HasDBJobs", true);
