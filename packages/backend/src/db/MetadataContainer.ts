@@ -1,5 +1,6 @@
 import { Container, type ContainerOptions } from "dry-utils-cosmosdb";
 import type { Metadata } from "../models/models.ts";
+import { debouncePromise } from "../utils/debounceUtils.ts";
 
 const ContainerName = "metadata";
 
@@ -20,13 +21,13 @@ export class MetadataContainer extends Container<Metadata> {
   }
 
   async getCompany() {
-    const doc = await this.getItem("company", "company");
+    const doc = await this.#cacheCompanyMeta();
     // For proper return type
     return doc?.id === "company" ? doc : undefined;
   }
 
   async getJob() {
-    const doc = await this.getItem("job", "job");
+    const doc = await this.#cacheJobMeta();
     // For proper return type
     return doc?.id === "job" ? doc : undefined;
   }
@@ -34,5 +35,18 @@ export class MetadataContainer extends Container<Metadata> {
   /** Creates or updates a metadata document. */
   async upsert(metadata: Metadata) {
     await this.upsertItem(metadata);
+
+    if (metadata.id === "company") {
+      this.#cacheCompanyMeta.clear();
+    } else {
+      this.#cacheJobMeta.clear();
+    }
+  }
+
+  #cacheCompanyMeta = debouncePromise(() => this.#get("company"));
+  #cacheJobMeta = debouncePromise(() => this.#get("job"));
+
+  async #get(id: Metadata["id"]) {
+    return await this.getItem(id, id);
   }
 }

@@ -4,11 +4,6 @@ import type { CompanyQuickRef } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import { debounceAsync, debouncePromise } from "../utils/debounceUtils.ts";
 
-const getCompanyMetadata = () => db.metadata.getCompany();
-const getJobMetadata = () => db.metadata.getJob();
-const cacheCompanyMeta = debouncePromise(getCompanyMetadata);
-const cacheJobMeta = debouncePromise(getJobMetadata);
-
 const cacheQuickRefMap = debouncePromise(getQuickRefMap);
 const cachedClientMetadata = debouncePromise(getClientMetadata);
 
@@ -61,22 +56,20 @@ async function refreshInternal() {
     companyCount: validRefs.length,
   });
 
-  cacheCompanyMeta.clear();
   cacheQuickRefMap.clear();
-  cacheJobMeta.clear();
   cachedClientMetadata.clear();
 }
 
 async function getQuickRefMap(): Promise<Map<string, CompanyQuickRef>> {
-  const metadata = await cacheCompanyMeta();
+  const metadata = await db.metadata.getCompany();
   const refs = metadata?.companyQuickRef ?? [];
   return new Map(refs.map((x) => [x[0], x] as [string, CompanyQuickRef]));
 }
 
 async function getClientMetadata(): Promise<ClientMetadata> {
   const [companyMetadata, jobMetadata] = await Promise.all([
-    cacheCompanyMeta(),
-    cacheJobMeta(),
+    db.metadata.getCompany(),
+    db.metadata.getJob(),
   ]);
   const {
     companyCount = 0,
