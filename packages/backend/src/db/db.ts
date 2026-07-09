@@ -68,7 +68,7 @@ class DB {
    * @throws {Error} If database connection fails
    * @returns Promise that resolves when all containers are initialized
    */
-  async connect(): Promise<void> {
+  async connect(testMockDataJson?: string): Promise<void> {
     const containers = await connectDB({
       endpoint: config.DATABASE_URL,
       key: config.DATABASE_KEY,
@@ -76,7 +76,7 @@ class DB {
       localCertPath:
         config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
       mockDBData: loadMockDBData({
-        mockDataJson: config.DATABASE_MOCK_DATA_JSON,
+        mockDataJson: testMockDataJson ?? config.DATABASE_MOCK_DATA_JSON,
         mockDataPath: config.DATABASE_MOCK_DATA_PATH,
       }),
       containers: [

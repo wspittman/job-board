@@ -1,94 +1,90 @@
 import assert from "node:assert/strict";
-import { suite, test } from "node:test";
+import { beforeEach, suite, test } from "node:test";
 import { ats } from "../../src/ats/ats.ts";
 import { db } from "../../src/db/db.ts";
 import { refreshJobsForCompany } from "../../src/refresh/jobs.ts";
-import { JOB_EXPIRY_MS } from "../../src/utils/constants.ts";
+import { Bag } from "../../src/types/types.ts";
+import { mockDBContent, telemetryContext } from "../setup.ts";
 
+const etagId = "RefreshJobsForCompany_exists";
 const key = { id: "acme", ats: "lever" } as const;
+const mockJob = {
+  id: "job-1",
+  companyId: key.id,
+  title: "Software Engineer",
+  description: "",
+  postTS: Date.now(),
+  applyUrl: "https://example.com/job-1",
+};
+const mockOldJob = {
+  id: "job-2",
+  companyId: key.id,
+  title: "Software Engineer",
+  description: "",
+  postTS: new Date("2025").getTime(),
+  applyUrl: "https://example.com/job-2",
+};
 
 suite("refreshJobsForCompany", () => {
-  test("saves a new ETag when an unstable ATS response has no new jobs", async (context) => {
-    const eTagSet = context.mock.fn(async () => {});
+  beforeEach(async () => {
+    await mockDBContent({
+      metadata: [
+        { id: "company", companyQuickRef: [[key.id, "Acme"]] },
+        { id: "job", jobCount: 2 },
+      ],
+      etag: [
+        {
+          id: etagId,
+          atsCompany: "lever+acme",
+          etag: "old-etag",
+        },
+      ],
+      job: [mockJob, mockOldJob],
+    });
+  });
 
-    context.mock.getter(db, "metadata", () => ({
-      getItem: async () => ({
-        id: "company",
-        companyQuickRef: [[key.id, "Acme"]],
-      }),
-    }));
-    context.mock.getter(db, "eTag", () => ({
-      get: async () => "old-etag",
-      set: eTagSet,
-    }));
-    context.mock.getter(db, "ignoreJob", () => ({
-      getIds: async () => [],
-    }));
-    context.mock.getter(db, "job", () => ({
-      getIds: async () => ["job-1"],
-      getExpiredIds: async () => [],
-    }));
+  test("ETag stable", async (context) => {
+    context.mock.method(ats, "supportsETag", () => true);
+    context.mock.method(ats, "getJobsETag", async () => ({ stable: true }));
+
+    // Two jobs present
+    assert.deepEqual(await db.job.getIds(key.id), ["job-1", "job-2"]);
+
+    await refreshJobsForCompany(key);
+
+    // Verify expected paths taken
+    const props = telemetryContext["prop"] as Bag;
+    assert.equal(props["Company_HasDBJobs"], true);
+    assert.equal(props["ATS_Jobs_Stable"], true);
+    assert.equal(props["ATS_Jobs_All"], undefined);
+
+    // Expired job removed
+    assert.deepEqual(await db.job.getIds(key.id), ["job-1"]);
+  });
+
+  test("ETag unstable, no new jobs", async (context) => {
     context.mock.method(ats, "supportsETag", () => true);
     context.mock.method(ats, "getJobsETag", async () => ({
       stable: false,
       etag: "new-etag",
-      data: [
-        {
-          item: {
-            id: "job-1",
-            companyId: key.id,
-            title: "Software Engineer",
-            description: "",
-            postTS: Date.now(),
-            applyUrl: "https://example.com/job-1",
-          },
-        },
-      ],
+      data: [{ item: mockJob }, { item: mockOldJob }],
     }));
+
+    // Two jobs present
+    assert.deepEqual(await db.job.getIds(key.id), ["job-1", "job-2"]);
 
     await refreshJobsForCompany(key);
 
-    assert.equal(eTagSet.mock.callCount(), 1);
-    assert.deepEqual(eTagSet.mock.calls[0]?.arguments, [
-      "RefreshJobsForCompany_exists",
-      key,
-      "new-etag",
-    ]);
-  });
+    // Verify expected paths taken
+    const props = telemetryContext["prop"] as Bag;
+    assert.equal(props["Company_HasDBJobs"], true);
+    assert.equal(props["ATS_Jobs_Stable"], undefined);
+    assert.equal(props["ATS_Jobs_All"], 2);
 
-  test("removes expired saved jobs when the ATS ETag is stable", async (context) => {
-    const now = Date.now();
-    const getExpiredIds = context.mock.fn(async () => ["expired"]);
-    const removeMany = context.mock.fn(async () => []);
+    // Expired job removed
+    assert.deepEqual(await db.job.getIds(key.id), ["job-1"]);
 
-    context.mock.getter(db, "metadata", () => ({
-      getItem: async () => ({
-        id: "company",
-        companyQuickRef: [[key.id, "Acme"]],
-      }),
-    }));
-    context.mock.getter(db, "eTag", () => ({
-      get: async () => "etag-value",
-    }));
-    context.mock.getter(db, "job", () => ({
-      getExpiredIds,
-      removeMany,
-    }));
-    context.mock.method(ats, "supportsETag", () => true);
-    context.mock.method(ats, "getJobsETag", async () => ({ stable: true }));
-
-    await refreshJobsForCompany(key);
-
-    assert.equal(getExpiredIds.mock.callCount(), 1);
-    const [companyId, cutoff] = getExpiredIds.mock.calls[0]?.arguments ?? [];
-    assert.equal(companyId, key.id);
-    assert.equal(typeof cutoff, "number");
-    assert.ok(cutoff >= now - JOB_EXPIRY_MS);
-    assert.ok(cutoff <= Date.now() - JOB_EXPIRY_MS);
-    assert.equal(removeMany.mock.callCount(), 1);
-    assert.deepEqual(removeMany.mock.calls[0]?.arguments, [
-      ["expired"],
-      key.id,
-    ]);
+    // ETag updated
+    assert.equal(await db.eTag.get(etagId, key), "new-etag");
   });
 });
