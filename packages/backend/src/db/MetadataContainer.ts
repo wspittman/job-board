@@ -21,13 +21,18 @@ export class MetadataContainer extends Container<Metadata> {
   }
 
   async getCompany() {
-    const { company } = await this.#cacheCompanyMeta();
-    return company;
+    const { companyMeta } = await this.#cacheCompanyMeta();
+    return companyMeta;
   }
 
   async getCompanyQuickRef(id: string) {
     const { quickRefMap } = await this.#cacheCompanyMeta();
     return quickRefMap.get(id);
+  }
+
+  async getCompanyNames() {
+    const { companyNames } = await this.#cacheCompanyMeta();
+    return companyNames;
   }
 
   async getJob() {
@@ -52,12 +57,15 @@ export class MetadataContainer extends Container<Metadata> {
 
   async #getCompanyEtc() {
     const meta = await this.#get("company");
-    const company = meta?.id === "company" ? meta : undefined;
-    const refs = company?.companyQuickRef ?? [];
+    const companyMeta = meta?.id === "company" ? meta : undefined;
+    const refs = companyMeta?.companyQuickRef ?? [];
     const quickRefMap = new Map(
       refs.map((x) => [x[0], x] as [string, CompanyQuickRef]),
     );
-    return { company, quickRefMap };
+    const companyNames = refs.map(
+      ([id, name]) => [id, name] as [string, string],
+    );
+    return { companyMeta, quickRefMap, companyNames };
   }
 
   async #get(id: Metadata["id"]) {

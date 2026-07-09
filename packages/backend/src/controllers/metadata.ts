@@ -1,12 +1,35 @@
 import { db } from "../db/db.ts";
 import type { ClientMetadata } from "../models/clientModels.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
-import { debounceAsync, debouncePromise } from "../utils/debounceUtils.ts";
+import { debounceAsync } from "../utils/debounceUtils.ts";
 
-const cachedClientMetadata = debouncePromise(getClientMetadata);
+export async function getMetadata(): Promise<ClientMetadata> {
+  const [companyMetadata, companyNames, jobMetadata] = await Promise.all([
+    db.metadata.getCompany(),
+    db.metadata.getCompanyNames(),
+    db.metadata.getJob(),
+  ]);
+  const { companyCount = 0, _ts: companyTS = 0 } = companyMetadata ?? {};
+  const {
+    jobCount = 0,
+    recentJobCount = 0,
+    presenceCounts = {},
+    jobFamilyCounts = {},
+    _ts: jobTS = 0,
+  } = jobMetadata ?? {};
 
-export function getMetadata(): Promise<ClientMetadata> {
-  return cachedClientMetadata();
+  const metadata: ClientMetadata = {
+    // _ts is in seconds, but the client expects milliseconds
+    timestamp: Math.max(companyTS, jobTS) * 1000,
+    companyCount,
+    companyNames,
+    jobCount,
+    recentJobCount,
+    presenceCounts,
+    jobFamilyCounts,
+  };
+
+  return metadata;
 }
 
 export const refreshMetadata = debounceAsync(
@@ -46,42 +69,4 @@ async function refreshInternal() {
     jobCount: jobMetadata.jobCount,
     companyCount: validRefs.length,
   });
-
-  cachedClientMetadata.clear();
-}
-
-async function getClientMetadata(): Promise<ClientMetadata> {
-  const [companyMetadata, jobMetadata] = await Promise.all([
-    db.metadata.getCompany(),
-    db.metadata.getJob(),
-  ]);
-  const {
-    companyCount = 0,
-    companyQuickRef = [],
-    _ts: companyTS = 0,
-  } = companyMetadata ?? {};
-  const {
-    jobCount = 0,
-    recentJobCount = 0,
-    presenceCounts = {},
-    jobFamilyCounts = {},
-    _ts: jobTS = 0,
-  } = jobMetadata ?? {};
-
-  const companyNames = companyQuickRef.map(
-    ([id, name]) => [id, name] as [string, string],
-  );
-
-  const metadata: ClientMetadata = {
-    // _ts is in seconds, but the client expects milliseconds
-    timestamp: Math.max(companyTS, jobTS) * 1000,
-    companyCount,
-    companyNames,
-    jobCount,
-    recentJobCount,
-    presenceCounts,
-    jobFamilyCounts,
-  };
-
-  return metadata;
 }
