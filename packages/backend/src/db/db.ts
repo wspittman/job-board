@@ -22,6 +22,7 @@ import { CompanyContainer } from "./CompanyContainer.ts";
 import { ETagContainer } from "./ETagContainer.ts";
 import { IgnoreJobContainer } from "./IgnoreJobContainer.ts";
 import { JobContainer } from "./JobContainer.ts";
+import { MetadataContainer } from "./MetadataContainer.ts";
 
 subscribeCosmosDBLogging({
   log: subscribeLog,
@@ -33,7 +34,7 @@ class DB {
   #company: CompanyContainer | undefined;
   #job: JobContainer | undefined;
   #ignoreJob: IgnoreJobContainer | undefined;
-  #metadata: Container<Metadata> | undefined;
+  #metadata: MetadataContainer | undefined;
   #locationCache: Container<Location> | undefined;
   #eTag: ETagContainer | undefined;
 
@@ -67,7 +68,7 @@ class DB {
    * @throws {Error} If database connection fails
    * @returns Promise that resolves when all containers are initialized
    */
-  async connect(): Promise<void> {
+  async connect(testMockDataJson?: string): Promise<void> {
     const containers = await connectDB({
       endpoint: config.DATABASE_URL,
       key: config.DATABASE_KEY,
@@ -75,18 +76,14 @@ class DB {
       localCertPath:
         config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
       mockDBData: loadMockDBData({
-        mockDataJson: config.DATABASE_MOCK_DATA_JSON,
+        mockDataJson: testMockDataJson ?? config.DATABASE_MOCK_DATA_JSON,
         mockDataPath: config.DATABASE_MOCK_DATA_PATH,
       }),
       containers: [
         CompanyContainer.ContainerOptions(),
         JobContainer.ContainerOptions(),
         IgnoreJobContainer.ContainerOptions(),
-        {
-          name: "metadata",
-          partitionKey: "id",
-          indexExclusions: "all",
-        },
+        MetadataContainer.ContainerOptions(),
         {
           name: "locationCache",
           partitionKey: "pKey",
@@ -103,7 +100,9 @@ class DB {
     this.#ignoreJob = new IgnoreJobContainer(
       containers["ignoreJob"] as Container<IgnoreJob>,
     );
-    this.#metadata = containers["metadata"] as Container<Metadata>;
+    this.#metadata = new MetadataContainer(
+      containers["metadata"] as Container<Metadata>,
+    );
     this.#locationCache = containers["locationCache"];
     this.#eTag = new ETagContainer(containers["etag"] as Container<ETag>);
   }

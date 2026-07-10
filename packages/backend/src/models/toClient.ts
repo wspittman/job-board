@@ -1,14 +1,8 @@
+import { db } from "../db/db.ts";
 import { normalizedLocation } from "../utils/location.ts";
 import { stripObj } from "../utils/objUtils.ts";
 import type { ClientJob } from "./clientModels.ts";
-import type { CompanyQuickRef, Job } from "./models.ts";
-
-type GetCompanyQuickRef = (id: string) => Promise<CompanyQuickRef | undefined>;
-let getCompanyQuickRef: GetCompanyQuickRef;
-
-export function setGetCompanyQuickRef(fn: GetCompanyQuickRef) {
-  getCompanyQuickRef = fn;
-}
+import type { Job } from "./models.ts";
 
 export async function toClientJobs(jobs: Job[]): Promise<ClientJob[]> {
   return Promise.all(jobs.map((job) => toClientJob(job)));
@@ -32,7 +26,8 @@ export async function toClientJob({
   const encodeId = encodeURIComponent(id);
   const encodeCompanyId = encodeURIComponent(companyId);
   const applyUrl = `/job/apply?id=${encodeId}&companyId=${encodeCompanyId}`;
-  const [, companyName, website] = (await getCompanyQuickRef(companyId)) ?? [];
+  const [, companyName, website] =
+    (await db.metadata.getCompanyQuickRef(companyId)) ?? [];
 
   return stripObj({
     // Keys

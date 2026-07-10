@@ -296,7 +296,6 @@ export const ExtractionFilters = z
     jobFamily: JobFamily,
     companyStage: CompanyStage,
     payCadence: PayCadence,
-    currency: zString("ISO 4217 currency code (uppercase), e.g. 'USD'."),
     title: zString(
       "A partial match search on job title text.",
       "Example: 'port' will match 'Support Engineer' and 'Portfolio Manager'.",

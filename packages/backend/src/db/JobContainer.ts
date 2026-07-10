@@ -1,7 +1,7 @@
 import { batch } from "dry-utils-async";
 import { Container, Query, type ContainerOptions } from "dry-utils-cosmosdb";
 import { JobFamily, Presence } from "../models/enums.ts";
-import type { Job, JobKey, Metadata } from "../models/models.ts";
+import type { Job, JobKey, JobMetadata } from "../models/models.ts";
 import { MS_PER_DAY } from "../utils/constants.ts";
 
 const ContainerName = "job";
@@ -87,7 +87,7 @@ export class JobContainer extends Container<Job> {
   }
 
   /** Aggregates job metadata used by search filters and site statistics. */
-  async aggregateMetadata(): Promise<Metadata> {
+  async aggregateMetadata(): Promise<JobMetadata> {
     const weekMs = Date.now() - 7 * MS_PER_DAY;
 
     const [jobCount, recentJobCount, presenceRows, jobFamilyRows] =

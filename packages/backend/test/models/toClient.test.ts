@@ -2,11 +2,8 @@ import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 
 import type { Job } from "../../src/models/models.ts";
-import {
-  setGetCompanyQuickRef,
-  toClientJob,
-  toClientJobs,
-} from "../../src/models/toClient.ts";
+import { toClientJob, toClientJobs } from "../../src/models/toClient.ts";
+import { mockDBContent } from "../setup.ts";
 
 const buildJob = (overrides: Partial<Job> = {}): Job => ({
   id: "job id",
@@ -37,16 +34,14 @@ const buildJob = (overrides: Partial<Job> = {}): Job => ({
   ...overrides,
 });
 
-suite("toClientJob", () => {
-  test("maps job fields and normalizes output", async () => {
+suite("toClient", () => {
+  async function mockQuickRef(companyQuickRef: string[][]) {
+    await mockDBContent({ metadata: [{ id: "company", companyQuickRef }] });
+  }
+
+  test("toClientJob: maps job fields and normalizes output", async () => {
     const job = buildJob();
-    setGetCompanyQuickRef((companyId) =>
-      Promise.resolve(
-        companyId === "acme/1"
-          ? ["acme/1", "Acme", "https://acme.example"]
-          : undefined,
-      ),
-    );
+    await mockQuickRef([["acme/1", "Acme", "https://acme.example"]]);
 
     assert.deepEqual(await toClientJob(job), {
       id: "job id",
@@ -72,17 +67,17 @@ suite("toClientJob", () => {
     });
   });
 
-  test("falls back to company id when mapping is unavailable", async () => {
+  test("toClientJob: falls back to company id when mapping is unavailable", async () => {
     const job = buildJob();
 
-    setGetCompanyQuickRef(() => Promise.resolve(undefined));
+    await mockQuickRef([]);
     const result = await toClientJob(job);
 
     assert.equal(result.company, "acme/1");
     assert.equal("companyWebsite" in result, false);
   });
 
-  test("drops undefined top-level fields", async () => {
+  test("toClientJob: drops undefined top-level fields", async () => {
     const job = buildJob({
       presence: "onsite",
       primaryLocation: undefined,
@@ -106,7 +101,7 @@ suite("toClientJob", () => {
     });
   });
 
-  test("handles various company website formats", async () => {
+  test("toClientJob: handles various company website formats", async () => {
     const job = buildJob();
 
     const testCases = [
@@ -121,9 +116,7 @@ suite("toClientJob", () => {
     ];
 
     for (const { input, expected } of testCases) {
-      setGetCompanyQuickRef(() =>
-        Promise.resolve(["id", "Name", input as string]),
-      );
+      await mockQuickRef([["acme/1", "Acme", input as string]]);
       const result = await toClientJob(job);
       if (expected === undefined) {
         assert.equal(
@@ -140,26 +133,21 @@ suite("toClientJob", () => {
       }
     }
   });
-});
 
-suite("toClientJobs", () => {
-  test("maps arrays of jobs", async () => {
-    const jobs = [buildJob(), buildJob({ id: "job-2", companyId: "acme 2" })];
+  test("toClientJobs: maps arrays of jobs", async () => {
+    const jobs = [buildJob(), buildJob({ id: "job-2", companyId: "acme/2" })];
 
-    setGetCompanyQuickRef((companyId) =>
-      Promise.resolve(
-        companyId === "acme/1"
-          ? ["acme/1", "Acme", "https://acme.example"]
-          : ["acme/2", "Acme 2", "https://acme2.example"],
-      ),
-    );
+    await mockQuickRef([
+      ["acme/1", "Acme", "https://acme.example"],
+      ["acme/2", "Acme 2", "https://acme2.example"],
+    ]);
 
     const results = await toClientJobs(jobs);
 
     assert.equal(results.length, 2);
     assert.equal(
       results[1]?.applyUrl,
-      "/job/apply?id=job-2&companyId=acme%202",
+      "/job/apply?id=job-2&companyId=acme%2F2",
     );
     assert.equal(results[1]?.company, "Acme 2");
     assert.equal(results[1]?.companyWebsite, "https://acme2.example/");

@@ -20,7 +20,6 @@ export interface Filters {
   jobFamily?: JobFamily;
   companyStage?: CompanyStage;
   payCadence?: PayCadence;
-  currency?: string;
   // Substring Match
   title?: string;
   city?: string;
