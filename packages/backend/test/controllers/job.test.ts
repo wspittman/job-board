@@ -26,62 +26,62 @@ suite("buildLocationWhere", () => {
     assert.equal(buildLocationWhere({}), undefined);
   });
 
-  test("builds local location clauses", () => {
-    const cases: LocationWhereCase[] = [
-      {
-        name: "city and state",
-        filters: { city: "Seattle", state: "WA", isRemote: false },
-        expected: [
-          `${stateMatch} AND ${cityMatch}`,
-          { "@city": "Seattle", "@state": "WA" },
-        ],
-      },
-      {
-        name: "state only",
-        filters: { state: "WA", isRemote: false },
-        expected: [stateMatch, { "@city": "", "@state": "WA" }],
-      },
-      {
-        name: "city only",
-        filters: { city: "Seattle", isRemote: false },
-        expected: [cityMatch, { "@city": "Seattle", "@state": "" }],
-      },
-    ];
+  const localLocationWhereCases: LocationWhereCase[] = [
+    {
+      name: "city and state",
+      filters: { city: "Seattle", state: "WA", isRemote: false },
+      expected: [
+        `${stateMatch} AND ${cityMatch}`,
+        { "@city": "Seattle", "@state": "WA" },
+      ],
+    },
+    {
+      name: "state only",
+      filters: { state: "WA", isRemote: false },
+      expected: [stateMatch, { "@city": "", "@state": "WA" }],
+    },
+    {
+      name: "city only",
+      filters: { city: "Seattle", isRemote: false },
+      expected: [cityMatch, { "@city": "Seattle", "@state": "" }],
+    },
+  ];
 
-    cases.forEach(({ name, filters, expected }) => {
+  localLocationWhereCases.forEach(({ name, filters, expected }) => {
+    test(`builds local location clauses: ${name}`, () => {
       assert.deepEqual(buildLocationWhere(filters), expected, name);
     });
   });
 
-  test("includes remote wildcard matches by default", () => {
-    const cases: LocationWhereCase[] = [
-      {
-        name: "city and state includes state-wide and country-wide remote",
-        filters: { city: "Seattle", state: "WA" },
-        expected: [
-          `${stateMatch} AND ${cityMatch} OR (c.presence = 'remote' AND (${noCity} AND ${stateMatch} OR ${countryWideRemote}))`,
-          { "@city": "Seattle", "@state": "WA" },
-        ],
-      },
-      {
-        name: "state only includes country-wide remote",
-        filters: { state: "WA" },
-        expected: [
-          `${stateMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
-          { "@city": "", "@state": "WA" },
-        ],
-      },
-      {
-        name: "city only includes country-wide remote",
-        filters: { city: "Seattle" },
-        expected: [
-          `${cityMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
-          { "@city": "Seattle", "@state": "" },
-        ],
-      },
-    ];
+  const remoteLocationWhereCases: LocationWhereCase[] = [
+    {
+      name: "city and state includes state-wide and country-wide remote",
+      filters: { city: "Seattle", state: "WA" },
+      expected: [
+        `${stateMatch} AND ${cityMatch} OR (c.presence = 'remote' AND (${noCity} AND ${stateMatch} OR ${countryWideRemote}))`,
+        { "@city": "Seattle", "@state": "WA" },
+      ],
+    },
+    {
+      name: "state only includes country-wide remote",
+      filters: { state: "WA" },
+      expected: [
+        `${stateMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
+        { "@city": "", "@state": "WA" },
+      ],
+    },
+    {
+      name: "city only includes country-wide remote",
+      filters: { city: "Seattle" },
+      expected: [
+        `${cityMatch} OR (c.presence = 'remote' AND (${countryWideRemote}))`,
+        { "@city": "Seattle", "@state": "" },
+      ],
+    },
+  ];
 
-    cases.forEach(({ name, filters, expected }) => {
+  remoteLocationWhereCases.forEach(({ name, filters, expected }) => {
+    test(`includes remote wildcard matches by default: ${name}`, () => {
       assert.deepEqual(buildLocationWhere(filters), expected, name);
     });
   });
