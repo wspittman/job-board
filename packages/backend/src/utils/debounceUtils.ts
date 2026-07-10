@@ -39,31 +39,36 @@ type DBPromise<T> = {
 /**
  * Creates a function that caches and returns the result of an asynchronous operation.
  * Subsequent calls return the same promise until it resolves successfully or is
- * explicitly cleared. If the operation fails, it automatically retries with
- * exponential backoff.
+ * explicitly cleared. If the operation fails, current callers receive the error
+ * and new attempts are throttled with an exponential cooldown.
  *
- * @param fn - The asynchronous function that resolves with the data.
+ * @param fn The asynchronous function that resolves with the data.
  * @returns A function that resolves with the data, including a `clear()` method to reset.
  */
 export function debouncePromise<T>(fn: () => Promise<T>): DBPromise<T> {
+  const cooldownMS = 10 * 1000;
   let promise: Promise<T> | undefined = undefined;
-  let errRetry = 1;
+  let cooldown = 0;
 
-  const wrapFn = (resolve: (value: T) => void) => {
-    fn()
-      .then((result) => {
-        errRetry = 1;
-        resolve(result);
-      })
-      .catch(() => {
-        timers.setTimeout(() => wrapFn(resolve), errRetry * 60 * 1000);
-        errRetry *= 2;
-      });
-  };
+  const wrapFn = () =>
+    new Promise<T>((resolve, reject) => {
+      timers.setTimeout(() => {
+        fn()
+          .then((result) => {
+            cooldown = 0;
+            resolve(result);
+          })
+          .catch((err: unknown) => {
+            promise = undefined;
+            cooldown = Math.max(1, 2 * cooldown);
+            reject(err instanceof Error ? err : new Error(String(err)));
+          });
+      }, cooldownMS * cooldown);
+    });
 
   const dbFn = function debouncedFn() {
     if (!promise) {
-      promise = new Promise(wrapFn);
+      promise = wrapFn();
     }
 
     return promise;
@@ -71,7 +76,6 @@ export function debouncePromise<T>(fn: () => Promise<T>): DBPromise<T> {
 
   dbFn.clear = () => {
     promise = undefined;
-    errRetry = 1;
   };
 
   return dbFn;

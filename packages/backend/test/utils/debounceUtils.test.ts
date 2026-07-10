@@ -103,61 +103,124 @@ suite("debouncePromise", () => {
     assert.equal(task.mock.callCount(), 2);
   });
 
-  test("retries on failure", async (context) => {
+  test("rejects current callers and delays new callers during cooldown", async (context) => {
     const tick = mockTimers(context);
-
-    let fail = true;
+    const error = new Error("fail");
     const failingTask = mock.fn(async () => {
-      if (fail) {
-        fail = false;
-        throw new Error("fail");
-      }
-      return "success";
+      throw error;
     });
 
     const db = debouncePromise(failingTask);
-    const p = db();
+    const p1 = db();
+    const p2 = db();
 
-    await tick(5);
-
+    assert.equal(p1, p2);
+    const firstRejection = assert.rejects(p1, error);
+    await tick(0);
+    await firstRejection;
     assert.equal(failingTask.mock.callCount(), 1);
 
-    await tick(60000);
+    const cooldownP1 = db();
+    const cooldownP2 = db();
+    let settled = false;
+    const observeSettlement = cooldownP1.then(
+      () => {
+        settled = true;
+      },
+      () => {
+        settled = true;
+      },
+    );
 
-    const result = await p;
-    assert.equal(result, "success");
+    assert.equal(cooldownP1, cooldownP2);
+    assert.equal(failingTask.mock.callCount(), 1);
+    await tick(9999);
+    assert.equal(settled, false);
+    assert.equal(failingTask.mock.callCount(), 1);
+
+    const cooldownRejection = assert.rejects(cooldownP1, error);
+    await tick(1);
+    await cooldownRejection;
+    await observeSettlement;
     assert.equal(failingTask.mock.callCount(), 2);
   });
 
-  test("exponential backoff on multiple failures", async (context) => {
+  test("new callers during cooldown receive the delayed retry promise", async (context) => {
     const tick = mockTimers(context);
 
     let attempts = 0;
-    const failingTask = mock.fn(async () => {
+    const taskWithTransientFailure = mock.fn(async () => {
       attempts++;
-      if (attempts < 3) {
+      if (attempts === 1) {
         throw new Error("fail");
       }
       return "success";
     });
 
+    const db = debouncePromise(taskWithTransientFailure);
+    const firstAttempt = db();
+    const firstRejection = assert.rejects(firstAttempt, /fail/);
+    await tick(0);
+    await firstRejection;
+
+    const retry = db();
+    const sameRetry = db();
+
+    assert.equal(retry, sameRetry);
+    assert.equal(taskWithTransientFailure.mock.callCount(), 1);
+
+    await tick(9999);
+    assert.equal(taskWithTransientFailure.mock.callCount(), 1);
+
+    await tick(1);
+
+    const result = await retry;
+    assert.equal(result, "success");
+    assert.equal(taskWithTransientFailure.mock.callCount(), 2);
+  });
+
+  test("doubles cooldown after repeated failures", async (context) => {
+    const tick = mockTimers(context);
+    const failingTask = mock.fn(async () => {
+      throw new Error("fail");
+    });
+
     const db = debouncePromise(failingTask);
-    const p = db();
 
-    // 1st attempt fails
-    await tick(5);
-    assert.equal(failingTask.mock.callCount(), 1);
+    const firstAttempt = db();
+    const firstRejection = assert.rejects(firstAttempt, /fail/);
+    await tick(0);
+    await firstRejection;
 
-    // 1st retry: 1 min
-    await tick(60000);
+    const secondAttempt = db();
+    const secondRejection = assert.rejects(secondAttempt, /fail/);
+    await tick(10000);
+    await secondRejection;
+
+    const thirdAttempt = db();
+    await tick(19999);
     assert.equal(failingTask.mock.callCount(), 2);
 
-    // 2nd attempt fails
-    // 2nd retry: 2 mins
-    await tick(120000);
+    const thirdRejection = assert.rejects(thirdAttempt, /fail/);
+    await tick(1);
+    await thirdRejection;
     assert.equal(failingTask.mock.callCount(), 3);
+  });
 
-    const result = await p;
-    assert.equal(result, "success");
+  test("wraps non-error rejections", async (context) => {
+    const tick = mockTimers(context);
+    const failingTask = mock.fn(async () => {
+      throw "fail";
+    });
+
+    const db = debouncePromise(failingTask);
+    const attempt = db();
+    const rejection = assert.rejects(attempt, {
+      message: "fail",
+    });
+
+    await tick(0);
+
+    await rejection;
   });
 });
