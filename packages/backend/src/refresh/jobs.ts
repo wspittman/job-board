@@ -1,6 +1,5 @@
 import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
-import { refreshMetadata } from "../controllers/metadata.ts";
 import { db } from "../db/db.ts";
 import type { CompanyKey, Job } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
@@ -8,6 +7,7 @@ import type { Context } from "../types/types.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue, type OnGroupEnd } from "../utils/asyncQueue.ts";
 import { JOB_EXPIRY_MS } from "../utils/constants.ts";
+import { refreshMetadata } from "./refreshMetadata.ts";
 
 const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
   onComplete: refreshMetadata,

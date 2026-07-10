@@ -5,10 +5,10 @@ import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../models/clientModels.ts";
 import type { CompanyKey, CompanyKeys, FullJobKey } from "../models/models.ts";
 import { refreshJobsForCompany } from "../refresh/jobs.ts";
+import { refreshMetadata } from "../refresh/refreshMetadata.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
-import { refreshMetadata } from "./metadata.ts";
 
 const companyInfoQueue = new AsyncQueue(
   "RefreshCompanyInfo",
