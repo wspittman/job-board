@@ -21,8 +21,8 @@ const stateMatch = `c.primaryLocation.regionCode = @state`;
 const cityMatch = `(CONTAINS(c.primaryLocation.city, @city, true) OR CONTAINS(@city, c.primaryLocation.city, true))`;
 const countryWideRemote = `${noCity} AND ${noRegion}`;
 
-suite("buildLocationWhere", () => {
-  test("returns undefined without city or state", () => {
+suite("Job Controller", () => {
+  test("buildLocationWhere: returns undefined without city or state", () => {
     assert.equal(buildLocationWhere({}), undefined);
   });
 
@@ -48,7 +48,7 @@ suite("buildLocationWhere", () => {
   ];
 
   localLocationWhereCases.forEach(({ name, filters, expected }) => {
-    test(`builds local location clauses: ${name}`, () => {
+    test(`buildLocationWhere: builds local location clauses: ${name}`, () => {
       assert.deepEqual(buildLocationWhere(filters), expected, name);
     });
   });
@@ -81,14 +81,12 @@ suite("buildLocationWhere", () => {
   ];
 
   remoteLocationWhereCases.forEach(({ name, filters, expected }) => {
-    test(`includes remote wildcard matches by default: ${name}`, () => {
+    test(`buildLocationWhere: includes remote wildcard matches by default: ${name}`, () => {
       assert.deepEqual(buildLocationWhere(filters), expected, name);
     });
   });
-});
 
-suite("applyJobOrder", () => {
-  const cases: {
+  const applyJobOrderCases: {
     name: string;
     orderBy: Filters["orderBy"];
     expectedQuery: string;
@@ -120,8 +118,8 @@ suite("applyJobOrder", () => {
     },
   ];
 
-  cases.forEach(({ name, orderBy, expectedQuery }) => {
-    test(name, () => {
+  applyJobOrderCases.forEach(({ name, orderBy, expectedQuery }) => {
+    test(`applyJobOrder: ${name}`, () => {
       const q = new Query().top(24);
       applyJobOrder(q, orderBy);
       const { query, parameters } = q.build();
@@ -130,10 +128,8 @@ suite("applyJobOrder", () => {
       assert.deepEqual(parameters, []);
     });
   });
-});
 
-suite("hasJobSearchFilters", () => {
-  const cases: {
+  const hasJobSearchFilterCases: {
     name: string;
     filters: Filters;
     expected: boolean;
@@ -165,8 +161,8 @@ suite("hasJobSearchFilters", () => {
     },
   ];
 
-  cases.forEach(({ name, filters, expected }) => {
-    test(name, () => {
+  hasJobSearchFilterCases.forEach(({ name, filters, expected }) => {
+    test(`hasJobSearchFilters: ${name}`, () => {
       assert.equal(hasJobSearchFilters(filters), expected);
     });
   });
