@@ -1,19 +1,14 @@
 import { batch } from "dry-utils-async";
-import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../models/clientModels.ts";
 import type { CompanyKey, CompanyKeys, FullJobKey } from "../models/models.ts";
 import { refreshJobsForCompany } from "../refresh/jobs.ts";
+import { companyInfoQueue } from "../refresh/refreshCompanyInfo.ts";
 import { refreshMetadata } from "../refresh/refreshMetadata.ts";
-import { logProperty } from "../telemetry/telemetry.ts";
 import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue } from "../utils/asyncQueue.ts";
 
-const companyInfoQueue = new AsyncQueue(
-  "RefreshCompanyInfo",
-  refreshCompanyInfo,
-);
 const companyJobQueue = new AsyncQueue(
   "RefreshJobsForCompany",
   refreshJobsForCompany,
@@ -166,29 +161,4 @@ async function addCompanyInternal(key: CompanyKey) {
 
   // Don't add to companyInfoQueue here, we want the caller to do it so they can batch
   return true;
-}
-
-async function refreshCompanyInfo(key: CompanyKey) {
-  logProperty("Input", key);
-  const company = await ats.getCompany(key);
-  const exampleJob = await ats.getExampleJob(key);
-
-  if (exampleJob) {
-    const context = {
-      description: "Example job from the company",
-      content: {
-        ...exampleJob.item,
-        ...(exampleJob.context?.[0]?.content ?? {}),
-      },
-    };
-
-    const success = await llm.fillCompanyInfo({
-      item: company,
-      context: [context],
-    });
-
-    if (success) {
-      await db.company.upsert(company);
-    }
-  }
 }
