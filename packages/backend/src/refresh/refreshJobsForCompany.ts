@@ -3,9 +3,20 @@ import { db } from "../db/db.ts";
 import type { CompanyKey, Job } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import type { Context } from "../types/types.ts";
-import type { OnGroupEnd } from "../utils/asyncQueue.ts";
+import { AsyncQueue, type OnGroupEnd } from "../utils/asyncQueue.ts";
 import { JOB_EXPIRY_MS } from "../utils/constants.ts";
 import { jobInfoQueue } from "./refreshJobInfo.ts";
+import { refreshMetadata } from "./refreshMetadata.ts";
+
+export const companyJobQueue = new AsyncQueue(
+  "RefreshJobsForCompany",
+  refreshJobsForCompany,
+  {
+    onComplete: refreshMetadata,
+    concurrentLimit: 3,
+    taskDelayMs: 150,
+  },
+);
 
 /**
  * Refreshes jobs for a specific company by synchronizing with ATS

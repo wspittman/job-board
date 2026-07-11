@@ -3,21 +3,10 @@ import { ats } from "../ats/ats.ts";
 import { db } from "../db/db.ts";
 import type { RefreshJobsOptions } from "../models/clientModels.ts";
 import type { CompanyKey, CompanyKeys, FullJobKey } from "../models/models.ts";
-import { refreshJobsForCompany } from "../refresh/jobs.ts";
 import { companyInfoQueue } from "../refresh/refreshCompanyInfo.ts";
+import { companyJobQueue } from "../refresh/refreshJobsForCompany.ts";
 import { refreshMetadata } from "../refresh/refreshMetadata.ts";
 import { AppError } from "../utils/AppError.ts";
-import { AsyncQueue } from "../utils/asyncQueue.ts";
-
-const companyJobQueue = new AsyncQueue(
-  "RefreshJobsForCompany",
-  refreshJobsForCompany,
-  {
-    onComplete: refreshMetadata,
-    concurrentLimit: 3,
-    taskDelayMs: 150,
-  },
-);
 
 /**
  * Adds a single company to the database if it doesn't exist
