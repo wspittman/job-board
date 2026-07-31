@@ -8,6 +8,8 @@ import { JOB_EXPIRY_MS } from "../utils/constants.ts";
 import { jobInfoQueue } from "./refreshJobInfo.ts";
 import { refreshMetadata } from "./refreshMetadata.ts";
 
+type CompanyForceKey = CompanyKey & { replaceJobsOlderThan?: number };
+
 export const companyJobQueue = new AsyncQueue(
   "RefreshJobsForCompany",
   refreshJobsForCompany,
@@ -23,37 +25,28 @@ export const companyJobQueue = new AsyncQueue(
  * @param key Company identifier and optional timestamp to replace older jobs
  * @returns Promise resolving when jobs are refreshed
  */
-export async function refreshJobsForCompany(
-  key: CompanyKey & { replaceJobsOlderThan?: number },
-) {
+export async function refreshJobsForCompany(key: CompanyForceKey) {
   logProperty("Input", key);
   const companyId = key.id;
 
-  // If the company is in the quick ref map, then it has jobs in the DB
-  const exists = (await db.metadata.getCompanyQuickRef(companyId)) != null;
+  const { hasDBJobs, etagId, dbETag } = await getCompanyDBData(key);
 
-  if (exists) {
+  if (hasDBJobs) {
     logProperty("Company_HasDBJobs", true);
-    // We should always jobs that show as expired in the DB, regardless of ETag state
-    // Jobs that have been updated in the ATS (and given and updated, unexpired post time) will be reprocessed as if new
+    // We should always remove jobs that show as expired in the DB, regardless of ETag state
+    // Jobs that have been updated in the ATS (and given an updated, unexpired post time) will be reprocessed as if new
     await removeExpiredJobs(companyId);
   }
 
-  // Get the saved etag, unless we are doing forced reprocessing
-  const etagId = `RefreshJobsForCompany_${exists ? "exists" : "absent"}`;
-  const etag =
-    key.replaceJobsOlderThan == null ? await getETag(etagId, key) : undefined;
-
-  // Use the ETag caching flow
   // Ask for meta if the company exists. Otherwise assume newly added company and get full job data for all jobs.
-  const atsTags = await ats.getJobsETag(key, etag, exists);
+  const atsTags = await ats.getJobsETag(key, dbETag, hasDBJobs);
 
   if (atsTags.stable) {
     logProperty("ATS_Jobs_Stable", true);
     return;
   }
 
-  const { data: atsJobs, etag: newEtag } = atsTags;
+  const { data: atsJobs, etag: atsETag } = atsTags;
   logProperty("ATS_Jobs_All", atsJobs.length);
 
   const [currentIds, ignoreIds] = await Promise.all([
@@ -62,7 +55,7 @@ export async function refreshJobsForCompany(
   ]);
 
   const [add, remove] = await groupAtsJobs(key, atsJobs, currentIds, ignoreIds);
-  const onJobsProcessed = createETagCallback(etagId, key, newEtag);
+  const onJobsProcessed = createETagCallback(etagId, key, atsETag);
 
   if (remove.length) {
     await db.job.removeMany(remove, companyId);
@@ -85,12 +78,26 @@ export async function refreshJobsForCompany(
     });
 
     jobInfoQueue.add(
-      add.map((job) => [key, job]),
+      add.map((job) => ({
+        key: { ...key, jobId: job.item.id },
+        job,
+      })),
       onJobsProcessed,
     );
   } else {
     await onJobsProcessed?.(false);
   }
+}
+
+async function getCompanyDBData(key: CompanyForceKey) {
+  const id = key.id;
+  const isForcedReprocessing = key.replaceJobsOlderThan != null;
+
+  const hasDBJobs = (await db.metadata.getCompanyQuickRef(id)) != null;
+  const etagId = `RefreshJobsForCompany_${hasDBJobs ? "exists" : "absent"}`;
+  const dbETag = isForcedReprocessing ? undefined : await getETag(etagId, key);
+
+  return { hasDBJobs, etagId, dbETag };
 }
 
 async function removeExpiredJobs(companyId: string) {
