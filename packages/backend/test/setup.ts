@@ -1,3 +1,4 @@
+import { MockDBData } from "dry-utils-cosmosdb";
 import { configureGlobal } from "dry-utils-logger";
 import { beforeEach, mock } from "node:test";
 import { configureTelemetry } from "../src/telemetry/telemetry.ts";
@@ -23,8 +24,8 @@ export function mockFetch(impl: typeof globalThis.fetch) {
   return fn;
 }
 
-export async function mockDBContent(content: Record<string, unknown>) {
-  await db.connect(JSON.stringify(content));
+export async function mockDBContent(content: Record<string, unknown[]>) {
+  await db.connect(content as MockDBData);
 }
 
 beforeEach(() => {

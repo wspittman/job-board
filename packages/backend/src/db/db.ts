@@ -3,6 +3,7 @@ import {
   connectDB,
   loadMockDBData,
   subscribeCosmosDBLogging,
+  type MockDBData,
 } from "dry-utils-cosmosdb";
 import { config } from "../config.ts";
 import type {
@@ -68,17 +69,19 @@ class DB {
    * @throws {Error} If database connection fails
    * @returns Promise that resolves when all containers are initialized
    */
-  async connect(testMockDataJson?: string): Promise<void> {
+  async connect(testMockDBData?: MockDBData): Promise<void> {
     const containers = await connectDB({
       endpoint: config.DATABASE_URL,
       key: config.DATABASE_KEY,
       name: "jobboard",
       localCertPath:
         config.NODE_ENV === "dev" ? config.DATABASE_LOCAL_CERT_PATH : undefined,
-      mockDBData: loadMockDBData({
-        mockDataJson: testMockDataJson ?? config.DATABASE_MOCK_DATA_JSON,
-        mockDataPath: config.DATABASE_MOCK_DATA_PATH,
-      }),
+      mockDBData:
+        testMockDBData ??
+        loadMockDBData({
+          mockDataJson: config.DATABASE_MOCK_DATA_JSON,
+          mockDataPath: config.DATABASE_MOCK_DATA_PATH,
+        }),
       containers: [
         CompanyContainer.ContainerOptions(),
         JobContainer.ContainerOptions(),
