@@ -1,4 +1,9 @@
-import { Query, type Where } from "dry-utils-cosmosdb";
+import {
+  buildQuery,
+  Where,
+  type OrderBy,
+  type WhereInput,
+} from "dry-utils-cosmosdb";
 import { llm } from "../ai/llm.ts";
 import { db } from "../db/db.ts";
 import type { Filters } from "../models/clientModels.ts";
@@ -14,11 +19,11 @@ import { MS_PER_DAY } from "../utils/constants.ts";
 // Keep that behavior in mind when adding new order options. MockDB may not
 // match Cosmos exactly here, so do not add IS_DEFINED guards just to satisfy
 // mock ordering.
-const JOB_ORDER_BY: Record<JobOrderBy, [string, "ASC" | "DESC"]> = {
+const JOB_ORDER_BY: Record<JobOrderBy, OrderBy> = {
   post_time: ["postTS", "DESC"],
   highest_salary: ["salaryRange.min", "DESC"],
   lowest_experience: ["requiredExperience", "ASC"],
-};
+} as const;
 
 /**
  * Retrieves jobs matching the specified filters
@@ -92,82 +97,81 @@ async function readJobsByFilters({
   jobFamily,
   companyStage,
   payCadence,
-  orderBy,
+  orderBy = "post_time",
 }: Filters) {
-  // The limit of 24 items is intentional to prevent excessive data retrieval.
-  const query = new Query().top(24);
-
   // When adding WHERE clauses to the QueryBuilder, order them for the best performance.
-  // Look at the QueryBuilder class comment for ordering guidelines
+  // Look at the Where class comment for ordering guidelines
+
+  const clauses: WhereInput[] = [];
 
   // Exact Matches
 
   if (companyId) {
-    query.whereCondition("companyId", "=", companyId);
+    clauses.push(["companyId", "=", companyId]);
   }
 
   if (isRemote != undefined) {
     if (isRemote) {
-      query.whereCondition("presence", "=", "remote");
+      clauses.push(["presence", "=", "remote"]);
     } else {
-      query.where(['(c.presence = "onsite" OR c.presence = "hybrid")']);
+      clauses.push(
+        Where.any(["presence", "=", "onsite"], ["presence", "=", "hybrid"]),
+      );
     }
   }
 
   if (workTimeBasis) {
-    query.whereCondition("workTimeBasis", "=", workTimeBasis);
+    clauses.push(["workTimeBasis", "=", workTimeBasis]);
   }
 
   if (jobFamily) {
-    query.whereCondition("jobFamily", "=", jobFamily);
+    clauses.push(["jobFamily", "=", jobFamily]);
   }
 
   if (companyStage) {
-    query.whereCondition("companyStage", "=", companyStage);
+    clauses.push(["companyStage", "=", companyStage]);
   }
 
   if (payCadence) {
-    query.whereCondition("salaryRange.cadence", "=", payCadence);
+    clauses.push(["salaryRange.cadence", "=", payCadence]);
   }
 
   // Range Matches
 
   if (daysSince) {
     const sinceTS = Date.now() - daysSince * MS_PER_DAY;
-    query.whereCondition("postTS", ">=", sinceTS);
+    clauses.push(["postTS", ">=", sinceTS]);
   }
 
   if (maxExperience != null) {
-    query.whereCondition("requiredExperience", "<=", maxExperience);
+    clauses.push(["requiredExperience", "<=", maxExperience]);
   }
 
   if (minSalary) {
-    query.whereCondition("salaryRange.min", ">=", minSalary);
+    clauses.push(["salaryRange.min", ">=", minSalary]);
   }
 
   // Substring Matches
 
   if (title) {
-    query.whereCondition("title", "CONTAINS", title);
+    clauses.push(["title", "CONTAINS", title]);
   }
 
   const locationWhere = buildLocationWhere({ city, state, isRemote });
   if (locationWhere) {
-    query.where(locationWhere);
+    clauses.push(locationWhere);
   }
 
-  applyJobOrder(query, orderBy);
+  const jobOrder = JOB_ORDER_BY[orderBy];
 
-  return db.job.query<Job>(query.build());
-}
-
-/**
- * Applies the allow-listed job result ordering to a query.
- */
-export function applyJobOrder(query: Query, orderBy: JobOrderBy = "post_time") {
-  if (orderBy && JOB_ORDER_BY[orderBy]) {
-    query.orderBy(...JOB_ORDER_BY[orderBy]);
-  }
+  return db.job.query<Job>(
+    buildQuery({
+      // The limit of 24 items is intentional to prevent excessive data retrieval.
+      top: 24,
+      where: clauses,
+      orderBy: [jobOrder],
+    }),
+  );
 }
 
 /**
@@ -184,47 +188,44 @@ export function hasJobSearchFilters(filters: Filters): boolean {
  * @returns A Cosmos SQL WHERE clause and parameters, or undefined when no location filter is needed.
  */
 export function buildLocationWhere({
-  city,
-  state,
+  city = "",
+  state = "",
   isRemote,
 }: Filters): Where | undefined {
   if (!city && !state) {
     return undefined;
   }
 
-  const presenceRemote = "c.presence = 'remote'";
+  const cityField = "primaryLocation.city";
+  const regionField = "primaryLocation.regionCode";
 
-  const noCity = `NOT IS_DEFINED(c.primaryLocation.city)`;
-  const noRegion = `NOT IS_DEFINED(c.primaryLocation.regionCode)`;
-  const stateMatch = `c.primaryLocation.regionCode = @state`;
-  const cityMatch = `(CONTAINS(c.primaryLocation.city, @city, true) OR CONTAINS(@city, c.primaryLocation.city, true))`;
+  const noCity = Where.raw(`NOT IS_DEFINED(c.${cityField})`);
+  const noRegion = Where.raw(`NOT IS_DEFINED(c.${regionField})`);
 
-  const countryWideRemote = `${noCity} AND ${noRegion}`;
-  const stateWideRemote = `${noCity} AND ${stateMatch}`;
+  const stateMatch = Where.is(regionField, "=", state);
+  const cityMatch = Where.any(Where.is(cityField, "CONTAINS", city), [
+    `CONTAINS(@city, c.${cityField}, true)`,
+    { "@city": city },
+  ]);
 
-  let locClause: string;
-  let remoteMatches = [countryWideRemote];
+  const remoteOk = isRemote !== false;
+  const remote = Where.is("presence", "=", "remote");
+  const countryOnly = Where.all(noCity, noRegion);
+  const stateOnly = Where.all(noCity, stateMatch);
+
+  const remoteCity = Where.all(remote, Where.any(stateOnly, countryOnly));
+  const remoteCountry = Where.all(remote, countryOnly);
 
   if (city && state) {
-    locClause = `${stateMatch} AND ${cityMatch}`;
-    remoteMatches = [stateWideRemote, countryWideRemote];
-  } else if (state) {
-    locClause = stateMatch;
-  } else {
-    locClause = cityMatch;
+    const inPerson = Where.all(stateMatch, cityMatch);
+    return remoteOk ? Where.any(inPerson, remoteCity) : inPerson;
   }
 
-  if (isRemote !== false) {
-    locClause += ` OR (${presenceRemote} AND (${remoteMatches.join(" OR ")}))`;
+  if (state) {
+    return remoteOk ? Where.any(stateMatch, remoteCountry) : stateMatch;
   }
 
-  return [
-    locClause,
-    {
-      "@city": city ?? "",
-      "@state": state ?? "",
-    },
-  ];
+  return remoteOk ? Where.any(cityMatch, remoteCountry) : cityMatch;
 }
 
 // #endregion
