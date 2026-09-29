@@ -76,6 +76,7 @@ export function debouncePromise<T>(fn: () => Promise<T>): DBPromise<T> {
 
   dbFn.clear = () => {
     promise = undefined;
+    cooldown = 0;
   };
 
   return dbFn;
