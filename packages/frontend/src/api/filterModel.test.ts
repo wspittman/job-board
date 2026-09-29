@@ -14,15 +14,9 @@ suite("FilterModel", () => {
     ["?isRemote=false", { isRemote: false }],
     ["?companyId=acme&jobId=job-1", { companyId: "acme", jobId: "job-1" }],
     [
-      "?title=engineer&location=Seattle%2C+WA",
+      "?title=engineer&city=Seattle%2C+WA",
       { title: "engineer", city: "Seattle, WA" },
     ],
-    // Backward compat: bare city name
-    ["?location=Austin", { city: "Austin" }],
-    // Backward compat: city already present — location param is ignored
-    ["?city=Chicago&location=Seattle%2C+IL", { city: "Chicago" }],
-    // Backward compat: state already present — location param is ignored
-    ["?state=WA&location=Seattle", { state: "WA" }],
     ["?orderBy=highest_salary", { orderBy: "highest_salary" }],
     ["?orderBy=HIGHEST_SALARY", { orderBy: "highest_salary" }],
     ["?orderBy=post_time", { orderBy: "post_time" }],
@@ -72,9 +66,9 @@ suite("FilterModel", () => {
     expect(entries).toEqual(expected);
   });
 
-  test("toLocationSearchString: round-trips title and location", () => {
+  test("toLocationSearchString: round-trips title and city", () => {
     const original = FilterModel.fromLocationSearchString(
-      "?title=engineer&location=Austin",
+      "?title=engineer&city=Austin",
     );
     const serialized = original.toLocationSearchString();
     const restored = FilterModel.fromLocationSearchString(`?${serialized}`);

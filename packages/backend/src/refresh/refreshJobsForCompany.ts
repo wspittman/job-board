@@ -1,55 +1,52 @@
-import { llm } from "../ai/llm.ts";
 import { ats } from "../ats/ats.ts";
-import { refreshMetadata } from "../controllers/metadata.ts";
 import { db } from "../db/db.ts";
 import type { CompanyKey, Job } from "../models/models.ts";
 import { logProperty } from "../telemetry/telemetry.ts";
 import type { Context } from "../types/types.ts";
-import { AppError } from "../utils/AppError.ts";
 import { AsyncQueue, type OnGroupEnd } from "../utils/asyncQueue.ts";
 import { JOB_EXPIRY_MS } from "../utils/constants.ts";
+import { jobInfoQueue } from "./refreshJobInfo.ts";
+import { refreshMetadata } from "./refreshMetadata.ts";
 
-const jobInfoQueue = new AsyncQueue("RefreshJobInfo", refreshJobInfo, {
-  onComplete: refreshMetadata,
-  taskDelayMs: 25,
-});
+type CompanyForceKey = CompanyKey & { replaceJobsOlderThan?: number };
+
+export const companyJobQueue = new AsyncQueue(
+  "RefreshJobsForCompany",
+  refreshJobsForCompany,
+  {
+    onComplete: refreshMetadata,
+    concurrentLimit: 3,
+    taskDelayMs: 150,
+  },
+);
 
 /**
  * Refreshes jobs for a specific company by synchronizing with ATS
  * @param key Company identifier and optional timestamp to replace older jobs
  * @returns Promise resolving when jobs are refreshed
  */
-export async function refreshJobsForCompany(
-  key: CompanyKey & { replaceJobsOlderThan?: number },
-) {
+export async function refreshJobsForCompany(key: CompanyForceKey) {
   logProperty("Input", key);
   const companyId = key.id;
 
-  // If the company is in the quick ref map, then it has jobs in the DB
-  const exists = (await db.metadata.getCompanyQuickRef(companyId)) != null;
+  const { hasDBJobs, etagId, dbETag } = await getCompanyDBData(key);
 
-  if (exists) {
+  if (hasDBJobs) {
     logProperty("Company_HasDBJobs", true);
-    // We should always jobs that show as expired in the DB, regardless of ETag state
-    // Jobs that have been updated in the ATS (and given and updated, unexpired post time) will be reprocessed as if new
+    // We should always remove jobs that show as expired in the DB, regardless of ETag state
+    // Jobs that have been updated in the ATS (and given an updated, unexpired post time) will be reprocessed as if new
     await removeExpiredJobs(companyId);
   }
 
-  // Get the saved etag, unless we are doing forced reprocessing
-  const etagId = `RefreshJobsForCompany_${exists ? "exists" : "absent"}`;
-  const etag =
-    key.replaceJobsOlderThan == null ? await getETag(etagId, key) : undefined;
-
-  // Use the ETag caching flow
   // Ask for meta if the company exists. Otherwise assume newly added company and get full job data for all jobs.
-  const atsTags = await ats.getJobsETag(key, etag, exists);
+  const atsTags = await ats.getJobsETag(key, dbETag, hasDBJobs);
 
   if (atsTags.stable) {
     logProperty("ATS_Jobs_Stable", true);
     return;
   }
 
-  const { data: atsJobs, etag: newEtag } = atsTags;
+  const { data: atsJobs, etag: atsETag } = atsTags;
   logProperty("ATS_Jobs_All", atsJobs.length);
 
   const [currentIds, ignoreIds] = await Promise.all([
@@ -58,7 +55,7 @@ export async function refreshJobsForCompany(
   ]);
 
   const [add, remove] = await groupAtsJobs(key, atsJobs, currentIds, ignoreIds);
-  const onJobsProcessed = createETagCallback(etagId, key, newEtag);
+  const onJobsProcessed = createETagCallback(etagId, key, atsETag);
 
   if (remove.length) {
     await db.job.removeMany(remove, companyId);
@@ -81,12 +78,26 @@ export async function refreshJobsForCompany(
     });
 
     jobInfoQueue.add(
-      add.map((job) => [key, job]),
+      add.map((job) => ({
+        key: { ...key, jobId: job.item.id },
+        job,
+      })),
       onJobsProcessed,
     );
   } else {
     await onJobsProcessed?.(false);
   }
+}
+
+async function getCompanyDBData(key: CompanyForceKey) {
+  const id = key.id;
+  const isForcedReprocessing = key.replaceJobsOlderThan != null;
+
+  const hasDBJobs = (await db.metadata.getCompanyQuickRef(id)) != null;
+  const etagId = `RefreshJobsForCompany_${hasDBJobs ? "exists" : "absent"}`;
+  const dbETag = isForcedReprocessing ? undefined : await getETag(etagId, key);
+
+  return { hasDBJobs, etagId, dbETag };
 }
 
 async function removeExpiredJobs(companyId: string) {
@@ -161,49 +172,6 @@ async function groupAtsJobs(
   logProperty("ATS_Jobs_ToRemove", removeJobs.length);
 
   return [newJobs, removeJobs] as const;
-}
-
-async function refreshJobInfo([companyKey, job]: [CompanyKey, Context<Job>]) {
-  logProperty("Input", { ...companyKey, jobId: job.item.id });
-
-  const skip = async (reason: string, value: string) => {
-    logProperty(`Skipped_${reason}`, value);
-    await db.ignoreJob.upsert(job.item.id, companyKey, reason);
-    return;
-  };
-
-  if (await llm.isGeneralApplication(job.item.title)) {
-    return await skip("GeneralApplication", job.item.title);
-  }
-
-  if (!job.context) {
-    job = await ats.getSpecificJob(job.item, companyKey);
-  }
-
-  const success = await llm.fillJobInfo(job);
-
-  // Do not add a job that failed to extract facets
-  if (!success) {
-    throw new AppError(
-      `${companyKey.ats}/${companyKey.id}/${job.item.id}: Extraction Failure`,
-    );
-  }
-
-  // This is a stopgap until we can add better US-only filters prior to main LLM processing.
-  const language = job.item.jdLanguage || "en";
-  const currency = job.item.salaryRange?.currency || "USD";
-  const location = job.item.primaryLocation?.countryCode || "US";
-  if (language.toLowerCase() !== "en") {
-    return await skip("NonEnglish", language);
-  }
-  if (currency.toUpperCase() !== "USD") {
-    return await skip("NonUSD", currency);
-  }
-  if (location.toUpperCase() !== "US") {
-    return await skip("NonUS", location);
-  }
-
-  await db.job.upsert(job.item);
 }
 
 async function getETag(

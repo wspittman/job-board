@@ -10,27 +10,27 @@ type StripCase = {
 };
 
 suite("stripObj", () => {
-  test("removes only null and undefined values", () => {
-    const cases: StripCase[] = [
-      {
-        name: "keeps falsy primitives",
-        input: { enabled: false, count: 0, label: "", skip: null },
-        expected: { enabled: false, count: 0, label: "" },
-      },
-      {
-        name: "drops undefined and null properties",
-        input: { title: "Role", notes: undefined, details: null },
-        expected: { title: "Role" },
-      },
-      {
-        name: "preserves nested object values",
-        input: { meta: { note: null }, value: undefined },
-        expected: { meta: { note: null } },
-      },
-    ];
+  const stripCases: StripCase[] = [
+    {
+      name: "keeps falsy primitives",
+      input: { enabled: false, count: 0, label: "", skip: null },
+      expected: { enabled: false, count: 0, label: "" },
+    },
+    {
+      name: "drops undefined and null properties",
+      input: { title: "Role", notes: undefined, details: null },
+      expected: { title: "Role" },
+    },
+    {
+      name: "preserves nested object values",
+      input: { meta: { note: null }, value: undefined },
+      expected: { meta: { note: null } },
+    },
+  ];
 
-    cases.forEach(({ name, input, expected }) => {
-      assert.deepEqual(stripObj(input), expected, name);
+  stripCases.forEach(({ name, input, expected }) => {
+    test(name, () => {
+      assert.deepEqual(stripObj(input), expected);
     });
   });
 });

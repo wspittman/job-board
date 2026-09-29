@@ -101,37 +101,29 @@ suite("toClient", () => {
     });
   });
 
-  test("toClientJob: handles various company website formats", async () => {
-    const job = buildJob();
+  const companyWebsiteCases = [
+    { input: "https://example.com", expected: "https://example.com/" },
+    { input: "example.com", expected: "https://example.com/" },
+    { input: "http://example.com", expected: undefined },
+    { input: "  https://example.com  ", expected: "https://example.com/" },
+    { input: "not-a-url", expected: undefined },
+    { input: "", expected: undefined },
+    { input: undefined, expected: undefined },
+    { input: "ftp://example.com", expected: undefined },
+  ];
 
-    const testCases = [
-      { input: "https://example.com", expected: "https://example.com/" },
-      { input: "example.com", expected: "https://example.com/" },
-      { input: "http://example.com", expected: undefined },
-      { input: "  https://example.com  ", expected: "https://example.com/" },
-      { input: "not-a-url", expected: undefined },
-      { input: "", expected: undefined },
-      { input: undefined, expected: undefined },
-      { input: "ftp://example.com", expected: undefined },
-    ];
+  companyWebsiteCases.forEach(({ input, expected }) => {
+    test(`toClientJob: handles company website format ${String(input)}`, async () => {
+      const job = buildJob();
 
-    for (const { input, expected } of testCases) {
       await mockQuickRef([["acme/1", "Acme", input as string]]);
       const result = await toClientJob(job);
       if (expected === undefined) {
-        assert.equal(
-          "companyWebsite" in result,
-          false,
-          `Expected companyWebsite to be absent for input: ${input}`,
-        );
+        assert.equal("companyWebsite" in result, false);
       } else {
-        assert.equal(
-          result.companyWebsite,
-          expected,
-          `Failed for input: ${input}`,
-        );
+        assert.equal(result.companyWebsite, expected);
       }
-    }
+    });
   });
 
   test("toClientJobs: maps arrays of jobs", async () => {

@@ -1,0 +1,42 @@
+import { db } from "../db/db.ts";
+import { logProperty } from "../telemetry/telemetry.ts";
+import { debounceAsync } from "../utils/debounceUtils.ts";
+
+export const refreshMetadata = debounceAsync(
+  "RefreshMetadata",
+  refreshInternal,
+);
+
+async function refreshInternal() {
+  const [quickRefs, companyIds, jobMetadata] = await Promise.all([
+    db.company.getQuickRefs(),
+    db.job.getCompanyIds(),
+    db.job.aggregateMetadata(),
+  ]);
+
+  // Only include quick refs for companies that have jobs
+  const companyIdSet = new Set(companyIds);
+  const validRefs = quickRefs.filter(([id]) => companyIdSet.has(id));
+
+  const emptyIds = quickRefs.filter(([id]) => !companyIdSet.has(id));
+  if (emptyIds.length) {
+    logProperty(
+      "EmptyCompanies",
+      emptyIds.map(([id]) => id),
+    );
+  }
+
+  await Promise.all([
+    db.metadata.upsert(jobMetadata),
+    db.metadata.upsert({
+      id: "company",
+      companyCount: validRefs.length,
+      companyQuickRef: validRefs,
+    }),
+  ]);
+
+  logProperty("Metadata", {
+    jobCount: jobMetadata.jobCount,
+    companyCount: validRefs.length,
+  });
+}

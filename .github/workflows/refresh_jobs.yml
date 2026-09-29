@@ -2,8 +2,10 @@ name: Refresh Jobs
 
 on:
   schedule:
-    # Runs daily at 9 AM UTC, which is 1 AM Pacific or 4 AM Eastern
-    - cron: "0 9 * * *"
+    # Runs daily around 10:32 PM Pacific
+    # Due to GitHub lag, this might not run for hours later
+    - cron: "32 22 * * *"
+      timezone: "America/Los_Angeles"
   workflow_dispatch:
 
 jobs:
