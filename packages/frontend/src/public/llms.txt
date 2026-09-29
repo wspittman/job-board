@@ -1,0 +1,11 @@
+# Better Job Board
+
+> A job board for efficiently finding USA-based jobs. Built to prioritize the needs of job seekers. Jobs are collected directly from company ATS and have searchable facets extracted via AI. No required accounts, ads, or paywall. Minimal user tracking.
+
+Important note:
+
+- Currently intended for human use via the UI. Not suitable for AI Agents to perform searches themselves.
+
+## Optional
+
+- [Changelog](/blog/progress-report.md): Recent updates
