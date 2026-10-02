@@ -1,10 +1,21 @@
 import { expect, suite, test } from "vitest";
 import type { XrayFormElement } from "../utils/testUtils";
 import { FormCombobox } from "./form-combobox";
+import type { FormElementProps } from "./form-element";
 
 type Xray = XrayFormElement<FormCombobox>;
 
 const create = () => document.createElement("jb-form-combobox") as Xray;
+
+const baseProps: FormElementProps = {
+  label: "Role",
+  name: "role",
+  options: [
+    { label: "Backend Engineer", value: "backend" },
+    { label: "Designer", value: "design" },
+  ],
+  value: "backend",
+};
 
 function readMenuOptions(element: Xray) {
   return Array.from(element.shadowRoot?.querySelectorAll(".option") ?? []).map(
@@ -56,15 +67,7 @@ suite("FormCombobox", () => {
 
   test("filters menu options on input with case-insensitive trimmed matching", () => {
     const element = create();
-    element.init({
-      label: "Role",
-      name: "role",
-      options: [
-        { label: "Backend Engineer", value: "backend" },
-        { label: "Designer", value: "design" },
-      ],
-      value: "backend",
-    });
+    element.init(baseProps);
 
     element.intake.value = "  engIneEr ";
     element.intake.dispatchEvent(
@@ -81,11 +84,7 @@ suite("FormCombobox", () => {
 
   test("renders the empty menu option when filtering yields no matches", () => {
     const element = create();
-    element.init({
-      label: "Role",
-      name: "role",
-      options: [{ label: "Backend Engineer", value: "backend" }],
-    });
+    element.init(baseProps);
 
     element.intake.value = "zzz";
     element.intake.dispatchEvent(
@@ -99,14 +98,7 @@ suite("FormCombobox", () => {
 
   test("selects the active option on Enter and closes the menu", () => {
     const element = create();
-    element.init({
-      label: "Role",
-      name: "role",
-      options: [
-        { label: "Backend Engineer", value: "backend" },
-        { label: "Designer", value: "design" },
-      ],
-    });
+    element.init(baseProps);
 
     element.intake.value = "des";
     element.intake.dispatchEvent(
@@ -123,11 +115,7 @@ suite("FormCombobox", () => {
 
   test("keeps menu open for internal focus moves and closes for external focus", () => {
     const element = create();
-    element.init({
-      label: "Role",
-      name: "role",
-      options: [{ label: "Backend Engineer", value: "backend" }],
-    });
+    element.init(baseProps);
 
     document.body.append(element);
     element.intake.dispatchEvent(new FocusEvent("focus"));
