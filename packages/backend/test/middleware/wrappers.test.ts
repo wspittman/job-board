@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import assert from "node:assert/strict";
-import { beforeEach, mock, suite, test, TestContext } from "node:test";
+import { beforeEach, mock, suite, test } from "node:test";
 // Note: Destructuring functions such as import { setTimeout } from 'node:timers' is currently not supported by [Mock Timers] API.
 import timers from "node:timers/promises";
 import {
@@ -9,6 +9,7 @@ import {
   jsonRoute,
   redirectRoute,
 } from "../../src/middleware/wrappers.ts";
+import { mockTimers } from "../testHelpers.ts";
 
 type Method = "GET" | "PUT";
 
@@ -19,21 +20,6 @@ interface In {
 
 interface Out {
   result: string;
-}
-
-/**
- * Mocks timers for testing
- * @param context - The test context
- * @returns A function to tick the mocked timers
- */
-function mockTimers(context: TestContext) {
-  context.mock.timers.enable({ apis: ["setTimeout"] });
-  return async (ms: number) => {
-    // Advance the mocked timers by the given number of milliseconds
-    context.mock.timers.tick(ms);
-    // Force the event loop to run all pending callbacks
-    await timers.setImmediate();
-  };
 }
 
 // #region Function Inputs
@@ -62,6 +48,12 @@ const routeVoid = async (input: In) => {
 const routeStr = async (input: In) => await route(input);
 const routeObj = async (input: In) => ({ result: await route(input) });
 type Route = typeof routeVoid | typeof routeStr | typeof routeObj;
+
+const routeFailCases: [Request, string][] = [
+  [mockRequest("GET", IN_BAD), "Validator Throws"],
+  [mockRequest("PUT", IN_BAD), "Validator Throws"],
+  [mockRequest("PUT", IN_FAIL), "Route Throws"],
+];
 
 function validator(input: unknown): In {
   if (input && typeof input === "object" && "in" in input) {
@@ -135,13 +127,7 @@ suite("jsonRoute", () => {
     });
   });
 
-  const failCases: [Request, string][] = [
-    [mockRequest("GET", IN_BAD), "Validator Throws"],
-    [mockRequest("PUT", IN_BAD), "Validator Throws"],
-    [mockRequest("PUT", IN_FAIL), "Route Throws"],
-  ];
-
-  failCases.forEach(([req, errMsg]) => {
+  routeFailCases.forEach(([req, errMsg]) => {
     test(`Invalid: ${req.method} expected error "${errMsg}"`, async () => {
       const handler = jsonRoute(routeStr, validator, formatter);
 
@@ -257,13 +243,7 @@ suite("redirectRoute", () => {
     assert.equal(redirectArgs?.at(1), expectedUrl);
   });
 
-  const failCases: [Request, string][] = [
-    [mockRequest("GET", IN_BAD), "Validator Throws"],
-    [mockRequest("PUT", IN_BAD), "Validator Throws"],
-    [mockRequest("PUT", IN_FAIL), "Route Throws"],
-  ];
-
-  failCases.forEach(([req, errMsg]) => {
+  routeFailCases.forEach(([req, errMsg]) => {
     test(`Invalid: ${req.method} expected error "${errMsg}"`, async () => {
       const handler = redirectRoute(routeStr, validator);
 

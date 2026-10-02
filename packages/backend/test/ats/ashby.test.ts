@@ -5,55 +5,8 @@ import type { CompanyResult } from "../../src/ats/ashby/companyResult.ts";
 import type { JobResult } from "../../src/ats/ashby/jobResult.ts";
 import { AppError } from "../../src/utils/AppError.ts";
 import { mockFetch } from "../setup.ts";
-
-function jsonResponse(data: unknown, init: ResponseInit = {}) {
-  return new Response(JSON.stringify(data), {
-    status: 200,
-    headers: { "content-type": "application/json" },
-    ...init,
-  });
-}
-
-function getFetchCall(fetchMock: ReturnType<typeof mockFetch>, index = 0) {
-  const call = fetchMock.mock.calls[index];
-  assert.ok(call);
-  const [url, init] = call.arguments as [string, RequestInit];
-  return { url, init };
-}
-
-function makeJob(overrides: Partial<JobResult> = {}): JobResult {
-  return {
-    id: "job-1",
-    title: "SOFTWARE ENGINEER",
-    department: "Engineering",
-    team: "Platform",
-    employmentType: "FullTime",
-    location: "Remote",
-    secondaryLocations: ["Seattle"],
-    publishedAt: "2026-01-02T03:04:05.000Z",
-    isListed: true,
-    isRemote: true,
-    workplaceType: "Remote",
-    address: {
-      postalAddress: {
-        addressRegion: "WA",
-        addressCountry: "US",
-        addressLocality: "Seattle",
-      },
-    },
-    jobUrl: "https://jobs.example.com/job-1",
-    applyUrl: "https://jobs.example.com/job-1/apply",
-    descriptionHtml: "<p>Build</p>",
-    descriptionPlain: "Build",
-    compensation: {
-      compensationTierSummary: "$100k-$120k",
-      scrapeableCompensationSalarySummary: "$100k-$120k",
-      compensationTiers: [],
-      summaryComponents: [],
-    },
-    ...overrides,
-  };
-}
+import { makeJob } from "./ashbyHelpers.ts";
+import { getFetchCall, jsonResponse } from "./atsHelpers.ts";
 
 function makeCompanyResult(jobs: JobResult[] = [makeJob()]): CompanyResult {
   return { apiVersion: "1", jobs };
@@ -100,14 +53,11 @@ suite("Ashby", () => {
   test("getJobsETag returns unstable formatted data because Ashby has no ETag support", async () => {
     const fetchMock = mockFetch(async () => jsonResponse(makeCompanyResult()));
 
-    const result = await new Ashby().getJobsETag(
-      { id: "acme", ats: "ashby" },
-      "etag-value",
-    );
+    const result = await new Ashby().getJobsETag({ id: "acme", ats: "ashby" });
 
     assert.equal(result.stable, false);
     assert.equal(result.data[0]?.item.id, "job-1");
-    assert.equal(result.etag, undefined);
+    assert.equal("etag" in result, false);
 
     const { init } = getFetchCall(fetchMock);
     assert.equal(init.headers, undefined);
