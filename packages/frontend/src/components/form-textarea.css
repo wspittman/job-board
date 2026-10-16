@@ -3,8 +3,9 @@
 }
 
 .intake {
+  field-sizing: content;
   resize: none;
   overflow-y: hidden;
   min-height: var(--space-6);
-  padding-block-start: var(--space-4);
+  padding: var(--space-4) 0;
 }
