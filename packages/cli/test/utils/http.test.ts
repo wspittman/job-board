@@ -24,7 +24,9 @@ suite("http apiCall", () => {
       body: { id: "123" },
     });
 
-    const [calledUrl, calledInit] = fetchMock.calls[0].arguments;
+    const call = fetchMock.calls[0];
+    assert.ok(call);
+    const [calledUrl, calledInit] = call.arguments;
 
     assert.equal(
       calledUrl?.toString(),
@@ -52,7 +54,9 @@ suite("http apiCall", () => {
 
     const result = await apiCall("GET", "jobs", { asAdmin: false });
 
-    const [, calledInit] = fetchMock.calls[0].arguments;
+    const call = fetchMock.calls[0];
+    assert.ok(call);
+    const [, calledInit] = call.arguments;
 
     assert.deepEqual(calledInit?.headers, {});
     assert.equal(calledInit?.body, undefined);
@@ -69,7 +73,9 @@ suite("http apiCall", () => {
 
     const result = await apiCall("GET", "jobs", { env: "prod" });
 
-    const [calledUrl, calledInit] = fetchMock.calls[0].arguments;
+    const call = fetchMock.calls[0];
+    assert.ok(call);
+    const [calledUrl, calledInit] = call.arguments;
 
     assert.equal(
       calledUrl?.toString(),

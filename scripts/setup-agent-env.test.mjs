@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { suite, test } from "node:test";
 import { parseEnv } from "node:util";
-import { setupEnv } from "../../../scripts/setup-agent-env.mjs";
+import { setupEnv } from "./setup-agent-env.mjs";
 
 suite("cloud setup environment", () => {
   for (const existing of [undefined, "backend", "cli"]) {
@@ -35,19 +35,19 @@ suite("cloud setup environment", () => {
         readFileSync(path.join(root, "packages", workspace, ".env"), "utf8"),
       );
       const [backend, cli] = contents.map(parseEnv);
-      assert.equal(backend!.ADMIN_TOKEN, cli!.ADMIN_TOKEN);
-      assert.ok(backend!.ADMIN_TOKEN!.length >= 16);
+      assert.equal(backend["ADMIN_TOKEN"], cli["ADMIN_TOKEN"]);
+      assert.ok(backend["ADMIN_TOKEN"].length >= 16);
       for (const [index, workspace] of ["backend", "cli"].entries()) {
         if (workspace === existing) {
           assert.equal(contents[index], saved);
         } else {
-          assert.ok(contents[index]!.includes("# Keep template comments"));
+          assert.ok(contents[index].includes("# Keep template comments"));
           assert.equal(
-            parseEnv(contents[index]!).DATABASE_MOCK_DATA_JSON,
+            parseEnv(contents[index])["DATABASE_MOCK_DATA_JSON"],
             "{}",
           );
           assert.equal(
-            parseEnv(contents[index]!).OPENAI_API_KEY,
+            parseEnv(contents[index])["OPENAI_API_KEY"],
             "local-placeholder-not-a-real-key",
           );
         }

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { after, suite, test } from "node:test";
 import { cost, costAg, isCostAvailable } from "../../src/eval/cost.ts";
-import { LLMAction } from "../../src/portal/pTypes.ts";
+import type { LLMAction } from "../../src/portal/pTypes.ts";
 import { afterReset } from "../setup.ts";
 
 after(afterReset);

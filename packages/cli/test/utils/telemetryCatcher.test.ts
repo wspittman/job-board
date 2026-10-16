@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { after, suite, test } from "node:test";
-import { Job } from "../../src/portal/pTypes.ts";
-import { Bag } from "../../src/types.ts";
+import type { Job } from "../../src/portal/pTypes.ts";
+import type { Bag } from "../../src/types.ts";
 import { catcher } from "../../src/utils/telemetryCatcher.ts";
 import { afterReset } from "../setup.ts";
 
@@ -42,7 +42,10 @@ suite("telemetryCatcher", () => {
     const metrics1 = { inTokens: 12, outTokens: 6 };
     const metrics2 = { inTokens: 16, outTokens: 8 };
 
-    catcher.catch(JSON.stringify((marked1 as unknown as Bag).item), metrics1);
+    catcher.catch(
+      JSON.stringify((marked1 as unknown as Bag)["item"]),
+      metrics1,
+    );
     catcher.catch(marked2 as string, metrics2);
 
     assert.deepEqual(catcher.find(v1), metrics1);
