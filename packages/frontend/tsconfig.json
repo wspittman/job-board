@@ -1,4 +1,5 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "es2023",
     "module": "esnext",
@@ -9,26 +10,7 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "moduleDetection": "force",
-    "noEmit": true,
-
-    // [Node Only] Don't allow non-JS constructs, including JSX
-    "erasableSyntaxOnly": true,
-    "verbatimModuleSyntax": true,
-
-    // Perf improvements
-    "incremental": true,
-    "skipLibCheck": true,
-
-    // Code Quality
-    "noUnusedParameters": true,
-    "noUnusedLocals": true,
-    "noImplicitOverride": true,
-    "allowUnreachableCode": false,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
-    // Record treats accessed values as potentially undefined
-    "noUncheckedIndexedAccess": true
+    "noEmit": true
   },
   "include": ["src", "plugins", "vite.config.ts", "vitest.config.ts"]
 }
