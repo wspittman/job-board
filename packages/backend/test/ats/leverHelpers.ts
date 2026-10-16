@@ -1,4 +1,4 @@
-import { JobResult } from "../../src/ats/leverFormat";
+import type { JobResult } from "../../src/ats/leverFormat.ts";
 
 export function makeJob(overrides: Partial<JobResult> = {}): JobResult {
   return {

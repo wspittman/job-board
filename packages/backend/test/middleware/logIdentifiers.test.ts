@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import assert from "node:assert/strict";
 import { beforeEach, mock, suite, test } from "node:test";
 import { logIdentifiers } from "../../src/middleware/logIdentifiers.ts";
-import { Bag } from "../../src/types/types.ts";
+import type { Bag } from "../../src/types/types.ts";
 import { telemetryContext } from "../setup.ts";
 
 const headers = {
@@ -67,7 +67,7 @@ suite("logIdentifiers", () => {
       logIdentifiers(req, res, next);
 
       assert.equal(next.mock.callCount(), 1);
-      const actual = (telemetryContext as Bag)?.prop ?? {};
+      const actual = (telemetryContext as Bag)?.["prop"] ?? {};
       assert.deepStrictEqual(actual, testInput.expected);
     });
   });
@@ -84,7 +84,7 @@ suite("logIdentifiers", () => {
     assert.doesNotThrow(() => logIdentifiers(req, res, next));
 
     assert.equal(next.mock.callCount(), 1);
-    const actual = (telemetryContext as Bag)?.prop ?? {};
+    const actual = (telemetryContext as Bag)?.["prop"] ?? {};
     assert.deepStrictEqual(actual, {});
   });
 });

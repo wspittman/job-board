@@ -1,4 +1,4 @@
-import { TestContext } from "node:test";
+import type { TestContext } from "node:test";
 import timers from "node:timers/promises";
 
 /**

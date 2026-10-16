@@ -3,7 +3,7 @@ import { beforeEach, suite, test } from "node:test";
 import { ats } from "../../src/ats/ats.ts";
 import { db } from "../../src/db/db.ts";
 import { refreshJobsForCompany } from "../../src/refresh/refreshJobsForCompany.ts";
-import { Bag } from "../../src/types/types.ts";
+import type { Bag } from "../../src/types/types.ts";
 import { mockDBContent, telemetryContext } from "../setup.ts";
 
 const etagId = "RefreshJobsForCompany_exists";

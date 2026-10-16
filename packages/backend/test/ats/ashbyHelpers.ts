@@ -1,4 +1,4 @@
-import { JobResult } from "../../src/ats/ashby/jobResult";
+import type { JobResult } from "../../src/ats/ashby/jobResult.ts";
 
 export function makeJob(overrides: Partial<JobResult> = {}): JobResult {
   return {

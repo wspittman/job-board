@@ -22,7 +22,6 @@ suite("ExtractionFilters", () => {
     });
 
     assert.equal(result.success, true);
-    if (!result.success) throw result.error;
     assert.equal("currency" in result.data, false);
   });
 });

@@ -1,4 +1,7 @@
-import { JobResult, JobResultBasic } from "../../src/ats/greenhouseFormat";
+import type {
+  JobResult,
+  JobResultBasic,
+} from "../../src/ats/greenhouseFormat.ts";
 
 export function makeJobBasic(
   overrides: Partial<JobResultBasic> = {},
