@@ -1,16 +1,16 @@
-import { MockDBData } from "dry-utils-cosmosdb";
+import type { MockDBData } from "dry-utils-cosmosdb";
 import { configureGlobal } from "dry-utils-logger";
 import { beforeEach, mock } from "node:test";
 import { configureTelemetry } from "../src/telemetry/telemetry.ts";
-import { Bag } from "../src/types/types.ts";
+import type { Bag } from "../src/types/types.ts";
 
 configureGlobal({
   filename: "logs/test.log",
 });
 
-process.env.ADMIN_TOKEN ??= "test-admin-token-123456";
-process.env.NODE_ENV ??= "test";
-process.env.OPENAI_API_KEY ??= "test-openai-key-123456";
+process.env["ADMIN_TOKEN"] ??= "test-admin-token-123456";
+process.env["NODE_ENV"] ??= "test";
+process.env["OPENAI_API_KEY"] ??= "test-openai-key-123456";
 const { db } = await import("../src/db/db.ts");
 
 /** The context where tested code stores telemetry properties */

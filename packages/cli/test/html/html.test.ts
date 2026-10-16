@@ -28,7 +28,7 @@ suite("HTML", () => {
       await mkdir(path.dirname(outPath), { recursive: true });
       await writeFile(inPath, "# Hello World\n\nSome content.", "utf-8");
 
-      await html.subCommands!.file.run!(["test-post"]);
+      await html.subCommands!["file"]!.run!(["test-post"]);
 
       const output = await readFile(outPath, "utf-8");
       assert.ok(output.includes("Hello World"));
@@ -40,7 +40,7 @@ suite("HTML", () => {
     invalidFileNames.forEach((fileName) => {
       test(`file run: throws CommandError for invalid file name "${fileName}"`, async () => {
         await assert.rejects(
-          () => html.subCommands!.file.run!([fileName]),
+          () => html.subCommands!["file"]!.run!([fileName]),
           CommandError,
         );
       });
@@ -164,7 +164,7 @@ suite("HTML", () => {
     invalidSlugs.forEach((slug) => {
       test(`runBlog: blog subcommand throws CommandError for invalid slug "${slug}"`, async () => {
         await assert.rejects(
-          () => html.subCommands!.blog.run!([slug]),
+          () => html.subCommands!["blog"]!.run!([slug]),
           CommandError,
         );
       });

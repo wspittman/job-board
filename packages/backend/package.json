@@ -5,9 +5,9 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier . --write",
-    "test": "node --import tsx --import ./test/setup.ts --test --test-reporter=dot test/**/*.test.ts",
-    "test-details": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
-    "dev": "tsx watch --env-file=./.env ./src/app.ts",
+    "test": "node --import ./test/setup.ts --test --test-reporter=dot test/**/*.test.ts",
+    "test-details": "node --import ./test/setup.ts --test test/**/*.test.ts",
+    "dev": "node --watch --env-file=./.env ./src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js"
   },
@@ -30,7 +30,6 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "^10.0.0",
     "prettier": "^3.7.4",
-    "tsx": "^4.23.1",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.56.0"
   }
