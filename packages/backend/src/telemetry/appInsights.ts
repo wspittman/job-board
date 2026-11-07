@@ -15,9 +15,9 @@ This means that the getter for defaultClient is executed before the client is in
 Consequently, defaultClient remains undefined even after setup() is called.
 https://github.com/microsoft/ApplicationInsights-node.js/issues/1354
 */
-import { logger } from "dry-utils-logger";
 import { config } from "../config.ts";
 import type { Bag } from "../types/types.ts";
+import { logger } from "./logger.ts";
 import { configureTelemetry, getContext } from "./telemetry.ts";
 import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
@@ -131,8 +131,7 @@ function appendContext(baseData: TypedRequestData | TypedEventData) {
 function devLogRequest(requestData: TypedRequestData) {
   if (config.NODE_ENV === "dev") {
     const { name, responseCode, duration, properties } = requestData;
-    devLog({
-      name,
+    devLog(name, {
       responseCode,
       duration,
       ...properties,
@@ -143,7 +142,7 @@ function devLogRequest(requestData: TypedRequestData) {
 function devLogEvent(eventData: TypedEventData) {
   if (config.NODE_ENV === "dev") {
     const { name, properties } = eventData;
-    devLog({ name, ...properties });
+    devLog(name, { ...properties });
   }
 }
 
@@ -167,7 +166,7 @@ function devLogException({ exceptions, properties }: TypedExceptionData) {
         }
       }
 
-      devLog({
+      devLog("Exception", {
         ...simplify(first),
         properties,
         innerExceptions: rest.map(simplify),
@@ -176,9 +175,9 @@ function devLogException({ exceptions, properties }: TypedExceptionData) {
   }
 }
 
-function devLog(data: object) {
+function devLog(name: string, data: object) {
   if (config.NODE_ENV === "dev") {
-    logger.info(new Date().toISOString(), data);
+    logger.info(name, data);
   }
 }
 

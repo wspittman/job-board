@@ -1,12 +1,7 @@
 import type { MockDBData } from "dry-utils-cosmosdb";
-import { configureGlobal } from "dry-utils-logger";
 import { beforeEach, mock } from "node:test";
 import { configureTelemetry } from "../src/telemetry/telemetry.ts";
 import type { Bag } from "../src/types/types.ts";
-
-configureGlobal({
-  filename: "logs/test.log",
-});
 
 process.env["ADMIN_TOKEN"] ??= "test-admin-token-123456";
 process.env["NODE_ENV"] ??= "test";
