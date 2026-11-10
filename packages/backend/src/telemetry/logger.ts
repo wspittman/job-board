@@ -10,7 +10,7 @@ function createLogger() {
     pretty: {
       template:
         "{{yyyy}}-{{mm}}-{{dd}} {{hh}}:{{MM}}:{{ss}}.{{ms}} {{logLevelName}} ",
-      inspectOptions: { depth: 5 },
+      inspectOptions: { depth: 6 },
       // Debug should go to file but not console
       levelMethod: { DEBUG: () => {} },
     },
