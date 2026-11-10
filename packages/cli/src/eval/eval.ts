@@ -1,6 +1,6 @@
 import { batch, subscribeAsyncLogging } from "dry-utils-async";
-import { logger } from "dry-utils-logger";
 import { getLLMOptions, validateLLMAction } from "../portal/pFuncs.ts";
+import { logger } from "../portal/pLogger.ts";
 import { llmActionTypes } from "../portal/pTypes.ts";
 import { CommandError, type Command } from "../types.ts";
 import { embedCache } from "../utils/embedCache.ts";

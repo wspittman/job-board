@@ -1,24 +1,14 @@
-import { configureGlobal } from "dry-utils-logger";
 import { rm } from "node:fs/promises";
 import path from "node:path";
+import process from "node:process";
 import { afterEach, mock } from "node:test";
 import { fileURLToPath } from "node:url";
-
-export const TEST_ADMIN_TOKEN = "test-admin-token-123456";
-export const TEST_PROD_ADMIN_TOKEN = "test-prod-token-123456";
-export const TEST_OPENAI_API_KEY = "test-openai-api-key-123456";
 
 const originalEnv = { ...process.env };
 const originalFetch = globalThis.fetch;
 
 export function setEnv(extras: Record<string, string | undefined> = {}) {
-  process.env = {
-    ...originalEnv,
-    ADMIN_TOKEN: TEST_ADMIN_TOKEN,
-    PROD_ADMIN_TOKEN: TEST_PROD_ADMIN_TOKEN,
-    OPENAI_API_KEY: TEST_OPENAI_API_KEY,
-    ...extras,
-  };
+  process.env = { ...originalEnv, ...extras };
 }
 
 export function mockFetch(impl: typeof globalThis.fetch) {
@@ -63,11 +53,6 @@ export function afterReset() {
   process.env = originalEnv;
   globalThis.fetch = originalFetch;
 }
-
-configureGlobal({
-  consoleLevel: "crit",
-  filename: "logs/test.log",
-});
 
 setEnv();
 mockFetch(mock.fn());

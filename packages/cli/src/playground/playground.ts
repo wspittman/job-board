@@ -1,4 +1,4 @@
-import { logger } from "dry-utils-logger";
+import { logger } from "../portal/pLogger.ts";
 import type { Bag, Command } from "../types.ts";
 import { embedCache } from "../utils/embedCache.ts";
 import { readObj, writeObj, type Place } from "../utils/fileUtils.ts";

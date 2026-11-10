@@ -81,10 +81,10 @@ suite("portal pFuncs", () => {
     assert.equal(fetchMock.callCount(), 1);
 
     const logText = await waitForLogText(companyId, logStartPosition);
-    assert.match(logText, /"name": "Portal\.FetchJobCounts"/);
-    assert.match(logText, /"greenhouse GET JobsBasic": 1/);
-    assert.match(logText, new RegExp(`"id": "${companyId}"`));
-    assert.match(logText, /"ats": "greenhouse"/);
-    assert.match(logText, /"metrics": \{\s+"ms": \d+,\s+"bytes": \d+\s+\}/);
+    assert.match(logText, /name: 'Portal\.FetchJobCounts'/);
+    assert.match(logText, /'greenhouse GET JobsBasic': 1/);
+    assert.match(logText, new RegExp(`id: '${companyId}'`));
+    assert.match(logText, /ats: 'greenhouse'/);
+    assert.match(logText, /metrics: \{\s+ms: \d+,\s+bytes: \d+\s+\}/);
   });
 });

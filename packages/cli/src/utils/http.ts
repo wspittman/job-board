@@ -1,5 +1,5 @@
-import { logger } from "dry-utils-logger";
 import { config } from "../config.ts";
+import { logger } from "../portal/pLogger.ts";
 import type { ENV, HttpMethod } from "../types.ts";
 
 interface Options {

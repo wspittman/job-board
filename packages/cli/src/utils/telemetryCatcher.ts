@@ -1,6 +1,6 @@
-import { logger } from "dry-utils-logger";
 import { subscribeOpenAILogging } from "dry-utils-openai";
 import { createHash } from "node:crypto";
+import { logger } from "../portal/pLogger.ts";
 import type { Context } from "../portal/pTypes.ts";
 import type { Bag, NumBag } from "../types.ts";
 

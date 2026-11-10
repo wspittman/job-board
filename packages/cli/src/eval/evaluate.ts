@@ -1,5 +1,5 @@
-import { logger } from "dry-utils-logger";
 import { infer } from "../portal/pFuncs.ts";
+import { logger } from "../portal/pLogger.ts";
 import type { Bag, NumBag } from "../types.ts";
 import { addNumBags } from "../utils/mathUtils.ts";
 import { catcher } from "../utils/telemetryCatcher.ts";

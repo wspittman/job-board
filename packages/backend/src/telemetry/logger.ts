@@ -1,5 +1,8 @@
 import { Logger } from "tslog";
 import { fileTransport } from "tslog/transports/file";
+import { config } from "../config.ts";
+
+const fileLogName = config.NODE_ENV === "test" ? "test" : "app";
 
 function createLogger() {
   const log = new Logger({
@@ -15,7 +18,7 @@ function createLogger() {
 
   log.attachTransport(
     fileTransport({
-      path: "logs/app.log",
+      path: `logs/${fileLogName}.log`,
       minLevel: "DEBUG",
       format: "pretty",
     }),
