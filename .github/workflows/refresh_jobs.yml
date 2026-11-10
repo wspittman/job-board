@@ -4,7 +4,7 @@ on:
   schedule:
     # Runs daily around 08:32 PM Pacific
     # Due to GitHub lag, this will not run for hours later
-    - cron: "32 02 * * *"
+    - cron: "32 20 * * *"
       timezone: "America/Los_Angeles"
   workflow_dispatch:
 
