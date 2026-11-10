@@ -9,7 +9,7 @@ import {
   runChecks,
   similar,
 } from "../../../src/eval/judge/checks.ts";
-import { Bag } from "../../../src/types.ts";
+import type { Bag } from "../../../src/types.ts";
 import { embedCache } from "../../../src/utils/embedCache.ts";
 import { afterReset } from "../../setup.ts";
 
@@ -146,8 +146,8 @@ suite("checks", () => {
       {
         check: "arrayExactMatcher",
         prop: "tags",
-        actual: actual.tags,
-        expected: expected.tags,
+        actual: actual["tags"],
+        expected: expected["tags"],
         score: 0.75,
       },
     ]);

@@ -1,6 +1,6 @@
-import { logger } from "dry-utils-logger";
 import { embed } from "dry-utils-openai";
 import { createHash } from "node:crypto";
+import { logger } from "../portal/pLogger.ts";
 import { readObj, writeObj, type Place } from "./fileUtils.ts";
 
 const inFile: Place = {

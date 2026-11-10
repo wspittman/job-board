@@ -33,7 +33,7 @@ suite("FormTextarea", () => {
     expect(intake.maxLength).toBe(-1);
   });
 
-  test("clear resets value and textarea height", () => {
+  test("clear resets value without setting an inline height", () => {
     const element = create();
     element.init({
       label: "Summary",
@@ -41,24 +41,18 @@ suite("FormTextarea", () => {
       value: "Existing text",
     });
 
-    element.intake.style.height = "140px";
-
     element.clear();
 
     expect(element.intake.value).toBe("");
-    expect(element.intake.style.height).toBe("auto");
+    expect(element.getAttribute("value")).toBe("");
+    expect(element.intake.style.height).toBe("");
   });
 
-  test("auto-resizes to scrollHeight on input", () => {
+  test("input syncs value without setting an inline height", () => {
     const element = create();
     element.init({
       label: "Details",
       name: "details",
-    });
-
-    Object.defineProperty(element.intake, "scrollHeight", {
-      configurable: true,
-      value: 172,
     });
 
     element.intake.value = "Line 1\nLine 2";
@@ -66,7 +60,7 @@ suite("FormTextarea", () => {
       new InputEvent("input", { bubbles: true, composed: true }),
     );
 
-    expect(element.intake.style.height).toBe("172px");
-    expect(element.intake.value).toBe("Line 1\nLine 2");
+    expect(element.intake.style.height).toBe("");
+    expect(element.getAttribute("value")).toBe("Line 1\nLine 2");
   });
 });

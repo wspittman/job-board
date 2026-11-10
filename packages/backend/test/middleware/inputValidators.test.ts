@@ -9,9 +9,9 @@ import {
   useInterpretQuery,
   useJobKey,
   useRefreshJobsOptions,
-} from "../../src/middleware/inputValidators";
-import { Bag } from "../../src/types/types";
-import { telemetryContext } from "../setup";
+} from "../../src/middleware/inputValidators.ts";
+import type { Bag } from "../../src/types/types.ts";
+import { telemetryContext } from "../setup.ts";
 
 // Simple valid keys
 const ats = "lever";
@@ -68,7 +68,7 @@ suite("useBeacon", () => {
 
     test(toTestName("Valid input", input), () => {
       useBeacon(input);
-      const actual = (telemetryContext as Bag)?.prop ?? {};
+      const actual = (telemetryContext as Bag)?.["prop"] ?? {};
       assert.deepEqual(actual, expected);
     });
   });

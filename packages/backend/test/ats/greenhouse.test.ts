@@ -1,61 +1,10 @@
 import assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import { Greenhouse } from "../../src/ats/greenhouse.ts";
-import type {
-  CompanyResult,
-  JobResult,
-  JobResultBasic,
-} from "../../src/ats/greenhouseFormat.ts";
+import type { CompanyResult } from "../../src/ats/greenhouseFormat.ts";
 import { mockFetch } from "../setup.ts";
-
-function jsonResponse(data: unknown, init: ResponseInit = {}) {
-  return new Response(JSON.stringify(data), {
-    status: 200,
-    headers: { "content-type": "application/json" },
-    ...init,
-  });
-}
-
-function getFetchCall(fetchMock: ReturnType<typeof mockFetch>, index = 0) {
-  const call = fetchMock.mock.calls[index];
-  assert.ok(call);
-  const [url, init] = call.arguments as [string, RequestInit];
-  return { url, init };
-}
-
-function makeJobBasic(overrides: Partial<JobResultBasic> = {}): JobResultBasic {
-  return {
-    id: 42,
-    internal_job_id: 7,
-    title: "SOFTWARE ENGINEER",
-    updated_at: "2026-02-03T04:05:06.000Z",
-    requisition_id: "REQ-42",
-    location: { name: "Seattle, WA" },
-    absolute_url: "https://boards.example.com/jobs/42",
-    metadata: { level: "senior" },
-    ...overrides,
-  };
-}
-
-function makeJob(overrides: Partial<JobResult> = {}): JobResult {
-  return {
-    ...makeJobBasic(),
-    content: "<p>Build</p>",
-    departments: [
-      { id: 1, name: "Engineering", child_ids: [], parent_id: undefined },
-    ],
-    offices: [
-      {
-        id: 2,
-        name: "Seattle",
-        location: "Seattle, WA",
-        child_ids: [],
-        parent_id: undefined,
-      },
-    ],
-    ...overrides,
-  };
-}
+import { getFetchCall, jsonResponse } from "./atsHelpers.ts";
+import { makeJob, makeJobBasic } from "./greenhouseHelpers.ts";
 
 suite("Greenhouse", () => {
   test("getCompany fetches and formats a Greenhouse board", async () => {

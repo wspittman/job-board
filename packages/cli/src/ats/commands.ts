@@ -1,4 +1,3 @@
-import { logger } from "dry-utils-logger";
 import timers from "node:timers/promises";
 import {
   fetchCompany,
@@ -6,6 +5,7 @@ import {
   fetchJobCounts,
   fetchSpecificJob,
 } from "../portal/pFuncs.ts";
+import { logger } from "../portal/pLogger.ts";
 import type { Command } from "../types.ts";
 import { writeObj } from "../utils/fileUtils.ts";
 import { validateCompanyArgs, validateJobArgs } from "../utils/utils.ts";

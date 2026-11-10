@@ -4,7 +4,7 @@ import { beforeEach, mock, suite, test } from "node:test";
 import { adminOnly } from "../../src/middleware/auth.ts";
 import { AppError } from "../../src/utils/AppError.ts";
 
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN ?? "";
+const ADMIN_TOKEN = process.env["ADMIN_TOKEN"] ?? "";
 
 function mockRequest(authHeader?: string): Request {
   return {

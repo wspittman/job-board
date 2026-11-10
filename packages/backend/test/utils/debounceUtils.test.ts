@@ -1,23 +1,10 @@
 import assert from "node:assert/strict";
-import { beforeEach, mock, suite, test, TestContext } from "node:test";
-import timers from "node:timers/promises";
+import { beforeEach, mock, suite, test } from "node:test";
 import {
   debounceAsync,
   debouncePromise,
 } from "../../src/utils/debounceUtils.ts";
-
-/**
- * Mocks timers for testing
- * @param context - The test context
- * @returns A function to tick the mocked timers
- */
-function mockTimers(context: TestContext) {
-  context.mock.timers.enable({ apis: ["setTimeout"] });
-  return async (ms: number) => {
-    context.mock.timers.tick(ms);
-    await timers.setImmediate();
-  };
-}
+import { mockTimers } from "../testHelpers.ts";
 
 suite("Debounce Utils", () => {
   {

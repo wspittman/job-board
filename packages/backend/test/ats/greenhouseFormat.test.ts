@@ -6,43 +6,8 @@ import {
   formatJobBasic,
   formatJobs,
   formatJobsBasic,
-  type JobResult,
-  type JobResultBasic,
 } from "../../src/ats/greenhouseFormat.ts";
-
-function makeJobBasic(overrides: Partial<JobResultBasic> = {}): JobResultBasic {
-  return {
-    id: 42,
-    internal_job_id: 7,
-    title: "SOFTWARE ENGINEER",
-    updated_at: "2026-02-03T04:05:06.000Z",
-    requisition_id: "REQ-42",
-    location: { name: "Seattle, WA" },
-    absolute_url: "https://boards.example.com/jobs/42",
-    metadata: { level: "senior" },
-    ...overrides,
-  };
-}
-
-function makeJob(overrides: Partial<JobResult> = {}): JobResult {
-  return {
-    ...makeJobBasic(),
-    content: "<p>Build <strong>things</strong>.</p><script>bad()</script>",
-    departments: [
-      { id: 1, name: "Engineering", child_ids: [], parent_id: undefined },
-    ],
-    offices: [
-      {
-        id: 2,
-        name: "Seattle",
-        location: "Seattle, WA",
-        child_ids: [],
-        parent_id: undefined,
-      },
-    ],
-    ...overrides,
-  };
-}
+import { makeJob, makeJobBasic } from "./greenhouseHelpers.ts";
 
 suite("greenhouseFormat", () => {
   test("formats and sanitizes a company", () => {
@@ -74,7 +39,9 @@ suite("greenhouseFormat", () => {
   });
 
   test("formats and sanitizes a full job with Greenhouse context", () => {
-    const job = makeJob();
+    const job = makeJob({
+      content: "<p>Build <strong>things</strong>.</p>",
+    });
 
     assert.deepEqual(formatJob("acme", job), {
       item: {

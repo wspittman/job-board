@@ -6,13 +6,12 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier . --write",
-    "test": "node --import tsx --test --import ./test/setup.ts --test-reporter=dot test/**/*.test.ts",
-    "test-details": "node --import tsx --import ./test/setup.ts --test test/**/*.test.ts",
-    "cli": "tsx --env-file=.env src/index.ts"
+    "test": "node --test --import ./test/setup.ts --env-file=./test/.env.test --test-reporter=dot test/**/*.test.ts",
+    "test-details": "node --import ./test/setup.ts --env-file=./test/.env.test --test test/**/*.test.ts",
+    "cli": "node --env-file=.env src/index.ts"
   },
   "dependencies": {
     "dry-utils-async": "^0.3.2",
-    "dry-utils-logger": "^0.2.0",
     "dry-utils-openai": "^0.4.2",
     "dry-utils-text": "^0.2.1",
     "ml-kmeans": "^7.0.0"
@@ -23,7 +22,6 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "^10.0.0",
     "prettier": "^3.7.4",
-    "tsx": "^4.23.1",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.56.0"
   }

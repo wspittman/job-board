@@ -17,7 +17,7 @@ A job board that prioritizes the job seeker's experience.
 
 ## NPM Workspaces
 
-Common Tech Stack: TypeScript, Node, Eslint, Prettier, Tsx
+Common Tech Stack: TypeScript, Node, Eslint, Prettier
 
 - `packages/backend`: REST service that integrates with Azure Cosmos DB, Application Insights telemetry, LLM provider, and public ATS APIs.
 - `packages/frontend`: MPA site client with server-side wrapper for production hosting.

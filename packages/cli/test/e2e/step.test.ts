@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { after, suite, test } from "node:test";
 
-const originalAdminToken = process.env.ADMIN_TOKEN;
-const originalE2eCompanies = process.env.E2E_COMPANIES;
+const originalAdminToken = process.env["ADMIN_TOKEN"];
+const originalE2eCompanies = process.env["E2E_COMPANIES"];
 
-process.env.ADMIN_TOKEN = "test-admin-token-1";
-process.env.E2E_COMPANIES = "ashby:ash-1|greenhouse:gh-1,gh-2|lever:lv-1";
+process.env["ADMIN_TOKEN"] = "test-admin-token-1";
+process.env["E2E_COMPANIES"] = "ashby:ash-1|greenhouse:gh-1,gh-2|lever:lv-1";
 
 const {
   req,
@@ -22,15 +22,15 @@ const {
 suite("e2e step", () => {
   after(() => {
     if (originalAdminToken === undefined) {
-      delete process.env.ADMIN_TOKEN;
+      delete process.env["ADMIN_TOKEN"];
     } else {
-      process.env.ADMIN_TOKEN = originalAdminToken;
+      process.env["ADMIN_TOKEN"] = originalAdminToken;
     }
 
     if (originalE2eCompanies === undefined) {
-      delete process.env.E2E_COMPANIES;
+      delete process.env["E2E_COMPANIES"];
     } else {
-      process.env.E2E_COMPANIES = originalE2eCompanies;
+      process.env["E2E_COMPANIES"] = originalE2eCompanies;
     }
   });
 

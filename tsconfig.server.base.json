@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    // [Environment Dependent]
+    // Node 24 App/Lib: es2024, NodeNext, NodeNext
+    // Browser App    : es2023, esnext, node
+    "target": "es2024",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    // Debugging
+    "sourceMap": true,
+
+    // Type declarations
+    "types": ["node"],
+
+    // Interoperability
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
+  }
+}

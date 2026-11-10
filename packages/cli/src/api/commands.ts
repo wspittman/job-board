@@ -1,4 +1,4 @@
-import { logger } from "dry-utils-logger";
+import { logger } from "../portal/pLogger.ts";
 import { type Command, type ENV } from "../types.ts";
 import { apiCall } from "../utils/http.ts";
 import { validateCompanyArgs, validateJobArgs } from "../utils/utils.ts";

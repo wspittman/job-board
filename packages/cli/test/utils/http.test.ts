@@ -1,12 +1,8 @@
 import assert from "node:assert/strict";
+import process from "node:process";
 import { after, suite, test } from "node:test";
 import { apiCall } from "../../src/utils/http.ts";
-import {
-  afterReset,
-  mockFetch,
-  TEST_ADMIN_TOKEN,
-  TEST_PROD_ADMIN_TOKEN,
-} from "../setup.ts";
+import { afterReset, mockFetch } from "../setup.ts";
 
 after(afterReset);
 
@@ -24,7 +20,9 @@ suite("http apiCall", () => {
       body: { id: "123" },
     });
 
-    const [calledUrl, calledInit] = fetchMock.calls[0].arguments;
+    const call = fetchMock.calls[0];
+    assert.ok(call);
+    const [calledUrl, calledInit] = call.arguments;
 
     assert.equal(
       calledUrl?.toString(),
@@ -32,7 +30,7 @@ suite("http apiCall", () => {
     );
     assert.equal(calledInit?.method, "POST");
     assert.deepEqual(calledInit?.headers, {
-      Authorization: `Bearer ${TEST_ADMIN_TOKEN}`,
+      Authorization: `Bearer ${process.env["ADMIN_TOKEN"]}`,
       "Content-Type": "application/json",
     });
     assert.equal(calledInit?.body, JSON.stringify({ id: "123" }));
@@ -52,7 +50,9 @@ suite("http apiCall", () => {
 
     const result = await apiCall("GET", "jobs", { asAdmin: false });
 
-    const [, calledInit] = fetchMock.calls[0].arguments;
+    const call = fetchMock.calls[0];
+    assert.ok(call);
+    const [, calledInit] = call.arguments;
 
     assert.deepEqual(calledInit?.headers, {});
     assert.equal(calledInit?.body, undefined);
@@ -69,14 +69,16 @@ suite("http apiCall", () => {
 
     const result = await apiCall("GET", "jobs", { env: "prod" });
 
-    const [calledUrl, calledInit] = fetchMock.calls[0].arguments;
+    const call = fetchMock.calls[0];
+    assert.ok(call);
+    const [calledUrl, calledInit] = call.arguments;
 
     assert.equal(
       calledUrl?.toString(),
       "https://api.betterjobboard.net/api/jobs",
     );
     assert.deepEqual(calledInit?.headers, {
-      Authorization: `Bearer ${TEST_PROD_ADMIN_TOKEN}`,
+      Authorization: `Bearer ${process.env["PROD_ADMIN_TOKEN"]}`,
     });
     assert.deepEqual(result, { status: 200, value: "ok" });
   });

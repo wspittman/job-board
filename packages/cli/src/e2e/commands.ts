@@ -1,5 +1,5 @@
-import { logger } from "dry-utils-logger";
 import assert from "node:assert/strict";
+import { logger } from "../portal/pLogger.ts";
 import { CommandError, type Command } from "../types.ts";
 import { apiCall } from "../utils/http.ts";
 import { flows } from "./flows.ts";

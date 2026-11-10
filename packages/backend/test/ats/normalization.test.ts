@@ -8,7 +8,7 @@ suite("normalization", () => {
     ["SENIOR QA/DEVOPS ENGINEER", "Senior QA/Devops Engineer"],
     ["DATA ANALYST II", "Data Analyst II"],
     ["  PRODUCT MANAGER  ", "Product Manager"],
-  ];
+  ] as const;
 
   allCapsTitleCases.forEach(([input, expected]) => {
     test(`normTitle: Converts all-caps title to title case: ${input}`, () => {

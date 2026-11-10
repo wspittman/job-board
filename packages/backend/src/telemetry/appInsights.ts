@@ -15,9 +15,9 @@ This means that the getter for defaultClient is executed before the client is in
 Consequently, defaultClient remains undefined even after setup() is called.
 https://github.com/microsoft/ApplicationInsights-node.js/issues/1354
 */
-import { logger } from "dry-utils-logger";
 import { config } from "../config.ts";
 import type { Bag } from "../types/types.ts";
+import { logger } from "./logger.ts";
 import { configureTelemetry, getContext } from "./telemetry.ts";
 import telemetryWorkaround from "./telemetryWorkaround.cjs";
 
@@ -128,57 +128,52 @@ function appendContext(baseData: TypedRequestData | TypedEventData) {
 
 // #region Development Logging
 
+const useDevLog = ["dev", "test"].includes(config.NODE_ENV);
+
 function devLogRequest(requestData: TypedRequestData) {
-  if (config.NODE_ENV === "dev") {
-    const { name, responseCode, duration, properties } = requestData;
-    devLog({
-      name,
-      responseCode,
-      duration,
-      ...properties,
-    });
-  }
+  if (!useDevLog) return;
+
+  const { name, responseCode, duration, properties } = requestData;
+  logger.info(name, {
+    responseCode,
+    duration,
+    ...properties,
+  });
 }
 
 function devLogEvent(eventData: TypedEventData) {
-  if (config.NODE_ENV === "dev") {
-    const { name, properties } = eventData;
-    devLog({ name, ...properties });
-  }
+  if (!useDevLog) return;
+
+  const { name, properties } = eventData;
+  logger.info(name, { ...properties });
 }
 
 function devLogException({ exceptions, properties }: TypedExceptionData) {
-  if (config.NODE_ENV === "dev") {
-    const [first, ...rest] = exceptions;
-    const simplify = (ex: ExceptionDetails) => ({
-      exception: ex.message,
-      stack: ex.stack ?? ex.parsedStack.map((frame) => frame.assembly),
-    });
+  if (!useDevLog) return;
 
-    if (first) {
-      if (
-        !Array.isArray(properties) &&
-        typeof properties?.["cause"] === "string"
-      ) {
-        try {
-          properties["cause"] = JSON.parse(properties["cause"]);
-        } catch {
-          /* ignore */
-        }
+  const [first, ...rest] = exceptions;
+  const simplify = (ex: ExceptionDetails) => ({
+    exception: ex.message,
+    stack: ex.stack ?? ex.parsedStack.map((frame) => frame.assembly),
+  });
+
+  if (first) {
+    if (
+      !Array.isArray(properties) &&
+      typeof properties?.["cause"] === "string"
+    ) {
+      try {
+        properties["cause"] = JSON.parse(properties["cause"]);
+      } catch {
+        /* ignore */
       }
-
-      devLog({
-        ...simplify(first),
-        properties,
-        innerExceptions: rest.map(simplify),
-      });
     }
-  }
-}
 
-function devLog(data: object) {
-  if (config.NODE_ENV === "dev") {
-    logger.info(new Date().toISOString(), data);
+    logger.info("Exception", {
+      ...simplify(first),
+      properties,
+      innerExceptions: rest.map(simplify),
+    });
   }
 }
 

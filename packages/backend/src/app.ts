@@ -4,7 +4,6 @@ import { startTelemetry } from "./telemetry/appInsights.ts";
 startTelemetry();
 
 import cors from "cors";
-import { logger } from "dry-utils-logger";
 import type { NextFunction, Request, Response } from "express";
 import express from "express";
 import helmet from "helmet";
@@ -12,6 +11,7 @@ import { config } from "./config.ts";
 import { db } from "./db/db.ts";
 import { logIdentifiers } from "./middleware/logIdentifiers.ts";
 import { router } from "./routes/routes.ts";
+import { logger } from "./telemetry/logger.ts";
 import { logError } from "./telemetry/telemetry.ts";
 import { AppError } from "./utils/AppError.ts";
 

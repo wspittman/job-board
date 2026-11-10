@@ -1,4 +1,3 @@
-import { logger } from "dry-utils-logger";
 import process from "node:process";
 import { apiCommands } from "./api/commands.ts";
 import { atsCommands } from "./ats/commands.ts";
@@ -6,6 +5,7 @@ import { e2e } from "./e2e/commands.ts";
 import { evals } from "./eval/eval.ts";
 import { html } from "./html/html.ts";
 import { playground } from "./playground/playground.ts";
+import { logger } from "./portal/pLogger.ts";
 import { CommandError, type Command } from "./types.ts";
 
 function commandUsage(cName: string, cmd: Command, indent: string): string[] {

@@ -19,7 +19,7 @@ The backend package implements the API for the Job Board monorepo. It is an Expr
    ```bash
    npm run start:backend
    ```
-   This runs `tsx watch` against `src/app.ts`, recompiling on change.
+   This runs `node --watch` against `src/app.ts`, recompiling on change.
 4. To create a production build, run:
    ```bash
    npm run build --workspace=backend
@@ -93,7 +93,7 @@ packages/backend/
 
 ## Useful Commands
 
-- `npm run dev --workspace=backend` – Start the service with automatic reloads via `tsx watch`.
+- `npm run dev --workspace=backend` – Start the service with automatic reloads via `node --watch`.
 - `npm run build --workspace=backend` – Compile TypeScript to JavaScript in `dist/`.
 - `npm run start --workspace=backend` – Run the compiled server from `dist/app.js`.
 - `npm run test --workspace=backend` – Execute the Node test runner. Note: until Node v26, the concise dot reporter does not show details for failed tests, so if you need full output, use the following command
@@ -101,7 +101,7 @@ packages/backend/
 
 ## Testing Notes
 
-The backend test suite runs directly against TypeScript sources using `node --import tsx --import ./test/setup.ts --test test/**/*.test.ts`. The shared `test/setup.ts` file stubs telemetry startup, database connections, and `app.listen` to prevent network calls or other side effects during testing.
+The backend test suite runs directly against TypeScript sources using `node --import ./test/setup.ts --test test/**/*.test.ts`. The shared `test/setup.ts` file stubs telemetry startup, database connections, and `app.listen` to prevent network calls or other side effects during testing.
 
 ## Troubleshooting
 
