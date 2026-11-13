@@ -7,7 +7,6 @@
     "lint": "eslint",
     "format": "prettier . --write",
     "test": "node --test --import ./test/setup.ts --env-file=./test/.env.test --test-reporter=dot test/**/*.test.ts",
-    "test-details": "node --import ./test/setup.ts --env-file=./test/.env.test --test test/**/*.test.ts",
     "cli": "node --env-file=.env src/index.ts"
   },
   "dependencies": {
