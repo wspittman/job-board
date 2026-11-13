@@ -6,7 +6,7 @@ providers, running end-to-end tests, running LLM evaluations, and running playgr
 
 ## Prerequisites
 
-- Node.js 24 or newer (the repository root manages the toolchain).
+- Node.js 26 or newer (the repository root manages the toolchain).
 - Project dependencies installed from the monorepo root with `npm install`.
 - Copy `.env.example` to `.env` inside `packages/cli/` and supply the required environment variables.
   - The cli package has commands that directly use code from the backend package. For those commands, any environment variables documented for the backend also apply here.

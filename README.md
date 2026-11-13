@@ -28,14 +28,14 @@ Our aim is to create a next-generation job board that prioritizes the job seeker
   - [`packages/backend`](packages/backend/README.md): Express 5 + TypeScript API that integrates with Azure Cosmos DB and ATS providers, exposing REST routes under `/api`.
   - [`packages/frontend`](packages/frontend/README.md): Current Vite/Vanilla frontend with server-side wrapper for production hosting.
   - [`packages/cli`](packages/cli/README.md): General-purpose CLI for development and operational tasks, including API interaction, direct ATS data fetching, end-to-end testing, LLM evaluations, and playground experiments.
-- **Prerequisites**: Node.js 24+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
+- **Prerequisites**: Node.js 26+, Azure Cosmos DB Emulator or an Azure Cosmos DB account.
 - **Install once from the repo root**: `npm install`
 - **Dev servers**: `npm run start:backend` and `npm run start:frontend`
 
 ## Getting Started
 
 0. Prerequisites:
-   - [Node.js 24+](https://nodejs.org/en/download/)
+   - [Node.js 26+](https://nodejs.org/en/download/)
    - [Azure CosmosDB Emulator](https://learn.microsoft.com/en-us/azure/cosmos-db/local-emulator) or [Azure CosmosDB Account](https://azure.microsoft.com/en-us/services/cosmos-db/)
 1. Install dependencies:
    ```bash

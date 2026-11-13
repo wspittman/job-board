@@ -14,9 +14,9 @@ import { setupEnv } from "./setup-agent-env.mjs";
  *   - backend actions that require a real OpenAI key will still fail
  */
 
-if (Number(process.versions.node.split(".")[0]) < 24) {
+if (Number(process.versions.node.split(".")[0]) < 26) {
   console.error(
-    `Setup requires Node.js 24 or newer; found ${process.version}.`,
+    `Setup requires Node.js 26 or newer; found ${process.version}.`,
   );
   process.exit(1);
 }
