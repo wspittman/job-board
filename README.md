@@ -92,10 +92,6 @@ UI Snapshots from June 8, 2026
 
 ![Explore page from 6/8/26](screenshots/6_8_26_Jobs.jpg)
 
-### Blog Page
-
-![Blog page from 6/8/26](screenshots/6_8_26_Blog.jpg)
-
 ### FAQ Page
 
 ![FAQ page from 6/8/26](screenshots/6_8_26_FAQ.jpg)
