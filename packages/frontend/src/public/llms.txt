@@ -5,7 +5,3 @@
 Important note:
 
 - Currently intended for human use via the UI. Not suitable for AI Agents to perform searches themselves.
-
-## Optional
-
-- [Changelog](/blog/progress-report.md): Recent updates

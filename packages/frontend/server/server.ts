@@ -36,7 +36,7 @@ declare module "express-serve-static-core" {
 
 // #endregion
 
-const PAGES = new Set(["blog", "index", "faq", "jobs", "about"]);
+const PAGES = new Set(["index", "faq", "jobs", "about"]);
 const METHOD_ALLOWED = new Set(["GET", "HEAD", "POST"]);
 const POST_ALLOWED = new Set(["/api/beacon", "/api/interpret"]);
 
@@ -226,10 +226,6 @@ async function getUrlParts(req: Request): Promise<UrlParts | string> {
 
   if (ext !== ".html") {
     return (await fileExists(urlParts)) ? urlParts : "404_hard";
-  }
-
-  if (dir === "/blog") {
-    return (await fileExists(urlParts)) ? urlParts : getNotFoundUrlParts();
   }
 
   // The /jobs path was previously /explore, so we want to support old links.

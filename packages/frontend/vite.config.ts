@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -29,20 +29,6 @@ export default defineConfig({
   plugins: [
     htmlPartials(),
     inlineLucideIcons(),
-    {
-      name: "copy-blog-md",
-      generateBundle() {
-        const blogDir = getDir("blog");
-        const files = getFiles(blogDir, ".md");
-        for (const file of files) {
-          this.emitFile({
-            type: "asset",
-            fileName: `blog/${file}`,
-            source: readFileSync(join(blogDir, file), "utf-8"),
-          });
-        }
-      },
-    },
     // Emit Brotli and gzip side-by-side
     compression({
       include: [/\.(js|mjs|css|html|svg|json|txt|xml|md)$/],
@@ -59,7 +45,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         ...getHtmlEntries(),
-        ...getHtmlEntries("blog"),
       },
     },
   },
