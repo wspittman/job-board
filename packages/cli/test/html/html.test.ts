@@ -11,32 +11,30 @@ after(afterReset);
 const touchedFiles = makeFileTracker();
 
 suite("HTML", () => {
-  {
-    test("file run: converts markdown to HTML and writes output file", async () => {
-      const inPath = path.join(logBasePath, "html", "in", "test-post.md");
-      const outPath = path.join(logBasePath, "html", "out", "test-post.html");
-      touchedFiles.push(inPath, outPath);
+  test("file run: converts markdown to HTML and writes output file", async () => {
+    const inPath = path.join(logBasePath, "html", "in", "test-post.md");
+    const outPath = path.join(logBasePath, "html", "out", "test-post.html");
+    touchedFiles.push(inPath, outPath);
 
-      await mkdir(path.dirname(inPath), { recursive: true });
-      await mkdir(path.dirname(outPath), { recursive: true });
-      await writeFile(inPath, "# Hello World\n\nSome content.", "utf-8");
+    await mkdir(path.dirname(inPath), { recursive: true });
+    await mkdir(path.dirname(outPath), { recursive: true });
+    await writeFile(inPath, "# Hello World\n\nSome content.", "utf-8");
 
-      await html.subCommands!["file"]!.run!(["test-post"]);
+    await html.subCommands!["file"]!.run!(["test-post"]);
 
-      const output = await readFile(outPath, "utf-8");
-      assert.ok(output.includes("Hello World"));
-      assert.ok(output.includes("Some content"));
+    const output = await readFile(outPath, "utf-8");
+    assert.ok(output.includes("Hello World"));
+    assert.ok(output.includes("Some content"));
+  });
+
+  const invalidFileNames = ["", "   ", "../evil", "nonexistent-post"];
+
+  invalidFileNames.forEach((fileName) => {
+    test(`file run: throws CommandError for invalid file name "${fileName}"`, async () => {
+      await assert.rejects(
+        () => html.subCommands!["file"]!.run!([fileName]),
+        CommandError,
+      );
     });
-
-    const invalidFileNames = ["", "   ", "../evil", "nonexistent-post"];
-
-    invalidFileNames.forEach((fileName) => {
-      test(`file run: throws CommandError for invalid file name "${fileName}"`, async () => {
-        await assert.rejects(
-          () => html.subCommands!["file"]!.run!([fileName]),
-          CommandError,
-        );
-      });
-    });
-  }
+  });
 });
