@@ -151,15 +151,26 @@ async function readJobsByFilters({
     clauses.push(["salaryRange.min", ">=", minSalary]);
   }
 
-  // Substring Matches
+  // Full-Text Matches
 
   if (title) {
-    clauses.push(["title", "CONTAINS", title]);
+    const terms = normalizeTitleSearchTerms(title);
+    if (terms.length) {
+      clauses.push(
+        terms.length === 1
+          ? ["title", "FULLTEXTCONTAINS", terms[0]!]
+          : ["title", "FULLTEXTCONTAINSALL", terms],
+      );
+    }
   }
 
   const locationWhere = buildLocationWhere({ city, state, isRemote });
   if (locationWhere) {
     clauses.push(locationWhere);
+  }
+
+  if (!clauses.length) {
+    return [];
   }
 
   const jobOrder = JOB_ORDER_BY[orderBy];
@@ -172,6 +183,14 @@ async function readJobsByFilters({
       orderBy: [jobOrder],
     }),
   );
+}
+
+/**
+ * Normalizes a title query into ordered terms for Cosmos full-text matching.
+ * @returns Nonempty title terms with surrounding and repeated whitespace removed.
+ */
+export function normalizeTitleSearchTerms(title: string): string[] {
+  return title.trim().split(/\s+/).filter(Boolean);
 }
 
 /**

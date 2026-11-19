@@ -17,6 +17,7 @@ export class JobContainer extends Container<Job> {
     return {
       name: ContainerName,
       partitionKey: "companyId",
+      fullTextIndexes: ["/title"],
     };
   }
 

@@ -20,10 +20,11 @@ export interface Filters {
   jobFamily?: JobFamily;
   companyStage?: CompanyStage;
   payCadence?: PayCadence;
-  // Substring Match
-  title?: string;
-  city?: string;
   state?: UsState;
+  // Full-text Match
+  title?: string;
+  // Normalized Match
+  city?: string;
   // Range Match
   daysSince?: number;
   maxExperience?: number;
