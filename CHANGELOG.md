@@ -1,5 +1,28 @@
 # Better Job Board changelog
 
+## November 19, 2026
+
+Feature: Full-Text Title search
+
+- Title filter now uses Full-Text (indexed) search instead of substring search
+- This provides much better matches by handling stemming (eg. "engineer" ~= "engineering") and word ordering (eg. "backend software engineer" ~= "software engineer, backend"), among other things
+
+Frontend
+
+- FAQ updates
+- Remove blog section of site, which was an unnecessary distraction to creating a better job board
+- Remove link to unmonitored BlueSky account, also an unnecessary distraction
+- Dep: `jsdom` from v30 to v31
+
+CLI
+
+- Remove blog support functionality
+
+Maintenance
+
+- Dep: `Node` from v24 to v26
+- Add `CHANGELOG.md`
+
 ## November 10, 2026
 
 Maintenance
