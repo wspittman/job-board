@@ -29,7 +29,6 @@ Run from the repository root:
 
 - `npm run pre-checkin`: Run lint, format, and tests.
 - `npm run test --workspace=<workspace>`: Run tests for a specific workspace. Great for change validation prior running a full pre-checkin.
-- `npm run test-details --workspace=<workspace>`: Run tests for a specific workspace with the default reporter for full (but more verbose) output. Better for debugging failed tests due to an issue with the dot reporter.
 - `npm run start:backend`: Start the API.
 - `npm run start:frontend`: Start the frontend.
 - `npm run cli -- help`: Learn about the available CLI commands.

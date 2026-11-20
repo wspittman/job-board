@@ -248,12 +248,6 @@
     }
   }
 
-  .bsky-btn {
-    &::before {
-      content: "Follow on Bluesky";
-    }
-  }
-
   .gh-btn {
     &::before {
       content: "View on GitHub";

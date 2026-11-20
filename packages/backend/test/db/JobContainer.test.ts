@@ -68,6 +68,7 @@ suite("JobContainer", () => {
     assert.deepEqual(JobContainer.ContainerOptions(), {
       name: "job",
       partitionKey: "companyId",
+      fullTextIndexes: ["/title"],
     });
   });
 

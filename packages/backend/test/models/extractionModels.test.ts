@@ -4,6 +4,13 @@ import { suite, test } from "node:test";
 import { ExtractionFilters } from "../../src/models/extractionModels.ts";
 
 suite("ExtractionFilters", () => {
+  test("describes title as word-based matching", () => {
+    assert.equal(
+      ExtractionFilters.shape.title.description,
+      "Words from the user's search that should match the job title. Every word must match, but the order does not matter.",
+    );
+  });
+
   test("does not include unsupported currency filter", () => {
     const result = ExtractionFilters.safeParse({
       isRemote: "",

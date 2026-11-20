@@ -34,7 +34,6 @@ packages/frontend/
 ├── src/
 │   ├── 404/          # 404 page logic and styles
 │   ├── api/          # Data-fetching utilities shared across pages
-│   ├── blog/         # Blog page logic and styles
 │   ├── components/   # Reusable UI building blocks
 │   ├── jobs/         # Jobs page logic and styles
 │   ├── faq/          # FAQ page logic and styles

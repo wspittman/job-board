@@ -1,23 +1,19 @@
-import { readFileSync, readdirSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import compression from "vite-plugin-compression2";
 import { htmlPartials } from "./plugins/htmlPartials.ts";
 import { inlineLucideIcons } from "./plugins/inlineLucideIcons.ts";
 
-const __dirname = join(dirname(fileURLToPath(import.meta.url)), "src");
-const getDir = (folder?: string) => resolve(__dirname, folder ?? "");
-const getFiles = (dir: string, ext: string) =>
-  readdirSync(dir).filter((f) => f.endsWith(ext));
+const sourceDir = join(dirname(fileURLToPath(import.meta.url)), "src");
 
-function getHtmlEntries(folder?: string) {
+function getHtmlEntries() {
   const input: Record<string, string> = {};
-  const dir = getDir(folder);
-  const files = getFiles(dir, ".html");
+  const files = readdirSync(sourceDir).filter((file) => file.endsWith(".html"));
 
   for (const file of files) {
-    const fullPath = join(dir, file);
+    const fullPath = join(sourceDir, file);
     input[file.replace(/\.html$/, "")] = fullPath;
   }
   return input;
@@ -29,23 +25,9 @@ export default defineConfig({
   plugins: [
     htmlPartials(),
     inlineLucideIcons(),
-    {
-      name: "copy-blog-md",
-      generateBundle() {
-        const blogDir = getDir("blog");
-        const files = getFiles(blogDir, ".md");
-        for (const file of files) {
-          this.emitFile({
-            type: "asset",
-            fileName: `blog/${file}`,
-            source: readFileSync(join(blogDir, file), "utf-8"),
-          });
-        }
-      },
-    },
     // Emit Brotli and gzip side-by-side
     compression({
-      include: [/\.(js|mjs|css|html|svg|json|txt|xml|md)$/],
+      include: [/\.(js|mjs|css|html|svg|json|txt|xml)$/],
       algorithms: [
         "brotliCompress", // produces .br
         "gzip", // produces .gz
@@ -57,10 +39,7 @@ export default defineConfig({
     outDir: "../deploy/dist",
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        ...getHtmlEntries(),
-        ...getHtmlEntries("blog"),
-      },
+      input: getHtmlEntries(),
     },
   },
   server: {

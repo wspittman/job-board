@@ -6,7 +6,7 @@ providers, running end-to-end tests, running LLM evaluations, and running playgr
 
 ## Prerequisites
 
-- Node.js 24 or newer (the repository root manages the toolchain).
+- Node.js 26 or newer (the repository root manages the toolchain).
 - Project dependencies installed from the monorepo root with `npm install`.
 - Copy `.env.example` to `.env` inside `packages/cli/` and supply the required environment variables.
   - The cli package has commands that directly use code from the backend package. For those commands, any environment variables documented for the backend also apply here.
@@ -86,36 +86,15 @@ npm run cli -- evals <LLM_ACTION> [RUN_NAME]
 
 ### `html` — Convert Markdown to HTML
 
-| Subcommand | Arguments | Description                                                                                                                      |
-| ---------- | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `file`     | `<NAME>`  | Converts a Markdown file in `logs/html/in/` and writes HTML to `logs/html/out/`.                                                 |
-| `blog`     | `<SLUG>`  | Converts a frontmatter Markdown file in the frontend blog folder to a full HTML page, and updates `blog.html` and `sitemap.xml`. |
+| Subcommand | Arguments | Description                                                                      |
+| ---------- | --------- | -------------------------------------------------------------------------------- |
+| `file`     | `<NAME>`  | Converts a Markdown file in `logs/html/in/` and writes HTML to `logs/html/out/`. |
 
 **`html file` example:**
 
 ```bash
 npm run cli -- html file my-post
 ```
-
-**`html blog` workflow:**
-
-1. Write a Markdown file with YAML frontmatter at `packages/frontend/src/blog/<slug>.md`:
-
-   ```markdown
-   ---
-   title: Your Article Title
-   description: A short description for the meta tag.
-   date: April 29, 2026
-   ---
-
-   Article body goes here.
-   ```
-
-2. Run the command - it converts the Markdown, injects it into the blog template, and writes the finished `.html` file alongside the source. It also inserts a card into `blog.html` and adds a `sitemap.xml` entry (both operations are idempotent).
-
-   ```bash
-   npm run cli -- html blog your-article-slug
-   ```
 
 ### `playground` — Run clustering experiments
 

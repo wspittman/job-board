@@ -297,8 +297,8 @@ export const ExtractionFilters = z
     companyStage: CompanyStage,
     payCadence: PayCadence,
     title: zString(
-      "A partial match search on job title text.",
-      "Example: 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
+      "Words from the user's search that should match the job title.",
+      "Every word must match, but the order does not matter.",
     ),
     city: zString(
       "The properly capitalized English city name.",

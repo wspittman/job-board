@@ -1,7 +1,7 @@
 import type {
   CompanyStage,
-  JobOrderBy,
   JobFamily,
+  JobOrderBy,
   PayCadence,
   Presence,
   UsState,
@@ -58,8 +58,9 @@ export interface FilterModelApi {
   companyStage?: CompanyStage;
   payCadence?: PayCadence;
   state?: UsState;
-  // Substring Match
+  // Full-text Match
   title?: string;
+  // Normalized Match
   city?: string;
   // Range Match
   daysSince?: number;

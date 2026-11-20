@@ -32,7 +32,7 @@ export const filterDefs = [
         label: "Title",
         maxLength: 100,
         tooltip:
-          "A partial match search on job title text, so 'port' will match 'Support Engineer' and 'Portfolio Manager'.",
+          "Search job titles using one or more words. Every word must match, but the order does not matter.",
       },
       companyFilterDef,
       {
